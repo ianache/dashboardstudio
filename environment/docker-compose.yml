@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cubejs_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-cubeuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cubepassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cubeuser} -d ${POSTGRES_DB:-analytics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cubejs_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cubejs:
+    image: cubejs/cube:latest
+    container_name: cubejs_api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"   # API REST + GraphQL
+      - "3000:3000"   # Playground (dev)
+    environment:
+      # --- Base de datos ---
+      CUBEJS_DB_TYPE: postgres
+      CUBEJS_DB_HOST: postgres
+      CUBEJS_DB_PORT: 5432
+      CUBEJS_DB_NAME: ${POSTGRES_DB:-analytics}
+      CUBEJS_DB_USER: ${POSTGRES_USER:-cubeuser}
+      CUBEJS_DB_PASS: ${POSTGRES_PASSWORD:-cubepassword}
+
+      # --- Redis (caché de agregaciones pre-agregadas) ---
+      CUBEJS_REDIS_URL: redis://redis:6379
+      CUBEJS_CACHE_AND_QUEUE_DRIVER: redis
+
+      # --- Seguridad ---
+      CUBEJS_API_SECRET: ${CUBEJS_API_SECRET:-cambia_esto_en_produccion_secreto_largo}
+
+      # --- Entorno ---
+      NODE_ENV: ${NODE_ENV:-development}
+      CUBEJS_DEV_MODE: ${CUBEJS_DEV_MODE:-true}   # false en producción
+      CUBEJS_PLAYGROUNDAUTH: ${CUBEJS_PLAYGROUNDAUTH:-}
+
+      # --- Concurrencia y rendimiento ---
+      CUBEJS_CONCURRENCY: 4
+      CUBEJS_DB_POOL_MAX: 8
+    volumes:
+      - ./schema:/cube/conf/schema        # Archivos .js/.yml con los Cubes
+      - ./cube.js:/cube/conf/cube.js:ro   # Configuración principal (opcional)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

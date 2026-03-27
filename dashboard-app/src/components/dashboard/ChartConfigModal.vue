@@ -1,0 +1,508 @@
+<template>
+  <div class="modal-overlay" @click.self="$emit('close')">
+    <div class="modal-box" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>
+          <span style="margin-right:8px">⚙️</span>
+          Configurar Widget
+        </h3>
+        <button class="btn-icon" @click="$emit('close')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="tabs" style="padding: 0 20px; margin-bottom: 0; border-bottom: 1px solid var(--border);">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          class="tab-btn"
+          :class="{ active: activeTab === tab.id }"
+          @click="activeTab = tab.id"
+        >{{ tab.label }}</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- TAB: General -->
+        <div v-if="activeTab === 'general'">
+          <div class="config-grid">
+            <div class="form-group">
+              <label class="form-label">Título del widget</label>
+              <input v-model="form.title" type="text" class="form-input" placeholder="Ej: Ventas Mensuales" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tipo de gráfico</label>
+              <div class="chart-type-grid">
+                <div
+                  v-for="ct in chartTypes"
+                  :key="ct.value"
+                  class="chart-type-card"
+                  :class="{ selected: form.chartType === ct.value }"
+                  @click="form.chartType = ct.value"
+                >
+                  <span class="ct-icon">{{ ct.icon }}</span>
+                  <span class="ct-label">{{ ct.label }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <input type="checkbox" v-model="form.useMockData" />
+                Usar datos de demostración
+              </label>
+              <span class="form-hint">Activa esto para visualizar el gráfico sin conexión a CubeJS</span>
+            </div>
+
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+              <div style="flex:1">
+                <label class="form-label">Ancho (columnas de 12)</label>
+                <div style="display:flex; align-items:center; gap:8px">
+                  <input v-model.number="form.position.w" type="range" min="1" max="12" style="flex:1"/>
+                  <span style="width:24px; text-align:center; font-weight:600">{{ form.position.w }}</span>
+                </div>
+              </div>
+              <div style="flex:1">
+                <label class="form-label">Alto (filas)</label>
+                <div style="display:flex; align-items:center; gap:8px">
+                  <input v-model.number="form.position.h" type="range" min="1" max="10" style="flex:1"/>
+                  <span style="width:24px; text-align:center; font-weight:600">{{ form.position.h }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Datos CubeJS -->
+        <div v-if="activeTab === 'data'">
+          <div class="config-grid">
+            <!-- Measures -->
+            <div class="form-group">
+              <label class="form-label">Medidas (Measures)</label>
+              <div class="measure-list">
+                <div
+                  v-for="(measure, idx) in form.cubeQuery.measures"
+                  :key="idx"
+                  class="measure-row"
+                >
+                  <input
+                    v-model="form.cubeQuery.measures[idx].key"
+                    type="text"
+                    class="form-input"
+                    placeholder="Ej: Orders.totalRevenue"
+                    style="flex:2"
+                  />
+                  <input
+                    v-model="form.cubeQuery.measures[idx].label"
+                    type="text"
+                    class="form-input"
+                    placeholder="Etiqueta"
+                    style="flex:1"
+                  />
+                  <input
+                    v-model="form.cubeQuery.measures[idx].color"
+                    type="color"
+                    class="color-picker"
+                    :title="'Color serie ' + (idx+1)"
+                  />
+                  <button class="btn-icon" @click="removeMeasure(idx)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <button class="btn btn-secondary btn-sm" @click="addMeasure" style="align-self:flex-start">
+                  + Añadir medida
+                </button>
+              </div>
+              <span class="form-hint">Ejemplo: <code>Orders.count</code>, <code>Revenue.total</code></span>
+            </div>
+
+            <!-- Dimensions -->
+            <div class="form-group">
+              <label class="form-label">Dimensiones (Dimensions)</label>
+              <div class="measure-list">
+                <div
+                  v-for="(dim, idx) in form.cubeQuery.dimensions"
+                  :key="idx"
+                  class="measure-row"
+                >
+                  <input
+                    v-model="form.cubeQuery.dimensions[idx].key"
+                    type="text"
+                    class="form-input"
+                    placeholder="Ej: Orders.status"
+                    style="flex:2"
+                  />
+                  <input
+                    v-model="form.cubeQuery.dimensions[idx].label"
+                    type="text"
+                    class="form-input"
+                    placeholder="Etiqueta"
+                    style="flex:1"
+                  />
+                  <button class="btn-icon" @click="removeDimension(idx)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <button class="btn btn-secondary btn-sm" @click="addDimension" style="align-self:flex-start">
+                  + Añadir dimensión
+                </button>
+              </div>
+            </div>
+
+            <!-- Time Dimension -->
+            <div class="form-group">
+              <label class="form-label">Dimensión de tiempo (opcional)</label>
+              <div class="measure-row">
+                <input
+                  v-model="timeDimKey"
+                  type="text"
+                  class="form-input"
+                  placeholder="Ej: Orders.createdAt"
+                  style="flex:2"
+                />
+                <select v-model="timeDimGranularity" class="form-input form-select" style="flex:1">
+                  <option value="">Sin granularidad</option>
+                  <option value="day">Día</option>
+                  <option value="week">Semana</option>
+                  <option value="month">Mes</option>
+                  <option value="quarter">Trimestre</option>
+                  <option value="year">Año</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="form-group">
+              <label class="form-label">Filtros</label>
+              <div class="measure-list">
+                <div v-for="(filter, idx) in form.cubeQuery.filters" :key="idx" class="filter-row">
+                  <input v-model="filter.member" class="form-input" placeholder="Miembro" style="flex:2" />
+                  <select v-model="filter.operator" class="form-input form-select" style="flex:1">
+                    <option value="equals">Igual</option>
+                    <option value="notEquals">No igual</option>
+                    <option value="contains">Contiene</option>
+                    <option value="gt">Mayor que</option>
+                    <option value="lt">Menor que</option>
+                    <option value="gte">Mayor o igual</option>
+                    <option value="lte">Menor o igual</option>
+                  </select>
+                  <input v-model="filter.values[0]" class="form-input" placeholder="Valor" style="flex:1" />
+                  <button class="btn-icon" @click="removeFilter(idx)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <button class="btn btn-secondary btn-sm" @click="addFilter" style="align-self:flex-start">
+                  + Añadir filtro
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Límite de filas</label>
+              <input v-model.number="form.cubeQuery.limit" type="number" min="1" max="5000" class="form-input" style="width:120px" />
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Visualización -->
+        <div v-if="activeTab === 'visual'">
+          <div class="config-grid">
+            <div class="form-group">
+              <label class="form-label">Opciones ECharts (JSON)</label>
+              <span class="form-hint">
+                Estas opciones se fusionan con las predeterminadas del gráfico.
+                <a href="https://echarts.apache.org/en/option.html" target="_blank" rel="noopener">Ver documentación →</a>
+              </span>
+              <textarea
+                v-model="chartOptionsJson"
+                class="form-input json-editor"
+                placeholder='{"tooltip": {"formatter": "{b}: {c}"}}'
+                rows="12"
+              ></textarea>
+              <div v-if="jsonError" class="alert alert-error" style="margin-top:8px">
+                {{ jsonError }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CubeJS meta -->
+        <div v-if="activeTab === 'cubemeta'" class="cube-meta-tab">
+          <div v-if="cubeStore.metaLoading" class="loading-row">
+            <div class="spinner"></div> Cargando esquema...
+          </div>
+          <div v-else-if="!cubeStore.connected" class="alert alert-error">
+            No hay conexión con CubeJS. Configura la URL y token en Configuración.
+          </div>
+          <div v-else>
+            <div v-for="cube in cubeStore.cubes" :key="cube.name" class="cube-block">
+              <div class="cube-name">{{ cube.name }}</div>
+              <div class="cube-members">
+                <div class="cube-member-group">
+                  <div class="member-group-title">Medidas</div>
+                  <div
+                    v-for="m in cube.measures"
+                    :key="m.name"
+                    class="member-chip"
+                    @click="insertMeasure(`${cube.name}.${m.name}`)"
+                    :title="m.description"
+                  >
+                    {{ cube.name }}.{{ m.name }}
+                    <span class="member-type">{{ m.type }}</span>
+                  </div>
+                </div>
+                <div class="cube-member-group">
+                  <div class="member-group-title">Dimensiones</div>
+                  <div
+                    v-for="d in cube.dimensions"
+                    :key="d.name"
+                    class="member-chip member-dim"
+                    @click="insertDimension(`${cube.name}.${d.name}`)"
+                    :title="d.description"
+                  >
+                    {{ cube.name }}.{{ d.name }}
+                    <span class="member-type">{{ d.type }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="$emit('close')">Cancelar</button>
+        <button class="btn btn-primary" @click="save">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useCubeStore } from '@/stores/cubejs'
+
+const props = defineProps({
+  widget: { type: Object, required: true }
+})
+
+const emit = defineEmits(['close', 'save'])
+
+const cubeStore = useCubeStore()
+
+const tabs = [
+  { id: 'general', label: 'General' },
+  { id: 'data', label: 'Datos (CubeJS)' },
+  { id: 'visual', label: 'Visualización' },
+  { id: 'cubemeta', label: 'Esquema Cube' }
+]
+
+const activeTab = ref('general')
+const jsonError = ref(null)
+
+const chartTypes = [
+  { value: 'bar', label: 'Barras', icon: '📊' },
+  { value: 'line', label: 'Líneas', icon: '📈' },
+  { value: 'pie', label: 'Pastel', icon: '🥧' },
+  { value: 'gauge', label: 'Gauge', icon: '🎯' },
+  { value: 'radar', label: 'Radar', icon: '🕸️' },
+  { value: 'combined', label: 'Combinado', icon: '📉' }
+]
+
+// Deep clone widget for editing
+const form = ref(JSON.parse(JSON.stringify(props.widget)))
+
+// Computed for time dimension
+const timeDimKey = computed({
+  get: () => form.value.cubeQuery.timeDimension?.dimension || '',
+  set: (v) => {
+    if (v) {
+      if (!form.value.cubeQuery.timeDimension) {
+        form.value.cubeQuery.timeDimension = { dimension: v, granularity: 'month' }
+      } else {
+        form.value.cubeQuery.timeDimension.dimension = v
+      }
+    } else {
+      form.value.cubeQuery.timeDimension = null
+    }
+  }
+})
+
+const timeDimGranularity = computed({
+  get: () => form.value.cubeQuery.timeDimension?.granularity || 'month',
+  set: (v) => {
+    if (form.value.cubeQuery.timeDimension) {
+      form.value.cubeQuery.timeDimension.granularity = v
+    }
+  }
+})
+
+const chartOptionsJson = ref(
+  Object.keys(form.value.chartOptions || {}).length
+    ? JSON.stringify(form.value.chartOptions, null, 2)
+    : ''
+)
+
+watch(chartOptionsJson, (v) => {
+  if (!v.trim()) { jsonError.value = null; return }
+  try {
+    JSON.parse(v)
+    jsonError.value = null
+  } catch (e) {
+    jsonError.value = 'JSON inválido: ' + e.message
+  }
+})
+
+function addMeasure() {
+  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff' })
+}
+function removeMeasure(idx) {
+  form.value.cubeQuery.measures.splice(idx, 1)
+}
+
+function addDimension() {
+  form.value.cubeQuery.dimensions.push({ key: '', label: '' })
+}
+function removeDimension(idx) {
+  form.value.cubeQuery.dimensions.splice(idx, 1)
+}
+
+function addFilter() {
+  form.value.cubeQuery.filters.push({ member: '', operator: 'equals', values: [''] })
+}
+function removeFilter(idx) {
+  form.value.cubeQuery.filters.splice(idx, 1)
+}
+
+function insertMeasure(key) {
+  form.value.cubeQuery.measures.push({ key, label: key.split('.')[1], color: '#1890ff' })
+  activeTab.value = 'data'
+}
+function insertDimension(key) {
+  form.value.cubeQuery.dimensions.push({ key, label: key.split('.')[1] })
+  activeTab.value = 'data'
+}
+
+function save() {
+  if (chartOptionsJson.value.trim()) {
+    if (jsonError.value) return
+    try {
+      form.value.chartOptions = JSON.parse(chartOptionsJson.value)
+    } catch {
+      return
+    }
+  } else {
+    form.value.chartOptions = {}
+  }
+
+  emit('save', JSON.parse(JSON.stringify(form.value)))
+}
+
+// Load cube meta if not already loaded
+if (cubeStore.token && !cubeStore.meta) {
+  cubeStore.loadMeta()
+}
+</script>
+
+<style scoped>
+.config-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chart-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #fff;
+}
+.chart-type-card:hover { border-color: var(--primary); background: var(--primary-light); }
+.chart-type-card.selected { border-color: var(--primary); background: var(--primary-light); }
+
+.ct-icon { font-size: 24px; }
+.ct-label { font-size: 13px; font-weight: 500; color: var(--text); }
+
+.measure-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.measure-row { display: flex; align-items: center; gap: 8px; }
+.filter-row { display: flex; align-items: center; gap: 8px; }
+
+.color-picker {
+  width: 36px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.json-editor {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 200px;
+}
+
+/* Cube meta */
+.cube-meta-tab { display: flex; flex-direction: column; gap: 16px; }
+.loading-row { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); }
+.cube-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.cube-name {
+  padding: 8px 12px;
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.cube-members { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.cube-member-group { display: flex; flex-direction: column; gap: 6px; }
+.member-group-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  width: fit-content;
+  transition: all 0.15s;
+}
+.member-chip:hover { background: var(--primary); color: #fff; }
+.member-dim { background: #f6ffed; color: var(--success); }
+.member-dim:hover { background: var(--success); color: #fff; }
+.member-type { font-size: 10px; opacity: 0.7; }
+</style>
