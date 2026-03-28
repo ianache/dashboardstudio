@@ -484,19 +484,28 @@ function handleGenerateDDL() {
 
   dims.forEach(node => {
     const tbl = tableOf[node.id]
-    const keyField = node.fields.find(f => f.isKey)
     lines.push(`CREATE TABLE ${tbl} (`)
 
-    const colLines = node.fields.map(f => {
-      const col  = toSqlName(f.name)
+    // Each entry: { def: 'sql definition', cmt: '  -- comment or empty' }
+    const colDefs = node.fields.map(f => {
+      const col = toSqlName(f.name)
       const type = pgTypeForCol(f)
-      const pk   = f.isKey ? ' PRIMARY KEY' : ''
-      const cmt  = f.description ? `  -- ${f.description}` : ''
-      return `    ${col.padEnd(30)} ${(type + pk).padEnd(30)}${cmt}`
+      const pk  = f.isKey ? ' PRIMARY KEY' : ''
+      return {
+        def: `    ${col.padEnd(30)} ${(type + pk).trimEnd()}`,
+        cmt: f.description ? `  -- ${f.description}` : ''
+      }
     })
 
-    if (!colLines.length) colLines.push('    -- (sin campos definidos)')
-    lines.push(colLines.join(',\n'))
+    if (!colDefs.length) {
+      lines.push('    -- (sin campos definidos)')
+    } else {
+      // Comma goes between definition and comment so it never lands inside the comment
+      const formatted = colDefs.map((item, i) =>
+        item.def + (i < colDefs.length - 1 ? ',' : '') + item.cmt
+      )
+      lines.push(formatted.join('\n'))
+    }
     lines.push(');')
     lines.push('')
   })
@@ -513,15 +522,14 @@ function handleGenerateDDL() {
     const tbl = tableOf[node.id]
     lines.push(`CREATE TABLE ${tbl} (`)
 
-    // Collect FK constraints to emit after columns
+    // FK CONSTRAINT clauses collected separately (no inline comment)
     const fkConstraints = []
 
-    const colLines = node.fields.map(f => {
+    const colDefs = node.fields.map(f => {
       const col  = toSqlName(f.name)
       const type = pgTypeForCol(f)
-      const cmt  = f.description ? `  -- ${f.description}` : ''
 
-      // If this is a FK field, resolve which dim table / key column it references
+      // Resolve REFERENCES constraint from FK description
       if (f.isFk && f.description) {
         // description format: "FK → DimName.fieldName"
         const match = f.description.match(/FK → (.+)\.(.+)/)
@@ -537,13 +545,27 @@ function handleGenerateDDL() {
         }
       }
 
-      return `    ${col.padEnd(30)} ${type.padEnd(30)}${cmt}`
+      return {
+        def: `    ${col.padEnd(30)} ${type.trimEnd()}`,
+        cmt: f.description ? `  -- ${f.description}` : ''
+      }
     })
 
-    if (!colLines.length) colLines.push('    -- (sin campos definidos)')
+    // Merge columns + FK constraints; constraints have no inline comment
+    const allDefs = [
+      ...colDefs,
+      ...fkConstraints.map(sql => ({ def: sql, cmt: '' }))
+    ]
 
-    const allLines = [...colLines, ...fkConstraints]
-    lines.push(allLines.join(',\n'))
+    if (!allDefs.length) {
+      lines.push('    -- (sin campos definidos)')
+    } else {
+      // Comma goes between definition and comment so it never lands inside the comment
+      const formatted = allDefs.map((item, i) =>
+        item.def + (i < allDefs.length - 1 ? ',' : '') + item.cmt
+      )
+      lines.push(formatted.join('\n'))
+    }
     lines.push(');')
     lines.push('')
   })
