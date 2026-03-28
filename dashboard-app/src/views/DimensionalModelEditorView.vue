@@ -211,6 +211,13 @@
             <span class="props-type-badge" :class="selectedNode.type">
               {{ selectedNode.type === 'fact' ? 'Tabla de Hecho' : 'Dimensión' }}
             </span>
+            <button class="btn-icon" data-tooltip="Exportar cubo CubeJS" @click="exportSingleCube(selectedNode)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </button>
             <button class="btn-icon" @click="selectedNode = null; selectedRel = null">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -329,6 +336,7 @@ import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useDataTypeStore } from '@/stores/dataTypes'
 import { useUIStore } from '@/stores/ui'
 import yaml from 'js-yaml'
+import JSZip from 'jszip'
 
 const router = useRouter()
 const route = useRoute()
@@ -605,17 +613,16 @@ function handleGenerateDDL() {
 function toPascalCase(s) {
   return s.trim().split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
 }
+function toCamelCase(s) {
+  const p = toPascalCase(s); return p.charAt(0).toLowerCase() + p.slice(1)
+}
 
-// Cube name: strip leading prefix (dim_, fct_, fact_, stg_, dbo_, …) then PascalCase
+// Strip leading table prefix (dim_, fct_, fact_, stg_, dbo_, …) then PascalCase
 function cubeNameFrom(node) {
   const tbl = toSqlName(node.name)
   const stripped = tbl.replace(/^[a-z]{2,6}_/, '')
   return stripped.split('_').filter(Boolean)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
-}
-function toCamelCase(s) {
-  const p = toPascalCase(s)
-  return p.charAt(0).toLowerCase() + p.slice(1)
 }
 
 function cubeJsDimType(field) {
@@ -635,39 +642,32 @@ function cubeJsMeasureType(field) {
     ? 'sum' : 'count'
 }
 
-function handleExportCubeJS() {
-  if (!model.value) return
-  const m = model.value
+// Build the JS content for a single node (dimension or fact cube)
+function buildCubeJS(node, m, tableOf, cubeOf) {
   const out = []
+  const cube = cubeOf[node.id]
+  const ts   = new Date().toISOString()
 
   out.push(`// ${'='.repeat(60)}`)
-  out.push(`// CubeJS Schema: ${m.name}`)
-  if (m.description) out.push(`// ${m.description}`)
-  out.push(`// Generado: ${new Date().toISOString()}`)
+  out.push(`// CubeJS cube: ${cube}`)
+  out.push(`// Tabla: ${tableOf[node.id]}  |  Modelo: ${m.name}`)
+  out.push(`// Generado: ${ts}`)
   out.push(`// ${'='.repeat(60)}`)
   out.push('')
+  out.push(`cube(\`${cube}\`, {`)
+  out.push(`  sql_table: \`${tableOf[node.id]}\`,`)
+  out.push('')
 
-  const dims  = m.nodes.filter(n => n.type === 'dimension')
-  const facts = m.nodes.filter(n => n.type === 'fact')
-
-  // Node ID → SQL table name and PascalCase cube name
-  const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
-  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
-
-  // ── 1. Dimension cubes ──────────────────────────────────────
-  if (dims.length) {
-    out.push(`// ${'-'.repeat(60)}`)
-    out.push('// DIMENSIONES')
-    out.push(`// ${'-'.repeat(60)}`)
-    out.push('')
-  }
-
-  dims.forEach(node => {
-    const cube = cubeOf[node.id]
-    out.push(`cube(\`${cube}\`, {`)
-    out.push(`  sql_table: \`${tableOf[node.id]}\`,`)
+  if (node.type === 'dimension') {
+    // measures — count always present
+    out.push('  measures: {')
+    out.push('    count: {')
+    out.push('      type: `count`,')
+    out.push('    },')
+    out.push('  },')
     out.push('')
 
+    // dimensions
     if (node.fields.length) {
       out.push('  dimensions: {')
       node.fields.forEach(f => {
@@ -684,40 +684,23 @@ function handleExportCubeJS() {
       out.push('  },')
     }
 
-    out.push('});')
-    out.push('')
-  })
-
-  // ── 2. Fact cubes ───────────────────────────────────────────
-  if (facts.length) {
-    out.push(`// ${'-'.repeat(60)}`)
-    out.push('// HECHOS')
-    out.push(`// ${'-'.repeat(60)}`)
-    out.push('')
-  }
-
-  facts.forEach(node => {
-    const cube = cubeOf[node.id]
-    out.push(`cube(\`${cube}\`, {`)
-    out.push(`  sql_table: \`${tableOf[node.id]}\`,`)
-    out.push('')
-
-    // Build join map by parsing FK field descriptions
-    const joinMap = {}   // dimNodeId → { dimCube, factCol, dimCol }
+  } else {
+    // fact cube
+    // Build join map from FK field descriptions
+    const joinMap = {}
     node.fields.filter(f => f.isFk && f.description).forEach(f => {
       const match = f.description.match(/FK → (.+)\.(.+)/)
       if (!match) return
       const dimNode = m.nodes.find(n => n.name === match[1] && n.type === 'dimension')
-      if (!dimNode || joinMap[dimNode.id]) return   // skip duplicates
+      if (!dimNode || joinMap[dimNode.id]) return
       joinMap[dimNode.id] = {
-        dimCube:  cubeOf[dimNode.id],
+        dimCube: cubeOf[dimNode.id],
         dimNode,
-        factCol:  toSqlName(f.name),
-        dimCol:   toSqlName(match[2])
+        factCol: toSqlName(f.name),
+        dimCol:  toSqlName(match[2])
       }
     })
 
-    // joins
     const joinEntries = Object.values(joinMap)
     if (joinEntries.length) {
       out.push('  joins: {')
@@ -731,7 +714,7 @@ function handleExportCubeJS() {
       out.push('')
     }
 
-    // measures  (non-FK fields only)
+    // measures — count + numeric fields
     const measureFields = node.fields.filter(f => !f.isFk)
     out.push('  measures: {')
     out.push('    count: {')
@@ -750,7 +733,7 @@ function handleExportCubeJS() {
     out.push('  },')
     out.push('')
 
-    // dimensions  (FK columns exposed for filtering / grouping)
+    // dimensions — FK cols for filtering / grouping
     const fkFields = node.fields.filter(f => f.isFk)
     if (fkFields.length) {
       out.push('  dimensions: {')
@@ -766,14 +749,12 @@ function handleExportCubeJS() {
       out.push('')
     }
 
-    // pre_aggregations  — one rollup per fact cube
-    // Use the first time-typed field found in any joined dimension
+    // pre_aggregations — rollup with all measures + detected time dimension
     let timeDimRef = null
     for (const j of joinEntries) {
       const timeField = j.dimNode.fields.find(f => cubeJsDimType(f) === 'time' && !f.isKey)
       if (timeField) { timeDimRef = `${j.dimCube}.${toCamelCase(timeField.name)}`; break }
     }
-
     const measureRefs = ['CUBE.count', ...measureFields.map(f => `CUBE.${toCamelCase(f.name)}`)]
     out.push('  pre_aggregations: {')
     out.push('    main: {')
@@ -788,17 +769,46 @@ function handleExportCubeJS() {
     out.push('      },')
     out.push('    },')
     out.push('  },')
-    out.push('});')
-    out.push('')
+  }
+
+  out.push('});')
+  return out.join('\n')
+}
+
+// Download a single node as its own .js file
+function exportSingleCube(node) {
+  if (!model.value || !node) return
+  const m = model.value
+  const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
+  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
+
+  const content = buildCubeJS(node, m, tableOf, cubeOf)
+  const fileName = `${cubeOf[node.id]}.js`
+  const blob = new Blob([content], { type: 'application/javascript' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a'); a.href = url; a.download = fileName; a.click()
+  URL.revokeObjectURL(url)
+  uiStore.notify({ message: `Cubo ${cubeOf[node.id]} exportado`, type: 'success' })
+}
+
+// Export all nodes as individual .js files bundled in a ZIP
+async function handleExportCubeJS() {
+  if (!model.value) return
+  const m = model.value
+  const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
+  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
+
+  const zip = new JSZip()
+  m.nodes.forEach(node => {
+    zip.file(`${cubeOf[node.id]}.js`, buildCubeJS(node, m, tableOf, cubeOf))
   })
 
   const slug = m.name.replace(/[^a-zA-Z0-9_\-. ]/g, '').trim().replace(/\s+/g, '_') || 'schema'
-  const blob = new Blob([out.join('\n')], { type: 'application/javascript' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url; a.download = `${slug}.js`; a.click()
+  const zipBlob = await zip.generateAsync({ type: 'blob' })
+  const url = URL.createObjectURL(zipBlob)
+  const a = document.createElement('a'); a.href = url; a.download = `${slug}_cubejs.zip`; a.click()
   URL.revokeObjectURL(url)
-  uiStore.notify({ message: 'Schema CubeJS exportado', type: 'success' })
+  uiStore.notify({ message: `${m.nodes.length} cubos exportados en ${slug}_cubejs.zip`, type: 'success' })
 }
 
 // ── Canvas ───────────────────────────────────────────────────
