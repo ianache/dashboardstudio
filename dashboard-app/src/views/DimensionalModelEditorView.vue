@@ -239,34 +239,46 @@
             <div class="props-section-title">Campos</div>
             <div class="fields-list">
               <div v-for="f in selectedNode.fields" :key="f.id" class="field-item">
-                <!-- Key toggle — available for both fact and dimension nodes -->
-                <button
-                  class="key-toggle"
-                  :class="{ active: f.isKey }"
-                  :title="f.isKey ? 'Llave primaria' : 'Marcar como llave'"
-                  @click="setKeyField(f.id)"
-                >🔑</button>
-                <input
-                  :value="f.name"
-                  type="text"
-                  class="form-input field-name-input"
-                  placeholder="Nombre"
-                  @change="updateField(f.id, 'name', $event.target.value)"
-                />
-                <select
-                  :value="f.dataType"
-                  class="form-input form-select field-type-select"
-                  @change="updateField(f.id, 'dataType', $event.target.value)"
-                >
-                  <option v-for="dt in dtStore.allTypes" :key="dt.id" :value="dt.id">
-                    {{ dt.name }}
-                  </option>
-                </select>
-                <button class="btn-icon field-del-btn" @click="deleteField(f.id)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
+                <!-- Row 1: key toggle · name · type · delete -->
+                <div class="field-row1">
+                  <button
+                    class="key-toggle"
+                    :class="{ active: f.isKey }"
+                    :title="f.isKey ? 'Llave primaria' : 'Marcar como llave'"
+                    @click="setKeyField(f.id)"
+                  >🔑</button>
+                  <input
+                    :value="f.name"
+                    type="text"
+                    class="form-input field-name-input"
+                    placeholder="Nombre"
+                    @change="updateField(f.id, 'name', $event.target.value)"
+                  />
+                  <select
+                    :value="f.dataType"
+                    class="form-input form-select field-type-select"
+                    @change="updateField(f.id, 'dataType', $event.target.value)"
+                  >
+                    <option v-for="dt in dtStore.allTypes" :key="dt.id" :value="dt.id">
+                      {{ dt.name }}
+                    </option>
+                  </select>
+                  <button class="btn-icon field-del-btn" @click="deleteField(f.id)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <!-- Row 2: description -->
+                <div class="field-row2">
+                  <input
+                    :value="f.description"
+                    type="text"
+                    class="form-input field-desc-input"
+                    placeholder="Descripción (opcional)"
+                    @change="updateField(f.id, 'description', $event.target.value)"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1296,7 +1308,8 @@ function deleteRelationship() {
 
 .fields-list { display: flex; flex-direction: column; gap: 6px; }
 
-.field-item { display: flex; align-items: center; gap: 4px; }
+.field-item { display: flex; flex-direction: column; gap: 0; padding-bottom: 4px; border-bottom: 1px solid var(--border-light, #f0f0f0); }
+.field-item:last-child { border-bottom: none; }
 
 /* Key toggle button */
 .key-toggle {
@@ -1315,8 +1328,11 @@ function deleteRelationship() {
 .key-toggle:hover { opacity: 0.7; border-color: #52c41a; }
 .key-toggle.active { opacity: 1; background: #f6ffed; border-color: #52c41a; }
 
+.field-row1 { display: flex; align-items: center; gap: 4px; }
+.field-row2 { padding-left: 28px; margin-top: 3px; }
 .field-name-input { flex: 1; min-width: 0; font-size: 12px; padding: 4px 6px; height: 28px; }
 .field-type-select { width: 86px; flex-shrink: 0; font-size: 12px; padding: 4px 4px; height: 28px; }
+.field-desc-input { width: 100%; font-size: 11px; padding: 3px 6px; height: 24px; color: var(--text-secondary); }
 .field-del-btn { flex-shrink: 0; color: var(--text-secondary); }
 .field-del-btn:hover { color: var(--error); background: #fff2f0; }
 
