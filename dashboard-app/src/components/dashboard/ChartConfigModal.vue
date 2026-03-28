@@ -107,6 +107,21 @@
                     class="color-picker"
                     :title="'Color serie ' + (idx+1)"
                   />
+                  <!-- Estilo de serie (solo bar y combined) -->
+                  <div
+                    v-if="form.chartType === 'bar' || form.chartType === 'combined'"
+                    class="series-type-toggle"
+                    :title="'Estilo de visualización'"
+                  >
+                    <button
+                      v-for="st in seriesTypes"
+                      :key="st.value"
+                      class="st-btn"
+                      :class="{ active: (form.cubeQuery.measures[idx].seriesType || 'bar') === st.value }"
+                      :title="st.label"
+                      @click="form.cubeQuery.measures[idx].seriesType = st.value"
+                    >{{ st.icon }}</button>
+                  </div>
                   <button class="btn-icon" @click="removeMeasure(idx)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -324,6 +339,12 @@ const chartTypes = [
   { value: 'combined', label: 'Combinado', icon: '📉' }
 ]
 
+const seriesTypes = [
+  { value: 'bar',  label: 'Barra',  icon: '▮' },
+  { value: 'line', label: 'Línea',  icon: '╱' },
+  { value: 'area', label: 'Área',   icon: '◬' }
+]
+
 // Deep clone widget for editing
 const form = ref(JSON.parse(JSON.stringify(props.widget)))
 
@@ -369,7 +390,7 @@ watch(chartOptionsJson, (v) => {
 })
 
 function addMeasure() {
-  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff' })
+  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff', seriesType: 'bar' })
 }
 function removeMeasure(idx) {
   form.value.cubeQuery.measures.splice(idx, 1)
@@ -395,7 +416,7 @@ function getMemberKey(cubeName, memberName) {
 
 function insertMeasure(key) {
   const label = key.split('.').pop()
-  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff' })
+  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff', seriesType: 'bar' })
   activeTab.value = 'data'
 }
 function insertDimension(key) {
@@ -511,4 +532,29 @@ if (cubeStore.token && !cubeStore.meta) {
 .member-dim { background: #f6ffed; color: var(--success); }
 .member-dim:hover { background: var(--success); color: #fff; }
 .member-type { font-size: 10px; opacity: 0.7; }
+
+.series-type-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.st-btn {
+  width: 28px;
+  height: 34px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.st-btn:last-child { border-right: none; }
+.st-btn:hover { background: var(--bg); color: var(--primary); }
+.st-btn.active { background: var(--primary); color: #fff; }
 </style>

@@ -37,7 +37,39 @@ function generateMockData(widget) {
   }
 }
 
-export function useCubeQuery(widget) {
+function normalizeMember(key) {
+  // Corrige doble prefijo: "Orders.Orders.createdAt" → "Orders.createdAt"
+  const parts = key.split('.')
+  if (parts.length === 3 && parts[0] === parts[1]) return `${parts[1]}.${parts[2]}`
+  return key
+}
+
+export function buildCubeFilter(filterDef, value) {
+  if (value === null || value === undefined || value === '') return []
+  const dimension = normalizeMember(filterDef.dimension)
+  const { type } = filterDef
+  if (type === 'string' || type === 'boolean') {
+    // value es un array de strings seleccionados; array vacío = todos = sin filtro
+    if (!Array.isArray(value) || value.length === 0) return []
+    return [{ member: dimension, operator: 'equals', values: value.map(String) }]
+  }
+  if (type === 'time') {
+    const vals = [value.from, value.to].filter(Boolean)
+    if (!vals.length) return []
+    return [{ member: dimension, operator: 'inDateRange', values: vals }]
+  }
+  if (type === 'number') {
+    const filters = []
+    if (value.min !== '' && value.min != null)
+      filters.push({ member: dimension, operator: 'gte', values: [String(value.min)] })
+    if (value.max !== '' && value.max != null)
+      filters.push({ member: dimension, operator: 'lte', values: [String(value.max)] })
+    return filters
+  }
+  return []
+}
+
+export function useCubeQuery(widget, dashboardFilters) {
   const cubeStore = useCubeStore()
   const data = ref([])
   const loading = ref(false)
@@ -78,11 +110,14 @@ export function useCubeQuery(widget) {
       throw new Error('Debes configurar al menos una medida con clave válida.')
     }
 
+    const widgetFilters = (cubeQuery.filters || []).filter(f => f.member)
+    const extraFilters = dashboardFilters?.value || []
+
     const query = {
       measures,
       dimensions,
       limit: cubeQuery.limit || 100,
-      filters: (cubeQuery.filters || []).filter(f => f.member)
+      filters: [...widgetFilters, ...extraFilters]
     }
 
     if (cubeQuery.timeDimension) {

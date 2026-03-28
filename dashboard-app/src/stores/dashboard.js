@@ -14,6 +14,7 @@ const SAMPLE_DASHBOARDS = [
     createdBy: '1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    filters: [],
     widgets: [
       {
         id: 'w1',
@@ -112,6 +113,7 @@ export const useDashboardStore = defineStore('dashboard', {
         createdBy,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        filters: [],
         widgets: []
       }
       this.dashboards.push(dashboard)
@@ -189,6 +191,25 @@ export const useDashboardStore = defineStore('dashboard', {
 
     assignDashboardToUsers(dashboardId, userIds) {
       this.updateDashboard(dashboardId, { assignedUsers: userIds })
+    },
+
+    addDashboardFilter(dashboardId, { dimension, label, type }) {
+      const dashboard = this.dashboards.find(d => d.id === dashboardId)
+      if (!dashboard) return
+      if (!dashboard.filters) dashboard.filters = []
+      const parts = dimension.split('.')
+      const cleanDimension = (parts.length === 3 && parts[0] === parts[1])
+        ? `${parts[1]}.${parts[2]}`
+        : dimension
+      dashboard.filters.push({ id: generateId(), dimension: cleanDimension, label, type })
+      this.persist()
+    },
+
+    removeDashboardFilter(dashboardId, filterId) {
+      const dashboard = this.dashboards.find(d => d.id === dashboardId)
+      if (!dashboard?.filters) return
+      dashboard.filters = dashboard.filters.filter(f => f.id !== filterId)
+      this.persist()
     },
 
     nextAvailablePosition(dashboard) {

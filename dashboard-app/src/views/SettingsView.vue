@@ -186,12 +186,14 @@
         </div>
         <div class="sc-body">
           <table class="info-table">
-            <tr><td>Aplicación</td><td><strong>Dashboard Studio</strong></td></tr>
-            <tr><td>Versión</td><td>1.0.0</td></tr>
-            <tr><td>Framework</td><td>Vue 3 + Pinia</td></tr>
-            <tr><td>Gráficos</td><td>Apache ECharts v5</td></tr>
-            <tr><td>Modelo semántico</td><td>CubeJS</td></tr>
-            <tr><td>Almacenamiento</td><td>LocalStorage (demo)</td></tr>
+            <tbody>
+              <tr><td>Aplicación</td><td><strong>Dashboard Studio</strong></td></tr>
+              <tr><td>Versión</td><td>1.0.0</td></tr>
+              <tr><td>Framework</td><td>Vue 3 + Pinia</td></tr>
+              <tr><td>Gráficos</td><td>Apache ECharts v5</td></tr>
+              <tr><td>Modelo semántico</td><td>CubeJS</td></tr>
+              <tr><td>Almacenamiento</td><td>LocalStorage (demo)</td></tr>
+            </tbody>
           </table>
         </div>
       </div>

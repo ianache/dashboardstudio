@@ -93,12 +93,14 @@ import { useCubeQuery, downloadCSV } from '@/composables/useCubeQuery'
 const props = defineProps({
   widget: { type: Object, required: true },
   isDesignMode: { type: Boolean, default: false },
-  isSelected: { type: Boolean, default: false }
+  isSelected: { type: Boolean, default: false },
+  dashboardFilters: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['configure', 'remove', 'select', 'resize-start'])
 
-const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget)
+const dashboardFiltersRef = computed(() => props.dashboardFilters)
+const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget, dashboardFiltersRef)
 
 const CHART_ICONS = {
   bar: '📊', line: '📈', pie: '🥧', gauge: '🎯', radar: '🕸️', combined: '📉'
@@ -123,6 +125,7 @@ onMounted(() => fetchData())
 
 watch(() => props.widget.cubeQuery, () => fetchData(), { deep: true })
 watch(() => props.widget.useMockData, () => fetchData())
+watch(() => props.dashboardFilters, () => fetchData(), { deep: true })
 </script>
 
 

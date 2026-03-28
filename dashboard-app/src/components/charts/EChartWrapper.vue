@@ -70,12 +70,26 @@ function buildBaseOption() {
   }
 }
 
+function buildSeriesItem(name, data, color, seriesType) {
+  if (seriesType === 'bar') {
+    return { name, type: 'bar', data, itemStyle: { color, borderRadius: [4, 4, 0, 0] }, barMaxWidth: 60 }
+  }
+  return {
+    name, type: 'line', data, smooth: true,
+    lineStyle: { color, width: 2 },
+    itemStyle: { color },
+    areaStyle: seriesType === 'area' ? { color, opacity: 0.15 } : undefined
+  }
+}
+
 function buildBarOption() {
   const labels = props.data.map(d => d.label)
-  const values = props.data.map(d => d.value)
   const measures = props.widget.cubeQuery?.measures || []
-  const seriesName = measures[0]?.label || 'Valor'
-  const color = measures[0]?.color || COLORS[0]
+  const rawData = [props.data.map(d => d.value), props.data.map(d => d.value2 || 0)]
+
+  const series = measures.slice(0, 2).map((m, i) =>
+    buildSeriesItem(m.label || `Serie ${i + 1}`, rawData[i], m.color || COLORS[i], m.seriesType || 'bar')
+  )
 
   return {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -87,13 +101,7 @@ function buildBarOption() {
       axisLabel: { rotate: labels.length > 8 ? 30 : 0, overflow: 'truncate', width: 80 }
     },
     yAxis: { type: 'value' },
-    series: [{
-      name: seriesName,
-      type: 'bar',
-      data: values,
-      itemStyle: { color, borderRadius: [4, 4, 0, 0] },
-      barMaxWidth: 60
-    }]
+    series
   }
 }
 
@@ -216,42 +224,27 @@ function buildRadarOption() {
 
 function buildCombinedOption() {
   const labels = props.data.map(d => d.label)
-  const values = props.data.map(d => d.value)
-  const values2 = props.data.map(d => d.value2 || 0)
   const measures = props.widget.cubeQuery?.measures || []
-  const series1Name = measures[0]?.label || 'Barras'
-  const series2Name = measures[1]?.label || 'Línea'
-  const color1 = measures[0]?.color || COLORS[0]
-  const color2 = measures[1]?.color || COLORS[1]
+  const m0 = measures[0] || {}
+  const m1 = measures[1] || {}
+  const name0 = m0.label || 'Serie 1'
+  const name1 = m1.label || 'Serie 2'
+  const color0 = m0.color || COLORS[0]
+  const color1 = m1.color || COLORS[1]
+
+  const s0 = { ...buildSeriesItem(name0, props.data.map(d => d.value), color0, m0.seriesType || 'bar'), yAxisIndex: 0 }
+  const s1 = { ...buildSeriesItem(name1, props.data.map(d => d.value2 || 0), color1, m1.seriesType || 'line'), yAxisIndex: 1 }
 
   return {
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-    legend: { bottom: 0, data: [series1Name, series2Name] },
+    legend: { bottom: 0, data: [name0, name1] },
     grid: { top: 10, left: 40, right: 40, bottom: 40, containLabel: true },
     xAxis: { type: 'category', data: labels },
     yAxis: [
-      { type: 'value', name: series1Name, position: 'left' },
-      { type: 'value', name: series2Name, position: 'right' }
+      { type: 'value', name: name0, position: 'left' },
+      { type: 'value', name: name1, position: 'right' }
     ],
-    series: [
-      {
-        name: series1Name,
-        type: 'bar',
-        yAxisIndex: 0,
-        data: values,
-        itemStyle: { color: color1, borderRadius: [4, 4, 0, 0] },
-        barMaxWidth: 60
-      },
-      {
-        name: series2Name,
-        type: 'line',
-        yAxisIndex: 1,
-        data: values2,
-        smooth: true,
-        lineStyle: { color: color2, width: 2 },
-        itemStyle: { color: color2 }
-      }
-    ]
+    series: [s0, s1]
   }
 }
 

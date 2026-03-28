@@ -34,12 +34,22 @@
         </div>
       </div>
 
+      <!-- Filter bar -->
+      <DashboardFilterBar
+        v-if="dashboard.filters?.length > 0"
+        :dashboard-id="dashboard.id"
+        :filters="dashboard.filters || []"
+        :is-design-mode="false"
+        v-model="activeFilterValues"
+      />
+
       <!-- Dashboard grid -->
       <div class="viewer-canvas">
         <DashboardGrid
           :widgets="dashboard.widgets"
           :is-design-mode="false"
           :dashboard-id="dashboard.id"
+          :dashboard-filters="resolvedDashboardFilters"
           :key="refreshKey"
         />
       </div>
@@ -54,6 +64,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
+import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
+import { buildCubeFilter } from '@/composables/useCubeQuery'
 
 const route = useRoute()
 const router = useRouter()
@@ -62,6 +74,7 @@ const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 
 const refreshKey = ref(0)
+const activeFilterValues = ref({})
 
 const dashboard = computed(() => {
   const id = route.params.id
@@ -75,7 +88,13 @@ const dashboard = computed(() => {
   return null
 })
 
+const resolvedDashboardFilters = computed(() => {
+  const schema = dashboard.value?.filters || []
+  return schema.flatMap(f => buildCubeFilter(f, activeFilterValues.value[f.id]))
+})
+
 watch(dashboard, (db) => {
+  activeFilterValues.value = {}
   if (db) {
     uiStore.setBreadcrumbs(['Dashboards', db.name])
   }

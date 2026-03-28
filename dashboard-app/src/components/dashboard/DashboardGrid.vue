@@ -25,6 +25,7 @@
           :widget="widget"
           :isDesignMode="isDesignMode"
           :isSelected="selectedWidgetId === widget.id"
+          :dashboardFilters="dashboardFilters"
           @select="selectWidget(widget.id)"
           @configure="$emit('configure-widget', widget)"
           @remove="$emit('remove-widget', widget.id)"
@@ -70,7 +71,8 @@ import { useDashboardStore } from '@/stores/dashboard'
 const props = defineProps({
   widgets: { type: Array, default: () => [] },
   isDesignMode: { type: Boolean, default: false },
-  dashboardId: { type: String, required: true }
+  dashboardId: { type: String, required: true },
+  dashboardFilters: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['configure-widget', 'remove-widget', 'widget-moved'])

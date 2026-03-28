@@ -31,13 +31,19 @@ export const useCubeStore = defineStore('cubejs', {
 
     allMeasures: (state) => {
       return (state.meta?.cubes || []).flatMap(c =>
-        c.measures.map(m => ({ ...m, cubeName: c.name, fullName: `${c.name}.${m.name}` }))
+        c.measures.map(m => {
+          const fullName = m.name.startsWith(c.name + '.') ? m.name : `${c.name}.${m.name}`
+          return { ...m, cubeName: c.name, fullName }
+        })
       )
     },
 
     allDimensions: (state) => {
       return (state.meta?.cubes || []).flatMap(c =>
-        c.dimensions.map(d => ({ ...d, cubeName: c.name, fullName: `${c.name}.${d.name}` }))
+        c.dimensions.map(d => {
+          const fullName = d.name.startsWith(c.name + '.') ? d.name : `${c.name}.${d.name}`
+          return { ...d, cubeName: c.name, fullName }
+        })
       )
     }
   },
@@ -72,6 +78,12 @@ export const useCubeStore = defineStore('cubejs', {
       if (!this.client) throw new Error('CubeJS no configurado')
       const result = await this.client.load(query)
       return result
+    },
+
+    async loadDimensionValues(dimension) {
+      const result = await this.executeQuery({ dimensions: [dimension], limit: 500 })
+      const rows = result.tablePivot ? result.tablePivot() : []
+      return rows.map(r => r[dimension]).filter(v => v != null)
     },
 
     async testConnection() {
