@@ -23,12 +23,20 @@
     <div v-else class="model-grid">
       <div v-for="model in modelStore.allModels" :key="model.id" class="model-card card">
         <div class="model-card-header">
-          <div class="model-icon">🗄️</div>
+          <div class="model-icon-wrap">
+            <span class="model-icon">🗄️</span>
+            <span v-if="model.isGlobal" class="global-badge">GLOBAL</span>
+          </div>
           <div class="model-card-actions">
             <button class="btn btn-secondary btn-sm" @click="openEditor(model.id)">
               Editar
             </button>
-            <button class="btn-icon" data-tooltip="Eliminar" @click="confirmDelete(model)">
+            <button
+              v-if="!model.isGlobal"
+              class="btn-icon"
+              data-tooltip="Eliminar"
+              @click="confirmDelete(model)"
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--error)">
                 <polyline points="3 6 5 6 21 6"/>
                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -186,6 +194,7 @@ function cancelEdit() {
 }
 
 onMounted(() => {
+  modelStore.ensureGlobalModel()
   uiStore.setBreadcrumbs(['Modelos'])
   if (route.query.new === '1') showNewModal.value = true
 })
@@ -262,7 +271,13 @@ function doDelete() {
   border-bottom: 1px solid var(--border);
   background: #fafafa;
 }
+.model-icon-wrap { display: flex; align-items: center; gap: 8px; }
 .model-icon { font-size: 28px; line-height: 1; }
+.global-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+  background: #722ed1; color: #fff;
+  padding: 2px 7px; border-radius: 10px;
+}
 .model-card-actions { display: flex; gap: 6px; align-items: center; }
 
 .model-card-body { padding: 14px 16px; }

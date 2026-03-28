@@ -20,7 +20,8 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
 
   getters: {
     allModels: (state) => state.models,
-    getModel: (state) => (id) => state.models.find(m => m.id === id) || null
+    getModel: (state) => (id) => state.models.find(m => m.id === id) || null,
+    globalModel: (state) => state.models.find(m => m.isGlobal) || null
   },
 
   actions: {
@@ -28,11 +29,35 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
       localStorage.setItem('dimensionalModels', JSON.stringify(this.models))
     },
 
+    // Guarantee exactly one Global model exists; call once on app mount.
+    ensureGlobalModel() {
+      if (this.models.some(m => m.isGlobal)) return
+      this.models.unshift({
+        id: generateId(),
+        name: 'Global',
+        description: 'Dimensiones compartidas entre todos los modelos dimensionales',
+        isGlobal: true,
+        createdBy: 'system',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        nodes: [],
+        relationships: []
+      })
+      this.persist()
+    },
+
+    // Mark a model as the global one (unmarks all others).
+    setGlobal(modelId) {
+      this.models.forEach(m => { m.isGlobal = m.id === modelId })
+      this.persist()
+    },
+
     createModel({ name, description, createdBy }) {
       const model = {
         id: generateId(),
         name,
         description: description || '',
+        isGlobal: false,
         createdBy: createdBy || '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -52,6 +77,8 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
     },
 
     deleteModel(id) {
+      const m = this.models.find(m => m.id === id)
+      if (!m || m.isGlobal) return  // Global model cannot be deleted
       const idx = this.models.findIndex(m => m.id === id)
       if (idx !== -1) { this.models.splice(idx, 1); this.persist() }
     },
@@ -59,7 +86,28 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
     addNode(modelId, { type, name, x = 100, y = 100 }) {
       const m = this.models.find(m => m.id === modelId)
       if (!m) return
-      const node = { id: generateId(), type, name, x, y, fields: [] }
+      const node = { id: generateId(), type, name, x, y, globalRef: null, fields: [] }
+      m.nodes.push(node)
+      m.updatedAt = new Date().toISOString()
+      this.persist()
+      return node
+    },
+
+    // Add a read-only reference to a dimension from the Global model.
+    addGlobalDimRef(modelId, globalNodeId, position) {
+      const m = this.models.find(m => m.id === modelId)
+      const globalModel = this.models.find(m => m.isGlobal)
+      const globalNode = globalModel?.nodes.find(n => n.id === globalNodeId)
+      if (!m || !globalNode) return null
+      const node = {
+        id: generateId(),
+        type: globalNode.type,
+        name: globalNode.name,
+        x: position?.x ?? 60,
+        y: position?.y ?? 60,
+        globalRef: { modelId: globalModel.id, nodeId: globalNodeId },
+        fields: []   // resolved at runtime from global model
+      }
       m.nodes.push(node)
       m.updatedAt = new Date().toISOString()
       this.persist()

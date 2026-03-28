@@ -74,6 +74,19 @@
           </svg>
           Dimensión
         </button>
+        <button
+          v-if="!model?.isGlobal && modelStore.globalModel"
+          class="btn btn-secondary btn-sm"
+          data-tooltip="Añadir dimensión del modelo Global"
+          @click="showGlobalDimModal = true"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          + Dim. Global
+        </button>
       </div>
     </div>
 
@@ -138,13 +151,14 @@
 
         <!-- Nodes -->
         <div
-          v-for="node in model?.nodes"
+          v-for="node in resolvedNodes"
           :key="node.id"
           class="model-node"
           :class="[
             node.type,
             { selected: selectedNode?.id === node.id },
-            { 'drop-target': dragField && node.type === 'fact' && node.id === dropTargetId }
+            { 'drop-target': dragField && node.type === 'fact' && node.id === dropTargetId },
+            { 'global-ref': node.globalRef }
           ]"
           :style="{ left: node.x + 'px', top: node.y + 'px' }"
           @click.stop="onNodeClick(node)"
@@ -153,6 +167,10 @@
           <div class="node-header" :class="node.type">
             <span class="node-badge">{{ node.type === 'fact' ? 'HECHO' : 'DIM' }}</span>
             <span class="node-name">{{ node.name }}</span>
+            <svg v-if="node.globalRef" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;flex-shrink:0">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
           </div>
           <div class="node-fields">
             <div
@@ -210,8 +228,9 @@
           <div class="props-header">
             <span class="props-type-badge" :class="selectedNode.type">
               {{ selectedNode.type === 'fact' ? 'Tabla de Hecho' : 'Dimensión' }}
+              <span v-if="selectedNode.globalRef" class="global-ref-tag">Global</span>
             </span>
-            <button class="btn-icon" data-tooltip="Exportar cubo CubeJS" @click="exportSingleCube(selectedNode)">
+            <button class="btn-icon" data-tooltip="Exportar cubo CubeJS" @click="exportSingleCube(resolveNode(selectedNode))">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
@@ -225,7 +244,37 @@
             </button>
           </div>
 
-          <div class="props-body">
+          <!-- Read-only panel for global-ref nodes -->
+          <div v-if="selectedNode.globalRef" class="props-body global-ref-body">
+            <div class="global-ref-notice">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              Dimensión del modelo Global — solo lectura
+            </div>
+            <div class="props-section-title" style="margin-top:8px">Campos</div>
+            <div class="global-ref-fields">
+              <div v-for="f in resolveNode(selectedNode).fields" :key="f.id" class="global-ref-field">
+                <span class="field-icon">
+                  <span v-if="f.isKey">🔑</span>
+                  <span v-else-if="f.isFk">🔗</span>
+                  <span v-else>{{ fieldIcon('dimension', f.dataType) }}</span>
+                </span>
+                <span class="field-name">{{ f.name }}</span>
+                <span class="field-type">{{ dtStore.getById(f.dataType)?.name ?? f.dataType }}</span>
+              </div>
+              <div v-if="!resolveNode(selectedNode).fields.length" class="node-empty">Sin campos</div>
+            </div>
+            <div class="props-divider"></div>
+            <button class="btn btn-sm btn-danger-outline" @click="deleteNodeConfirm">
+              Quitar del modelo
+            </button>
+          </div>
+
+          <!-- Editable panel for local nodes -->
+          <div v-else class="props-body">
             <div class="form-group">
               <label class="form-label">Nombre</label>
               <input
@@ -311,7 +360,7 @@
             <button class="btn btn-sm btn-danger-outline" @click="deleteNodeConfirm">
               Eliminar tabla
             </button>
-          </div>
+          </div><!-- end v-else editable props-body -->
         </template>
 
         <!-- Relationship properties -->
@@ -352,6 +401,51 @@
             </button>
           </div>
         </template>
+      </div>
+    </div>
+
+    <!-- Modal: Add Global Dimensions -->
+    <div v-if="showGlobalDimModal" class="modal-overlay" @click.self="showGlobalDimModal = false">
+      <div class="modal card">
+        <div class="modal-header">
+          <h3>Añadir Dimensiones Globales</h3>
+          <button class="btn-icon" @click="showGlobalDimModal = false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p v-if="!availableGlobalDims.length" class="modal-empty">
+            No hay dimensiones globales disponibles para añadir.
+          </p>
+          <div v-else class="global-dim-list">
+            <label
+              v-for="n in availableGlobalDims"
+              :key="n.id"
+              class="global-dim-option"
+              :class="{ selected: selectedGlobalDims.includes(n.id) }"
+            >
+              <input
+                type="checkbox"
+                :value="n.id"
+                v-model="selectedGlobalDims"
+                style="display:none"
+              />
+              <span class="global-dim-icon">🌐</span>
+              <span class="global-dim-name">{{ n.name }}</span>
+              <span class="global-dim-fields">{{ n.fields.length }} campos</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showGlobalDimModal = false">Cancelar</button>
+          <button
+            class="btn btn-primary"
+            :disabled="!selectedGlobalDims.length"
+            @click="addSelectedGlobalDims"
+          >Añadir ({{ selectedGlobalDims.length }})</button>
+        </div>
       </div>
     </div>
   </div>
@@ -498,19 +592,22 @@ function handleGenerateDDL() {
   lines.push(`-- ============================================================`)
   lines.push('')
 
+  // Use resolved nodes so global-ref nodes show their actual fields
+  const allNodes = resolvedNodes.value
+
   // Separate dimensions and facts
-  const dims  = m.nodes.filter(n => n.type === 'dimension')
-  const facts = m.nodes.filter(n => n.type === 'fact')
+  const dims  = allNodes.filter(n => n.type === 'dimension')
+  const facts = allNodes.filter(n => n.type === 'fact')
 
   // Map nodeId → sql table name (needed for FK references)
   const tableOf = {}
-  m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
+  allNodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
 
   // Helper: build relationship lookup dim→fact
   // rel.fromNodeId = dim, rel.toNodeId = fact (as created by drag-drop)
   const relsByDim = {}
   m.relationships.forEach(r => {
-    const fromNode = m.nodes.find(n => n.id === r.fromNodeId)
+    const fromNode = allNodes.find(n => n.id === r.fromNodeId)
     if (fromNode?.type === 'dimension') {
       if (!relsByDim[r.fromNodeId]) relsByDim[r.fromNodeId] = []
       relsByDim[r.fromNodeId].push(r)
@@ -577,7 +674,7 @@ function handleGenerateDDL() {
         // description format: "FK → DimName.fieldName"
         const match = f.description.match(/FK → (.+)\.(.+)/)
         if (match) {
-          const dimNode = m.nodes.find(n => n.name === match[1] && n.type === 'dimension')
+          const dimNode = allNodes.find(n => n.name === match[1] && n.type === 'dimension')
           if (dimNode) {
             const refTbl = tableOf[dimNode.id]
             const refCol = toSqlName(match[2])
@@ -616,7 +713,7 @@ function handleGenerateDDL() {
 
   // 3. RELATIONSHIP comments (for N:N or non-FK rels)
   const nonFkRels = m.relationships.filter(r => {
-    const from = m.nodes.find(n => n.id === r.fromNodeId)
+    const from = allNodes.find(n => n.id === r.fromNodeId)
     return r.cardinality === 'N:N' || !from || from.type !== 'dimension'
   })
   if (nonFkRels.length) {
@@ -672,7 +769,8 @@ function cubeJsMeasureType(field) {
 }
 
 // Build the JS content for a single node (dimension or fact cube)
-function buildCubeJS(node, m, tableOf, cubeOf) {
+// rNodes: resolved nodes array (so global-ref dims are found with real names/fields)
+function buildCubeJS(node, m, tableOf, cubeOf, rNodes) {
   const out = []
   const cube = cubeOf[node.id]
   const ts   = new Date().toISOString()
@@ -720,7 +818,7 @@ function buildCubeJS(node, m, tableOf, cubeOf) {
     node.fields.filter(f => f.isFk && f.description).forEach(f => {
       const match = f.description.match(/FK → (.+)\.(.+)/)
       if (!match) return
-      const dimNode = m.nodes.find(n => n.name === match[1] && n.type === 'dimension')
+      const dimNode = (rNodes || m.nodes).find(n => n.name === match[1] && n.type === 'dimension')
       if (!dimNode || joinMap[dimNode.id]) return
       joinMap[dimNode.id] = {
         dimCube: cubeOf[dimNode.id],
@@ -809,10 +907,11 @@ function buildCubeJS(node, m, tableOf, cubeOf) {
 function exportSingleCube(node) {
   if (!model.value || !node) return
   const m = model.value
-  const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
-  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
+  const rNodes = resolvedNodes.value
+  const tableOf = {}; rNodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
+  const cubeOf  = {}; rNodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
 
-  const content = buildCubeJS(node, m, tableOf, cubeOf)
+  const content = buildCubeJS(node, m, tableOf, cubeOf, rNodes)
   const fileName = `${cubeOf[node.id]}.js`
   const blob = new Blob([content], { type: 'application/javascript' })
   const url = URL.createObjectURL(blob)
@@ -825,12 +924,13 @@ function exportSingleCube(node) {
 async function handleExportCubeJS() {
   if (!model.value) return
   const m = model.value
-  const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
-  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
+  const rNodes = resolvedNodes.value
+  const tableOf = {}; rNodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
+  const cubeOf  = {}; rNodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
 
   const zip = new JSZip()
-  m.nodes.forEach(node => {
-    zip.file(`${cubeOf[node.id]}.js`, buildCubeJS(node, m, tableOf, cubeOf))
+  rNodes.forEach(node => {
+    zip.file(`${cubeOf[node.id]}.js`, buildCubeJS(node, m, tableOf, cubeOf, rNodes))
   })
 
   const slug = m.name.replace(/[^a-zA-Z0-9_\-. ]/g, '').trim().replace(/\s+/g, '_') || 'schema'
@@ -838,7 +938,7 @@ async function handleExportCubeJS() {
   const url = URL.createObjectURL(zipBlob)
   const a = document.createElement('a'); a.href = url; a.download = `${slug}_cubejs.zip`; a.click()
   URL.revokeObjectURL(url)
-  uiStore.notify({ message: `${m.nodes.length} cubos exportados en ${slug}_cubejs.zip`, type: 'success' })
+  uiStore.notify({ message: `${rNodes.length} cubos exportados en ${slug}_cubejs.zip`, type: 'success' })
 }
 
 // ── Canvas ───────────────────────────────────────────────────
@@ -1134,6 +1234,36 @@ function deleteRelationship() {
   modelStore.deleteRelationship(modelId, selectedRel.value.id)
   selectedRel.value = null
 }
+
+// ── Global Model ──────────────────────────────────────────────
+const showGlobalDimModal = ref(false)
+const selectedGlobalDims = ref([])
+
+function resolveNode(node) {
+  if (!node.globalRef) return node
+  const gNode = modelStore.globalModel?.nodes.find(n => n.id === node.globalRef.nodeId)
+  if (!gNode) return node
+  return { ...gNode, id: node.id, x: node.x, y: node.y, globalRef: node.globalRef }
+}
+
+const resolvedNodes = computed(() => (model.value?.nodes || []).map(resolveNode))
+
+const availableGlobalDims = computed(() => {
+  const gModel = modelStore.globalModel
+  if (!gModel || model.value?.isGlobal) return []
+  const alreadyReferenced = new Set(
+    (model.value?.nodes || []).filter(n => n.globalRef).map(n => n.globalRef.nodeId)
+  )
+  return gModel.nodes.filter(n => n.type === 'dimension' && !alreadyReferenced.has(n.id))
+})
+
+function addSelectedGlobalDims() {
+  selectedGlobalDims.value.forEach((nodeId, i) => {
+    modelStore.addGlobalDimRef(modelId, nodeId, { x: 60 + i * 220, y: 60 })
+  })
+  selectedGlobalDims.value = []
+  showGlobalDimModal.value = false
+}
 </script>
 
 <style scoped>
@@ -1384,4 +1514,61 @@ function deleteRelationship() {
 
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-label { font-size: 12px; font-weight: 500; color: var(--text); }
+
+/* Global-ref nodes */
+.model-node.global-ref { border-style: dashed; border-color: #722ed1; opacity: 0.9; }
+.model-node.global-ref .node-header.dimension { background: #722ed1; }
+
+/* Global-ref properties panel */
+.global-ref-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.global-ref-notice {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #722ed1; background: #f9f0ff;
+  padding: 8px 10px; border-radius: 6px; line-height: 1.4;
+}
+.global-ref-fields { display: flex; flex-direction: column; gap: 2px; }
+.global-ref-field {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 6px; font-size: 12px; color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.global-ref-field:last-child { border-bottom: none; }
+.global-ref-tag {
+  font-size: 9px; font-weight: 700; background: #722ed1; color: #fff;
+  padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;
+}
+
+/* Global dim modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  width: 420px; max-width: 95vw;
+  padding: 0; overflow: hidden;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 0; }
+.modal-body { padding: 16px 20px; max-height: 60vh; overflow-y: auto; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 12px 20px; border-top: 1px solid var(--border); background: #fafafa;
+}
+.modal-empty { font-size: 13px; color: var(--text-secondary); }
+.global-dim-list { display: flex; flex-direction: column; gap: 6px; }
+.global-dim-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 6px; border: 2px solid var(--border);
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.global-dim-option:hover { border-color: #722ed1; background: #f9f0ff; }
+.global-dim-option.selected { border-color: #722ed1; background: #f0e6ff; }
+.global-dim-icon { font-size: 16px; flex-shrink: 0; }
+.global-dim-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+.global-dim-fields { font-size: 11px; color: var(--text-secondary); }
 </style>
