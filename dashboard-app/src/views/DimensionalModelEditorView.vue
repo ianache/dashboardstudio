@@ -29,8 +29,15 @@
       </div>
 
       <div class="toolbar-actions">
-        <!-- DDL / Import / Export -->
+        <!-- CubeJS / DDL / Import / Export -->
         <input ref="importInput" type="file" accept=".yaml,.yml" style="display:none" @change="handleImport" />
+        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Exportar schema CubeJS (.js)" @click="handleExportCubeJS">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </button>
         <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Generar DDL/SQL" @click="handleGenerateDDL">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <ellipse cx="12" cy="5" rx="9" ry="3"/>
@@ -592,6 +599,198 @@ function handleGenerateDDL() {
   const a = document.createElement('a')
   a.href = url; a.download = `${slug}.ddl`; a.click()
   URL.revokeObjectURL(url)
+}
+
+// ── CubeJS Export ────────────────────────────────────────────
+function toPascalCase(s) {
+  return s.trim().split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+}
+function toCamelCase(s) {
+  const p = toPascalCase(s)
+  return p.charAt(0).toLowerCase() + p.slice(1)
+}
+
+function cubeJsDimType(field) {
+  const dt = dtStore.getById(field.dataType)
+  const base = dt?.baseType ?? normalizePgType(field.dataType)
+  if (['DATE', 'TIME', 'TIMESTAMP', 'TIMESTAMPTZ'].includes(base)) return 'time'
+  if (base === 'BOOLEAN') return 'boolean'
+  if (['VARCHAR', 'CHAR', 'TEXT', 'UUID', 'JSONB', 'JSON', 'BYTEA'].some(t => base.startsWith(t))) return 'string'
+  return 'number'
+}
+
+function cubeJsMeasureType(field) {
+  const dt = dtStore.getById(field.dataType)
+  const base = dt?.baseType ?? normalizePgType(field.dataType)
+  return ['INTEGER', 'BIGINT', 'SMALLINT', 'SERIAL', 'BIGSERIAL',
+          'NUMERIC', 'DECIMAL', 'REAL', 'DOUBLE PRECISION', 'MONEY'].includes(base)
+    ? 'sum' : 'count'
+}
+
+function handleExportCubeJS() {
+  if (!model.value) return
+  const m = model.value
+  const out = []
+
+  out.push(`// ${'='.repeat(60)}`)
+  out.push(`// CubeJS Schema: ${m.name}`)
+  if (m.description) out.push(`// ${m.description}`)
+  out.push(`// Generado: ${new Date().toISOString()}`)
+  out.push(`// ${'='.repeat(60)}`)
+  out.push('')
+
+  const dims  = m.nodes.filter(n => n.type === 'dimension')
+  const facts = m.nodes.filter(n => n.type === 'fact')
+
+  // Node ID → SQL table name and PascalCase cube name
+  const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
+  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = toPascalCase(n.name) })
+
+  // ── 1. Dimension cubes ──────────────────────────────────────
+  if (dims.length) {
+    out.push(`// ${'-'.repeat(60)}`)
+    out.push('// DIMENSIONES')
+    out.push(`// ${'-'.repeat(60)}`)
+    out.push('')
+  }
+
+  dims.forEach(node => {
+    const cube = cubeOf[node.id]
+    out.push(`cube(\`${cube}\`, {`)
+    out.push(`  sql_table: \`${tableOf[node.id]}\`,`)
+    out.push('')
+
+    if (node.fields.length) {
+      out.push('  dimensions: {')
+      node.fields.forEach(f => {
+        const name = toCamelCase(f.name)
+        const sql  = toSqlName(f.name)
+        const type = cubeJsDimType(f)
+        out.push(`    ${name}: {`)
+        out.push(`      sql: \`\${CUBE}.${sql}\`,`)
+        out.push(`      type: \`${type}\`,`)
+        if (f.isKey) out.push(`      primary_key: true,`)
+        if (f.description && !f.isKey) out.push(`      title: \`${f.description}\`,`)
+        out.push(`    },`)
+      })
+      out.push('  },')
+    }
+
+    out.push('});')
+    out.push('')
+  })
+
+  // ── 2. Fact cubes ───────────────────────────────────────────
+  if (facts.length) {
+    out.push(`// ${'-'.repeat(60)}`)
+    out.push('// HECHOS')
+    out.push(`// ${'-'.repeat(60)}`)
+    out.push('')
+  }
+
+  facts.forEach(node => {
+    const cube = cubeOf[node.id]
+    out.push(`cube(\`${cube}\`, {`)
+    out.push(`  sql_table: \`${tableOf[node.id]}\`,`)
+    out.push('')
+
+    // Build join map by parsing FK field descriptions
+    const joinMap = {}   // dimNodeId → { dimCube, factCol, dimCol }
+    node.fields.filter(f => f.isFk && f.description).forEach(f => {
+      const match = f.description.match(/FK → (.+)\.(.+)/)
+      if (!match) return
+      const dimNode = m.nodes.find(n => n.name === match[1] && n.type === 'dimension')
+      if (!dimNode || joinMap[dimNode.id]) return   // skip duplicates
+      joinMap[dimNode.id] = {
+        dimCube:  cubeOf[dimNode.id],
+        dimNode,
+        factCol:  toSqlName(f.name),
+        dimCol:   toSqlName(match[2])
+      }
+    })
+
+    // joins
+    const joinEntries = Object.values(joinMap)
+    if (joinEntries.length) {
+      out.push('  joins: {')
+      joinEntries.forEach(j => {
+        out.push(`    ${j.dimCube}: {`)
+        out.push(`      sql: \`\${CUBE}.${j.factCol} = \${${j.dimCube}}.${j.dimCol}\`,`)
+        out.push(`      relationship: \`many_to_one\`,`)
+        out.push(`    },`)
+      })
+      out.push('  },')
+      out.push('')
+    }
+
+    // measures  (non-FK fields only)
+    const measureFields = node.fields.filter(f => !f.isFk)
+    out.push('  measures: {')
+    out.push('    count: {')
+    out.push('      type: `count`,')
+    out.push('    },')
+    measureFields.forEach(f => {
+      const name = toCamelCase(f.name)
+      const sql  = toSqlName(f.name)
+      const type = cubeJsMeasureType(f)
+      out.push(`    ${name}: {`)
+      out.push(`      sql: \`\${CUBE}.${sql}\`,`)
+      out.push(`      type: \`${type}\`,`)
+      if (f.description) out.push(`      title: \`${f.description}\`,`)
+      out.push(`    },`)
+    })
+    out.push('  },')
+    out.push('')
+
+    // dimensions  (FK columns exposed for filtering / grouping)
+    const fkFields = node.fields.filter(f => f.isFk)
+    if (fkFields.length) {
+      out.push('  dimensions: {')
+      fkFields.forEach(f => {
+        const name = toCamelCase(f.name)
+        const sql  = toSqlName(f.name)
+        out.push(`    ${name}: {`)
+        out.push(`      sql: \`\${CUBE}.${sql}\`,`)
+        out.push(`      type: \`${cubeJsDimType(f)}\`,`)
+        out.push(`    },`)
+      })
+      out.push('  },')
+      out.push('')
+    }
+
+    // pre_aggregations  — one rollup per fact cube
+    // Use the first time-typed field found in any joined dimension
+    let timeDimRef = null
+    for (const j of joinEntries) {
+      const timeField = j.dimNode.fields.find(f => cubeJsDimType(f) === 'time' && !f.isKey)
+      if (timeField) { timeDimRef = `${j.dimCube}.${toCamelCase(timeField.name)}`; break }
+    }
+
+    const measureRefs = ['CUBE.count', ...measureFields.map(f => `CUBE.${toCamelCase(f.name)}`)]
+    out.push('  pre_aggregations: {')
+    out.push('    main: {')
+    out.push('      type: `rollup`,')
+    out.push(`      measures: [${measureRefs.join(', ')}],`)
+    if (timeDimRef) {
+      out.push(`      time_dimension: ${timeDimRef},`)
+      out.push('      granularity: `day`,')
+    }
+    out.push('      refresh_key: {')
+    out.push('        every: `1 hour`,')
+    out.push('      },')
+    out.push('    },')
+    out.push('  },')
+    out.push('});')
+    out.push('')
+  })
+
+  const slug = m.name.replace(/[^a-zA-Z0-9_\-. ]/g, '').trim().replace(/\s+/g, '_') || 'schema'
+  const blob = new Blob([out.join('\n')], { type: 'application/javascript' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = `${slug}.js`; a.click()
+  URL.revokeObjectURL(url)
+  uiStore.notify({ message: 'Schema CubeJS exportado', type: 'success' })
 }
 
 // ── Canvas ───────────────────────────────────────────────────
