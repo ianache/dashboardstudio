@@ -239,9 +239,8 @@
             <div class="props-section-title">Campos</div>
             <div class="fields-list">
               <div v-for="f in selectedNode.fields" :key="f.id" class="field-item">
-                <!-- Key radio for dimension nodes -->
+                <!-- Key toggle — available for both fact and dimension nodes -->
                 <button
-                  v-if="selectedNode.type === 'dimension'"
                   class="key-toggle"
                   :class="{ active: f.isKey }"
                   :title="f.isKey ? 'Llave primaria' : 'Marcar como llave'"
@@ -560,9 +559,10 @@ function handleGenerateDDL() {
         }
       }
 
+      const pk = f.isKey ? ' PRIMARY KEY' : ''
       return {
-        def: `    ${col.padEnd(30)} ${type.trimEnd()}`,
-        cmt: f.description ? `  -- ${f.description}` : ''
+        def: `    ${col.padEnd(30)} ${(type + pk).trimEnd()}`,
+        cmt: f.description && !f.isKey ? `  -- ${f.description}` : ''
       }
     })
 
@@ -715,7 +715,7 @@ function buildCubeJS(node, m, tableOf, cubeOf) {
     }
 
     // measures — count + numeric fields
-    const measureFields = node.fields.filter(f => !f.isFk)
+    const measureFields = node.fields.filter(f => !f.isFk && !f.isKey)
     out.push('  measures: {')
     out.push('    count: {')
     out.push('      type: `count`,')
@@ -733,16 +733,17 @@ function buildCubeJS(node, m, tableOf, cubeOf) {
     out.push('  },')
     out.push('')
 
-    // dimensions — FK cols for filtering / grouping
-    const fkFields = node.fields.filter(f => f.isFk)
-    if (fkFields.length) {
+    // dimensions — FK cols + explicit key fields for filtering / grouping
+    const dimFields = node.fields.filter(f => f.isFk || f.isKey)
+    if (dimFields.length) {
       out.push('  dimensions: {')
-      fkFields.forEach(f => {
+      dimFields.forEach(f => {
         const name = toCamelCase(f.name)
         const sql  = toSqlName(f.name)
         out.push(`    ${name}: {`)
         out.push(`      sql: \`\${CUBE}.${sql}\`,`)
         out.push(`      type: \`${cubeJsDimType(f)}\`,`)
+        if (f.isKey) out.push(`      primary_key: true,`)
         out.push(`    },`)
       })
       out.push('  },')
