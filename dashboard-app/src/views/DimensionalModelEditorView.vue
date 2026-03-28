@@ -169,7 +169,7 @@
                 <span v-else>{{ fieldIcon(node.type, f.dataType) }}</span>
               </span>
               <span class="field-name">{{ f.name }}</span>
-              <span class="field-type">{{ f.dataType }}</span>
+              <span class="field-type">{{ dtStore.getById(f.dataType)?.name ?? f.dataType }}</span>
             </div>
 
             <!-- Hint for dimensions without key -->
@@ -245,18 +245,9 @@
                   class="form-input form-select field-type-select"
                   @change="updateField(f.id, 'dataType', $event.target.value)"
                 >
-                  <template v-if="selectedNode.type === 'fact'">
-                    <option value="integer">integer</option>
-                    <option value="decimal">decimal</option>
-                    <option value="currency">currency</option>
-                    <option value="percentage">percentage</option>
-                  </template>
-                  <template v-else>
-                    <option value="string">string</option>
-                    <option value="date">date</option>
-                    <option value="boolean">boolean</option>
-                    <option value="integer">integer</option>
-                  </template>
+                  <option v-for="dt in dtStore.allTypes" :key="dt.id" :value="dt.id">
+                    {{ dt.name }}
+                  </option>
                 </select>
                 <button class="btn-icon field-del-btn" @click="deleteField(f.id)">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -328,12 +319,14 @@
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
+import { useDataTypeStore } from '@/stores/dataTypes'
 import { useUIStore } from '@/stores/ui'
 import yaml from 'js-yaml'
 
 const router = useRouter()
 const route = useRoute()
 const modelStore = useDimensionalModelStore()
+const dtStore = useDataTypeStore()
 const uiStore = useUIStore()
 
 const modelId = route.params.id
@@ -410,16 +403,6 @@ function handleImport(e) {
 }
 
 // ── DDL Generation ───────────────────────────────────────────
-const SQL_TYPES = {
-  integer: 'INTEGER',
-  decimal: 'DECIMAL(18,4)',
-  currency: 'DECIMAL(18,2)',
-  percentage: 'DECIMAL(5,2)',
-  string: 'VARCHAR(255)',
-  date: 'DATE',
-  boolean: 'BOOLEAN'
-}
-
 function toSqlName(s) {
   return s.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
 }
@@ -471,7 +454,7 @@ function handleGenerateDDL() {
 
     const colLines = node.fields.map(f => {
       const col  = toSqlName(f.name)
-      const type = SQL_TYPES[f.dataType] || 'VARCHAR(255)'
+      const type = dtStore.sqlOf(f.dataType)
       const pk   = f.isKey ? ' PRIMARY KEY' : ''
       const nn   = f.isKey ? ' NOT NULL' : ''
       const cmt  = f.description ? `  -- ${f.description}` : ''
@@ -501,7 +484,7 @@ function handleGenerateDDL() {
 
     const colLines = node.fields.map(f => {
       const col  = toSqlName(f.name)
-      const type = SQL_TYPES[f.dataType] || 'INTEGER'
+      const type = dtStore.sqlOf(f.dataType)
       const nn   = ''
       const cmt  = f.description ? `  -- ${f.description}` : ''
 
@@ -779,10 +762,16 @@ function addField() {
   if (!selectedNode.value) return
   const isDim = selectedNode.value.type === 'dimension'
   const autoKey = isDim && selectedNode.value.fields.length === 0
+  // Pick sensible default type IDs from store, fallback to first available
+  const allTypes = dtStore.allTypes
+  const defaultDimKey  = allTypes.find(t => t.id === 'dt-serial') ?? allTypes.find(t => t.baseType === 'SERIAL') ?? allTypes[0]
+  const defaultDimText = allTypes.find(t => t.id === 'dt-varchar') ?? allTypes.find(t => t.baseType === 'VARCHAR') ?? allTypes[0]
+  const defaultFact    = allTypes.find(t => t.id === 'dt-numeric') ?? allTypes.find(t => t.baseType === 'NUMERIC') ?? allTypes[0]
+  const defaultType = autoKey ? defaultDimKey?.id : (isDim ? defaultDimText?.id : defaultFact?.id)
   modelStore.addField(modelId, selectedNode.value.id, {
     name: autoKey ? 'id' : 'nuevo_campo',
     description: '',
-    dataType: autoKey ? 'integer' : (isDim ? 'string' : 'decimal'),
+    dataType: defaultType ?? (allTypes[0]?.id ?? 'dt-int'),
     isKey: autoKey
   })
   refreshSelectedNode()

@@ -83,6 +83,9 @@
             <div class="nav-sub-item nav-sub-action" @click="createNewModel">
               <span class="sub-dot">+</span> Nuevo modelo
             </div>
+            <router-link to="/models/data-types" class="nav-sub-item" :class="{ active: $route.name === 'DataTypes' }">
+              <span class="sub-dot">•</span> Tipos de datos
+            </router-link>
           </div>
         </transition>
       </div>
@@ -164,7 +167,7 @@ const isDesignerRoute = computed(() =>
 )
 
 const isModelRoute = computed(() =>
-  ['ModelList', 'ModelEditor'].includes(router.currentRoute.value.name)
+  ['ModelList', 'ModelEditor', 'DataTypes'].includes(router.currentRoute.value.name)
 )
 
 const isDashboardRoute = computed(() =>

@@ -44,6 +44,12 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Modelos'] }
       },
       {
+        path: 'models/data-types',
+        name: 'DataTypes',
+        component: () => import('@/views/DataTypesView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Modelos', 'Tipos de datos'] }
+      },
+      {
         path: 'models/:id',
         name: 'ModelEditor',
         component: () => import('@/views/DimensionalModelEditorView.vue'),
