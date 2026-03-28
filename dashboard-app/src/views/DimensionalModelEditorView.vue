@@ -605,6 +605,14 @@ function handleGenerateDDL() {
 function toPascalCase(s) {
   return s.trim().split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
 }
+
+// Cube name: strip leading prefix (dim_, fct_, fact_, stg_, dbo_, …) then PascalCase
+function cubeNameFrom(node) {
+  const tbl = toSqlName(node.name)
+  const stripped = tbl.replace(/^[a-z]{2,6}_/, '')
+  return stripped.split('_').filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+}
 function toCamelCase(s) {
   const p = toPascalCase(s)
   return p.charAt(0).toLowerCase() + p.slice(1)
@@ -644,7 +652,7 @@ function handleExportCubeJS() {
 
   // Node ID → SQL table name and PascalCase cube name
   const tableOf = {}; m.nodes.forEach(n => { tableOf[n.id] = toSqlName(n.name) })
-  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = toPascalCase(n.name) })
+  const cubeOf  = {}; m.nodes.forEach(n => { cubeOf[n.id]  = cubeNameFrom(n) })
 
   // ── 1. Dimension cubes ──────────────────────────────────────
   if (dims.length) {
