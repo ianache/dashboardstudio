@@ -236,7 +236,24 @@
               />
             </div>
 
-            <div class="props-section-title">Campos</div>
+            <div class="props-section-title">
+              Campos
+              <button
+                class="btn-icon desc-toggle"
+                :class="{ active: showFieldDesc }"
+                :title="showFieldDesc ? 'Ocultar descripciones' : 'Mostrar descripciones'"
+                @click="showFieldDesc = !showFieldDesc"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="8" y1="6" x2="21" y2="6"/>
+                  <line x1="8" y1="12" x2="21" y2="12"/>
+                  <line x1="8" y1="18" x2="21" y2="18"/>
+                  <line x1="3" y1="6" x2="3.01" y2="6"/>
+                  <line x1="3" y1="12" x2="3.01" y2="12"/>
+                  <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+              </button>
+            </div>
             <div class="fields-list">
               <div v-for="f in selectedNode.fields" :key="f.id" class="field-item">
                 <!-- Row 1: key toggle · name · type · delete -->
@@ -269,8 +286,8 @@
                     </svg>
                   </button>
                 </div>
-                <!-- Row 2: description -->
-                <div class="field-row2">
+                <!-- Row 2: description (toggled) -->
+                <div v-show="showFieldDesc" class="field-row2">
                   <input
                     :value="f.description"
                     type="text"
@@ -845,6 +862,7 @@ function canvasPos(clientX, clientY) {
 // ── Selection ────────────────────────────────────────────────
 const selectedNode = ref(null)
 const selectedRel = ref(null)
+const showFieldDesc = ref(false)
 
 // ── Node drag state ──────────────────────────────────────────
 const dragging = ref(null)  // { nodeId, startX, startY, origX, origY }
@@ -1297,6 +1315,7 @@ function deleteRelationship() {
 .props-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
 
 .props-section-title {
+  display: flex; align-items: center; justify-content: space-between;
   font-size: 12px; font-weight: 600; color: var(--text-secondary);
   text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px;
 }
@@ -1330,6 +1349,14 @@ function deleteRelationship() {
 
 .field-row1 { display: flex; align-items: center; gap: 4px; }
 .field-row2 { padding-left: 28px; margin-top: 3px; }
+
+.desc-toggle {
+  width: 22px; height: 22px; border-radius: 4px;
+  color: var(--text-secondary); opacity: 0.6;
+  text-transform: none; letter-spacing: 0;
+}
+.desc-toggle:hover { opacity: 1; background: var(--bg); color: var(--primary); }
+.desc-toggle.active { opacity: 1; color: var(--primary); background: #e6f4ff; }
 .field-name-input { flex: 1; min-width: 0; font-size: 12px; padding: 4px 6px; height: 28px; }
 .field-type-select { width: 86px; flex-shrink: 0; font-size: 12px; padding: 4px 4px; height: 28px; }
 .field-desc-input { width: 100%; font-size: 11px; padding: 3px 6px; height: 24px; color: var(--text-secondary); }
