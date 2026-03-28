@@ -1,0 +1,64 @@
+name: Global
+description: ''
+nodes:
+  - id: bhcd5p6pa
+    type: dimension
+    name: dim_date
+    x: 60
+    'y': 60
+    fields:
+      - id: 2ydlzd2lt
+        name: date_key
+        description: Identificacion de la fecha
+        dataType: dt-date
+        isKey: true
+        isFk: false
+      - id: awwqfgs1b
+        name: day_of_week
+        description: Dia de la semana (numero 0 a 6)
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: fwrrv8zin
+        name: week_number
+        description: Numero de la semana en el año
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: szd65onb0
+        name: month
+        description: Nombre dle mes
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: u9xtawnmw
+        name: quarter
+        description: Numero del cuarto
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: 4ko9uqkyh
+        name: fiscal_year
+        description: año de la fecha
+        dataType: dt-numeric
+        isKey: false
+        isFk: false
+      - id: vkzmi18is
+        name: is_weekend
+        description: Define si es fin de semana
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+      - id: qum7qfcyn
+        name: is_holiday
+        description: Define si es fecha feriada o no laborable
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+      - id: qudpeub5k
+        name: is_business_day
+        description: Define si es dia laborable
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+relationships: []
