@@ -5,7 +5,8 @@
     @click.stop="isDesignMode && $emit('select')"
   >
     <!-- Widget Header -->
-    <div class="widget-header" :class="{ 'drag-handle': isDesignMode }">
+    <div class="widget-header" :class="{ 'drag-handle': isDesignMode }"
+         @mousedown="isDesignMode && $emit('drag-start', $event)">
       <div class="widget-title">
         <span class="chart-type-icon">{{ chartTypeIcon }}</span>
         <span>{{ widget.title || 'Sin título' }}</span>
@@ -97,7 +98,7 @@ const props = defineProps({
   dashboardFilters: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['configure', 'remove', 'select', 'resize-start'])
+const emit = defineEmits(['configure', 'remove', 'select', 'resize-start', 'drag-start'])
 
 const dashboardFiltersRef = computed(() => props.dashboardFilters)
 const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget, dashboardFiltersRef)

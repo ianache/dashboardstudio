@@ -1,14 +1,10 @@
 <template>
   <div class="grid-outer">
-    <!-- Grid canvas -->
     <div
       class="grid-canvas"
       ref="canvasRef"
       :class="{ 'design-mode': isDesignMode }"
       :style="canvasStyle"
-      @mousemove="onMouseMove"
-      @mouseup="onMouseUp"
-      @mouseleave="onMouseUp"
     >
       <!-- Background grid lines (design mode only) -->
       <div v-if="isDesignMode" class="grid-lines" :style="gridLinesStyle"></div>
@@ -19,7 +15,6 @@
         :key="widget.id"
         class="grid-item"
         :style="getItemStyle(widget)"
-        @mousedown.self="isDesignMode && startDrag($event, widget)"
       >
         <DashboardWidget
           :widget="widget"
@@ -29,6 +24,7 @@
           @select="selectWidget(widget.id)"
           @configure="$emit('configure-widget', widget)"
           @remove="$emit('remove-widget', widget.id)"
+          @drag-start="(e) => startDrag(e, widget)"
           @resize-start="(dir, e) => startResize(e, widget, dir)"
         />
       </div>
@@ -37,7 +33,7 @@
       <div
         v-if="dragState.active"
         class="drag-ghost"
-        :style="getGhostStyle()"
+        :style="ghostStyle"
       ></div>
 
       <!-- Empty state for design mode -->
@@ -64,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import DashboardWidget from './DashboardWidget.vue'
 import { useDashboardStore } from '@/stores/dashboard'
 
@@ -81,25 +77,23 @@ const dashboardStore = useDashboardStore()
 
 // Grid config
 const COL_COUNT = 12
-const ROW_HEIGHT = 90 // px per row unit
-const GAP = 10 // px
+const ROW_HEIGHT = 90  // px per row unit
+const GAP = 10         // px gap between cells
 
 const canvasRef = ref(null)
 const selectedWidgetId = ref(null)
 
-// Drag state
+// ── Drag state ────────────────────────────────────────────────
 const dragState = ref({
   active: false,
   widgetId: null,
-  startMouseX: 0,
-  startMouseY: 0,
-  startX: 0,
-  startY: 0,
-  currentX: 0,
-  currentY: 0
+  grabOffsetX: 0,   // px from widget left edge where user grabbed
+  grabOffsetY: 0,   // px from widget top  edge where user grabbed
+  pointerX: 0,      // current pointer position in canvas coords
+  pointerY: 0
 })
 
-// Resize state
+// ── Resize state ──────────────────────────────────────────────
 const resizeState = ref({
   active: false,
   widgetId: null,
@@ -107,10 +101,79 @@ const resizeState = ref({
   startMouseX: 0,
   startMouseY: 0,
   startW: 0,
-  startH: 0
+  startH: 0,
+  startX: 0
 })
 
-// Computed canvas height (enough to fit all widgets + some extra)
+// ── Helpers ───────────────────────────────────────────────────
+function getColWidth() {
+  if (!canvasRef.value) return 100
+  return (canvasRef.value.offsetWidth - GAP * (COL_COUNT + 1)) / COL_COUNT
+}
+
+// Convert a clientX/Y into canvas-content coordinates (accounts for scroll)
+function clientToCanvas(clientX, clientY) {
+  if (!canvasRef.value) return { x: 0, y: 0 }
+  const rect = canvasRef.value.getBoundingClientRect()
+  return {
+    x: clientX - rect.left + canvasRef.value.scrollLeft,
+    y: clientY - rect.top  + canvasRef.value.scrollTop
+  }
+}
+
+// Grid-unit snap functions — input is the desired pixel left/top of the widget
+function snapCol(pxLeft) {
+  const colW = getColWidth()
+  return Math.round((pxLeft - GAP) / (colW + GAP))
+}
+function snapRow(pxTop) {
+  return Math.round((pxTop - GAP) / (ROW_HEIGHT + GAP))
+}
+
+// Widget position (grid units) → absolute pixel style
+function getItemStyle(widget) {
+  const { x, y, w, h } = widget.position
+  const colW = getColWidth()
+  return {
+    position: 'absolute',
+    left:   `${GAP + x * (colW + GAP)}px`,
+    top:    `${GAP + y * (ROW_HEIGHT + GAP)}px`,
+    width:  `${w * colW + (w - 1) * GAP}px`,
+    height: `${h * ROW_HEIGHT + (h - 1) * GAP}px`,
+    transition: (dragState.value.widgetId === widget.id || resizeState.value.widgetId === widget.id)
+      ? 'none' : 'left 0.15s ease, top 0.15s ease'
+  }
+}
+
+// ── Ghost (drop preview) ──────────────────────────────────────
+const ghostStyle = computed(() => {
+  const ds = dragState.value
+  if (!ds.active) return {}
+  const widget = props.widgets.find(w => w.id === ds.widgetId)
+  if (!widget) return {}
+
+  const colW = getColWidth()
+  const targetLeft = ds.pointerX - ds.grabOffsetX
+  const targetTop  = ds.pointerY - ds.grabOffsetY
+
+  const snapX = Math.max(0, Math.min(COL_COUNT - widget.position.w, snapCol(targetLeft)))
+  const snapY = Math.max(0, snapRow(targetTop))
+
+  return {
+    position: 'absolute',
+    left:   `${GAP + snapX * (colW + GAP)}px`,
+    top:    `${GAP + snapY * (ROW_HEIGHT + GAP)}px`,
+    width:  `${widget.position.w * colW + (widget.position.w - 1) * GAP}px`,
+    height: `${widget.position.h * ROW_HEIGHT + (widget.position.h - 1) * GAP}px`,
+    background: 'rgba(24,144,255,0.12)',
+    border: '2px dashed #1890ff',
+    borderRadius: '8px',
+    pointerEvents: 'none',
+    zIndex: 50
+  }
+})
+
+// ── Canvas size ───────────────────────────────────────────────
 const canvasHeight = computed(() => {
   if (props.widgets.length === 0) return 400
   let maxRow = 0
@@ -137,88 +200,30 @@ const gridLinesStyle = computed(() => ({
   pointerEvents: 'none'
 }))
 
-function getColWidth() {
-  if (!canvasRef.value) return 100
-  const canvasW = canvasRef.value.offsetWidth
-  return (canvasW - GAP * (COL_COUNT + 1)) / COL_COUNT
-}
-
-function getItemStyle(widget) {
-  const { x, y, w, h } = widget.position
-  const colW = getColWidth()
-
-  const left = GAP + x * (colW + GAP)
-  const top = GAP + y * (ROW_HEIGHT + GAP)
-  const width = w * colW + (w - 1) * GAP
-  const height = h * ROW_HEIGHT + (h - 1) * GAP
-
-  return {
-    position: 'absolute',
-    left: `${left}px`,
-    top: `${top}px`,
-    width: `${width}px`,
-    height: `${height}px`,
-    transition: dragState.value.widgetId === widget.id || resizeState.value.widgetId === widget.id
-      ? 'none'
-      : 'all 0.15s ease'
-  }
-}
-
-function getGhostStyle() {
-  if (!dragState.value.active) return {}
-  const widget = props.widgets.find(w => w.id === dragState.value.widgetId)
-  if (!widget) return {}
-
-  const colW = getColWidth()
-  const snapX = Math.max(0, Math.min(COL_COUNT - widget.position.w, snapToGrid(dragState.value.currentX)))
-  const snapY = Math.max(0, snapToRowGrid(dragState.value.currentY))
-
-  return {
-    position: 'absolute',
-    left: `${GAP + snapX * (colW + GAP)}px`,
-    top: `${GAP + snapY * (ROW_HEIGHT + GAP)}px`,
-    width: `${widget.position.w * colW + (widget.position.w - 1) * GAP}px`,
-    height: `${widget.position.h * ROW_HEIGHT + (widget.position.h - 1) * GAP}px`,
-    background: 'rgba(24,144,255,0.12)',
-    border: '2px dashed #1890ff',
-    borderRadius: '8px',
-    pointerEvents: 'none',
-    zIndex: 50
-  }
-}
-
-function snapToGrid(pixelX) {
-  const colW = getColWidth()
-  return Math.round(pixelX / (colW + GAP))
-}
-
-function snapToRowGrid(pixelY) {
-  return Math.round(pixelY / (ROW_HEIGHT + GAP))
-}
-
-function getCanvasOffset() {
-  const rect = canvasRef.value?.getBoundingClientRect()
-  return rect ? { left: rect.left, top: rect.top } : { left: 0, top: 0 }
-}
-
+// ── Drag ──────────────────────────────────────────────────────
 function startDrag(e, widget) {
   if (!props.isDesignMode) return
   e.preventDefault()
   selectWidget(widget.id)
 
-  const offset = getCanvasOffset()
+  const colW     = getColWidth()
+  const canvasXY = clientToCanvas(e.clientX, e.clientY)
+
+  // Where within the widget did the user grab?
+  const widgetLeft = GAP + widget.position.x * (colW + GAP)
+  const widgetTop  = GAP + widget.position.y * (ROW_HEIGHT + GAP)
+
   dragState.value = {
     active: true,
     widgetId: widget.id,
-    startMouseX: e.clientX,
-    startMouseY: e.clientY,
-    startX: widget.position.x,
-    startY: widget.position.y,
-    currentX: e.clientX - offset.left - GAP,
-    currentY: e.clientY - offset.top - GAP
+    grabOffsetX: canvasXY.x - widgetLeft,
+    grabOffsetY: canvasXY.y - widgetTop,
+    pointerX: canvasXY.x,
+    pointerY: canvasXY.y
   }
 }
 
+// ── Resize ────────────────────────────────────────────────────
 function startResize(e, widget, direction) {
   if (!props.isDesignMode) return
   e.preventDefault()
@@ -231,15 +236,17 @@ function startResize(e, widget, direction) {
     startMouseX: e.clientX,
     startMouseY: e.clientY,
     startW: widget.position.w,
-    startH: widget.position.h
+    startH: widget.position.h,
+    startX: widget.position.x
   }
 }
 
+// ── Global mouse handlers (registered on document) ────────────
 function onMouseMove(e) {
   if (dragState.value.active) {
-    const offset = getCanvasOffset()
-    dragState.value.currentX = e.clientX - offset.left - GAP
-    dragState.value.currentY = e.clientY - offset.top - GAP
+    const pos = clientToCanvas(e.clientX, e.clientY)
+    dragState.value.pointerX = pos.x
+    dragState.value.pointerY = pos.y
   }
 
   if (resizeState.value.active) {
@@ -251,20 +258,14 @@ function onMouseMove(e) {
     const widget = props.widgets.find(w => w.id === rs.widgetId)
     if (!widget) return
 
-    if (rs.direction.includes('e') || rs.direction === 'se') {
-      const newW = Math.max(1, Math.min(COL_COUNT - widget.position.x, rs.startW + dxCols))
-      dashboardStore.updateWidgetPosition(props.dashboardId, rs.widgetId, {
-        ...widget.position,
-        w: newW
-      })
+    const newPos = { ...widget.position }
+    if (rs.direction.includes('e')) {
+      newPos.w = Math.max(1, Math.min(COL_COUNT - rs.startX, rs.startW + dxCols))
     }
-    if (rs.direction.includes('s') || rs.direction === 'se') {
-      const newH = Math.max(1, rs.startH + dyRows)
-      dashboardStore.updateWidgetPosition(props.dashboardId, rs.widgetId, {
-        ...widget.position,
-        h: newH
-      })
+    if (rs.direction.includes('s')) {
+      newPos.h = Math.max(1, rs.startH + dyRows)
     }
+    dashboardStore.updateWidgetPosition(props.dashboardId, rs.widgetId, newPos)
   }
 }
 
@@ -272,12 +273,12 @@ function onMouseUp(e) {
   if (dragState.value.active) {
     const widget = props.widgets.find(w => w.id === dragState.value.widgetId)
     if (widget) {
-      const offset = getCanvasOffset()
-      const mouseX = e.clientX - offset.left - GAP
-      const mouseY = e.clientY - offset.top - GAP
+      const pos = clientToCanvas(e.clientX, e.clientY)
+      const targetLeft = pos.x - dragState.value.grabOffsetX
+      const targetTop  = pos.y - dragState.value.grabOffsetY
 
-      const newX = Math.max(0, Math.min(COL_COUNT - widget.position.w, snapToGrid(mouseX)))
-      const newY = Math.max(0, snapToRowGrid(mouseY))
+      const newX = Math.max(0, Math.min(COL_COUNT - widget.position.w, snapCol(targetLeft)))
+      const newY = Math.max(0, snapRow(targetTop))
 
       dashboardStore.updateWidgetPosition(props.dashboardId, dragState.value.widgetId, {
         ...widget.position,
@@ -285,12 +286,12 @@ function onMouseUp(e) {
         y: newY
       })
     }
-    dragState.value.active = false
+    dragState.value.active   = false
     dragState.value.widgetId = null
   }
 
   if (resizeState.value.active) {
-    resizeState.value.active = false
+    resizeState.value.active   = false
     resizeState.value.widgetId = null
   }
 }
@@ -299,14 +300,14 @@ function selectWidget(id) {
   selectedWidgetId.value = id
 }
 
-// Deselect on canvas click
-function handleCanvasClick() {
-  selectedWidgetId.value = null
-}
+onMounted(() => {
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup',   onMouseUp)
+})
 
 onBeforeUnmount(() => {
-  dragState.value.active = false
-  resizeState.value.active = false
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mouseup',   onMouseUp)
 })
 </script>
 
@@ -326,10 +327,6 @@ onBeforeUnmount(() => {
 }
 
 .grid-item {
-  z-index: 10;
-}
-
-.design-mode .grid-item {
   z-index: 10;
 }
 
