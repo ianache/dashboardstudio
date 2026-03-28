@@ -125,7 +125,7 @@ onMounted(() => fetchData())
 
 watch(() => props.widget.cubeQuery, () => fetchData(), { deep: true })
 watch(() => props.widget.useMockData, () => fetchData())
-watch(() => props.dashboardFilters, () => fetchData(), { deep: true })
+watch(() => props.dashboardFilters, () => fetchData())
 </script>
 
 

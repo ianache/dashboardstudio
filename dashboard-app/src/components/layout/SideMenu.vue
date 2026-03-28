@@ -56,6 +56,35 @@
             </div>
           </div>
         </transition>
+
+        <!-- Models subsection -->
+        <div class="nav-item" :class="{ active: isModelRoute }" @click="toggleSection('models')">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="8" height="6" rx="1"/>
+              <rect x="14" y="3" width="8" height="6" rx="1"/>
+              <rect x="8" y="15" width="8" height="6" rx="1"/>
+              <line x1="6" y1="9" x2="12" y2="15"/>
+              <line x1="18" y1="9" x2="12" y2="15"/>
+            </svg>
+          </span>
+          <span class="nav-label">Modelos</span>
+          <span class="nav-arrow" :class="{ open: openSections.models }">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <path d="M2 4l4 4 4-4"/>
+            </svg>
+          </span>
+        </div>
+        <transition name="expand">
+          <div v-show="openSections.models" class="nav-sub">
+            <router-link to="/models" class="nav-sub-item" :class="{ active: $route.name === 'ModelList' }">
+              <span class="sub-dot">•</span> Ver todos
+            </router-link>
+            <div class="nav-sub-item nav-sub-action" @click="createNewModel">
+              <span class="sub-dot">+</span> Nuevo modelo
+            </div>
+          </div>
+        </transition>
       </div>
 
       <!-- Dashboards section (for all users) -->
@@ -126,11 +155,16 @@ const uiStore = useUIStore()
 
 const openSections = ref({
   design: true,
+  models: true,
   dashboards: true
 })
 
 const isDesignerRoute = computed(() =>
   ['DesignerList', 'DesignerEdit'].includes(router.currentRoute.value.name)
+)
+
+const isModelRoute = computed(() =>
+  ['ModelList', 'ModelEditor'].includes(router.currentRoute.value.name)
 )
 
 const isDashboardRoute = computed(() =>
@@ -148,6 +182,10 @@ function toggleSection(name) {
 
 function createNewDashboard() {
   router.push('/designer?new=1')
+}
+
+function createNewModel() {
+  router.push('/models?new=1')
 }
 </script>
 

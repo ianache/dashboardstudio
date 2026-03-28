@@ -315,7 +315,7 @@ import { useUIStore } from '@/stores/ui'
 import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
-import { buildCubeFilter } from '@/composables/useCubeQuery'
+import { useDashboardFilters } from '@/composables/useDashboardFilters'
 
 const route = useRoute()
 const router = useRouter()
@@ -340,7 +340,6 @@ const editTitleValue = ref('')
 const editDescription = ref('')
 const titleInput = ref(null)
 const isPublic = ref(false)
-const activeFilterValues = ref({})
 
 const chartTypes = [
   { value: 'bar', label: 'Barras', icon: '📊', desc: 'Comparar categorías' },
@@ -358,14 +357,11 @@ const activeDashboard = computed(() => {
   return dashboardStore.allDashboards.find(d => d.id === id) || null
 })
 
-const resolvedDashboardFilters = computed(() => {
-  const schema = activeDashboard.value?.filters || []
-  return schema.flatMap(f => buildCubeFilter(f, activeFilterValues.value[f.id]))
-})
+const { activeFilterValues, resolvedDashboardFilters, resetFilters } = useDashboardFilters(activeDashboard)
 
 // Watch route changes
 watch(() => route.params.id, (id) => {
-  activeFilterValues.value = {}
+  resetFilters()
   if (id) {
     const db = dashboardStore.allDashboards.find(d => d.id === id)
     if (db) {

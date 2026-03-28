@@ -203,9 +203,9 @@ onBeforeUnmount(() => {
   document.removeEventListener('mousedown', onClickOutside)
 })
 
-watch(() => props.filters, (filters) => {
-  filters.forEach(loadValues)
-}, { deep: true })
+watch(() => props.filters.map(f => f.id).join(','), () => {
+  props.filters.forEach(loadValues)
+})
 
 // Cerrar dropdown al hacer click fuera
 function onClickOutside(e) {
@@ -290,6 +290,9 @@ function removeFilter(filterId) {
   dashboardStore.removeDashboardFilter(props.dashboardId, filterId)
   const updated = { ...props.modelValue }
   delete updated[filterId]
+  delete dimensionValues.value[filterId]
+  delete loadingValues.value[filterId]
+  delete wrapperRefs.value[filterId]
   emit('update:modelValue', updated)
 }
 </script>

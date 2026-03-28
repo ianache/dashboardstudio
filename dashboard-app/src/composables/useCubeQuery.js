@@ -37,8 +37,7 @@ function generateMockData(widget) {
   }
 }
 
-function normalizeMember(key) {
-  // Corrige doble prefijo: "Orders.Orders.createdAt" → "Orders.createdAt"
+export function normalizeMember(key) {
   const parts = key.split('.')
   if (parts.length === 3 && parts[0] === parts[1]) return `${parts[1]}.${parts[2]}`
   return key

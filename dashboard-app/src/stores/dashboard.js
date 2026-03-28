@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { normalizeMember } from '@/composables/useCubeQuery'
 
 function generateId() {
   return Math.random().toString(36).substr(2, 9)
@@ -197,11 +198,7 @@ export const useDashboardStore = defineStore('dashboard', {
       const dashboard = this.dashboards.find(d => d.id === dashboardId)
       if (!dashboard) return
       if (!dashboard.filters) dashboard.filters = []
-      const parts = dimension.split('.')
-      const cleanDimension = (parts.length === 3 && parts[0] === parts[1])
-        ? `${parts[1]}.${parts[2]}`
-        : dimension
-      dashboard.filters.push({ id: generateId(), dimension: cleanDimension, label, type })
+      dashboard.filters.push({ id: generateId(), dimension: normalizeMember(dimension), label, type })
       this.persist()
     },
 

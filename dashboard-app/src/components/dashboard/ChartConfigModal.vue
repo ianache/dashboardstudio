@@ -340,9 +340,9 @@ const chartTypes = [
 ]
 
 const seriesTypes = [
-  { value: 'bar',  label: 'Barra',  icon: '▮' },
-  { value: 'line', label: 'Línea',  icon: '╱' },
-  { value: 'area', label: 'Área',   icon: '◬' }
+  { value: 'bar',  label: 'Barra',  icon: 'Bar' },
+  { value: 'line', label: 'Línea',  icon: 'Lin' },
+  { value: 'area', label: 'Área',   icon: 'Are' }
 ]
 
 // Deep clone widget for editing
@@ -541,12 +541,14 @@ if (cubeStore.token && !cubeStore.meta) {
   flex-shrink: 0;
 }
 .st-btn {
-  width: 28px;
+  min-width: 32px;
   height: 34px;
+  padding: 0 6px;
   border: none;
   background: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-secondary);
   transition: all 0.15s;
   border-right: 1px solid var(--border);

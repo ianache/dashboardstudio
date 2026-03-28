@@ -38,6 +38,18 @@ const routes = [
         meta: { breadcrumbs: ['Dashboards'] }
       },
       {
+        path: 'models',
+        name: 'ModelList',
+        component: () => import('@/views/DimensionalModelListView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Modelos'] }
+      },
+      {
+        path: 'models/:id',
+        name: 'ModelEditor',
+        component: () => import('@/views/DimensionalModelEditorView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Modelos', 'Editor'] }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/SettingsView.vue'),

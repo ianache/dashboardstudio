@@ -8,15 +8,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "pinia": "^2.1.7",
-    "echarts": "^5.4.3",
-    "vue-echarts": "^6.6.9",
     "@cubejs-client/core": "^0.35.23",
     "@vueuse/core": "^10.9.0",
-    "vuedraggable": "^4.1.0",
-    "axios": "^1.6.8"
+    "axios": "^1.6.8",
+    "echarts": "^5.4.3",
+    "js-yaml": "^4.1.1",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-echarts": "^6.6.9",
+    "vue-router": "^4.3.0",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import cubejs from '@cubejs-client/core'
 
+const dimValuesCache = new Map()
+const dimValuesLoading = new Map()
+
 export const useCubeStore = defineStore('cubejs', {
   state: () => ({
     apiUrl: localStorage.getItem('cubeApiUrl') || import.meta.env.VITE_CUBEJS_API_URL || 'http://localhost:4000/cubejs-api/v1',
@@ -54,6 +57,7 @@ export const useCubeStore = defineStore('cubejs', {
       this.token = token
       localStorage.setItem('cubeApiUrl', apiUrl)
       localStorage.setItem('cubeToken', token)
+      dimValuesCache.clear()
       this.meta = null
       this.connected = false
     },
@@ -81,9 +85,25 @@ export const useCubeStore = defineStore('cubejs', {
     },
 
     async loadDimensionValues(dimension) {
-      const result = await this.executeQuery({ dimensions: [dimension], limit: 500 })
-      const rows = result.tablePivot ? result.tablePivot() : []
-      return rows.map(r => r[dimension]).filter(v => v != null)
+      if (dimValuesCache.has(dimension)) return dimValuesCache.get(dimension)
+      if (dimValuesLoading.has(dimension)) return dimValuesLoading.get(dimension)
+
+      const promise = this.executeQuery({ dimensions: [dimension], limit: 500 })
+        .then(result => {
+          const rows = result.tablePivot ? result.tablePivot() : []
+          const values = rows.map(r => r[dimension]).filter(v => v != null)
+          dimValuesCache.set(dimension, values)
+          dimValuesLoading.delete(dimension)
+          return values
+        })
+        .catch(err => { dimValuesLoading.delete(dimension); throw err })
+
+      dimValuesLoading.set(dimension, promise)
+      return promise
+    },
+
+    clearDimensionValuesCache() {
+      dimValuesCache.clear()
     },
 
     async testConnection() {
