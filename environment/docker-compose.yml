@@ -1,6 +1,10 @@
 version: "3.9"
 
 services:
+
+  # ─────────────────────────────────────────────
+  #  PostgreSQL — compartido: analytics + keycloak
+  # ─────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: cubejs_postgres
@@ -13,13 +17,51 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./initdb/01_keycloak.sql:/docker-entrypoint-initdb.d/01_keycloak.sql:ro
+      - ./initdb/02_analytics.sql:/docker-entrypoint-initdb.d/02_analytics.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cubeuser} -d ${POSTGRES_DB:-analytics}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # ─────────────────────────────────────────────
+  #  Keycloak — Identity Provider
+  # ─────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KC_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:-admin}
+      # Mismo postgres, base de datos "keycloak" creada en init.sql
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/${KC_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KC_DB_USER:-keycloak_user}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloakpassword}
+      KC_DB_SCHEMA: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # ─────────────────────────────────────────────
+  #  Redis — sesiones / tokens
+  # ─────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: cubejs_redis
@@ -35,46 +77,61 @@ services:
       timeout: 5s
       retries: 5
 
+  # ─────────────────────────────────────────────
+  #  Cube Store — caché de pre-agregaciones
+  # ─────────────────────────────────────────────
+  cubestore:
+    image: cubejs/cubestore:latest
+    container_name: cubejs_store
+    restart: unless-stopped
+    environment:
+      CUBESTORE_REMOTE_DIR: /cube/data
+    volumes:
+      - cubestore_data:/cube/data
+
+  # ─────────────────────────────────────────────
+  #  CubeJS — API analítica
+  # ─────────────────────────────────────────────
   cubejs:
     image: cubejs/cube:latest
     container_name: cubejs_api
     restart: unless-stopped
     ports:
-      - "4000:4000"   # API REST + GraphQL
-      - "3000:3000"   # Playground (dev)
+      - "4000:4000"
+      - "3000:3000"
     environment:
-      # --- Base de datos ---
+      # CubeJS apunta al schema "analytics" (default)
       CUBEJS_DB_TYPE: postgres
       CUBEJS_DB_HOST: postgres
       CUBEJS_DB_PORT: 5432
       CUBEJS_DB_NAME: ${POSTGRES_DB:-analytics}
       CUBEJS_DB_USER: ${POSTGRES_USER:-cubeuser}
       CUBEJS_DB_PASS: ${POSTGRES_PASSWORD:-cubepassword}
-
-      # --- Redis (caché de agregaciones pre-agregadas) ---
+      CUBEJS_DB_SCHEMA: analytics
+      CUBEJS_CUBESTORE_HOST: cubestore
+      CUBEJS_CACHE_AND_QUEUE_DRIVER: cubestore
       CUBEJS_REDIS_URL: redis://redis:6379
-      CUBEJS_CACHE_AND_QUEUE_DRIVER: redis
-
-      # --- Seguridad ---
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: ${KC_REALM:-analytics}
       CUBEJS_API_SECRET: ${CUBEJS_API_SECRET:-cambia_esto_en_produccion_secreto_largo}
-
-      # --- Entorno ---
       NODE_ENV: ${NODE_ENV:-development}
-      CUBEJS_DEV_MODE: ${CUBEJS_DEV_MODE:-true}   # false en producción
-      CUBEJS_PLAYGROUNDAUTH: ${CUBEJS_PLAYGROUNDAUTH:-}
-
-      # --- Concurrencia y rendimiento ---
+      CUBEJS_DEV_MODE: ${CUBEJS_DEV_MODE:-true}
       CUBEJS_CONCURRENCY: 4
       CUBEJS_DB_POOL_MAX: 8
     volumes:
-      - ./schema:/cube/conf/schema        # Archivos .js/.yml con los Cubes
-      - ./cube.js:/cube/conf/cube.js:ro   # Configuración principal (opcional)
+      - ./schema:/cube/conf/schema
+      - ./cube.js:/cube/conf/cube.js:ro
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      cubestore:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
 
 volumes:
   postgres_data:
   redis_data:
+  cubestore_data:

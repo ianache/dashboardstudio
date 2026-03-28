@@ -170,7 +170,7 @@ export const useDashboardStore = defineStore('dashboard', {
       if (!dashboard) return
       const widgetIdx = dashboard.widgets.findIndex(w => w.id === widgetId)
       if (widgetIdx !== -1) {
-        dashboard.widgets[widgetIdx] = { ...dashboard.widgets[widgetIdx], ...updates }
+        Object.assign(dashboard.widgets[widgetIdx], updates)
         this.persist()
       }
     },

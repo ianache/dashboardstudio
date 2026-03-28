@@ -71,11 +71,18 @@ export function useCubeQuery(widget) {
 
   function buildCubeQuery(widget) {
     const { cubeQuery } = widget
+    const measures = cubeQuery.measures.map(m => m.key).filter(k => k)
+    const dimensions = cubeQuery.dimensions.map(d => d.key).filter(k => k)
+
+    if (measures.length === 0) {
+      throw new Error('Debes configurar al menos una medida con clave válida.')
+    }
+
     const query = {
-      measures: cubeQuery.measures.map(m => m.key),
-      dimensions: cubeQuery.dimensions.map(d => d.key),
+      measures,
+      dimensions,
       limit: cubeQuery.limit || 100,
-      filters: cubeQuery.filters || []
+      filters: (cubeQuery.filters || []).filter(f => f.member)
     }
 
     if (cubeQuery.timeDimension) {

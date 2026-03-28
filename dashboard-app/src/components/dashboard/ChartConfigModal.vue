@@ -252,10 +252,10 @@
                     v-for="m in cube.measures"
                     :key="m.name"
                     class="member-chip"
-                    @click="insertMeasure(`${cube.name}.${m.name}`)"
+                    @click="insertMeasure(getMemberKey(cube.name, m.name))"
                     :title="m.description"
                   >
-                    {{ cube.name }}.{{ m.name }}
+                    {{ getMemberKey(cube.name, m.name) }}
                     <span class="member-type">{{ m.type }}</span>
                   </div>
                 </div>
@@ -265,10 +265,10 @@
                     v-for="d in cube.dimensions"
                     :key="d.name"
                     class="member-chip member-dim"
-                    @click="insertDimension(`${cube.name}.${d.name}`)"
+                    @click="insertDimension(getMemberKey(cube.name, d.name))"
                     :title="d.description"
                   >
-                    {{ cube.name }}.{{ d.name }}
+                    {{ getMemberKey(cube.name, d.name) }}
                     <span class="member-type">{{ d.type }}</span>
                   </div>
                 </div>
@@ -389,12 +389,18 @@ function removeFilter(idx) {
   form.value.cubeQuery.filters.splice(idx, 1)
 }
 
+function getMemberKey(cubeName, memberName) {
+  return memberName.startsWith(cubeName + '.') ? memberName : `${cubeName}.${memberName}`
+}
+
 function insertMeasure(key) {
-  form.value.cubeQuery.measures.push({ key, label: key.split('.')[1], color: '#1890ff' })
+  const label = key.split('.').pop()
+  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff' })
   activeTab.value = 'data'
 }
 function insertDimension(key) {
-  form.value.cubeQuery.dimensions.push({ key, label: key.split('.')[1] })
+  const label = key.split('.').pop()
+  form.value.cubeQuery.dimensions.push({ key, label })
   activeTab.value = 'data'
 }
 
