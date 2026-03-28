@@ -407,6 +407,41 @@ function toSqlName(s) {
   return s.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
 }
 
+// Normalize a raw type string to a valid uppercase PostgreSQL type
+function normalizePgType(raw) {
+  if (!raw) return 'VARCHAR(255)'
+  const map = {
+    'integer': 'INTEGER', 'int': 'INTEGER', 'int4': 'INTEGER',
+    'bigint': 'BIGINT', 'int8': 'BIGINT', 'smallint': 'SMALLINT', 'int2': 'SMALLINT',
+    'serial': 'SERIAL', 'bigserial': 'BIGSERIAL',
+    'numeric': 'NUMERIC', 'decimal': 'DECIMAL', 'money': 'MONEY',
+    'real': 'REAL', 'double precision': 'DOUBLE PRECISION', 'float8': 'DOUBLE PRECISION',
+    'varchar': 'VARCHAR(255)', 'character varying': 'VARCHAR(255)',
+    'char': 'CHAR(1)', 'character': 'CHAR(1)', 'text': 'TEXT',
+    'boolean': 'BOOLEAN', 'bool': 'BOOLEAN',
+    'date': 'DATE', 'time': 'TIME',
+    'timestamp': 'TIMESTAMP', 'timestamp without time zone': 'TIMESTAMP',
+    'timestamptz': 'TIMESTAMPTZ', 'timestamp with time zone': 'TIMESTAMPTZ',
+    'uuid': 'UUID', 'jsonb': 'JSONB', 'json': 'JSON', 'bytea': 'BYTEA',
+  }
+  return map[raw.toLowerCase()] ?? raw.toUpperCase()
+}
+
+// Resolve PostgreSQL column type from a model field.
+// SERIAL/BIGSERIAL are auto-increment sequences — invalid for FK columns.
+function pgTypeForCol(field) {
+  const dt = dtStore.getById(field.dataType)
+  if (dt) {
+    if (field.isFk) {
+      if (dt.baseType === 'SERIAL')    return 'INTEGER'
+      if (dt.baseType === 'BIGSERIAL') return 'BIGINT'
+    }
+    return dtStore.sqlOf(field.dataType)
+  }
+  // Fallback for legacy raw-string dataType values
+  return normalizePgType(field.dataType)
+}
+
 function handleGenerateDDL() {
   if (!model.value) return
   const m = model.value
@@ -454,11 +489,10 @@ function handleGenerateDDL() {
 
     const colLines = node.fields.map(f => {
       const col  = toSqlName(f.name)
-      const type = dtStore.sqlOf(f.dataType)
+      const type = pgTypeForCol(f)
       const pk   = f.isKey ? ' PRIMARY KEY' : ''
-      const nn   = f.isKey ? ' NOT NULL' : ''
       const cmt  = f.description ? `  -- ${f.description}` : ''
-      return `    ${col.padEnd(30)} ${(type + pk + nn).padEnd(30)}${cmt}`
+      return `    ${col.padEnd(30)} ${(type + pk).padEnd(30)}${cmt}`
     })
 
     if (!colLines.length) colLines.push('    -- (sin campos definidos)')
@@ -484,8 +518,7 @@ function handleGenerateDDL() {
 
     const colLines = node.fields.map(f => {
       const col  = toSqlName(f.name)
-      const type = dtStore.sqlOf(f.dataType)
-      const nn   = ''
+      const type = pgTypeForCol(f)
       const cmt  = f.description ? `  -- ${f.description}` : ''
 
       // If this is a FK field, resolve which dim table / key column it references
@@ -504,7 +537,7 @@ function handleGenerateDDL() {
         }
       }
 
-      return `    ${col.padEnd(30)} ${(type + nn).padEnd(30)}${cmt}`
+      return `    ${col.padEnd(30)} ${type.padEnd(30)}${cmt}`
     })
 
     if (!colLines.length) colLines.push('    -- (sin campos definidos)')
@@ -708,10 +741,27 @@ function handleFieldDrop(factNode) {
 
   // Add FK field if not present
   if (!factNode.fields.find(f => f.name === fkName)) {
+    // Match key field type but SERIAL→INTEGER and BIGSERIAL→BIGINT (FK cols can't be sequences)
+    const dimKeyField = dimNode.fields.find(f => f.isKey)
+    let fkDataType
+    if (dimKeyField) {
+      const keyDt = dtStore.getById(dimKeyField.dataType)
+      if (keyDt?.baseType === 'SERIAL') {
+        fkDataType = dtStore.allTypes.find(t => t.baseType === 'INTEGER')?.id ?? 'dt-int'
+      } else if (keyDt?.baseType === 'BIGSERIAL') {
+        fkDataType = dtStore.allTypes.find(t => t.baseType === 'BIGINT')?.id ?? 'dt-bigint'
+      } else {
+        fkDataType = dimKeyField.dataType
+      }
+    } else {
+      fkDataType = dtStore.allTypes.find(t => t.id === 'dt-int')?.id
+               ?? dtStore.allTypes.find(t => t.baseType === 'INTEGER')?.id
+               ?? dtStore.allTypes[0]?.id
+    }
     modelStore.addField(modelId, factNode.id, {
       name: fkName,
       description: `FK → ${dimNode.name}.${dragField.value.fieldName}`,
-      dataType: 'integer',
+      dataType: fkDataType,
       isFk: true
     })
   }
