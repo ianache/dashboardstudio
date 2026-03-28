@@ -1,0 +1,262 @@
+name: Gestion de Proyectos
+description: ''
+nodes:
+  - id: wmc7bfg7k
+    type: dimension
+    name: dim_tiempo
+    x: 70
+    'y': 38
+    fields:
+      - id: 5ykl2wazj
+        name: anio
+        description: ''
+        dataType: integer
+        isKey: false
+        isFk: false
+      - id: d2xyjy9dp
+        name: mes
+        description: ''
+        dataType: integer
+        isKey: false
+        isFk: false
+      - id: 3lqx27jar
+        name: nombre_mes
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: 0uxtszv3y
+        name: dia
+        description: ''
+        dataType: integer
+        isKey: false
+        isFk: false
+      - id: qzzrnduqp
+        name: dia_semana
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: ol9htnm0g
+        name: nombre_dia
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: 198trkrc9
+        name: trimestre
+        description: ''
+        dataType: integer
+        isKey: false
+        isFk: false
+      - id: 51ldvx7un
+        name: semana_anio
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: u5azgveeu
+        name: es_feriado
+        description: ''
+        dataType: boolean
+        isKey: false
+        isFk: false
+      - id: 2c27jrbgt
+        name: temporada_comercial
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: f5d52n8o3
+        name: id_fecha
+        description: ''
+        dataType: date
+        isKey: false
+        isFk: false
+      - id: pkguubawu
+        name: id
+        description: ''
+        dataType: integer
+        isKey: true
+        isFk: false
+  - id: fp9p7bt3s
+    type: dimension
+    name: dim_colaborador
+    x: 736
+    'y': 168
+    fields:
+      - id: 5lcwko7pc
+        name: usuario
+        description: ''
+        dataType: string
+        isKey: true
+        isFk: false
+      - id: ebg4mmztz
+        name: nombre
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: zpkhysrtz
+        name: role
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+  - id: ieu9veqjr
+    type: fact
+    name: fct_horasreporatas
+    x: 388
+    'y': 142
+    fields:
+      - id: x3633i9pm
+        name: horas
+        description: ''
+        dataType: decimal
+        isKey: false
+        isFk: false
+      - id: gfosv11x1
+        name: dim_tiempo_id
+        description: FK → dim_tiempo.id
+        dataType: integer
+        isKey: false
+        isFk: true
+      - id: vsed6rpfe
+        name: dim_colaborador_usuario
+        description: FK → dim_colaborador.usuario
+        dataType: integer
+        isKey: false
+        isFk: true
+      - id: fkwjqm7q4
+        name: dim_proyecto_id
+        description: FK → dim_proyecto.id
+        dataType: integer
+        isKey: false
+        isFk: true
+      - id: vetvm3uxm
+        name: dim_producto_id
+        description: FK → dim_producto.id
+        dataType: integer
+        isKey: false
+        isFk: true
+      - id: gv18fupd1
+        name: dim_tarea_id
+        description: FK → dim_tarea.id
+        dataType: integer
+        isKey: false
+        isFk: true
+      - id: mp8zva3lj
+        name: dim_userstory_id
+        description: FK → dim_userstory.id
+        dataType: integer
+        isKey: false
+        isFk: true
+      - id: ixq3q86rd
+        name: costo
+        description: ''
+        dataType: currency
+        isKey: false
+        isFk: false
+  - id: 6nw45lbau
+    type: dimension
+    name: dim_producto
+    x: 732
+    'y': 322
+    fields:
+      - id: b61b7rwt8
+        name: id
+        description: ''
+        dataType: integer
+        isKey: true
+        isFk: false
+      - id: zrgimm6d2
+        name: nombre
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+  - id: tqhb33dwg
+    type: dimension
+    name: dim_proyecto
+    x: 733
+    'y': 32
+    fields:
+      - id: 36lx5vvhr
+        name: id
+        description: ''
+        dataType: integer
+        isKey: true
+        isFk: false
+      - id: 4ozsnqsb2
+        name: nombre
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+  - id: rsg159fvv
+    type: dimension
+    name: dim_tarea
+    x: 68
+    'y': 431
+    fields:
+      - id: eyti0ddr2
+        name: id
+        description: ''
+        dataType: integer
+        isKey: true
+        isFk: false
+      - id: 5gemxoqtg
+        name: nombre
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+      - id: 66sss9y6c
+        name: estimacion
+        description: ''
+        dataType: integer
+        isKey: false
+        isFk: false
+  - id: qpvu53p0s
+    type: dimension
+    name: dim_userstory
+    x: 737
+    'y': 443
+    fields:
+      - id: ty25rb50d
+        name: id
+        description: ''
+        dataType: string
+        isKey: true
+        isFk: false
+      - id: 9bg6634b6
+        name: nombre
+        description: ''
+        dataType: string
+        isKey: false
+        isFk: false
+relationships:
+  - id: 9yugfqvm0
+    fromNodeId: wmc7bfg7k
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: k7hcu8ym3
+    fromNodeId: fp9p7bt3s
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: 2q91w301c
+    fromNodeId: tqhb33dwg
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: o7tjqlscg
+    fromNodeId: 6nw45lbau
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: qnvfnqxn8
+    fromNodeId: rsg159fvv
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: 6kfp8xsmy
+    fromNodeId: qpvu53p0s
+    toNodeId: ieu9veqjr
+    cardinality: 1:N

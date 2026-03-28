@@ -1,0 +1,142 @@
+name: Concesionarias
+description: Modelo Dimensional para Concesionarias
+nodes:
+  - id: ci4h4xl67
+    type: dimension
+    name: dim_concesionarias
+    x: 131
+    'y': 74
+    fields:
+      - id: uocxeqnjw
+        name: id
+        description: ''
+        dataType: dt-uuid
+        isKey: true
+        isFk: false
+      - id: q0zinwkt6
+        name: nombre
+        description: ''
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+      - id: 7xe8zjupv
+        name: razonsocial
+        description: ''
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+  - id: 7qamqhkm1
+    type: dimension
+    name: dim_tiendas
+    x: 692
+    'y': 121
+    fields:
+      - id: upiueirsk
+        name: id
+        description: ''
+        dataType: dt-serial
+        isKey: true
+        isFk: false
+      - id: onew05726
+        name: nombre
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: jqyn6uw0m
+        name: distrito
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: gvfvqilaw
+        name: provincia
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: 6bcj9q94z
+        name: departamento
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: jlxvh3al6
+        name: direccion
+        description: ''
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+  - id: j13pzm5vs
+    type: dimension
+    name: dim_vendedores
+    x: 125
+    'y': 303
+    fields:
+      - id: 9b6bwrxcd
+        name: id
+        description: ''
+        dataType: dt-int
+        isKey: true
+        isFk: false
+      - id: p16tp9gqp
+        name: nombre
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+  - id: jhom2pb0m
+    type: fact
+    name: fct_ventas
+    x: 411
+    'y': 118
+    fields:
+      - id: aed2qbdr5
+        name: precio_venta
+        description: ''
+        dataType: dt-money
+        isKey: false
+        isFk: false
+      - id: r2nyp5lql
+        name: comision_vendedor
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: pmcii4m2o
+        name: id
+        description: ''
+        dataType: dt-uuid
+        isKey: false
+        isFk: false
+      - id: duhstl8ro
+        name: dim_concesionarias_id
+        description: FK → dim_concesionarias.id
+        dataType: dt-uuid
+        isKey: false
+        isFk: true
+      - id: cnim7x4e7
+        name: dim_tiendas_id
+        description: FK → dim_tiendas.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: q5c9eegir
+        name: dim_vendedores_id
+        description: FK → dim_vendedores.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+relationships:
+  - id: vi65wr5zc
+    fromNodeId: ci4h4xl67
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
+  - id: s52ywe0wc
+    fromNodeId: 7qamqhkm1
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
+  - id: yocvcdko6
+    fromNodeId: j13pzm5vs
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
