@@ -175,6 +175,80 @@
         </div>
       </div>
 
+      <!-- LLM / IA -->
+      <div v-if="authStore.isDesigner" class="settings-card card">
+        <div class="sc-header">
+          <div class="sc-icon">✦</div>
+          <div>
+            <h3 class="sc-title">LLM / Inteligencia Artificial</h3>
+            <p class="sc-desc">Clave API y modelo asignado por operación</p>
+          </div>
+        </div>
+        <div class="sc-body">
+          <div v-if="llmStore.isConfigured" class="alert alert-success">
+            ✅ Clave Anthropic configurada
+          </div>
+          <div v-else class="alert alert-error">
+            ⚠️ Sin clave API — las funciones de IA no estarán disponibles
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Clave API Anthropic</label>
+            <div style="position:relative">
+              <input
+                v-model="llmKey"
+                :type="showLlmKey ? 'text' : 'password'"
+                class="form-input"
+                placeholder="sk-ant-..."
+                autocomplete="off"
+                style="padding-right:40px"
+              />
+              <button
+                type="button"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--text-secondary)"
+                @click="showLlmKey = !showLlmKey"
+              >{{ showLlmKey ? '🙈' : '👁️' }}</button>
+            </div>
+            <span class="form-hint">Obtén tu clave en <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com →</a></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Modelo por operación</label>
+            <div class="llm-ops-table">
+              <div class="llm-ops-header">
+                <span>Operación</span>
+                <span>Modelo</span>
+              </div>
+              <div v-for="op in llmOperations" :key="op.id" class="llm-ops-row">
+                <div>
+                  <div class="llm-op-label">{{ op.label }}</div>
+                  <div class="llm-op-desc">{{ op.description }}</div>
+                </div>
+                <select
+                  :value="llmStore.models[op.id]"
+                  class="form-input form-select"
+                  style="width:auto;min-width:180px;flex-shrink:0"
+                  @change="llmStore.setModel(op.id, $event.target.value)"
+                >
+                  <option v-for="m in llmModels" :key="m.id" :value="m.id">
+                    {{ m.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="llm-model-legend">
+              <span v-for="m in llmModels" :key="m.id" class="llm-legend-item">
+                <strong>{{ m.label }}:</strong> {{ m.description }}
+              </span>
+            </div>
+          </div>
+
+          <div class="sc-actions">
+            <button class="btn btn-primary" @click="saveLlm">💾 Guardar</button>
+          </div>
+        </div>
+      </div>
+
       <!-- App Info -->
       <div class="settings-card card">
         <div class="sc-header">
@@ -207,11 +281,16 @@ import { useAuthStore } from '@/stores/auth'
 import { useCubeStore } from '@/stores/cubejs'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
+import { useLlmStore, ANTHROPIC_MODELS, LLM_OPERATIONS } from '@/stores/llm'
 
 const authStore = useAuthStore()
 const cubeStore = useCubeStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
+const llmStore = useLlmStore()
+
+// Migrate key stored by previous implementation (one-time)
+llmStore.migrateFromLegacy()
 
 uiStore.setBreadcrumbs(['Configuración'])
 
@@ -220,6 +299,17 @@ const apiToken = ref(cubeStore.token)
 const showToken = ref(false)
 const testing = ref(false)
 const openCubes = ref([])
+
+// LLM
+const llmKey = ref(llmStore.anthropicKey)
+const showLlmKey = ref(false)
+const llmModels = ANTHROPIC_MODELS
+const llmOperations = LLM_OPERATIONS
+
+function saveLlm() {
+  llmStore.setKey(llmKey.value)
+  uiStore.addAlert({ type: 'success', message: 'Configuración LLM guardada' })
+}
 
 const myDashboards = computed(() => {
   if (authStore.isDesigner) return dashboardStore.allDashboards
@@ -362,6 +452,27 @@ function toggleCube(name) {
 .info-table td { padding: 8px 0; border-bottom: 1px solid var(--border); }
 .info-table td:first-child { color: var(--text-secondary); width: 50%; }
 .info-table tr:last-child td { border-bottom: none; }
+
+/* LLM */
+.llm-ops-table { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.llm-ops-header {
+  display: grid; grid-template-columns: 1fr auto;
+  padding: 8px 14px; background: var(--bg);
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.llm-ops-row {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.llm-ops-row:last-child { border-bottom: none; }
+.llm-op-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.llm-op-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.llm-model-legend { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.llm-legend-item  { font-size: 12px; color: var(--text-secondary); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

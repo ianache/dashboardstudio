@@ -255,17 +255,11 @@
                 </div>
 
                 <div class="ai-panel-body">
-                  <div class="form-group" style="margin:0">
-                    <label class="form-label">Clave API Anthropic</label>
-                    <input
-                      v-model="aiApiKey"
-                      type="password"
-                      class="form-input"
-                      placeholder="sk-ant-..."
-                      autocomplete="off"
-                      @change="saveApiKey"
-                    />
-                    <span class="form-hint">Se guarda localmente en tu navegador. Necesitas una clave de <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com →</a></span>
+                  <div v-if="!llmStore.isConfigured" class="alert alert-error" style="margin:0">
+                    Sin clave API configurada.
+                    <router-link to="/settings" @click="$emit('close')" style="color:inherit;font-weight:600;margin-left:4px">
+                      Ir a Configuración →
+                    </router-link>
                   </div>
 
                   <div class="ai-context-chips">
@@ -289,7 +283,7 @@
                   <button
                     class="btn btn-primary"
                     style="align-self:flex-start"
-                    :disabled="!aiApiKey.trim() || !aiPrompt.trim() || aiLoading"
+                    :disabled="!llmStore.isConfigured || !aiPrompt.trim() || aiLoading"
                     @click="generateWithAI"
                   >
                     <svg v-if="aiLoading" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -391,6 +385,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useCubeStore } from '@/stores/cubejs'
+import { useLlmStore } from '@/stores/llm'
 
 const props = defineProps({
   widget: { type: Object, required: true }
@@ -399,6 +394,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'save'])
 
 const cubeStore = useCubeStore()
+const llmStore = useLlmStore()
 
 const tabs = [
   { id: 'general', label: 'General' },
@@ -461,15 +457,10 @@ const chartOptionsJson = ref(
 
 // ── IA Assist ─────────────────────────────────────────────────
 const aiOpen    = ref(false)
-const aiApiKey  = ref(localStorage.getItem('aiApiKey') || '')
 const aiPrompt  = ref('')
 const aiResult  = ref('')
 const aiLoading = ref(false)
 const aiError   = ref(null)
-
-function saveApiKey() {
-  localStorage.setItem('aiApiKey', aiApiKey.value)
-}
 
 function buildAIPrompt() {
   const chartLabels = { bar:'Barras', line:'Líneas', pie:'Pastel', gauge:'Gauge', radar:'Radar', combined:'Combinado' }
@@ -507,12 +498,12 @@ async function generateWithAI() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': aiApiKey.value.trim(),
+        'x-api-key': llmStore.anthropicKey,
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-allow-browser': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: llmStore.modelFor('chartAssist'),
         max_tokens: 2048,
         messages: [{ role: 'user', content: buildAIPrompt() }]
       })
