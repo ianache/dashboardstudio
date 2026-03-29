@@ -7,6 +7,15 @@
           <h2 class="page-title">Mis Dashboards</h2>
           <p class="page-subtitle">Diseña y gestiona tus dashboards</p>
         </div>
+        <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
+        <button class="btn btn-secondary" @click="importFileInput.click()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Importar
+        </button>
         <button class="btn btn-primary" @click="showNewModal = true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -45,6 +54,13 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button class="btn-icon" data-tooltip="Exportar dashboard" @click="handleExportDashboard(db)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
               </button>
               <button class="btn-icon" data-tooltip="Eliminar" @click="confirmDelete(db)">
@@ -333,6 +349,40 @@
       </div>
     </div>
 
+    <!-- Import Dashboard Modal -->
+    <div v-if="importPreview" class="modal-overlay" @click.self="importPreview = null">
+      <div class="modal-box" style="max-width: 440px;">
+        <div class="modal-header">
+          <h3>Importar Dashboard</h3>
+          <button class="btn-icon" @click="importPreview = null">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px">
+            Se creará una copia nueva del siguiente dashboard:
+          </p>
+          <div class="import-preview-card">
+            <div class="import-preview-name">{{ importPreview.name }}</div>
+            <p v-if="importPreview.description" class="import-preview-desc">{{ importPreview.description }}</p>
+            <div class="import-preview-meta">
+              <span class="badge badge-blue">{{ importPreview.widgets.length }} widgets</span>
+              <span v-if="importPreview.filters?.length" class="badge" style="background:#f6ffed;color:#52c41a">
+                {{ importPreview.filters.length }} filtros
+              </span>
+            </div>
+          </div>
+          <p class="form-hint" style="margin-top:12px">Los identificadores internos serán regenerados.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="importPreview = null">Cancelar</button>
+          <button class="btn btn-primary" @click="confirmImport">Importar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Chart Config Modal -->
     <ChartConfigModal
       v-if="configuringWidget"
@@ -401,6 +451,8 @@ const editDescription = ref('')
 const titleInput = ref(null)
 const isPublic = ref(false)
 const paletteOpen = ref(false)
+const importFileInput = ref(null)
+const importPreview = ref(null)
 
 const vClickOutside = {
   mounted(el, binding) {
@@ -575,6 +627,71 @@ function selectDashboardPalette(paletteId) {
 const activeDashboardPalette = computed(() =>
   paletteStore.getPaletteById(activeDashboard.value?.colorPalette) || null
 )
+
+// ── Export / Import ───────────────────────────────────────────
+
+function handleExportDashboard(db) {
+  const payload = {
+    __dashboardStudio: true,
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    dashboard: {
+      name: db.name,
+      description: db.description || '',
+      isPublic: db.isPublic || false,
+      filters: db.filters || [],
+      colorPalette: db.colorPalette || null,
+      widgets: db.widgets
+    }
+  }
+  const slug = db.name.replace(/[^a-zA-Z0-9_\-. ]/g, '').trim().replace(/\s+/g, '_') || 'dashboard'
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${slug}.dashboard.json`
+  a.click()
+  URL.revokeObjectURL(url)
+  uiStore.addAlert({ type: 'success', message: `Dashboard "${db.name}" exportado` })
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  e.target.value = ''
+  const reader = new FileReader()
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result)
+      if (!data.__dashboardStudio || !data.dashboard?.name) {
+        uiStore.addAlert({ type: 'error', message: 'Archivo inválido: no es un dashboard exportado de Dashboard Studio' })
+        return
+      }
+      importPreview.value = data.dashboard
+    } catch {
+      uiStore.addAlert({ type: 'error', message: 'Error al leer el archivo: JSON inválido' })
+    }
+  }
+  reader.readAsText(file)
+}
+
+function confirmImport() {
+  if (!importPreview.value) return
+  const d = importPreview.value
+  const db = dashboardStore.createDashboard(d.name, d.description, authStore.user.id)
+  dashboardStore.updateDashboard(db.id, {
+    isPublic: d.isPublic || false,
+    filters: d.filters || [],
+    colorPalette: d.colorPalette || null,
+    widgets: d.widgets.map(w => ({
+      ...w,
+      id: Math.random().toString(36).substr(2, 9)
+    }))
+  })
+  uiStore.addAlert({ type: 'success', message: `Dashboard "${d.name}" importado correctamente` })
+  importPreview.value = null
+  router.push(`/designer/${db.id}`)
+}
 </script>
 
 <style scoped>
@@ -604,6 +721,17 @@ const activeDashboardPalette = computed(() =>
 .db-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
 .db-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px; }
 .db-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* Import preview */
+.import-preview-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.import-preview-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.import-preview-desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 10px; }
+.import-preview-meta { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* Editor */
 .designer-editor { display: flex; flex-direction: column; height: 100%; }
