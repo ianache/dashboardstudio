@@ -28,8 +28,11 @@
             <span v-if="model.isGlobal" class="global-badge">GLOBAL</span>
           </div>
           <div class="model-card-actions">
-            <button class="btn btn-secondary btn-sm" @click="openEditor(model.id)">
-              Editar
+            <button class="btn-icon" data-tooltip="Editar" @click="openEditor(model.id)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
             </button>
             <button
               v-if="!model.isGlobal"

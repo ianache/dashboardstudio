@@ -9,6 +9,23 @@
         <button class="btn btn-secondary btn-sm" @click="confirmReset" title="Restaurar tipos predeterminados">
           Restaurar defaults
         </button>
+        <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
+        <div class="header-btn-group">
+          <button class="header-btn-group__btn" data-tooltip="Importar tipos" @click="importFileInput.click()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </button>
+          <button class="header-btn-group__btn" data-tooltip="Exportar tipos" @click="exportTypes">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+        </div>
         <button class="btn btn-primary" @click="startAdd">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -162,6 +179,55 @@
       </div>
     </div>
 
+    <!-- Import preview modal -->
+    <div v-if="importPreview" class="modal-overlay" @click.self="importPreview = null">
+      <div class="modal card">
+        <div class="modal-header">
+          <h3>Importar tipos de datos</h3>
+          <button class="btn-icon" @click="importPreview = null">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div v-if="importPreview.toAdd.length" class="import-section">
+            <p class="import-label import-label--add">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              {{ importPreview.toAdd.length }} tipo(s) nuevos a agregar
+            </p>
+            <ul class="import-list">
+              <li v-for="dt in importPreview.toAdd" :key="dt.name">
+                <strong>{{ dt.name }}</strong> <code class="sql-badge">{{ previewSql(dt) }}</code>
+              </li>
+            </ul>
+          </div>
+          <div v-if="importPreview.toReplace.length" class="import-section">
+            <p class="import-label import-label--replace">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.59"/></svg>
+              {{ importPreview.toReplace.length }} tipo(s) a reemplazar (mismo nombre)
+            </p>
+            <ul class="import-list">
+              <li v-for="dt in importPreview.toReplace" :key="dt.name">
+                <strong>{{ dt.name }}</strong> <code class="sql-badge">{{ previewSql(dt) }}</code>
+              </li>
+            </ul>
+          </div>
+          <p v-if="!importPreview.toAdd.length && !importPreview.toReplace.length" class="modal-warn">
+            El archivo no contiene tipos de datos.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="importPreview = null">Cancelar</button>
+          <button
+            class="btn btn-primary"
+            :disabled="!importPreview.toAdd.length && !importPreview.toReplace.length"
+            @click="doImport"
+          >Importar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Reset confirm modal -->
     <div v-if="showResetConfirm" class="modal-overlay" @click.self="showResetConfirm = false">
       <div class="modal card">
@@ -284,6 +350,85 @@ function doDelete() {
   deleteTarget.value = null
 }
 
+// ── Export ────────────────────────────────────────────────────
+function exportTypes() {
+  const payload = {
+    __dashboardStudio: true,
+    type: 'dataTypes',
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    dataTypes: dtStore.allTypes.map(({ id, name, baseType, size, precision, description }) => ({
+      id, name, baseType, size, precision, description
+    }))
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'tipos-de-datos.datatypes.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// ── Import ────────────────────────────────────────────────────
+const importFileInput = ref(null)
+const importPreview = ref(null)
+
+function handleImportFile(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  e.target.value = ''
+  const reader = new FileReader()
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result)
+      if (!data.__dashboardStudio || data.type !== 'dataTypes' || !Array.isArray(data.dataTypes)) {
+        uiStore.addAlert({ type: 'error', message: 'Archivo inválido: no es un export de tipos de datos.' })
+        return
+      }
+      const toAdd = []
+      const toReplace = []
+      for (const dt of data.dataTypes) {
+        const existing = dtStore.allTypes.find(t => t.name.toLowerCase() === dt.name.toLowerCase())
+        if (existing) {
+          toReplace.push({ ...dt, existingId: existing.id })
+        } else {
+          toAdd.push(dt)
+        }
+      }
+      importPreview.value = { toAdd, toReplace }
+    } catch {
+      uiStore.addAlert({ type: 'error', message: 'Error al leer el archivo.' })
+    }
+  }
+  reader.readAsText(file)
+}
+
+function doImport() {
+  if (!importPreview.value) return
+  const { toAdd, toReplace } = importPreview.value
+  for (const dt of toReplace) {
+    dtStore.updateType(dt.existingId, {
+      name: dt.name,
+      baseType: dt.baseType,
+      size: dt.size ?? null,
+      precision: dt.precision ?? null,
+      description: dt.description || ''
+    })
+  }
+  for (const dt of toAdd) {
+    dtStore.addType({
+      name: dt.name,
+      baseType: dt.baseType,
+      size: dt.size ?? null,
+      precision: dt.precision ?? null,
+      description: dt.description || ''
+    })
+  }
+  importPreview.value = null
+  uiStore.addAlert({ type: 'success', message: `Importación completada: ${toAdd.length} añadidos, ${toReplace.length} reemplazados.` })
+}
+
 // ── Reset ─────────────────────────────────────────────────────
 const showResetConfirm = ref(false)
 function confirmReset() { showResetConfirm.value = true }
@@ -304,6 +449,15 @@ function doReset() {
 .page-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .page-subtitle { font-size: 14px; color: var(--text-secondary); margin: 0; }
 .header-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+.header-btn-group { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.header-btn-group__btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border: none; background: #fff;
+  color: var(--text-secondary); cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.header-btn-group__btn + .header-btn-group__btn { border-left: 1px solid var(--border); }
+.header-btn-group__btn:hover { background: var(--primary-light, #e6f7ff); color: var(--primary); }
 
 /* Table */
 .dt-table-wrap { padding: 0; overflow: auto; }
@@ -411,4 +565,14 @@ function doReset() {
   cursor: pointer; font-size: 13px; font-weight: 500;
 }
 .btn-danger:hover { background: #cf1322; }
+
+.import-section { display: flex; flex-direction: column; gap: 6px; }
+.import-label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 600; margin: 0;
+}
+.import-label--add { color: #389e0d; }
+.import-label--replace { color: #d46b08; }
+.import-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.import-list li { font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 6px; }
 </style>

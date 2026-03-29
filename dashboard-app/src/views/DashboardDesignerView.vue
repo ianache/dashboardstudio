@@ -7,21 +7,23 @@
           <h2 class="page-title">Mis Dashboards</h2>
           <p class="page-subtitle">Diseña y gestiona tus dashboards</p>
         </div>
-        <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
-        <button class="btn btn-secondary" @click="importFileInput.click()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          Importar
-        </button>
-        <button class="btn btn-primary" @click="showNewModal = true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Nuevo Dashboard
-        </button>
+        <div class="header-actions">
+          <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
+          <div class="header-btn-group">
+            <button class="header-btn-group__btn" data-tooltip="Importar dashboard" @click="importFileInput.click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </button>
+            <button class="header-btn-group__btn header-btn-group__btn--primary" data-tooltip="Nuevo dashboard" @click="showNewModal = true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div v-if="dashboardStore.allDashboards.length === 0" class="empty-state card">
@@ -40,8 +42,11 @@
           <div class="db-card-header">
             <div class="db-icon-wrap">📊</div>
             <div class="db-card-actions">
-              <button class="btn btn-secondary btn-sm" @click="openDesigner(db.id)">
-                Diseñar
+              <button class="btn-icon" data-tooltip="Diseñar" @click="openDesigner(db.id)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                </svg>
               </button>
               <button class="btn-icon" data-tooltip="Asignar usuarios" @click="openAssignModal(db)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -703,6 +708,18 @@ function confirmImport() {
 }
 .page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
 .page-subtitle { font-size: 14px; color: var(--text-secondary); }
+
+.header-actions { display: flex; align-items: center; }
+.header-btn-group { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.header-btn-group__btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border: none; background: #fff;
+  color: var(--text-secondary); cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.header-btn-group__btn + .header-btn-group__btn { border-left: 1px solid var(--border); }
+.header-btn-group__btn:hover { background: var(--primary-light); color: var(--primary); }
+.header-btn-group__btn--primary { background: var(--primary); color: #fff; }
+.header-btn-group__btn--primary:hover { background: #40a9ff; color: #fff; }
 
 /* Dashboard cards */
 .dashboard-grid-list {
