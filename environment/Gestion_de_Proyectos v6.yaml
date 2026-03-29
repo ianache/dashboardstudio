@@ -1,0 +1,430 @@
+name: Gestion de Proyectos
+description: Modelo Dimensional para Gestion de Proyectos
+nodes:
+  - id: wmc7bfg7k
+    type: dimension
+    name: dim_tiempo
+    x: 70
+    'y': 50
+    fields:
+      - id: 5ykl2wazj
+        name: anio
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: d2xyjy9dp
+        name: mes
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: 3lqx27jar
+        name: nombre_mes
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: 0uxtszv3y
+        name: dia
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: qzzrnduqp
+        name: dia_semana
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: ol9htnm0g
+        name: nombre_dia
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: 198trkrc9
+        name: trimestre
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: 51ldvx7un
+        name: semana_anio
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: u5azgveeu
+        name: es_feriado
+        description: ''
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+      - id: 2c27jrbgt
+        name: temporada_comercial
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: f5d52n8o3
+        name: id_fecha
+        description: ''
+        dataType: dt-date
+        isKey: true
+        isFk: false
+  - id: fp9p7bt3s
+    type: dimension
+    name: dim_colaborador
+    x: 792
+    'y': 296
+    fields:
+      - id: 5lcwko7pc
+        name: usuario
+        description: ''
+        dataType: dt-ts89rtou0
+        isKey: true
+        isFk: false
+      - id: ebg4mmztz
+        name: nombre
+        description: ''
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: zpkhysrtz
+        name: role
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+  - id: ieu9veqjr
+    type: fact
+    name: fct_horasreportadas
+    x: 383
+    'y': 63
+    fields:
+      - id: x3633i9pm
+        name: horas
+        description: ''
+        dataType: dt-numeric
+        isKey: false
+        isFk: false
+      - id: vetvm3uxm
+        name: dim_producto_id
+        description: FK → dim_producto.id
+        dataType: dt-0plpfprzc
+        isKey: false
+        isFk: true
+      - id: gv18fupd1
+        name: tarea_id
+        description: FK → dim_tarea.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: mp8zva3lj
+        name: userstory_id
+        description: FK → dim_userstory.id
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: true
+      - id: ixq3q86rd
+        name: costo
+        description: ''
+        dataType: dt-money
+        isKey: false
+        isFk: false
+      - id: fmaz4c4dp
+        name: guid
+        description: ''
+        dataType: dt-uuid
+        isKey: true
+        isFk: false
+      - id: xdms9lkmh
+        name: tiempo_id_fecha
+        description: FK → dim_tiempo.id_fecha
+        dataType: dt-date
+        isKey: false
+        isFk: true
+      - id: wtm2ap5km
+        name: proyecto_id
+        description: FK → dim_proyecto.id
+        dataType: dt-0plpfprzc
+        isKey: false
+        isFk: true
+      - id: gx0m33wa8
+        name: colaborador_usuario
+        description: FK → dim_colaborador.usuario
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: true
+      - id: 4mygcrhf5
+        name: milestone_milestone_id
+        description: FK → dim_milestone.milestone_id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+  - id: 6nw45lbau
+    type: dimension
+    name: dim_producto
+    x: 745
+    'y': 477
+    fields:
+      - id: b61b7rwt8
+        name: id
+        description: ''
+        dataType: dt-0plpfprzc
+        isKey: true
+        isFk: false
+      - id: zrgimm6d2
+        name: nombre
+        description: ''
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+  - id: tqhb33dwg
+    type: dimension
+    name: dim_proyecto
+    x: 747
+    'y': 170
+    fields:
+      - id: 36lx5vvhr
+        name: id
+        description: ''
+        dataType: dt-0plpfprzc
+        isKey: true
+        isFk: false
+      - id: 4ozsnqsb2
+        name: nombre
+        description: ''
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+  - id: rsg159fvv
+    type: dimension
+    name: dim_tarea
+    x: 63
+    'y': 465
+    fields:
+      - id: eyti0ddr2
+        name: id
+        description: ''
+        dataType: dt-int
+        isKey: true
+        isFk: false
+      - id: 5gemxoqtg
+        name: nombre
+        description: ''
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+      - id: 66sss9y6c
+        name: estimacion
+        description: ''
+        dataType: dt-numeric
+        isKey: false
+        isFk: false
+  - id: qpvu53p0s
+    type: dimension
+    name: dim_userstory
+    x: 750
+    'y': 24
+    fields:
+      - id: ty25rb50d
+        name: id
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: true
+        isFk: false
+      - id: 9bg6634b6
+        name: nombre
+        description: ''
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+  - id: 57hy1ogag
+    type: fact
+    name: fct_asignaciontareas
+    x: 394
+    'y': 422
+    fields:
+      - id: lmkja2c5d
+        name: nuevo_campo
+        description: ''
+        dataType: dt-uuid
+        isKey: true
+        isFk: false
+      - id: 2wcgnf9oo
+        name: horas_restantes
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: al4uh4qo2
+        name: horas_estimadas
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: df0iags8h
+        name: horas_ejecutadas
+        description: ''
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: 6mzlyq8dx
+        name: condicion
+        description: ''
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: r0iohsylz
+        name: tarea_id
+        description: FK → dim_tarea.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: z5wlrclfe
+        name: producto_id
+        description: FK → dim_producto.id
+        dataType: dt-0plpfprzc
+        isKey: false
+        isFk: true
+      - id: l61rvo2b1
+        name: colaborador_usuario
+        description: FK → dim_colaborador.usuario
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: true
+      - id: r7dzxcb8e
+        name: proyecto_id
+        description: FK → dim_proyecto.id
+        dataType: dt-0plpfprzc
+        isKey: false
+        isFk: true
+      - id: v5dxwx8yv
+        name: tiempo_id_fecha
+        description: FK → dim_tiempo.id_fecha
+        dataType: dt-date
+        isKey: false
+        isFk: true
+  - id: 7nzulbw25
+    type: dimension
+    name: dim_milestone
+    x: 68
+    'y': 617
+    fields:
+      - id: 7khiq7aq7
+        name: milestone_id
+        description: Identificador único del hito.
+        dataType: dt-serial
+        isKey: true
+        isFk: false
+      - id: avfde91k6
+        name: proyecto_id
+        description: Clave foránea a dim_proyecto.
+        dataType: dt-uuid
+        isKey: false
+        isFk: false
+      - id: oxsh7b5j8
+        name: nombre
+        description: Nombre del hito.
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+      - id: l154h3sur
+        name: descripcion
+        description: Descripción detallada del hito.
+        dataType: dt-text
+        isKey: false
+        isFk: false
+      - id: u4h41xmm4
+        name: fecha_inicio_estimada
+        description: Fecha estimada de inicio del hito.
+        dataType: dt-date
+        isKey: false
+        isFk: false
+      - id: krr9agk3g
+        name: fecha_fin_estimada
+        description: Fecha estimada de fin del hito.
+        dataType: dt-date
+        isKey: false
+        isFk: false
+      - id: eintvkq53
+        name: fecha_inicio_real
+        description: Fecha real de inicio del hito.
+        dataType: dt-date
+        isKey: false
+        isFk: false
+      - id: 3qrpyerls
+        name: fecha_fin_real
+        description: Fecha real de fin del hito.
+        dataType: dt-date
+        isKey: false
+        isFk: false
+      - id: rseax8j54
+        name: estado
+        description: 'Estado actual del hito (ej: Pendiente, En Progreso, Completado, Cancelado).'
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: l4lp7rwuo
+        name: creado_en
+        description: Timestamp de creación del registro.
+        dataType: dt-tstz
+        isKey: false
+        isFk: false
+      - id: pqlz9poaw
+        name: actualizado_en
+        description: Timestamp de la última actualización del registro.
+        dataType: dt-tstz
+        isKey: false
+        isFk: false
+relationships:
+  - id: o7tjqlscg
+    fromNodeId: 6nw45lbau
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: qnvfnqxn8
+    fromNodeId: rsg159fvv
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: 6kfp8xsmy
+    fromNodeId: qpvu53p0s
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: c6e50m8ch
+    fromNodeId: wmc7bfg7k
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: nv1vxzqcw
+    fromNodeId: tqhb33dwg
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: 8j7ssx3cr
+    fromNodeId: fp9p7bt3s
+    toNodeId: ieu9veqjr
+    cardinality: 1:N
+  - id: xebu3ub9z
+    fromNodeId: rsg159fvv
+    toNodeId: 57hy1ogag
+    cardinality: 1:N
+  - id: 75wdesm6w
+    fromNodeId: 6nw45lbau
+    toNodeId: 57hy1ogag
+    cardinality: 1:N
+  - id: zbdlavams
+    fromNodeId: fp9p7bt3s
+    toNodeId: 57hy1ogag
+    cardinality: 1:N
+  - id: vhlndxww0
+    fromNodeId: tqhb33dwg
+    toNodeId: 57hy1ogag
+    cardinality: 1:N
+  - id: 8puf08ehy
+    fromNodeId: wmc7bfg7k
+    toNodeId: 57hy1ogag
+    cardinality: 1:N
+  - id: 8wj6yi3ma
+    fromNodeId: 7nzulbw25
+    toNodeId: ieu9veqjr
+    cardinality: 1:N

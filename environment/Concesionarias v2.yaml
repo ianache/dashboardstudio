@@ -1,0 +1,198 @@
+name: Concesionarias
+description: Modelo Dimensional para Concesionarias
+nodes:
+  - id: 7qamqhkm1
+    type: dimension
+    name: dim_tiendas
+    x: 756
+    'y': 5
+    fields:
+      - id: upiueirsk
+        name: id
+        description: ID interno
+        dataType: dt-serial
+        isKey: true
+        isFk: false
+      - id: onew05726
+        name: nombre
+        description: Nombre de la tienda
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: jqyn6uw0m
+        name: distrito
+        description: Nombre del distrto
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: gvfvqilaw
+        name: provincia
+        description: Nombre de la provincia
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: 6bcj9q94z
+        name: departamento
+        description: Nombre de departamento
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: jlxvh3al6
+        name: direccion
+        description: Direccion
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+  - id: jhom2pb0m
+    type: fact
+    name: fct_ventas
+    x: 369
+    'y': 12
+    fields:
+      - id: aed2qbdr5
+        name: precio_venta
+        description: Precio de venta de la unidad
+        dataType: dt-money
+        isKey: false
+        isFk: false
+      - id: r2nyp5lql
+        name: comision_vendedor
+        description: Comision del vendedor
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: pmcii4m2o
+        name: id
+        description: ID inerno
+        dataType: dt-uuid
+        isKey: true
+        isFk: false
+      - id: cnim7x4e7
+        name: tiendas_id
+        description: FK → dim_tiendas.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: 30loq7zi3
+        name: date_date_key
+        description: FK → dim_date.date_key
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: kdyl8apdv
+        name: vendedor_id
+        description: FK → dim_person.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: 277t4s68g
+        name: concesionaria_id
+        description: FK → dim_company.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+  - id: ltoh3fig7
+    type: fact
+    name: fact_cierre_mes
+    x: 370
+    'y': 344
+    fields:
+      - id: od8e5wrfa
+        name: id
+        description: ID interno
+        dataType: dt-uuid
+        isKey: true
+        isFk: false
+      - id: v1izadox7
+        name: cuota_unidades
+        description: Cuotas de unidades a vender
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: xs8fr4b3s
+        name: monto_premio_meta
+        description: Monto ganado en premios por ventas
+        dataType: dt-money
+        isKey: false
+        isFk: false
+      - id: 6anei8fj9
+        name: bono_tienda
+        description: Bono a entregar a la tienda
+        dataType: dt-money
+        isKey: false
+        isFk: false
+      - id: 53tqscps1
+        name: date_date_key
+        description: FK → dim_date.date_key
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: 1zjqbz7d9
+        name: company_id
+        description: FK → dim_company.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: af5s43ajv
+        name: tiendas_id
+        description: FK → dim_tiendas.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+      - id: 2sai6zwfb
+        name: vendedor_id
+        description: FK → dim_person.id
+        dataType: dt-int
+        isKey: false
+        isFk: true
+  - id: dvlcao0hm
+    type: dimension
+    name: dim_date
+    x: 760
+    'y': 312
+    fields: []
+  - id: nkym0i2hw
+    type: dimension
+    name: dim_person
+    x: 21
+    'y': 457
+    fields: []
+  - id: x2ufd6p34
+    type: dimension
+    name: dim_company
+    x: 24
+    'y': 13
+    fields: []
+relationships:
+  - id: s52ywe0wc
+    fromNodeId: 7qamqhkm1
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
+  - id: vbpqnb18r
+    fromNodeId: dvlcao0hm
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
+  - id: dpf2v696s
+    fromNodeId: dvlcao0hm
+    toNodeId: ltoh3fig7
+    cardinality: 1:N
+  - id: lsjg4cofh
+    fromNodeId: nkym0i2hw
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
+  - id: vy2zgjes0
+    fromNodeId: x2ufd6p34
+    toNodeId: jhom2pb0m
+    cardinality: 1:N
+  - id: 033aaystj
+    fromNodeId: x2ufd6p34
+    toNodeId: ltoh3fig7
+    cardinality: 1:N
+  - id: g7z6zvn37
+    fromNodeId: 7qamqhkm1
+    toNodeId: ltoh3fig7
+    cardinality: 1:N
+  - id: hawvyowbl
+    fromNodeId: nkym0i2hw
+    toNodeId: ltoh3fig7
+    cardinality: 1:N

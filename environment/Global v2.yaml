@@ -1,0 +1,172 @@
+name: Global
+description: Definiciones globales de dimensiones comunes
+nodes:
+  - id: bhcd5p6pa
+    type: dimension
+    name: dim_date
+    x: 30
+    'y': 31
+    fields:
+      - id: 2ydlzd2lt
+        name: date_key
+        description: Identificacion de la fecha
+        dataType: dt-date
+        isKey: true
+        isFk: false
+      - id: awwqfgs1b
+        name: day_of_week
+        description: Dia de la semana (numero 0 a 6)
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: fwrrv8zin
+        name: week_number
+        description: Numero de la semana en el año
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: szd65onb0
+        name: month
+        description: Nombre dle mes
+        dataType: dt-1hzl3eodl
+        isKey: false
+        isFk: false
+      - id: u9xtawnmw
+        name: quarter
+        description: Numero del cuarto
+        dataType: dt-int
+        isKey: false
+        isFk: false
+      - id: 4ko9uqkyh
+        name: fiscal_year
+        description: año de la fecha
+        dataType: dt-numeric
+        isKey: false
+        isFk: false
+      - id: vkzmi18is
+        name: is_weekend
+        description: Define si es fin de semana
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+      - id: qum7qfcyn
+        name: is_holiday
+        description: Define si es fecha feriada o no laborable
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+      - id: qudpeub5k
+        name: is_business_day
+        description: Define si es dia laborable
+        dataType: dt-bool
+        isKey: false
+        isFk: false
+  - id: 9kgmk17sq
+    type: dimension
+    name: dim_person
+    x: 242
+    'y': 33
+    fields:
+      - id: yw10vjvgz
+        name: id
+        description: ID interno
+        dataType: dt-serial
+        isKey: true
+        isFk: false
+      - id: h0raj5i7j
+        name: fullname
+        description: Nombre completo de la persona
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: dnpgd7p1c
+        name: docid
+        description: Documento de identidad
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+  - id: 7ikgbq1sy
+    type: dimension
+    name: dim_company
+    x: 456
+    'y': 34
+    fields:
+      - id: wd9fgf2p9
+        name: id
+        description: ID interno
+        dataType: dt-int
+        isKey: true
+        isFk: false
+      - id: f982k20qf
+        name: businessname
+        description: Razon Social
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+      - id: 193t88qra
+        name: comercialname
+        description: Nombre comercial
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: tz9lu8bsf
+        name: taxnumber
+        description: Codigo de registro tributario
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+  - id: twq4elw0e
+    type: dimension
+    name: dim_businesslocation
+    x: 684
+    'y': 33
+    fields:
+      - id: ek00nhuep
+        name: id
+        description: ID interno
+        dataType: dt-serial
+        isKey: true
+        isFk: false
+      - id: h41bwsglu
+        name: name
+        description: Nombre de la ubicacion, dependencia o tienda
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+      - id: eiv1zzvlz
+        name: address
+        description: Direccion
+        dataType: dt-cp3yhl9gc
+        isKey: false
+        isFk: false
+      - id: 98ghc25om
+        name: geocode
+        description: Codigo de unicacion geografica
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+  - id: 3lb82i9zv
+    type: dimension
+    name: dim_geocode
+    x: 896
+    'y': 36
+    fields:
+      - id: q0vjf76na
+        name: id
+        description: Geocode
+        dataType: dt-ts89rtou0
+        isKey: true
+        isFk: false
+      - id: rgyvyx7n0
+        name: level
+        description: nivel de division geografica (departamento, provincia, distrito)
+        dataType: dt-ts89rtou0
+        isKey: false
+        isFk: false
+      - id: 2i1ntw9fp
+        name: name
+        description: Nombre de la geoubicacion
+        dataType: dt-varchar
+        isKey: false
+        isFk: false
+relationships: []
