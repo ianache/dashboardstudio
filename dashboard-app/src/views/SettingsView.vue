@@ -132,49 +132,6 @@
         </div>
       </div>
 
-      <!-- User Management (Designer only) -->
-      <div v-if="authStore.isDesigner" class="settings-card card">
-        <div class="sc-header">
-          <div class="sc-icon">👥</div>
-          <div>
-            <h3 class="sc-title">Usuarios del sistema</h3>
-            <p class="sc-desc">Lista de usuarios y sus dashboards asignados</p>
-          </div>
-        </div>
-        <div class="sc-body">
-          <div class="users-table">
-            <div class="ut-header">
-              <span>Usuario</span>
-              <span>Rol</span>
-              <span>Dashboards asignados</span>
-            </div>
-            <div v-for="user in authStore.allUsers" :key="user.id" class="ut-row">
-              <div class="ut-user">
-                <div class="ut-avatar">{{ user.avatar }}</div>
-                <div>
-                  <div class="ut-name">{{ user.name }}</div>
-                  <div class="ut-email">{{ user.email }}</div>
-                </div>
-              </div>
-              <div>
-                <span class="badge" :class="user.role === 'designer' ? 'badge-blue' : 'badge-green'">
-                  {{ user.role === 'designer' ? 'Diseñador' : 'Visualizador' }}
-                </span>
-              </div>
-              <div class="ut-dbs">
-                <span v-if="!getDashboardsForUser(user.id).length" class="form-hint">Ninguno</span>
-                <span
-                  v-for="db in getDashboardsForUser(user.id)"
-                  :key="db.id"
-                  class="badge badge-blue"
-                  style="margin-right:4px"
-                >{{ db.name }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- LLM / IA -->
       <div v-if="authStore.isDesigner" class="settings-card card">
         <div class="sc-header">
@@ -459,10 +416,6 @@ const myDashboards = computed(() => {
   return dashboardStore.dashboardsForUser(authStore.user?.id || '')
 })
 
-function getDashboardsForUser(userId) {
-  return dashboardStore.allDashboards.filter(d => d.assignedUsers.includes(userId))
-}
-
 async function testConnection() {
   testing.value = true
   cubeStore.setConfig(apiUrl.value, apiToken.value)
@@ -611,32 +564,6 @@ function doDeletePalette() {
   padding: 8px 12px; background: var(--bg); border-radius: 6px;
   font-size: 13px; color: var(--text);
 }
-
-/* Users table */
-.users-table { display: flex; flex-direction: column; gap: 0; }
-.ut-header {
-  display: grid; grid-template-columns: 2fr 1fr 2fr;
-  padding: 8px 12px; background: var(--bg);
-  font-size: 12px; font-weight: 600; color: var(--text-secondary);
-  text-transform: uppercase; letter-spacing: 0.5px;
-  border-radius: 6px; margin-bottom: 4px;
-}
-.ut-row {
-  display: grid; grid-template-columns: 2fr 1fr 2fr;
-  padding: 10px 12px; align-items: center;
-  border-bottom: 1px solid var(--border);
-}
-.ut-row:last-child { border-bottom: none; }
-.ut-user { display: flex; align-items: center; gap: 10px; }
-.ut-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--primary); color: #fff;
-  font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.ut-name { font-size: 13px; font-weight: 500; color: var(--text); }
-.ut-email { font-size: 11px; color: var(--text-secondary); }
-.ut-dbs { display: flex; flex-wrap: wrap; gap: 4px; }
 
 /* Info table */
 .info-table { width: 100%; border-collapse: collapse; font-size: 14px; }

@@ -21,6 +21,11 @@ export default defineConfig({
         target: 'https://generativelanguage.googleapis.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/gemini/, '')
+      },
+      '/keycloak': {
+        target: 'http://keycloak.local',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/keycloak/, '')
       }
     }
   }

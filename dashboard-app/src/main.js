@@ -23,6 +23,7 @@ import {
 import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
+import keycloak from './services/keycloak'
 import './assets/main.css'
 
 use([
@@ -41,15 +42,62 @@ use([
   MarkLineComponent
 ])
 
-const app = createApp(App)
-const pinia = createPinia()
+keycloak
+  .init({
+    onLoad: 'login-required',
+    checkLoginIframe: false,
+    pkceMethod: 'S256'
+  })
+  .then(authenticated => {
+    if (!authenticated) {
+      // Shouldn't happen with onLoad: 'login-required', but guard anyway
+      keycloak.login()
+      return
+    }
 
-app.use(pinia)
-app.use(router)
-app.component('v-chart', ECharts)
+    const app = createApp(App)
+    const pinia = createPinia()
 
-// Init auth from localStorage
-const authStore = useAuthStore()
-authStore.initFromStorage()
+    app.use(pinia)
+    app.use(router)
+    app.component('v-chart', ECharts)
 
-app.mount('#app')
+    const authStore = useAuthStore()
+    authStore.initFromKeycloak(keycloak)
+
+    // Refresh token before it expires (60s buffer)
+    keycloak.onTokenExpired = () => {
+      keycloak
+        .updateToken(60)
+        .then(refreshed => {
+          if (refreshed) authStore.onTokenRefreshed()
+        })
+        .catch(() => authStore.logout())
+    }
+
+    app.mount('#app')
+  })
+  .catch(err => {
+    console.error('Keycloak init failed:', err)
+    const kcUrl = import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak.local'
+    const realm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
+    const clientId = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-app'
+    const errDetail = err instanceof Error ? err.message : (typeof err === 'string' ? err : JSON.stringify(err))
+    document.body.innerHTML =
+      '<div style="padding:40px;font-family:sans-serif;max-width:700px">' +
+      '<h2 style="color:#d32f2f">Error de autenticación</h2>' +
+      '<p>La inicialización de Keycloak falló. Causa probable:</p>' +
+      '<ul style="line-height:2">' +
+      '<li>El <strong>Redirect URI</strong> <code>' + window.location.origin + '/*</code> no está registrado en el cliente Keycloak</li>' +
+      '<li>El <strong>Web Origin</strong> <code>' + window.location.origin + '</code> no está en la lista de orígenes permitidos del cliente</li>' +
+      '<li>El realm <code>' + realm + '</code> o client <code>' + clientId + '</code> no existen en Keycloak</li>' +
+      '</ul>' +
+      '<details style="margin-top:16px">' +
+      '<summary style="cursor:pointer;color:#666">Detalle técnico del error</summary>' +
+      '<pre style="background:#f5f5f5;padding:12px;border-radius:6px;margin-top:8px;white-space:pre-wrap;font-size:12px">' +
+      (errDetail || '(sin detalle)') + '</pre>' +
+      '</details>' +
+      '<hr style="margin:24px 0">' +
+      '<p style="font-size:13px;color:#666">Servidor: <strong>' + kcUrl + '</strong> — Realm: <strong>' + realm + '</strong> — Client: <strong>' + clientId + '</strong></p>' +
+      '</div>'
+  })

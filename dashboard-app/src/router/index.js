@@ -3,10 +3,9 @@ import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { public: true }
+    // Keycloak redirect callback — handled automatically by keycloak-js
+    path: '/auth/callback',
+    redirect: '/'
   },
   {
     path: '/',
@@ -59,7 +58,8 @@ const routes = [
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/SettingsView.vue'),
-        meta: { breadcrumbs: ['Configuración'] }
+        // Only admin and designer can access settings
+        meta: { requiresDesigner: true, breadcrumbs: ['Configuración'] }
       }
     ]
   },
@@ -77,9 +77,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
-  if (to.meta.public) return next()
-
-  if (!authStore.isAuthenticated) return next('/login')
+  // App only mounts after Keycloak authentication, so isAuthenticated should always be true.
+  // This guard handles role-based route protection.
+  if (!authStore.isAuthenticated) return next('/')
 
   if (to.meta.requiresDesigner && !authStore.isDesigner) {
     return next('/')
