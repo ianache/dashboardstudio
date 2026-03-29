@@ -79,12 +79,25 @@ keycloak
   })
   .catch(err => {
     console.error('Keycloak init failed:', err)
+    const kcUrl = import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak.local'
+    const realm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
+    const clientId = import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'dashboard-app'
+    const errDetail = err instanceof Error ? err.message : (typeof err === 'string' ? err : JSON.stringify(err))
     document.body.innerHTML =
-      '<div style="padding:40px;font-family:sans-serif;color:#d32f2f">' +
-      '<h2>Error de autenticación</h2>' +
-      '<p>No se pudo conectar con el servidor de autenticación. ' +
-      'Verifica que Keycloak esté disponible en <strong>' +
-      (import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak.local') +
-      '</strong></p>' +
+      '<div style="padding:40px;font-family:sans-serif;max-width:700px">' +
+      '<h2 style="color:#d32f2f">Error de autenticación</h2>' +
+      '<p>La inicialización de Keycloak falló. Causa probable:</p>' +
+      '<ul style="line-height:2">' +
+      '<li>El <strong>Redirect URI</strong> <code>' + window.location.origin + '/*</code> no está registrado en el cliente Keycloak</li>' +
+      '<li>El <strong>Web Origin</strong> <code>' + window.location.origin + '</code> no está en la lista de orígenes permitidos del cliente</li>' +
+      '<li>El realm <code>' + realm + '</code> o client <code>' + clientId + '</code> no existen en Keycloak</li>' +
+      '</ul>' +
+      '<details style="margin-top:16px">' +
+      '<summary style="cursor:pointer;color:#666">Detalle técnico del error</summary>' +
+      '<pre style="background:#f5f5f5;padding:12px;border-radius:6px;margin-top:8px;white-space:pre-wrap;font-size:12px">' +
+      (errDetail || '(sin detalle)') + '</pre>' +
+      '</details>' +
+      '<hr style="margin:24px 0">' +
+      '<p style="font-size:13px;color:#666">Servidor: <strong>' + kcUrl + '</strong> — Realm: <strong>' + realm + '</strong> — Client: <strong>' + clientId + '</strong></p>' +
       '</div>'
   })

@@ -36,15 +36,21 @@ services:
     environment:
       KEYCLOAK_ADMIN: ${KC_ADMIN_USER:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:-admin}
-      # Mismo postgres, base de datos "keycloak" creada en init.sql
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres/${KC_DB_NAME:-keycloak}
       KC_DB_USERNAME: ${KC_DB_USER:-keycloak_user}
       KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloakpassword}
       KC_DB_SCHEMA: keycloak
+      # Sin KC_PROXY — acceso directo sin reverse proxy en desarrollo
       KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
-      KC_PROXY: edge
+      KC_HTTP_PORT: "8080"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      # Cookie SameSite compatible con acceso directo por HTTP
+      KC_SPI_COOKIE_SAME_SITE: "None"
+      KC_SPI_COOKIE_SECURE: "false"
     ports:
       - "8080:8080"
     volumes:
@@ -119,7 +125,7 @@ services:
       CUBEJS_CONCURRENCY: 4
       CUBEJS_DB_POOL_MAX: 8
     volumes:
-      - ./cube-data:/cube/conf/schema
+      - ./schema:/cube/conf/schema
       - ./cube.js:/cube/conf/cube.js:ro
     depends_on:
       postgres:

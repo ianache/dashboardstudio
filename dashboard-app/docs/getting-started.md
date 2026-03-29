@@ -22,6 +22,27 @@ npm run dev
 
 La aplicación estará disponible en `http://localhost:3000`.
 
+## Conexion con Keycloak
+
+Roles en Keycloak (realm roles)
+
+  ┌──────────┬────────────────────────────────────────┐
+  │   Rol    │                 Acceso                 │
+  ├──────────┼────────────────────────────────────────┤
+  │ admin    │ Todo (designer + settings)             │
+  ├──────────┼────────────────────────────────────────┤
+  │ designer │ Crear/editar dashboards y modelos      │
+  ├──────────┼────────────────────────────────────────┤
+  │ viewer   │ Solo ver dashboards asignados/públicos │
+  └──────────┴────────────────────────────────────────┘
+
+  Setup requerido en Keycloak
+
+  1. Crear realm dashboard
+  2. Crear client dashboard-app (tipo: public, redirect URI: http://localhost:3000/*)
+  3. Crear realm roles: admin, designer, viewer
+  4. Asignar roles a usuarios desde Keycloak Admin Console
+
 ## Credenciales de demo
 
 | Rol | Email | Contraseña |
