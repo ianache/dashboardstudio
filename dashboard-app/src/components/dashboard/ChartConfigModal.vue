@@ -230,6 +230,85 @@
         <!-- TAB: Visualización -->
         <div v-if="activeTab === 'visual'">
           <div class="config-grid">
+
+            <!-- Color Palette -->
+            <div class="form-group">
+              <label class="form-label">Paleta de colores del widget</label>
+              <div class="palette-grid">
+
+                <!-- Inherit from dashboard (null) -->
+                <div
+                  class="palette-card palette-card--special"
+                  :class="{ selected: form.colorPalette == null }"
+                  @click="form.colorPalette = null"
+                >
+                  <div class="palette-swatches palette-swatches--inherit">
+                    <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+                      <rect x="0.5" y="0.5" width="19" height="13" rx="2.5" stroke="currentColor" stroke-dasharray="3 2"/>
+                      <path d="M6 7h8M10 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <span class="palette-label">Heredar</span>
+                </div>
+
+                <!-- No palette ('none') -->
+                <div
+                  class="palette-card palette-card--special"
+                  :class="{ selected: form.colorPalette === 'none' }"
+                  @click="form.colorPalette = 'none'"
+                >
+                  <div class="palette-swatches palette-swatches--none">
+                    <span class="palette-swatch" style="background:#1890ff"/>
+                    <span class="palette-swatch" style="background:#52c41a"/>
+                    <span class="palette-swatch" style="background:#faad14"/>
+                    <span class="palette-swatch" style="background:#f5222d"/>
+                    <span class="palette-swatch" style="background:#722ed1"/>
+                    <span class="palette-swatch" style="background:#13c2c2"/>
+                  </div>
+                  <span class="palette-label">Sin paleta</span>
+                </div>
+
+                <!-- Named palettes -->
+                <div
+                  v-for="palette in paletteStore.allPalettes"
+                  :key="palette.id"
+                  class="palette-card"
+                  :class="{ selected: form.colorPalette === palette.id }"
+                  @click="form.colorPalette = palette.id"
+                >
+                  <div class="palette-swatches">
+                    <span
+                      v-for="color in palette.colors.slice(0, 6)"
+                      :key="color"
+                      class="palette-swatch"
+                      :style="{ background: color }"
+                    ></span>
+                  </div>
+                  <span class="palette-label">{{ palette.label }}</span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Pie-specific options -->
+            <div v-if="form.chartType === 'pie'" class="form-group pie-options-group">
+              <label class="form-label">Opciones del gráfico Pie</label>
+              <div class="pie-options-row">
+                <label class="pie-opt-toggle" :class="{ active: form.pieOptions.showValue }" @click="form.pieOptions.showValue = !form.pieOptions.showValue">
+                  <span class="pie-opt-icon">{{ form.pieOptions.showValue ? '✓' : '' }}</span>
+                  Mostrar valor
+                </label>
+                <label class="pie-opt-toggle" :class="{ active: form.pieOptions.showPercent }" @click="form.pieOptions.showPercent = !form.pieOptions.showPercent">
+                  <span class="pie-opt-icon">{{ form.pieOptions.showPercent ? '✓' : '' }}</span>
+                  Mostrar porcentaje
+                </label>
+                <label class="pie-opt-toggle" :class="{ active: form.pieOptions.showTotal }" @click="form.pieOptions.showTotal = !form.pieOptions.showTotal">
+                  <span class="pie-opt-icon">{{ form.pieOptions.showTotal ? '✓' : '' }}</span>
+                  Total al centro
+                </label>
+              </div>
+            </div>
+
             <div class="form-group">
               <div class="visual-label-row">
                 <label class="form-label">Opciones ECharts (JSON)</label>
@@ -252,6 +331,9 @@
                     <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
                   </svg>
                   <span>IA Assist — Generador de opciones ECharts</span>
+                  <span v-if="llmStore.isConfigured" class="ai-model-badge">
+                    {{ llmStore.configFor('chartAssist').providerLabel }} · {{ llmStore.configFor('chartAssist').modelLabel }}
+                  </span>
                 </div>
 
                 <div class="ai-panel-body">
@@ -325,16 +407,45 @@
 
         <!-- CubeJS meta -->
         <div v-if="activeTab === 'cubemeta'" class="cube-meta-tab">
+          <div class="cube-meta-toolbar">
+            <span class="cube-meta-count" v-if="cubeStore.cubes.length">
+              {{ cubeStore.cubes.length }} cubos disponibles
+            </span>
+            <span v-else></span>
+            <button
+              class="btn btn-secondary btn-sm"
+              :disabled="cubeStore.metaLoading"
+              @click="refreshMeta"
+            >
+              <svg :class="{ spin: cubeStore.metaLoading }" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+              </svg>
+              {{ cubeStore.metaLoading ? 'Cargando...' : 'Refrescar' }}
+            </button>
+          </div>
+
           <div v-if="cubeStore.metaLoading" class="loading-row">
             <div class="spinner"></div> Cargando esquema...
           </div>
           <div v-else-if="!cubeStore.connected" class="alert alert-error">
             No hay conexión con CubeJS. Configura la URL y token en Configuración.
           </div>
-          <div v-else>
+          <div v-else class="cube-list">
             <div v-for="cube in cubeStore.cubes" :key="cube.name" class="cube-block">
-              <div class="cube-name">{{ cube.name }}</div>
-              <div class="cube-members">
+              <div class="cube-name" @click="toggleCubeMeta(cube.name)">
+                {{ cube.name }}
+                <span class="cube-meta-counts">
+                  {{ cube.measures.length }}M · {{ cube.dimensions.length }}D
+                </span>
+                <svg
+                  class="cube-chevron"
+                  :class="{ open: openMetaCubes.includes(cube.name) }"
+                  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div v-if="openMetaCubes.includes(cube.name)" class="cube-members">
                 <div class="cube-member-group">
                   <div class="member-group-title">Medidas</div>
                   <div
@@ -386,6 +497,10 @@
 import { ref, computed, watch } from 'vue'
 import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
+import { callLlm } from '@/composables/useLlmCall'
+import { useColorPaletteStore } from '@/stores/colorPalettes'
+
+const paletteStore = useColorPaletteStore()
 
 const props = defineProps({
   widget: { type: Object, required: true }
@@ -407,12 +522,13 @@ const activeTab = ref('general')
 const jsonError = ref(null)
 
 const chartTypes = [
-  { value: 'bar', label: 'Barras', icon: '📊' },
-  { value: 'line', label: 'Líneas', icon: '📈' },
-  { value: 'pie', label: 'Pastel', icon: '🥧' },
-  { value: 'gauge', label: 'Gauge', icon: '🎯' },
-  { value: 'radar', label: 'Radar', icon: '🕸️' },
-  { value: 'combined', label: 'Combinado', icon: '📉' }
+  { value: 'bar',      label: 'Barras',    icon: '📊' },
+  { value: 'line',     label: 'Líneas',    icon: '📈' },
+  { value: 'pie',      label: 'Pastel',    icon: '🥧' },
+  { value: 'gauge',    label: 'Gauge',     icon: '🎯' },
+  { value: 'radar',    label: 'Radar',     icon: '🕸️' },
+  { value: 'combined', label: 'Combinado', icon: '📉' },
+  { value: 'table',    label: 'Tabla',     icon: '🗒️' }
 ]
 
 const seriesTypes = [
@@ -423,6 +539,13 @@ const seriesTypes = [
 
 // Deep clone widget for editing
 const form = ref(JSON.parse(JSON.stringify(props.widget)))
+
+// Ensure pieOptions exists with defaults
+if (!form.value.pieOptions) {
+  form.value.pieOptions = { showValue: false, showPercent: true, showTotal: false }
+}
+
+// colorPalette: null = inherit dashboard, 'none' = no palette, <id> = specific palette
 
 // Computed for time dimension
 const timeDimKey = computed({
@@ -488,34 +611,19 @@ REGLAS:
 }
 
 async function generateWithAI() {
-  if (!aiApiKey.value.trim() || !aiPrompt.value.trim()) return
+  if (!aiPrompt.value.trim()) return
   aiLoading.value = true
   aiError.value = null
   aiResult.value = ''
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': llmStore.anthropicKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
-      },
-      body: JSON.stringify({
-        model: llmStore.modelFor('chartAssist'),
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: buildAIPrompt() }]
-      })
+    const cfg = llmStore.configFor('chartAssist')
+    const text = await callLlm({
+      provider: cfg.provider,
+      modelId:  cfg.modelId,
+      apiKey:   cfg.apiKey,
+      prompt:   buildAIPrompt()
     })
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}))
-      throw new Error(err.error?.message || `Error ${response.status}`)
-    }
-
-    const data = await response.json()
-    const text = data.content?.[0]?.text || ''
 
     // Extract JSON block from response
     const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
@@ -623,6 +731,20 @@ function save() {
   emit('save', JSON.parse(JSON.stringify(form.value)))
 }
 
+// Cube meta collapsible state (all closed by default)
+const openMetaCubes = ref([])
+
+function toggleCubeMeta(name) {
+  const idx = openMetaCubes.value.indexOf(name)
+  if (idx === -1) openMetaCubes.value.push(name)
+  else openMetaCubes.value.splice(idx, 1)
+}
+
+async function refreshMeta() {
+  openMetaCubes.value = []
+  await cubeStore.loadMeta()
+}
+
 // Load cube meta if not already loaded
 if (cubeStore.token && !cubeStore.meta) {
   cubeStore.loadMeta()
@@ -684,18 +806,33 @@ if (cubeStore.token && !cubeStore.meta) {
 }
 
 /* Cube meta */
-.cube-meta-tab { display: flex; flex-direction: column; gap: 16px; }
+.cube-meta-tab { display: flex; flex-direction: column; gap: 12px; }
+.cube-meta-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.cube-meta-count { font-size: 12px; color: var(--text-secondary); }
+.cube-list { display: flex; flex-direction: column; gap: 6px; }
 .loading-row { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); }
 .cube-block { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .cube-name {
-  padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px;
   background: var(--bg);
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
 }
-.cube-members { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.cube-name:hover { background: var(--primary-light); }
+.cube-meta-counts { font-size: 11px; font-weight: 400; color: var(--text-secondary); }
+.cube-chevron {
+  margin-left: auto; flex-shrink: 0;
+  transition: transform 0.2s; color: var(--text-secondary);
+}
+.cube-chevron.open { transform: rotate(180deg); }
+.cube-members { padding: 12px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--border); }
 .cube-member-group { display: flex; flex-direction: column; gap: 6px; }
 .member-group-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 .member-chip {
@@ -760,6 +897,15 @@ if (cubeStore.token && !cubeStore.meta) {
   font-size: 13px;
   font-weight: 600;
 }
+.ai-model-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
 .ai-panel-body {
   padding: 14px 16px;
   display: flex;
@@ -798,6 +944,58 @@ if (cubeStore.token && !cubeStore.meta) {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
+
+/* Color palette selector */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.palette-card {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: #fff;
+}
+.palette-card:hover { border-color: var(--primary); }
+.palette-card.selected { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light, #e6f4ff); }
+.palette-swatches {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+.palette-swatch {
+  flex: 1;
+  height: 14px;
+  border-radius: 3px;
+}
+.palette-label {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  display: block;
+  text-align: center;
+}
+.palette-card.selected .palette-label { color: var(--primary); font-weight: 600; }
+.palette-card--special .palette-swatches { justify-content: center; align-items: center; height: 14px; }
+.palette-swatches--inherit { color: var(--text-secondary); }
+.palette-card--special.selected .palette-swatches--inherit { color: var(--primary); }
+
+/* Pie options */
+.pie-options-group { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: #fafafa; }
+.pie-options-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.pie-opt-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: #fff;
+  font-size: 12px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.pie-opt-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.pie-opt-toggle.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.pie-opt-icon { font-size: 11px; width: 12px; text-align: center; }
 
 .series-type-toggle {
   display: flex;

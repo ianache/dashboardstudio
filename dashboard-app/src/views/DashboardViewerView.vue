@@ -50,6 +50,7 @@
           :is-design-mode="false"
           :dashboard-id="dashboard.id"
           :dashboard-filters="resolvedDashboardFilters"
+          :dashboard-palette="dashboard.colorPalette || null"
           :key="refreshKey"
         />
       </div>

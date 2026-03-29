@@ -21,6 +21,7 @@
           :isDesignMode="isDesignMode"
           :isSelected="selectedWidgetId === widget.id"
           :dashboardFilters="dashboardFilters"
+          :dashboardPalette="dashboardPalette"
           @select="selectWidget(widget.id)"
           @configure="$emit('configure-widget', widget)"
           @remove="$emit('remove-widget', widget.id)"
@@ -68,7 +69,8 @@ const props = defineProps({
   widgets: { type: Array, default: () => [] },
   isDesignMode: { type: Boolean, default: false },
   dashboardId: { type: String, required: true },
-  dashboardFilters: { type: Array, default: () => [] }
+  dashboardFilters: { type: Array, default: () => [] },
+  dashboardPalette: { type: String, default: null }
 })
 
 const emit = defineEmits(['configure-widget', 'remove-widget', 'widget-moved'])

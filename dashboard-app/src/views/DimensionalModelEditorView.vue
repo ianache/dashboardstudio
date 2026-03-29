@@ -60,6 +60,13 @@
           </svg>
         </button>
 
+        <button class="btn-ai-assist" @click="aiAssistOpen = true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          </svg>
+          IA Assist
+        </button>
+
         <div class="toolbar-sep"></div>
 
         <button class="btn btn-secondary btn-sm" @click="addNode('fact')">
@@ -404,6 +411,128 @@
       </div>
     </div>
 
+    <!-- Modal: AI Assist -->
+    <div v-if="aiAssistOpen" class="modal-overlay" @click.self="aiAssistOpen = false">
+      <div class="modal card ai-assist-modal">
+        <div class="modal-header ai-assist-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          </svg>
+          <span>IA Assist — Diseñador de Tablas</span>
+          <span v-if="llmStore.isConfigured" class="ai-model-label">
+            {{ llmStore.configFor('modelAssist').providerLabel }} · {{ llmStore.configFor('modelAssist').modelLabel }}
+          </span>
+          <button class="btn-icon" style="margin-left:auto" @click="aiAssistOpen = false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body ai-assist-body">
+          <!-- No LLM configured -->
+          <div v-if="!llmStore.isConfigured" class="alert alert-error">
+            Sin clave API configurada.
+            <router-link to="/settings" @click="aiAssistOpen = false" style="color:inherit;font-weight:600;margin-left:4px">
+              Ir a Configuración →
+            </router-link>
+          </div>
+
+          <!-- Context chips -->
+          <div class="ai-context-row">
+            <span class="ai-ctx-label">Modelo:</span>
+            <span class="ai-chip ai-chip-model">{{ model?.name }}</span>
+            <template v-if="model?.nodes.length">
+              <span class="ai-ctx-label" style="margin-left:8px">Tablas existentes:</span>
+              <span v-for="n in model.nodes.slice(0, 6)" :key="n.id"
+                    class="ai-chip" :class="n.type === 'fact' ? 'ai-chip-fact' : 'ai-chip-dim'">
+                {{ n.name }}
+              </span>
+              <span v-if="model.nodes.length > 6" class="ai-chip-more">+{{ model.nodes.length - 6 }}</span>
+            </template>
+          </div>
+
+          <!-- Prompt -->
+          <div class="form-group" style="margin:0">
+            <label class="form-label">¿Qué tablas necesitas diseñar?</label>
+            <textarea
+              v-model="aiAssistPrompt"
+              class="form-input"
+              rows="4"
+              :disabled="aiAssistLoading"
+              placeholder="Ej: Necesito una tabla de hechos de Ventas con campos de monto, cantidad y descuento, y dimensiones de Cliente, Producto y Tiempo con sus campos principales."
+              @keydown.ctrl.enter="runAIAssist"
+            ></textarea>
+            <span class="form-hint">Ctrl+Enter para generar</span>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            style="align-self:flex-start"
+            :disabled="!llmStore.isConfigured || !aiAssistPrompt.trim() || aiAssistLoading"
+            @click="runAIAssist"
+          >
+            <svg v-if="aiAssistLoading" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+            </svg>
+            {{ aiAssistLoading ? 'Generando...' : 'Generar tablas' }}
+          </button>
+
+          <div v-if="aiAssistError" class="alert alert-error">{{ aiAssistError }}</div>
+
+          <!-- Result preview -->
+          <div v-if="aiAssistResult" class="ai-result-section">
+            <div class="ai-result-title">
+              <span>{{ aiAssistResult.length }} tabla(s) generada(s) — selecciona las que quieres añadir</span>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(true)">Todas</button>
+                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(false)">Ninguna</button>
+              </div>
+            </div>
+            <div class="ai-tables-list">
+              <div
+                v-for="(table, idx) in aiAssistResult"
+                :key="idx"
+                class="ai-table-card"
+                :class="{ selected: aiSelectedTables.includes(idx), fact: table.type === 'fact', dim: table.type === 'dimension' }"
+                @click="aiToggleTable(idx)"
+              >
+                <div class="ai-table-header">
+                  <input type="checkbox" :checked="aiSelectedTables.includes(idx)" @click.stop="aiToggleTable(idx)" />
+                  <span class="ai-table-badge" :class="table.type">
+                    {{ table.type === 'fact' ? 'HECHO' : 'DIM' }}
+                  </span>
+                  <span class="ai-table-name">{{ table.name }}</span>
+                  <span class="ai-table-count">{{ table.fields.length }} campos</span>
+                </div>
+                <div class="ai-table-fields">
+                  <span v-for="f in table.fields" :key="f.name" class="ai-field-chip" :class="{ 'is-key': f.isKey }">
+                    <span v-if="f.isKey">🔑</span>{{ f.name }}
+                    <span class="ai-field-type">{{ f.dataTypeLabel }}</span>
+                  </span>
+                </div>
+                <div v-if="table.description" class="ai-table-desc">{{ table.description }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="aiAssistResult" class="modal-footer">
+          <button class="btn btn-secondary" @click="aiAssistOpen = false">Cancelar</button>
+          <button
+            class="btn btn-primary"
+            :disabled="!aiSelectedTables.length"
+            @click="applyAITables"
+          >
+            Añadir {{ aiSelectedTables.length }} tabla(s) al canvas
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal: Add Global Dimensions -->
     <div v-if="showGlobalDimModal" class="modal-overlay" @click.self="showGlobalDimModal = false">
       <div class="modal card">
@@ -457,6 +586,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useDataTypeStore } from '@/stores/dataTypes'
 import { useUIStore } from '@/stores/ui'
+import { useLlmStore } from '@/stores/llm'
+import { callLlm } from '@/composables/useLlmCall'
 import yaml from 'js-yaml'
 import JSZip from 'jszip'
 
@@ -465,6 +596,8 @@ const route = useRoute()
 const modelStore = useDimensionalModelStore()
 const dtStore = useDataTypeStore()
 const uiStore = useUIStore()
+
+const llmStore = useLlmStore()
 
 const modelId = route.params.id
 const model = computed(() => modelStore.getModel(modelId))
@@ -1235,6 +1368,138 @@ function deleteRelationship() {
   selectedRel.value = null
 }
 
+// ── AI Assist ─────────────────────────────────────────────────
+const aiAssistOpen    = ref(false)
+const aiAssistPrompt  = ref('')
+const aiAssistLoading = ref(false)
+const aiAssistError   = ref(null)
+const aiAssistResult  = ref(null)   // array of { type, name, description, fields }
+const aiSelectedTables = ref([])
+
+function buildModelAssistPrompt() {
+  const existing = (model.value?.nodes || [])
+    .map(n => `  - ${n.type === 'fact' ? '[HECHO]' : '[DIM]'} ${n.name} (${n.fields.length} campos)`)
+    .join('\n') || '  (ninguna)'
+
+  const availableTypes = dtStore.allTypes
+    .map(t => `${t.id} → ${t.name} (${dtStore.sqlOf(t.id)})`)
+    .join('\n')
+
+  return `Eres un experto en modelado dimensional (star schema / snowflake). Tu tarea es diseñar tablas de hechos y dimensiones.
+
+MODELO ACTUAL: "${model.value?.name}"
+${model.value?.description ? `DESCRIPCIÓN: ${model.value.description}` : ''}
+
+TABLAS YA EXISTENTES EN EL MODELO:
+${existing}
+
+TIPOS DE DATOS DISPONIBLES (usa exactamente estos IDs en el campo "dataTypeId"):
+${availableTypes}
+
+PETICIÓN DEL DISEÑADOR:
+${aiAssistPrompt.value}
+
+INSTRUCCIONES:
+1. Responde SOLO con un bloque JSON válido (\`\`\`json ... \`\`\`)
+2. El JSON debe ser un array de objetos tabla con este formato EXACTO:
+[
+  {
+    "type": "fact" | "dimension",
+    "name": "NombreTabla",
+    "description": "descripción breve",
+    "fields": [
+      { "name": "nombre_campo", "dataTypeId": "dt-serial", "isKey": true, "description": "descripción" },
+      { "name": "otro_campo", "dataTypeId": "dt-varchar", "isKey": false, "description": "" }
+    ]
+  }
+]
+3. Cada tabla de dimensión DEBE tener exactamente un campo con "isKey": true (la llave primaria)
+4. Los nombres de campo deben estar en snake_case
+5. Usa los dataTypeId exactos de la lista proporcionada
+6. No incluyas texto fuera del bloque JSON`
+}
+
+async function runAIAssist() {
+  if (!aiAssistPrompt.value.trim() || !llmStore.isConfigured) return
+  aiAssistLoading.value = true
+  aiAssistError.value = null
+  aiAssistResult.value = null
+  aiSelectedTables.value = []
+
+  try {
+    const cfg = llmStore.configFor('modelAssist')
+    const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildModelAssistPrompt() })
+
+    const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
+    const raw = match ? match[1].trim() : text.trim()
+    const tables = JSON.parse(raw)
+
+    if (!Array.isArray(tables)) throw new Error('La respuesta no es un array de tablas')
+
+    // Enrich with resolved dataType labels for display
+    aiAssistResult.value = tables.map(t => ({
+      ...t,
+      fields: t.fields.map(f => ({
+        ...f,
+        dataTypeLabel: dtStore.getById(f.dataTypeId)?.name ?? f.dataTypeId
+      }))
+    }))
+    // Pre-select all
+    aiSelectedTables.value = tables.map((_, i) => i)
+  } catch (e) {
+    aiAssistError.value = e.message
+  } finally {
+    aiAssistLoading.value = false
+  }
+}
+
+function aiToggleTable(idx) {
+  const pos = aiSelectedTables.value.indexOf(idx)
+  if (pos === -1) aiSelectedTables.value.push(idx)
+  else aiSelectedTables.value.splice(pos, 1)
+}
+
+function aiSelectAll(select) {
+  aiSelectedTables.value = select ? (aiAssistResult.value || []).map((_, i) => i) : []
+}
+
+function applyAITables() {
+  if (!aiAssistResult.value) return
+  const allTypes = dtStore.allTypes
+  const fallbackType = allTypes.find(t => t.id === 'dt-varchar')?.id ?? allTypes[0]?.id
+
+  let offsetX = 60
+  const offsetY = 80
+  const spacing = 240
+
+  aiSelectedTables.value.forEach(idx => {
+    const table = aiAssistResult.value[idx]
+    const node = modelStore.addNode(modelId, {
+      type: table.type,
+      name: table.name,
+      x: offsetX,
+      y: table.type === 'fact' ? offsetY + 200 : offsetY
+    })
+    offsetX += spacing
+
+    table.fields.forEach(f => {
+      modelStore.addField(modelId, node.id, {
+        name: f.name,
+        description: f.description || '',
+        dataType: allTypes.find(t => t.id === f.dataTypeId)?.id ?? fallbackType,
+        isKey: !!f.isKey,
+        isFk: false
+      })
+    })
+  })
+
+  uiStore.notify({ message: `${aiSelectedTables.value.length} tabla(s) añadidas al canvas`, type: 'success' })
+  aiAssistOpen.value = false
+  aiAssistResult.value = null
+  aiAssistPrompt.value = ''
+  aiSelectedTables.value = []
+}
+
 // ── Global Model ──────────────────────────────────────────────
 const showGlobalDimModal = ref(false)
 const selectedGlobalDims = ref([])
@@ -1571,4 +1836,93 @@ function addSelectedGlobalDims() {
 .global-dim-icon { font-size: 16px; flex-shrink: 0; }
 .global-dim-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
 .global-dim-fields { font-size: 11px; color: var(--text-secondary); }
+/* ── IA Assist toolbar button (mismo estilo que ChartConfigModal) ── */
+.btn-ai-assist {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #722ed1;
+  background: #fff;
+  color: #722ed1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-ai-assist:hover,
+.btn-ai-assist.active { background: #722ed1; color: #fff; }
+
+/* ── AI Assist modal ──────────────────────────────────────── */
+.ai-assist-modal { max-width: 680px; width: 96vw; max-height: 88vh; display: flex; flex-direction: column; }
+.ai-assist-header {
+  display: flex; align-items: center; gap: 8px;
+  background: #722ed1; color: #fff; padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px; font-weight: 600;
+}
+.ai-model-label {
+  font-size: 11px; font-weight: 400;
+  background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;
+}
+.ai-assist-body {
+  padding: 16px; overflow-y: auto; flex: 1;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Context chips */
+.ai-context-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.ai-ctx-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+.ai-chip { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 10px; }
+.ai-chip-model  { background: #722ed1; color: #fff; }
+.ai-chip-fact   { background: #e6f4ff; color: #1890ff; border: 1px solid #91caff; }
+.ai-chip-dim    { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.ai-chip-more   { font-size: 11px; color: var(--text-secondary); }
+
+/* Result section */
+.ai-result-section { display: flex; flex-direction: column; gap: 10px; }
+.ai-result-title {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.ai-tables-list { display: flex; flex-direction: column; gap: 8px; }
+.ai-table-card {
+  border: 2px solid var(--border); border-radius: 8px;
+  overflow: hidden; cursor: pointer; transition: border-color 0.15s;
+}
+.ai-table-card:hover { border-color: #d3adf7; }
+.ai-table-card.selected { border-color: #722ed1; }
+.ai-table-card.selected.fact { border-color: var(--primary); }
+.ai-table-card.selected.dim  { border-color: #52c41a; }
+.ai-table-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: var(--bg);
+  font-size: 13px;
+}
+.ai-table-header input[type=checkbox] { flex-shrink: 0; cursor: pointer; }
+.ai-table-badge {
+  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+  flex-shrink: 0;
+}
+.ai-table-badge.fact { background: #e6f4ff; color: #1890ff; }
+.ai-table-badge.dimension { background: #f6ffed; color: #52c41a; }
+.ai-table-name { font-weight: 600; color: var(--text); flex: 1; }
+.ai-table-count { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+.ai-table-fields {
+  display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 12px;
+  border-top: 1px solid var(--border);
+}
+.ai-field-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; padding: 2px 7px; border-radius: 8px;
+  background: #f5f5f5; color: var(--text);
+}
+.ai-field-chip.is-key { background: #fff7e6; color: #d48806; }
+.ai-field-type { color: var(--text-secondary); font-size: 10px; }
+.ai-table-desc { padding: 0 12px 8px; font-size: 12px; color: var(--text-secondary); font-style: italic; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }
 </style>

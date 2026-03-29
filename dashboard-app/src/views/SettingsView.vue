@@ -181,35 +181,41 @@
           <div class="sc-icon">✦</div>
           <div>
             <h3 class="sc-title">LLM / Inteligencia Artificial</h3>
-            <p class="sc-desc">Clave API y modelo asignado por operación</p>
+            <p class="sc-desc">Claves API por proveedor y modelo asignado por operación</p>
           </div>
         </div>
         <div class="sc-body">
           <div v-if="llmStore.isConfigured" class="alert alert-success">
-            ✅ Clave Anthropic configurada
+            ✅ Al menos un proveedor configurado
           </div>
           <div v-else class="alert alert-error">
             ⚠️ Sin clave API — las funciones de IA no estarán disponibles
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Clave API Anthropic</label>
+          <!-- One key field per provider -->
+          <div v-for="prov in llmProviders" :key="prov.id" class="form-group">
+            <label class="form-label">
+              <span class="provider-icon">{{ prov.icon }}</span>
+              {{ prov.apiKeyLabel }}
+            </label>
             <div style="position:relative">
               <input
-                v-model="llmKey"
-                :type="showLlmKey ? 'text' : 'password'"
+                v-model="llmKeys[prov.id]"
+                :type="showLlmKey[prov.id] ? 'text' : 'password'"
                 class="form-input"
-                placeholder="sk-ant-..."
+                :placeholder="prov.apiKeyPlaceholder"
                 autocomplete="off"
                 style="padding-right:40px"
               />
               <button
                 type="button"
                 style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--text-secondary)"
-                @click="showLlmKey = !showLlmKey"
-              >{{ showLlmKey ? '🙈' : '👁️' }}</button>
+                @click="showLlmKey[prov.id] = !showLlmKey[prov.id]"
+              >{{ showLlmKey[prov.id] ? '🙈' : '👁️' }}</button>
             </div>
-            <span class="form-hint">Obtén tu clave en <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com →</a></span>
+            <span class="form-hint">
+              Obtén tu clave en <a :href="prov.docsUrl" target="_blank" rel="noopener">{{ prov.docsUrl }} →</a>
+            </span>
           </div>
 
           <div class="form-group">
@@ -217,7 +223,7 @@
             <div class="llm-ops-table">
               <div class="llm-ops-header">
                 <span>Operación</span>
-                <span>Modelo</span>
+                <span>Proveedor / Modelo</span>
               </div>
               <div v-for="op in llmOperations" :key="op.id" class="llm-ops-row">
                 <div>
@@ -227,19 +233,16 @@
                 <select
                   :value="llmStore.models[op.id]"
                   class="form-input form-select"
-                  style="width:auto;min-width:180px;flex-shrink:0"
+                  style="width:auto;min-width:210px;flex-shrink:0"
                   @change="llmStore.setModel(op.id, $event.target.value)"
                 >
-                  <option v-for="m in llmModels" :key="m.id" :value="m.id">
-                    {{ m.label }}
-                  </option>
+                  <optgroup v-for="prov in llmProviders" :key="prov.id" :label="prov.label">
+                    <option v-for="m in prov.models" :key="m.id" :value="prov.id + ':' + m.id">
+                      {{ m.label }}
+                    </option>
+                  </optgroup>
                 </select>
               </div>
-            </div>
-            <div class="llm-model-legend">
-              <span v-for="m in llmModels" :key="m.id" class="llm-legend-item">
-                <strong>{{ m.label }}:</strong> {{ m.description }}
-              </span>
             </div>
           </div>
 
@@ -271,6 +274,142 @@
           </table>
         </div>
       </div>
+      <!-- Color Palettes (designers only) -->
+      <div v-if="authStore.isDesigner" class="settings-card card palette-mgr-card">
+        <div class="sc-header">
+          <div class="sc-icon">🎨</div>
+          <div>
+            <h3 class="sc-title">Paletas de colores</h3>
+            <p class="sc-desc">Gestiona las paletas disponibles para dashboards y widgets. La paleta predeterminada se aplica automáticamente a los nuevos dashboards.</p>
+          </div>
+        </div>
+
+        <div class="sc-body">
+
+          <!-- Palette list -->
+          <div class="pal-list">
+            <div
+              v-for="palette in paletteStore.allPalettes"
+              :key="palette.id"
+              class="pal-row"
+              :class="{ 'pal-row--default': paletteStore.defaultPaletteId === palette.id }"
+            >
+              <div class="pal-row-swatches">
+                <span
+                  v-for="c in palette.colors.slice(0, 8)"
+                  :key="c"
+                  class="pal-swatch"
+                  :style="{ background: c }"
+                />
+              </div>
+              <span class="pal-row-name">{{ palette.label }}</span>
+              <span v-if="paletteStore.defaultPaletteId === palette.id" class="pal-default-badge">
+                Por defecto
+              </span>
+              <div class="pal-row-actions">
+                <button
+                  class="btn-icon"
+                  :data-tooltip="paletteStore.defaultPaletteId === palette.id ? 'Quitar predeterminada' : 'Establecer como predeterminada'"
+                  @click="paletteStore.setDefault(palette.id)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon :fill="paletteStore.defaultPaletteId === palette.id ? 'currentColor' : 'none'" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </button>
+                <button
+                  class="btn-icon"
+                  data-tooltip="Editar"
+                  @click="startEditPalette(palette)"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button
+                  class="btn-icon"
+                  data-tooltip="Eliminar"
+                  :disabled="paletteStore.allPalettes.length <= 1"
+                  @click="confirmDeletePalette(palette)"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6M14 11v6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add / Edit form -->
+          <div class="pal-form" v-if="palForm.open">
+            <h4 class="pal-form-title">{{ palForm.editId ? 'Editar paleta' : 'Nueva paleta' }}</h4>
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <input v-model="palForm.label" class="form-input" placeholder="Ej: Corporativa" maxlength="40" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Colores (mínimo 6)</label>
+              <div class="pal-color-inputs">
+                <div v-for="(c, idx) in palForm.colors" :key="idx" class="pal-color-slot">
+                  <input type="color" v-model="palForm.colors[idx]" class="pal-color-input" />
+                  <button
+                    v-if="palForm.colors.length > 6"
+                    class="pal-color-remove"
+                    @click="palForm.colors.splice(idx, 1)"
+                    title="Quitar"
+                  >×</button>
+                </div>
+                <button
+                  v-if="palForm.colors.length < 12"
+                  class="pal-color-add"
+                  @click="palForm.colors.push('#cccccc')"
+                >+</button>
+              </div>
+              <div class="pal-form-preview">
+                <span
+                  v-for="c in palForm.colors"
+                  :key="c + Math.random()"
+                  class="pal-swatch pal-swatch--lg"
+                  :style="{ background: c }"
+                />
+              </div>
+            </div>
+            <div class="sc-actions">
+              <button class="btn btn-secondary" @click="closePalForm">Cancelar</button>
+              <button
+                class="btn btn-primary"
+                :disabled="!palForm.label.trim() || palForm.colors.length < 6"
+                @click="savePalette"
+              >
+                {{ palForm.editId ? 'Guardar cambios' : 'Añadir paleta' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="sc-actions" v-else>
+            <button class="btn btn-secondary" @click="openNewPalForm">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nueva paleta
+            </button>
+            <button class="btn btn-secondary" @click="paletteStore.resetToBuiltIn">
+              Restaurar predefinidas
+            </button>
+          </div>
+
+          <!-- Delete confirm -->
+          <div v-if="deletingPalette" class="pal-delete-confirm">
+            <span>¿Eliminar <strong>{{ deletingPalette.label }}</strong>?</span>
+            <button class="btn btn-secondary btn-sm" @click="deletingPalette = null">Cancelar</button>
+            <button class="btn btn-sm" style="background:var(--error);color:#fff;border-color:var(--error)" @click="doDeletePalette">Eliminar</button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -281,10 +420,12 @@ import { useAuthStore } from '@/stores/auth'
 import { useCubeStore } from '@/stores/cubejs'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
-import { useLlmStore, ANTHROPIC_MODELS, LLM_OPERATIONS } from '@/stores/llm'
+import { useLlmStore, PROVIDERS, LLM_OPERATIONS } from '@/stores/llm'
+import { useColorPaletteStore } from '@/stores/colorPalettes'
 
 const authStore = useAuthStore()
 const cubeStore = useCubeStore()
+const paletteStore = useColorPaletteStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 const llmStore = useLlmStore()
@@ -301,13 +442,15 @@ const testing = ref(false)
 const openCubes = ref([])
 
 // LLM
-const llmKey = ref(llmStore.anthropicKey)
-const showLlmKey = ref(false)
-const llmModels = ANTHROPIC_MODELS
+const llmProviders = PROVIDERS
 const llmOperations = LLM_OPERATIONS
+const llmKeys = ref(Object.fromEntries(PROVIDERS.map(p => [p.id, llmStore.keys[p.id] ?? ''])))
+const showLlmKey = ref(Object.fromEntries(PROVIDERS.map(p => [p.id, false])))
 
 function saveLlm() {
-  llmStore.setKey(llmKey.value)
+  for (const prov of PROVIDERS) {
+    llmStore.setKey(prov.id, llmKeys.value[prov.id] ?? '')
+  }
   uiStore.addAlert({ type: 'success', message: 'Configuración LLM guardada' })
 }
 
@@ -342,6 +485,54 @@ function toggleCube(name) {
   const idx = openCubes.value.indexOf(name)
   if (idx === -1) openCubes.value.push(name)
   else openCubes.value.splice(idx, 1)
+}
+
+// ── Palette management ────────────────────────────────────────
+const deletingPalette = ref(null)
+
+const palForm = ref({ open: false, editId: null, label: '', colors: [] })
+
+function openNewPalForm() {
+  palForm.value = {
+    open: true,
+    editId: null,
+    label: '',
+    colors: ['#1890ff','#52c41a','#faad14','#f5222d','#722ed1','#13c2c2','#fa8c16','#eb2f96']
+  }
+}
+
+function startEditPalette(palette) {
+  palForm.value = {
+    open: true,
+    editId: palette.id,
+    label: palette.label,
+    colors: [...palette.colors]
+  }
+}
+
+function closePalForm() {
+  palForm.value.open = false
+}
+
+function savePalette() {
+  const { editId, label, colors } = palForm.value
+  if (editId) {
+    paletteStore.updatePalette(editId, label.trim(), colors)
+  } else {
+    paletteStore.addPalette(label.trim(), colors)
+  }
+  palForm.value.open = false
+  uiStore.addAlert({ type: 'success', message: editId ? 'Paleta actualizada' : 'Paleta añadida' })
+}
+
+function confirmDeletePalette(palette) {
+  deletingPalette.value = palette
+}
+
+function doDeletePalette() {
+  paletteStore.deletePalette(deletingPalette.value.id)
+  deletingPalette.value = null
+  uiStore.addAlert({ type: 'success', message: 'Paleta eliminada' })
 }
 </script>
 
@@ -454,6 +645,7 @@ function toggleCube(name) {
 .info-table tr:last-child td { border-bottom: none; }
 
 /* LLM */
+.provider-icon { margin-right: 4px; }
 .llm-ops-table { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .llm-ops-header {
   display: grid; grid-template-columns: 1fr auto;
@@ -471,8 +663,117 @@ function toggleCube(name) {
 .llm-ops-row:last-child { border-bottom: none; }
 .llm-op-label { font-size: 13px; font-weight: 600; color: var(--text); }
 .llm-op-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-.llm-model-legend { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-.llm-legend-item  { font-size: 12px; color: var(--text-secondary); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Palette manager */
+.palette-mgr-card { grid-column: 1 / -1; }
+
+.pal-list { display: flex; flex-direction: column; gap: 6px; }
+
+.pal-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+.pal-row--default { border-color: var(--primary); background: #e6f4ff; }
+
+.pal-row-swatches { display: flex; gap: 3px; flex-shrink: 0; }
+.pal-swatch {
+  width: 16px; height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.pal-swatch--lg { width: 22px; height: 22px; border-radius: 4px; }
+
+.pal-row-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; }
+
+.pal-default-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pal-row-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+.pal-form {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pal-form-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+
+.pal-color-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+.pal-color-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.pal-color-input {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px;
+  cursor: pointer;
+  background: #fff;
+}
+.pal-color-remove {
+  position: absolute; top: -6px; right: -6px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: var(--error);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.pal-color-add {
+  width: 36px; height: 36px;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+  background: transparent;
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.pal-color-add:hover { border-color: var(--primary); color: var(--primary); }
+
+.pal-form-preview {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.pal-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--error);
+  border-radius: 8px;
+  background: #fff2f0;
+  font-size: 13px;
+}
+.pal-delete-confirm span { flex: 1; }
 </style>

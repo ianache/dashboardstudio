@@ -62,13 +62,22 @@
     </div>
 
     <!-- Chart Body -->
-    <div class="widget-body">
+    <div class="widget-body" :class="{ 'widget-body--table': widget.chartType === 'table' }">
+      <DataTableWidget
+        v-if="widget.chartType === 'table'"
+        :data="data"
+        :loading="loading"
+        :error="errorMsg"
+        :widget="widget"
+      />
       <EChartWrapper
+        v-else
         :chart-type="widget.chartType"
         :data="data"
         :loading="loading"
         :error="errorMsg"
         :widget="widget"
+        :dashboard-palette="dashboardPalette"
       />
     </div>
 
@@ -89,13 +98,15 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue'
 import EChartWrapper from '../charts/EChartWrapper.vue'
+import DataTableWidget from '../charts/DataTableWidget.vue'
 import { useCubeQuery, downloadCSV } from '@/composables/useCubeQuery'
 
 const props = defineProps({
   widget: { type: Object, required: true },
   isDesignMode: { type: Boolean, default: false },
   isSelected: { type: Boolean, default: false },
-  dashboardFilters: { type: Array, default: () => [] }
+  dashboardFilters: { type: Array, default: () => [] },
+  dashboardPalette: { type: String, default: null }
 })
 
 const emit = defineEmits(['configure', 'remove', 'select', 'resize-start', 'drag-start'])
@@ -104,7 +115,7 @@ const dashboardFiltersRef = computed(() => props.dashboardFilters)
 const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget, dashboardFiltersRef)
 
 const CHART_ICONS = {
-  bar: '📊', line: '📈', pie: '🥧', gauge: '🎯', radar: '🕸️', combined: '📉'
+  bar: '📊', line: '📈', pie: '🥧', gauge: '🎯', radar: '🕸️', combined: '📉', table: '🗒️'
 }
 
 const chartTypeIcon = computed(() => CHART_ICONS[props.widget.chartType] || '📊')
@@ -208,6 +219,7 @@ watch(() => props.dashboardFilters, () => fetchData())
   padding: 8px;
   overflow: hidden;
 }
+.widget-body--table { padding: 0; }
 
 /* Footer */
 .widget-footer {

@@ -103,6 +103,63 @@
 
         <div class="toolbar-spacer" />
 
+        <!-- Palette picker (design mode only) -->
+        <div v-if="isDesignMode" class="palette-picker" v-click-outside="() => paletteOpen = false">
+          <button class="palette-trigger" @click="paletteOpen = !paletteOpen" :title="'Paleta del dashboard'">
+            <div class="palette-trigger-swatches" v-if="activeDashboardPalette">
+              <span
+                v-for="c in activeDashboardPalette.colors.slice(0, 5)"
+                :key="c"
+                class="palette-trigger-swatch"
+                :style="{ background: c }"
+              />
+            </div>
+            <div class="palette-trigger-swatches palette-trigger-swatches--default" v-else>
+              <span class="palette-trigger-swatch" style="background:#1890ff"/>
+              <span class="palette-trigger-swatch" style="background:#52c41a"/>
+              <span class="palette-trigger-swatch" style="background:#faad14"/>
+              <span class="palette-trigger-swatch" style="background:#f5222d"/>
+              <span class="palette-trigger-swatch" style="background:#722ed1"/>
+            </div>
+            <span class="palette-trigger-label">{{ activeDashboardPalette?.label ?? 'Por defecto' }}</span>
+            <svg class="palette-trigger-arrow" :class="{ open: paletteOpen }" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="palette-dropdown" v-if="paletteOpen">
+            <div
+              class="palette-option"
+              :class="{ selected: !activeDashboard?.colorPalette }"
+              @click="selectDashboardPalette(null)"
+            >
+              <span class="palette-option-label">Por defecto</span>
+              <div class="palette-option-swatches">
+                <span class="palette-option-swatch" style="background:#1890ff"/>
+                <span class="palette-option-swatch" style="background:#52c41a"/>
+                <span class="palette-option-swatch" style="background:#faad14"/>
+                <span class="palette-option-swatch" style="background:#f5222d"/>
+                <span class="palette-option-swatch" style="background:#722ed1"/>
+                <span class="palette-option-swatch" style="background:#13c2c2"/>
+              </div>
+            </div>
+            <div
+              v-for="palette in paletteStore.allPalettes"
+              :key="palette.id"
+              class="palette-option"
+              :class="{ selected: activeDashboard?.colorPalette === palette.id }"
+              @click="selectDashboardPalette(palette.id)"
+            >
+              <span class="palette-option-label">{{ palette.label }}</span>
+              <div class="palette-option-swatches">
+                <span
+                  v-for="c in palette.colors.slice(0, 6)"
+                  :key="c"
+                  class="palette-option-swatch"
+                  :style="{ background: c }"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Public toggle -->
         <label class="toggle-label">
           <input type="checkbox" v-model="isPublic" @change="togglePublic" />
@@ -162,6 +219,7 @@
           :is-design-mode="isDesignMode"
           :dashboard-id="activeDashboard.id"
           :dashboard-filters="resolvedDashboardFilters"
+          :dashboard-palette="activeDashboard.colorPalette || null"
           @configure-widget="openConfigModal"
           @remove-widget="removeWidget"
         />
@@ -316,12 +374,14 @@ import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
+import { useColorPaletteStore } from '@/stores/colorPalettes'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
+const paletteStore = useColorPaletteStore()
 
 // State
 const isDesignMode = ref(true)
@@ -340,6 +400,17 @@ const editTitleValue = ref('')
 const editDescription = ref('')
 const titleInput = ref(null)
 const isPublic = ref(false)
+const paletteOpen = ref(false)
+
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutsideHandler = (e) => { if (!el.contains(e.target)) binding.value(e) }
+    document.addEventListener('mousedown', el._clickOutsideHandler)
+  },
+  unmounted(el) {
+    document.removeEventListener('mousedown', el._clickOutsideHandler)
+  }
+}
 
 const chartTypes = [
   { value: 'bar', label: 'Barras', icon: '📊', desc: 'Comparar categorías' },
@@ -347,7 +418,8 @@ const chartTypes = [
   { value: 'pie', label: 'Pastel', icon: '🥧', desc: 'Distribución porcentual' },
   { value: 'gauge', label: 'Gauge', icon: '🎯', desc: 'Valor único / KPI' },
   { value: 'radar', label: 'Radar', icon: '🕸️', desc: 'Múltiples variables' },
-  { value: 'combined', label: 'Combinado', icon: '📉', desc: 'Barras + Líneas' }
+  { value: 'combined', label: 'Combinado', icon: '📉', desc: 'Barras + Líneas' },
+  { value: 'table',    label: 'Tabla',     icon: '🗒️', desc: 'Datos con paginación y ordenamiento' }
 ]
 
 // Active dashboard from route
@@ -492,6 +564,17 @@ function togglePublic() {
     dashboardStore.updateDashboard(activeDashboard.value.id, { isPublic: isPublic.value })
   }
 }
+
+function selectDashboardPalette(paletteId) {
+  if (activeDashboard.value) {
+    dashboardStore.updateDashboard(activeDashboard.value.id, { colorPalette: paletteId })
+  }
+  paletteOpen.value = false
+}
+
+const activeDashboardPalette = computed(() =>
+  paletteStore.getPaletteById(activeDashboard.value?.colorPalette) || null
+)
 </script>
 
 <style scoped>
@@ -548,6 +631,91 @@ function togglePublic() {
 .edit-hint { opacity: 0.5; }
 .title-edit-input { max-width: 300px; font-size: 15px; font-weight: 600; }
 .toolbar-spacer { flex: 1; }
+
+/* Palette picker */
+.palette-picker {
+  position: relative;
+  flex-shrink: 0;
+}
+.palette-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  transition: border-color 0.15s;
+  white-space: nowrap;
+}
+.palette-trigger:hover { border-color: var(--primary); }
+.palette-trigger-swatches {
+  display: flex;
+  gap: 2px;
+}
+.palette-trigger-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.palette-trigger-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.palette-trigger-arrow {
+  color: var(--text-secondary);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.palette-trigger-arrow.open { transform: rotate(180deg); }
+
+.palette-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  min-width: 220px;
+  z-index: 200;
+  overflow: hidden;
+}
+.palette-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 12px;
+}
+.palette-option:hover { background: var(--bg); }
+.palette-option.selected { background: #e6f4ff; }
+.palette-option-label {
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.palette-option.selected .palette-option-label { color: var(--primary); font-weight: 600; }
+.palette-option-swatches {
+  display: flex;
+  gap: 3px;
+}
+.palette-option-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+}
 
 .toggle-label {
   display: flex; align-items: center; gap: 6px;

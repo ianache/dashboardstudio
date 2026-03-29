@@ -119,7 +119,7 @@ services:
       CUBEJS_CONCURRENCY: 4
       CUBEJS_DB_POOL_MAX: 8
     volumes:
-      - ./schema:/cube/conf/schema
+      - ./cube-data:/cube/conf/schema
       - ./cube.js:/cube/conf/cube.js:ro
     depends_on:
       postgres:

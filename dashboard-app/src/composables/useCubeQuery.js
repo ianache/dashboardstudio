@@ -32,6 +32,31 @@ function generateMockData(widget) {
         value: Math.floor(Math.random() * 80) + 20
       }))
 
+    case 'table': {
+      const statuses  = ['Completado', 'Pendiente', 'En proceso', 'Cancelado']
+      const products  = ['Laptop Pro', 'Monitor 4K', 'Teclado Inalámbrico', 'Mouse Ergonómico', 'Webcam HD', 'Auriculares', 'Tablet', 'Impresora']
+      const regions   = ['Norte', 'Sur', 'Este', 'Oeste', 'Centro']
+      return Array.from({ length: 50 }, (_, i) => {
+        const qty    = Math.floor(Math.random() * 10) + 1
+        const price  = +(Math.random() * 950 + 50).toFixed(2)
+        const date   = new Date(Date.now() - Math.random() * 90 * 86400000).toISOString().slice(0, 10)
+        return {
+          label: `Orden #${1000 + i + 1}`,
+          value: +(price * qty).toFixed(2),
+          raw: {
+            'id':        1000 + i + 1,
+            'fecha':     date,
+            'producto':  products[i % products.length],
+            'region':    regions[i % regions.length],
+            'estado':    statuses[Math.floor(Math.random() * statuses.length)],
+            'cantidad':  qty,
+            'precio':    price,
+            'total':     +(price * qty).toFixed(2)
+          }
+        }
+      })
+    }
+
     default:
       return []
   }

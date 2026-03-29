@@ -18,6 +18,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useColorPaletteStore } from '@/stores/colorPalettes'
+
+const paletteStore = useColorPaletteStore()
 
 const props = defineProps({
   chartType: {
@@ -39,6 +42,10 @@ const props = defineProps({
   widget: {
     type: Object,
     required: true
+  },
+  dashboardPalette: {
+    type: String,
+    default: null
   }
 })
 
@@ -46,6 +53,28 @@ const COLORS = [
   '#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1',
   '#13c2c2', '#fa8c16', '#eb2f96', '#2f54eb', '#a0d911'
 ]
+
+// Active palette resolution (priority order):
+//   widget 'none'     → no palette (use measure colors)
+//   widget <id>       → widget-specific palette
+//   dashboardPalette  → dashboard palette
+//   system default    → defaultPaletteId from settings
+//   fallback          → hardcoded COLORS
+const activePaletteId = computed(() => {
+  const wp = props.widget.colorPalette
+  if (wp === 'none') return null
+  return wp || props.dashboardPalette || paletteStore.defaultPaletteId || null
+})
+const activeColors = computed(() => {
+  if (!activePaletteId.value) return COLORS
+  return paletteStore.getPaletteById(activePaletteId.value)?.colors ?? COLORS
+})
+
+// Resolve color for a series index
+function seriesColor(index, measureColor) {
+  if (activePaletteId.value) return activeColors.value[index % activeColors.value.length]
+  return measureColor || COLORS[index % COLORS.length]
+}
 
 const chartOption = computed(() => {
   if (!props.data || props.data.length === 0) {
@@ -55,7 +84,8 @@ const chartOption = computed(() => {
   const baseOption = buildBaseOption()
   const customOptions = props.widget.chartOptions || {}
 
-  return deepMerge(baseOption, customOptions)
+  // Inject palette as ECharts top-level color array (affects tooltip, legend, auto-series)
+  return deepMerge({ color: activeColors.value }, deepMerge(baseOption, customOptions))
 })
 
 function buildBaseOption() {
@@ -88,7 +118,7 @@ function buildBarOption() {
   const rawData = [props.data.map(d => d.value), props.data.map(d => d.value2 || 0)]
 
   const series = measures.slice(0, 2).map((m, i) =>
-    buildSeriesItem(m.label || `Serie ${i + 1}`, rawData[i], m.color || COLORS[i], m.seriesType || 'bar')
+    buildSeriesItem(m.label || `Serie ${i + 1}`, rawData[i], seriesColor(i, m.color), m.seriesType || 'bar')
   )
 
   return {
@@ -110,7 +140,7 @@ function buildLineOption() {
   const values = props.data.map(d => d.value)
   const measures = props.widget.cubeQuery?.measures || []
   const seriesName = measures[0]?.label || 'Valor'
-  const color = measures[0]?.color || COLORS[0]
+  const color = seriesColor(0, measures[0]?.color)
 
   return {
     tooltip: { trigger: 'axis' },
@@ -131,21 +161,59 @@ function buildLineOption() {
 }
 
 function buildPieOption() {
+  const opts = props.widget.pieOptions || {}
+  const showValue   = opts.showValue   ?? false
+  const showPercent = opts.showPercent ?? true
+  const showTotal   = opts.showTotal   ?? false
+
+  const total = props.data.reduce((s, d) => s + (d.value || 0), 0)
+  const measures = props.widget.cubeQuery?.measures || []
+  const metricLabel = measures[0]?.label || 'Total'
+
   const seriesData = props.data.map((d, i) => ({
     name: d.label,
     value: d.value,
-    itemStyle: { color: COLORS[i % COLORS.length] }
+    itemStyle: { color: activeColors.value[i % activeColors.value.length] }
   }))
+
+  // Build label formatter
+  let labelParts = ['{b}']
+  if (showValue && showPercent) labelParts.push('{c} ({d}%)')
+  else if (showValue)           labelParts.push('{c}')
+  else if (showPercent)         labelParts.push('{d}%')
+  const labelFormatter = labelParts.join('\n')
+  const showLabel = showValue || showPercent
+
+  // Center graphic for total
+  const graphic = showTotal ? [{
+    type: 'text',
+    left: 'center',
+    top: 'center',
+    style: {
+      text: `${metricLabel}\n${total.toLocaleString('es', { maximumFractionDigits: 2 })}`,
+      textAlign: 'center',
+      fill: '#333',
+      fontSize: 13,
+      fontWeight: 'bold',
+      lineHeight: 20
+    }
+  }] : []
 
   return {
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
     legend: { bottom: 0, type: 'scroll' },
+    graphic,
     series: [{
       type: 'pie',
-      radius: ['35%', '65%'],
+      radius: showTotal ? ['40%', '68%'] : ['35%', '65%'],
       center: ['50%', '45%'],
       data: seriesData,
-      label: { formatter: '{b}\n{d}%', fontSize: 12 },
+      label: {
+        show: showLabel,
+        formatter: labelFormatter,
+        fontSize: 12
+      },
+      labelLine: { show: showLabel },
       emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' } }
     }]
   }
@@ -198,7 +266,7 @@ function buildRadarOption() {
   const values = props.data.map(d => d.value)
   const measures = props.widget.cubeQuery?.measures || []
   const seriesName = measures[0]?.label || 'Valor'
-  const color = measures[0]?.color || COLORS[0]
+  const color = seriesColor(0, measures[0]?.color)
 
   return {
     tooltip: { trigger: 'item' },
@@ -229,8 +297,8 @@ function buildCombinedOption() {
   const m1 = measures[1] || {}
   const name0 = m0.label || 'Serie 1'
   const name1 = m1.label || 'Serie 2'
-  const color0 = m0.color || COLORS[0]
-  const color1 = m1.color || COLORS[1]
+  const color0 = seriesColor(0, m0.color)
+  const color1 = seriesColor(1, m1.color)
 
   const s0 = { ...buildSeriesItem(name0, props.data.map(d => d.value), color0, m0.seriesType || 'bar'), yAxisIndex: 0 }
   const s1 = { ...buildSeriesItem(name1, props.data.map(d => d.value2 || 0), color1, m1.seriesType || 'line'), yAxisIndex: 1 }
