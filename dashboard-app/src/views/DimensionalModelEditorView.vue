@@ -1050,7 +1050,7 @@ function exportSingleCube(node) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a'); a.href = url; a.download = fileName; a.click()
   URL.revokeObjectURL(url)
-  uiStore.notify({ message: `Cubo ${cubeOf[node.id]} exportado`, type: 'success' })
+  uiStore.addAlert({ message: `Cubo ${cubeOf[node.id]} exportado`, type: 'success' })
 }
 
 // Export all nodes as individual .js files bundled in a ZIP
@@ -1071,7 +1071,7 @@ async function handleExportCubeJS() {
   const url = URL.createObjectURL(zipBlob)
   const a = document.createElement('a'); a.href = url; a.download = `${slug}_cubejs.zip`; a.click()
   URL.revokeObjectURL(url)
-  uiStore.notify({ message: `${rNodes.length} cubos exportados en ${slug}_cubejs.zip`, type: 'success' })
+  uiStore.addAlert({ message: `${rNodes.length} cubos exportados en ${slug}_cubejs.zip`, type: 'success' })
 }
 
 // ── Canvas ───────────────────────────────────────────────────
@@ -1493,7 +1493,7 @@ function applyAITables() {
     })
   })
 
-  uiStore.notify({ message: `${aiSelectedTables.value.length} tabla(s) añadidas al canvas`, type: 'success' })
+  uiStore.addAlert({ message: `${aiSelectedTables.value.length} tabla(s) añadidas al canvas`, type: 'success' })
   aiAssistOpen.value = false
   aiAssistResult.value = null
   aiAssistPrompt.value = ''
