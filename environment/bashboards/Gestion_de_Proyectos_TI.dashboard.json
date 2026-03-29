@@ -1,0 +1,250 @@
+{
+  "__dashboardStudio": true,
+  "version": "1.0",
+  "exportedAt": "2026-03-29T20:15:00.479Z",
+  "dashboard": {
+    "name": "Gestion de Proyectos TI",
+    "description": "Tablero de Gestión de Proyectos y Colaboradores",
+    "isPublic": false,
+    "filters": [
+      {
+        "id": "t7kqzbovf",
+        "dimension": "Colaborador.usuario",
+        "label": "Colaborador",
+        "type": "string"
+      },
+      {
+        "id": "4xmnuuyak",
+        "dimension": "dim_tiempo.id_fecha",
+        "label": "Fecha",
+        "type": "time"
+      },
+      {
+        "id": "qb0i6wiwo",
+        "dimension": "Producto.id",
+        "label": "Producto",
+        "type": "string"
+      },
+      {
+        "id": "vv1t6ufqa",
+        "dimension": "Colaborador.role",
+        "label": "Role",
+        "type": "string"
+      }
+    ],
+    "colorPalette": null,
+    "widgets": [
+      {
+        "id": "6cez2669i",
+        "title": "Horas Reportadas por Colaborador",
+        "chartType": "combined",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Horasreportadas.horas",
+              "label": "horas reportadas",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            },
+            {
+              "key": "Horasreportadas.jornada",
+              "label": "jornada",
+              "color": "#ff1a1a",
+              "seriesType": "line"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.usuario",
+              "label": "usuario"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": false,
+          "showPercent": true,
+          "showTotal": false
+        },
+        "colorPalette": null
+      },
+      {
+        "id": "4wnjv2saf",
+        "title": "Tareas del Colaborador",
+        "chartType": "table",
+        "position": {
+          "x": 6,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Horasreportadas.horas",
+              "label": "horas",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            },
+            {
+              "key": "Horasreportadas.costo",
+              "label": "costo",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.usuario",
+              "label": "usuario"
+            },
+            {
+              "key": "Colaborador.nombre",
+              "label": "nombre"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": false,
+          "showPercent": true,
+          "showTotal": false
+        },
+        "colorPalette": null
+      },
+      {
+        "id": "er2vuqorn",
+        "title": "Distribucion de tareas por role",
+        "chartType": "pie",
+        "position": {
+          "x": 0,
+          "y": 4,
+          "w": 4,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Horasreportadas.count",
+              "label": "count",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.role",
+              "label": "role"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {
+          "tooltip": {
+            "trigger": "item",
+            "formatter": "{b} \n {c} {d}%"
+          }
+        },
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": true
+        },
+        "colorPalette": null
+      },
+      {
+        "id": "n1dlw9egx",
+        "title": "Distribucion de horas por role",
+        "chartType": "pie",
+        "position": {
+          "x": 4,
+          "y": 4,
+          "w": 4,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Horasreportadas.horas",
+              "label": "horas",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.role",
+              "label": "role"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": false
+        },
+        "colorPalette": null
+      },
+      {
+        "id": "e3vpt5s30",
+        "title": "Distribucion de costo por role",
+        "chartType": "pie",
+        "position": {
+          "x": 8,
+          "y": 4,
+          "w": 4,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Horasreportadas.costo",
+              "label": "costo",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.role",
+              "label": "role"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": false
+        },
+        "colorPalette": null
+      }
+    ]
+  }
+}

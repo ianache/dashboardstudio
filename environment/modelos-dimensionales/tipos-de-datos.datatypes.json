@@ -1,0 +1,152 @@
+{
+  "__dashboardStudio": true,
+  "type": "dataTypes",
+  "version": "1.0",
+  "exportedAt": "2026-03-29T20:41:37.483Z",
+  "dataTypes": [
+    {
+      "id": "dt-serial",
+      "name": "Serial",
+      "baseType": "SERIAL",
+      "size": null,
+      "precision": null,
+      "description": "Entero autoincremental (clave primaria)"
+    },
+    {
+      "id": "dt-int",
+      "name": "Entero",
+      "baseType": "INTEGER",
+      "size": null,
+      "precision": null,
+      "description": "Número entero de 32 bits"
+    },
+    {
+      "id": "dt-bigint",
+      "name": "Entero grande",
+      "baseType": "BIGINT",
+      "size": null,
+      "precision": null,
+      "description": "Número entero de 64 bits"
+    },
+    {
+      "id": "dt-numeric",
+      "name": "Decimal",
+      "baseType": "NUMERIC",
+      "size": 18,
+      "precision": 4,
+      "description": "Número decimal de alta precisión"
+    },
+    {
+      "id": "dt-money",
+      "name": "Moneda",
+      "baseType": "NUMERIC",
+      "size": 18,
+      "precision": 2,
+      "description": "Valores monetarios"
+    },
+    {
+      "id": "dt-pct",
+      "name": "Porcentaje",
+      "baseType": "NUMERIC",
+      "size": 5,
+      "precision": 2,
+      "description": "Valores porcentuales (0-100)"
+    },
+    {
+      "id": "dt-varchar",
+      "name": "Texto",
+      "baseType": "VARCHAR",
+      "size": 255,
+      "precision": null,
+      "description": "Cadena de texto variable"
+    },
+    {
+      "id": "dt-text",
+      "name": "Texto largo",
+      "baseType": "TEXT",
+      "size": null,
+      "precision": null,
+      "description": "Texto sin límite de longitud"
+    },
+    {
+      "id": "dt-bool",
+      "name": "Booleano",
+      "baseType": "BOOLEAN",
+      "size": null,
+      "precision": null,
+      "description": "Verdadero / Falso"
+    },
+    {
+      "id": "dt-date",
+      "name": "Fecha",
+      "baseType": "DATE",
+      "size": null,
+      "precision": null,
+      "description": "Fecha sin hora (YYYY-MM-DD)"
+    },
+    {
+      "id": "dt-ts",
+      "name": "Timestamp",
+      "baseType": "TIMESTAMP",
+      "size": null,
+      "precision": null,
+      "description": "Fecha y hora sin zona horaria"
+    },
+    {
+      "id": "dt-tstz",
+      "name": "Timestamp TZ",
+      "baseType": "TIMESTAMPTZ",
+      "size": null,
+      "precision": null,
+      "description": "Fecha y hora con zona horaria"
+    },
+    {
+      "id": "dt-uuid",
+      "name": "UUID",
+      "baseType": "UUID",
+      "size": null,
+      "precision": null,
+      "description": "Identificador único universal"
+    },
+    {
+      "id": "dt-jsonb",
+      "name": "JSONB",
+      "baseType": "JSONB",
+      "size": null,
+      "precision": null,
+      "description": "Documento JSON binario indexable"
+    },
+    {
+      "id": "dt-0plpfprzc",
+      "name": "Codigo",
+      "baseType": "VARCHAR",
+      "size": 5,
+      "precision": null,
+      "description": "Codigo corto"
+    },
+    {
+      "id": "dt-1hzl3eodl",
+      "name": "Texto10",
+      "baseType": "VARCHAR",
+      "size": 255,
+      "precision": null,
+      "description": "Cadena de caracteres (10)"
+    },
+    {
+      "id": "dt-ts89rtou0",
+      "name": "Texto20",
+      "baseType": "VARCHAR",
+      "size": 20,
+      "precision": null,
+      "description": "Cadena de caracteres (20)"
+    },
+    {
+      "id": "dt-cp3yhl9gc",
+      "name": "Texto corto",
+      "baseType": "VARCHAR",
+      "size": 50,
+      "precision": null,
+      "description": "Texto corto (50)"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "__dashboardStudio": true,
+  "version": "1.0",
+  "exportedAt": "2026-03-29T20:14:49.615Z",
+  "dashboard": {
+    "name": "Concesionarias",
+    "description": "",
+    "isPublic": true,
+    "filters": [
+      {
+        "id": "ob9aa0n46",
+        "dimension": "Concesionarias.nombre",
+        "label": "Concesionaria",
+        "type": "string"
+      },
+      {
+        "id": "9knbxuyyp",
+        "dimension": "Tiendas.nombre",
+        "label": "Tiendas",
+        "type": "string"
+      }
+    ],
+    "colorPalette": "vivid",
+    "widgets": [
+      {
+        "id": "sa8v36wkm",
+        "title": "Ventas por Tiendas",
+        "chartType": "pie",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 6,
+          "h": 5
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Ventas.precioVenta",
+              "label": "precioventa",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Tiendas.nombre",
+              "label": "nombre"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false
+      },
+      {
+        "id": "xqbgubgoy",
+        "title": "Comisiones por Vendedores",
+        "chartType": "bar",
+        "position": {
+          "x": 6,
+          "y": 0,
+          "w": 6,
+          "h": 5
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Ventas.comisionVendedor",
+              "label": "comision",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Vendedores.nombre",
+              "label": "nombre"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false
+      }
+    ]
+  }
+}

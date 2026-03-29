@@ -1,0 +1,136 @@
+{
+  "__dashboardStudio": true,
+  "version": "1.0",
+  "exportedAt": "2026-03-29T20:14:22.844Z",
+  "dashboard": {
+    "name": "Demo: Ventas por Región",
+    "description": "Dashboard de ejemplo con datos simulados",
+    "isPublic": false,
+    "filters": [],
+    "colorPalette": "earth",
+    "widgets": [
+      {
+        "id": "w1",
+        "title": "Ventas Mensuales",
+        "chartType": "bar",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 6,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Orders.totalRevenue",
+              "label": "Revenue",
+              "color": "#1890ff"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Orders.month",
+              "label": "Mes"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 12
+        },
+        "chartOptions": {},
+        "useMockData": true
+      },
+      {
+        "id": "w2",
+        "title": "Distribución por Categoría",
+        "chartType": "pie",
+        "position": {
+          "x": 6,
+          "y": 0,
+          "w": 6,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Products.count",
+              "label": "Cantidad",
+              "color": ""
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Products.category",
+              "label": "Categoría"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 10
+        },
+        "chartOptions": {},
+        "useMockData": true
+      },
+      {
+        "id": "w3",
+        "title": "Tendencia de Pedidos",
+        "chartType": "line",
+        "position": {
+          "x": 0,
+          "y": 3,
+          "w": 8,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Orders.count",
+              "label": "Pedidos",
+              "color": "#52c41a"
+            }
+          ],
+          "dimensions": [],
+          "timeDimension": {
+            "dimension": "Orders.createdAt",
+            "granularity": "month"
+          },
+          "filters": [],
+          "limit": 12
+        },
+        "chartOptions": {},
+        "useMockData": true
+      },
+      {
+        "id": "w4",
+        "title": "Meta Cumplida",
+        "chartType": "gauge",
+        "position": {
+          "x": 8,
+          "y": 3,
+          "w": 4,
+          "h": 3
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "KPI.achievement",
+              "label": "Logro",
+              "color": "#faad14"
+            }
+          ],
+          "dimensions": [],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 1
+        },
+        "chartOptions": {},
+        "useMockData": true,
+        "pieOptions": {
+          "showValue": false,
+          "showPercent": true,
+          "showTotal": false
+        }
+      }
+    ]
+  }
+}
