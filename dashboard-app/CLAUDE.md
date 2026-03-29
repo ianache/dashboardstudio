@@ -36,10 +36,11 @@ src/
 ├── router/index.js                  # Rutas + guards de autenticación y rol
 │
 ├── stores/
-│   ├── auth.js       # Autenticación, roles, usuarios mock, persistencia localStorage
-│   ├── dashboard.js  # CRUD dashboards y widgets, persistencia localStorage
-│   ├── cubejs.js     # Cliente CubeJS, meta schema, ejecución de queries
-│   └── ui.js         # Sidebar collapsed, breadcrumbs, alertas, dropdowns
+│   ├── auth.js            # Autenticación, roles, usuarios mock, persistencia localStorage
+│   ├── dashboard.js       # CRUD dashboards y widgets, persistencia localStorage
+│   ├── cubejs.js          # Cliente CubeJS, meta schema, ejecución de queries
+│   ├── ui.js              # Sidebar collapsed, breadcrumbs, alertas, dropdowns
+│   └── colorPalettes.js   # Paletas de colores CRUD + defaultPaletteId, persistencia localStorage
 │
 ├── composables/
 │   └── useCubeQuery.js  # Fetch datos CubeJS, generador de mock data, descarga CSV

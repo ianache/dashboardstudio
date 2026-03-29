@@ -12,7 +12,22 @@ Transforma datos internos al formato de opciones de Apache ECharts y renderiza e
 | `data` | `Array` | Datos en formato `[{ label, value, value2? }]` |
 | `loading` | `Boolean` | Muestra skeleton de carga |
 | `error` | `String \| null` | Mensaje de error a mostrar |
-| `widget` | `Object` | Widget completo (para acceder a `chartOptions`) |
+| `widget` | `Object` | Widget completo (accede a `chartOptions` y `colorPalette`) |
+| `dashboardPalette` | `String \| null` | ID de paleta del dashboard padre |
+
+## Resolución de colores
+
+Los colores de las series se resuelven en este orden de prioridad:
+
+```
+widget.colorPalette === 'none'   →  sin paleta (usa colores de medidas)
+widget.colorPalette === <id>     →  paleta específica del widget
+dashboardPalette prop            →  paleta del dashboard
+paletteStore.defaultPaletteId   →  paleta predeterminada del sistema
+(ninguna)                        →  array COLORS hardcoded
+```
+
+Consultar [colorPalettes store](../stores/colorPalettes.md) para detalles del sistema de paletas.
 
 ## Formato de datos internos
 

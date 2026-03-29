@@ -16,7 +16,8 @@ src/
 │   ├── cubejs.js                    # Cliente CubeJS, meta schema, queries
 │   ├── ui.js                        # Sidebar, breadcrumbs, alertas, dropdowns
 │   ├── dataTypes.js                 # Tipos de datos SQL personalizados
-│   └── dimensionalModel.js          # Modelos dimensionales (star schema)
+│   ├── dimensionalModel.js          # Modelos dimensionales (star schema)
+│   └── colorPalettes.js             # Paletas de colores gestionables por diseñadores
 │
 ├── composables/
 │   ├── useCubeQuery.js              # Fetch datos CubeJS, mock data, CSV
@@ -79,7 +80,7 @@ App.vue
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Pinia Stores                            │
-│  auth ─── dashboard ─── cubejs ─── ui ─── dataTypes ─── dm │
+│  auth ── dashboard ── cubejs ── ui ── dataTypes ── dm ── colorPalettes │
 └──────┬──────────┬──────────┬─────────────────────────────────┘
        │          │          │
        ▼          ▼          ▼
@@ -125,6 +126,7 @@ Todo se almacena en **localStorage** (sin backend):
 | `cubeApiUrl` / `cubeToken` | Configuración CubeJS |
 | `dataTypes` | Tipos de datos SQL personalizados |
 | `dimensionalModels` | Modelos dimensionales |
+| `colorPalettes` | Paletas de colores y `defaultPaletteId` |
 
 ## Sistema de grid
 

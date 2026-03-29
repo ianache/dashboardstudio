@@ -16,6 +16,7 @@ Dashboard Studio es una aplicación web para **diseñar y ejecutar dashboards** 
 | [ui](./stores/ui.md) | Estado de interfaz (sidebar, alertas, breadcrumbs) |
 | [dataTypes](./stores/dataTypes.md) | Tipos de datos SQL personalizados |
 | [dimensionalModel](./stores/dimensionalModel.md) | Modelos dimensionales (star schema) |
+| [colorPalettes](./stores/colorPalettes.md) | Gestión de paletas de colores y predeterminada del sistema |
 | **Componentes** | |
 | [Layout](./components/layout.md) | AppLayout, SideMenu, TopBar |
 | [Dashboard](./components/dashboard.md) | DashboardGrid, DashboardWidget, ChartConfigModal, DashboardFilterBar |
@@ -31,7 +32,7 @@ Dashboard Studio es una aplicación web para **diseñar y ejecutar dashboards** 
 | Tecnología | Versión | Uso |
 |---|---|---|
 | Vue 3 | ^3.4 | Framework principal, Composition API + `<script setup>` |
-| Pinia | ^2.1 | Estado global (6 stores) |
+| Pinia | ^2.1 | Estado global (7 stores) |
 | Vue Router | ^4.3 | SPA con guards de rol |
 | Apache ECharts | ^5.4 | Renderizado de gráficos |
 | vue-echarts | ^6.6 | Wrapper Vue para ECharts |
