@@ -5,12 +5,22 @@
         <h2 class="page-title">Modelos Dimensionales</h2>
         <p class="page-subtitle">Diseña y gestiona tus modelos de datos dimensionales</p>
       </div>
-      <button class="btn btn-primary" @click="showNewModal = true">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Nuevo Modelo
-      </button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-icon-only" data-tooltip="Añadir nuevo Modelo Dimensional" @click="showNewModal = true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        
+        <input ref="importInput" type="file" accept=".yaml,.yml" style="display:none" @change="handleImport" />
+        <button class="btn btn-secondary btn-icon-only" data-tooltip="Importar YAML" @click="importInput.click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div v-if="modelStore.allModels.length === 0" class="empty-state card">
@@ -28,6 +38,13 @@
             <span v-if="model.isGlobal" class="global-badge">GLOBAL</span>
           </div>
           <div class="model-card-actions">
+            <button class="btn-icon" data-tooltip="Exportar YAML" @click.stop="exportModel(model.id)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </button>
             <button class="btn-icon" data-tooltip="Editar" @click="openEditor(model.id)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -158,6 +175,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useUIStore } from '@/stores/ui'
+import yaml from 'js-yaml'
 
 const router = useRouter()
 const route = useRoute()
@@ -169,6 +187,7 @@ const showNewModal = ref(false)
 const newName = ref('')
 const newDescription = ref('')
 const deleteTarget = ref(null)
+const importInput = ref(null)
 
 // Inline editing: editingId = '{modelId}:{field}'
 const editingId = ref(null)
@@ -229,6 +248,65 @@ function createModel() {
   })
   cancelNew()
   router.push(`/models/${model.id}`)
+}
+
+function exportModel(modelId) {
+  const model = modelStore.getModel(modelId)
+  if (!model) return
+  const doc = {
+    version: '1.0',
+    type: 'dimensional_model',
+    name: model.name,
+    description: model.description,
+    nodes: model.nodes.map(n => ({
+      id: n.id, type: n.type, name: n.name, x: n.x, y: n.y,
+      fields: n.fields.map(f => ({
+        id: f.id, name: f.name, description: f.description,
+        dataType: f.dataType, isKey: !!f.isKey, isFk: !!f.isFk
+      }))
+    })),
+    relationships: model.relationships.map(r => ({
+      id: r.id, fromNodeId: r.fromNodeId, toNodeId: r.toNodeId, cardinality: r.cardinality
+    }))
+  }
+  const content = yaml.dump(doc, { indent: 2, lineWidth: 120 })
+  const slug = model.name.replace(/[^a-zA-Z0-9_\-. ]/g, '').trim().replace(/\s+/g, '_') || 'modelo'
+  const blob = new Blob([content], { type: 'text/yaml' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = `${slug}.yaml`; a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleImport(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    try {
+      const doc = yaml.load(ev.target.result)
+      if (!doc || typeof doc !== 'object') throw new Error('Formato inválido')
+      
+      // Creamos un nuevo modelo en el listado a partir del YAML importado
+      const newModel = modelStore.createModel({
+        name: doc.name || 'Modelo Importado',
+        description: doc.description || '',
+        createdBy: authStore.user?.id || ''
+      })
+      
+      const m = modelStore.getModel(newModel.id)
+      if (m) {
+        m.nodes = Array.isArray(doc.nodes) ? doc.nodes : []
+        m.relationships = Array.isArray(doc.relationships) ? doc.relationships : []
+        modelStore.persist()
+      }
+    } catch (err) {
+      alert(`Error al importar: ${err.message}`)
+    } finally {
+      e.target.value = ''
+    }
+  }
+  reader.readAsText(file)
 }
 
 function confirmDelete(model) {
