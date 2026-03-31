@@ -2,7 +2,7 @@
   <div
     ref="widgetRef"
     class="dashboard-widget"
-    :class="{ 'is-design': isDesignMode, 'is-selected': isSelected }"
+    :class="{ 'is-design': isDesignMode, 'is-selected': isSelected, 'is-maximized': isMaximized }"
     @click.stop="isDesignMode && $emit('select')"
   >
     <!-- Widget Header -->
@@ -22,6 +22,24 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button
+          class="widget-action-btn"
+          :data-tooltip="isMaximized ? 'Minimizar' : 'Maximizar'"
+          @click.stop="$emit('toggle-maximize')"
+        >
+          <svg v-if="!isMaximized" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"/>
+            <polyline points="9 21 3 21 3 15"/>
+            <line x1="21" y1="3" x2="14" y2="10"/>
+            <line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+          <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 14 10 14 10 20"/>
+            <polyline points="20 10 14 10 14 4"/>
+            <line x1="14" y1="10" x2="21" y2="3"/>
+            <line x1="3" y1="21" x2="10" y2="14"/>
           </svg>
         </button>
         <button
@@ -119,11 +137,12 @@ const props = defineProps({
   widget: { type: Object, required: true },
   isDesignMode: { type: Boolean, default: false },
   isSelected: { type: Boolean, default: false },
+  isMaximized: { type: Boolean, default: false },
   dashboardFilters: { type: Array, default: () => [] },
   dashboardPalette: { type: String, default: null }
 })
 
-const emit = defineEmits(['configure', 'remove', 'select', 'resize-start', 'drag-start'])
+const emit = defineEmits(['configure', 'remove', 'select', 'resize-start', 'drag-start', 'toggle-maximize'])
 
 const dashboardFiltersRef = computed(() => props.dashboardFilters)
 const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget, dashboardFiltersRef)
@@ -200,11 +219,26 @@ watch(() => props.dashboardFilters, () => fetchData())
   overflow: hidden;
   height: 100%;
   position: relative;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s, top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
 }
 .dashboard-widget.is-design { cursor: move; }
 .dashboard-widget.is-design:hover { box-shadow: 0 4px 16px rgba(24,144,255,0.15); border-color: #a0d4ff; }
 .dashboard-widget.is-selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
+
+.dashboard-widget.is-maximized {
+  position: fixed !important;
+  top: 40px !important;
+  left: 40px !important;
+  right: 40px !important;
+  bottom: 40px !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
 /* Header */
 .widget-header {

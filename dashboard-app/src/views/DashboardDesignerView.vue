@@ -533,7 +533,6 @@ const { activeFilterValues, resolvedDashboardFilters, resetFilters } = useDashbo
 
 // Watch route changes
 watch(() => route.params.id, (id) => {
-  resetFilters()
   if (id) {
     const db = dashboardStore.allDashboards.find(d => d.id === id)
     if (db) {

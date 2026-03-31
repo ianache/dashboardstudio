@@ -1,5 +1,6 @@
 <template>
   <div class="grid-outer">
+    <div v-if="maximizedWidgetId" class="grid-maximize-overlay" @click="maximizedWidgetId = null"></div>
     <div
       class="grid-canvas"
       ref="canvasRef"
@@ -20,9 +21,11 @@
           :widget="widget"
           :isDesignMode="isDesignMode"
           :isSelected="selectedWidgetId === widget.id"
+          :isMaximized="maximizedWidgetId === widget.id"
           :dashboardFilters="dashboardFilters"
           :dashboardPalette="dashboardPalette"
           @select="selectWidget(widget.id)"
+          @toggle-maximize="maximizedWidgetId = maximizedWidgetId === widget.id ? null : widget.id"
           @configure="$emit('configure-widget', widget)"
           @remove="$emit('remove-widget', widget.id)"
           @drag-start="(e) => startDrag(e, widget)"
@@ -84,6 +87,7 @@ const GAP = 10         // px gap between cells
 
 const canvasRef = ref(null)
 const selectedWidgetId = ref(null)
+const maximizedWidgetId = ref(null)
 
 // ── Drag state ────────────────────────────────────────────────
 const dragState = ref({
@@ -143,7 +147,8 @@ function getItemStyle(widget) {
     width:  `${w * colW + (w - 1) * GAP}px`,
     height: `${h * ROW_HEIGHT + (h - 1) * GAP}px`,
     transition: (dragState.value.widgetId === widget.id || resizeState.value.widgetId === widget.id)
-      ? 'none' : 'left 0.15s ease, top 0.15s ease'
+      ? 'none' : 'left 0.15s ease, top 0.15s ease',
+    zIndex: maximizedWidgetId.value === widget.id ? 100 : 10
   }
 }
 
@@ -317,6 +322,13 @@ onBeforeUnmount(() => {
 .grid-outer {
   width: 100%;
   height: 100%;
+}
+
+.grid-maximize-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 90;
 }
 
 .grid-canvas {

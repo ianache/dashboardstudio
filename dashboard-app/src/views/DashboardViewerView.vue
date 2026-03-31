@@ -91,7 +91,6 @@ const dashboard = computed(() => {
 const { activeFilterValues, resolvedDashboardFilters, resetFilters } = useDashboardFilters(dashboard)
 
 watch(dashboard, (db) => {
-  resetFilters()
   if (db) {
     uiStore.setBreadcrumbs(['Dashboards', db.name])
   }
