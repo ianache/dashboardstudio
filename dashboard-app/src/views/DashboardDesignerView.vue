@@ -211,6 +211,17 @@
           </svg>
           Añadir widget
         </button>
+        <button
+          v-if="isDesignMode"
+          class="btn-ai-assist"
+          style="margin-left:8px"
+          @click="aiAssistOpen = true"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          </svg>
+          IA Assist
+        </button>
       </div>
 
       <!-- Description field (design mode) -->
@@ -449,6 +460,69 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal: AI Assist -->
+    <div v-if="aiAssistOpen" class="modal-overlay" @click.self="aiAssistOpen = false">
+      <div class="modal card ai-assist-modal">
+        <div class="modal-header ai-assist-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          </svg>
+          <span>IA Assist — Generador de Widgets</span>
+          <span v-if="llmStore.isConfigured" class="ai-model-label">
+            {{ llmStore.configFor('modelAssist').providerLabel }} · {{ llmStore.configFor('modelAssist').modelLabel }}
+          </span>
+          <button class="btn-icon" style="margin-left:auto" @click="aiAssistOpen = false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body ai-assist-body">
+          <div v-if="!llmStore.isConfigured" class="alert alert-error">
+            Sin clave API configurada.
+            <router-link to="/settings" @click="aiAssistOpen = false" style="color:inherit;font-weight:600;margin-left:4px">
+              Ir a Configuración →
+            </router-link>
+          </div>
+          
+          <div class="ai-context-row">
+            <span class="ai-ctx-label">Contexto del Cubo:</span>
+            <span class="badge badge-blue">{{ cubeStore.allMeasures.length }} métricas</span>
+            <span class="badge badge-purple">{{ cubeStore.allDimensions.length }} dimensiones</span>
+          </div>
+
+          <textarea
+            v-model="aiAssistPrompt"
+            class="form-input ai-prompt-input"
+            rows="5"
+            placeholder="Ej: Muéstrame un gráfico de barras comparando el total de ventas por región..."
+            :disabled="aiAssistLoading || !llmStore.isConfigured"
+            @keydown.enter.prevent="runAIAssist"
+          ></textarea>
+        </div>
+
+        <div class="modal-footer ai-assist-footer">
+          <span class="ai-hint">Usa Enter para enviar</span>
+          <button class="btn btn-secondary" @click="aiAssistOpen = false" :disabled="aiAssistLoading">Cancelar</button>
+          <button
+            class="btn-ai-assist"
+            style="margin-left:auto"
+            :disabled="!aiAssistPrompt.trim() || aiAssistLoading || !llmStore.isConfigured"
+            @click="runAIAssist"
+          >
+            <svg v-if="aiAssistLoading" class="spinner-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32" />
+            </svg>
+            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+            {{ aiAssistLoading ? 'Generando...' : 'Generar Widget' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -464,6 +538,9 @@ import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
 import keycloak from '@/services/keycloak'
+import { useCubeStore } from '@/stores/cubejs'
+import { useLlmStore } from '@/stores/llm'
+import { callLlm } from '@/composables/useLlmCall'
 
 const kcUrl = import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak.local'
 const kcRealm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
@@ -474,6 +551,8 @@ const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 const paletteStore = useColorPaletteStore()
+const cubeStore = useCubeStore()
+const llmStore = useLlmStore()
 
 // State
 const isDesignMode = ref(true)
@@ -556,6 +635,102 @@ function openDesigner(id) {
 
 function closeDesigner() {
   router.push('/designer')
+}
+
+// ── AI Assist ─────────────────────────────────────────────────
+const aiAssistOpen = ref(false)
+const aiAssistPrompt = ref('')
+const aiAssistLoading = ref(false)
+
+function buildWidgetAssistPrompt() {
+  const measures = cubeStore.allMeasures.map(m => `- ${m.fullName} (${m.type}) - ${m.title}`).join('\n')
+  const dims = cubeStore.allDimensions.map(d => `- ${d.fullName} (${d.type}) - ${d.title}`).join('\n')
+  
+  return `Eres un experto analista de datos. Tu tarea es generar la configuración de un widget para un dashboard partiendo de un modelo en estrella.
+
+MÉTRICAS DISPONIBLES (Usa el valor 'fullName' para 'measures'):
+${measures}
+
+DIMENSIONES DISPONIBLES (Usa el valor 'fullName' para 'dimensions'. Si es de tiempo, úsalo en 'timeDimension'):
+${dims}
+
+PETICIÓN DEL USUARIO:
+${aiAssistPrompt.value}
+
+INSTRUCCIONES:
+1. Responde SOLO con un bloque JSON válido (\`\`\`json ... \`\`\`).
+2. El JSON debe referenciar EXCLUSIVAMENTE nombres detallados en los listados anteriores y tener este formato EXACTO:
+{
+  "title": "Un título corto para el gráfico generado de tu comprensión de la petición temporal o temática",
+  "widgetType": "bar", // escoge: bar, line, pie, gauge, radar, table, combined
+  "cubeQuery": {
+    "measures": ["CubeName.measureName"],
+    "dimensions": ["CubeName.dimensionName"],
+    "timeDimension": {
+      "dimension": "CubeName.timeDimensionName",
+      "granularity": "month" // opcional, puede ser: day, week, month, year
+    }
+  }
+}
+3. No incluyas texto fuera del bloque JSON.
+4. "timeDimension" es opcional. Solo inclúyela si la consulta tiene un enfoque explícito en fechas/tiempo y la petición o métrica pide graficar en el tiempo. NO la incluyas al azar si analizas campos normales de nombre/status.`
+}
+
+async function runAIAssist() {
+  if (!aiAssistPrompt.value.trim() || !llmStore.isConfigured) return
+  aiAssistLoading.value = true
+
+  try {
+    const cfg = llmStore.configFor('modelAssist')
+    const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildWidgetAssistPrompt() })
+    
+    let widgetDef = null
+    const extractedText = text.trim()
+
+    try {
+      widgetDef = JSON.parse(extractedText)
+    } catch {
+      const match = extractedText.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/i)
+      const block = match ? match[1].trim() : extractedText
+      try {
+        widgetDef = JSON.parse(block)
+      } catch (e2) {
+        throw new Error('No se pudo encontrar un objeto JSON válido en la respuesta.')
+      }
+    }
+
+    if (!widgetDef || !widgetDef.cubeQuery || !widgetDef.widgetType) {
+      throw new Error('La respuesta de la IA carece de los campos requeridos.')
+    }
+
+    const { cubeQuery } = widgetDef;
+    if (cubeQuery.timeDimension && !cubeQuery.timeDimension.dimension) {
+        delete cubeQuery.timeDimension
+    }
+    
+    // Map LLM string arrays to {key, label} objects expected by the store
+    const normalizedQuery = {
+      measures: (cubeQuery.measures || []).map(m => typeof m === 'string' ? { key: m, label: m.split('.').pop(), color: '#1890ff' } : m),
+      dimensions: (cubeQuery.dimensions || []).map(d => typeof d === 'string' ? { key: d, label: d.split('.').pop() } : d),
+      timeDimension: cubeQuery.timeDimension || null,
+      filters: [],
+      limit: 100
+    }
+
+    dashboardStore.addWidget(activeDashboard.value.id, {
+        title: widgetDef.title || 'Gráfico generado por IA',
+        chartType: widgetDef.widgetType,
+        cubeQuery: normalizedQuery,
+        useMockData: false
+    })
+
+    aiAssistOpen.value = false
+    aiAssistPrompt.value = ''
+  } catch (err) {
+    alert('Error al generar widget: ' + err.message)
+  } finally {
+    aiAssistLoading.value = false
+  }
 }
 
 function viewDashboard(id) {
@@ -1041,4 +1216,46 @@ function confirmImport() {
 .ua-name { font-size: 14px; font-weight: 500; color: var(--text); }
 .ua-email { font-size: 12px; color: var(--text-secondary); }
 .ua-check { color: var(--primary); font-weight: 700; font-size: 16px; }
+
+.assign-modal-body p { margin-bottom: 12px; font-size: 14px; text-align: center; }
+.search-input-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; position: relative; }
+.search-input-wrap input { flex: 1; padding-left: 32px; }
+.search-input-wrap svg { position: absolute; left: 10px; color: var(--text-secondary); pointer-events: none; }
+.search-loading { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-style: italic; }
+.search-error { color: var(--error); font-size: 13px; margin-bottom: 8px; background: #fff2f0; padding: 6px 12px; border-radius: 4px; }
+
+.user-list { border: 1px solid var(--border); border-radius: 6px; max-height: 250px; overflow-y: auto; background: #fff; margin-bottom: 16px; }
+.user-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.user-item:last-child { border-bottom: none; }
+.user-item:hover { background: #fdfdfd; }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.user-details { display: flex; flex-direction: column; }
+.user-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.user-email { font-size: 12px; color: var(--text-secondary); }
+
+/* AI Assist Modal */
+.ai-assist-modal { width: 90%; max-width: 600px; display: flex; flex-direction: column; }
+.ai-assist-header { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1)); border-bottom: 1px solid rgba(168,85,247,0.2); color: var(--text); }
+.ai-model-label { margin-left:12px; font-size:11px; font-family:var(--font-mono); background:#fff; padding:2px 6px; border-radius:4px; border:1px solid #e0e0e0; color:#666; }
+.ai-context-row { display: flex; align-items: center; gap:8px; margin-bottom: 16px; font-size: 13px; }
+.ai-ctx-label { font-weight: 600; color: var(--text-secondary); }
+.ai-prompt-input { font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; }
+.ai-prompt-input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
+.ai-hint { margin-right:auto; font-size:12px; color:#aaa; font-style:italic; }
+
+.btn-ai-assist {
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white; border: none; padding: 6px 14px;
+  border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; box-shadow: 0 4px 12px rgba(168, 247, 0.25);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.btn-ai-assist:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(168, 85, 247, 0.35); }
+.btn-ai-assist:active:not(:disabled) { transform: translateY(0); }
+.btn-ai-assist:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; filter: grayscale(50%); }
+
+.spinner-icon { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
