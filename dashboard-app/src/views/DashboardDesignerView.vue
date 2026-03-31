@@ -290,15 +290,30 @@
         </div>
         <div class="modal-body">
           <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px">
-            Selecciona los usuarios que tendrán acceso a este dashboard:
+            Busca y selecciona los usuarios que tendrán acceso a este dashboard:
           </p>
-          <div class="user-assign-list">
+          
+          <div class="form-group" style="margin-bottom: 16px;">
+            <input 
+              v-model="userSearchQuery" 
+              class="form-input" 
+              placeholder="Buscar por nombre o correo..." 
+              @keyup.enter="searchUsers"
+            />
+            <button class="btn btn-secondary btn-sm" style="margin-top: 6px;" @click="searchUsers" :disabled="isSearchingUsers">
+              {{ isSearchingUsers ? 'Buscando...' : 'Buscar en Keycloak' }}
+            </button>
+            <div v-if="searchError" style="color:var(--error); font-size:12px; margin-top:4px">{{ searchError }}</div>
+          </div>
+
+          <div v-if="userSearchResults.length > 0" class="user-assign-list" style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+            <div style="font-size:12px; font-weight:bold; color:var(--text-secondary); margin-bottom:8px">Resultados de búsqueda:</div>
             <div
-              v-for="user in authStore.viewers"
-              :key="user.id"
+              v-for="user in userSearchResults"
+              :key="'s-'+user.id"
               class="user-assign-item"
               :class="{ selected: selectedUsers.includes(user.id) }"
-              @click="toggleUser(user.id)"
+              @click="toggleUserFromSearch(user)"
             >
               <div class="ua-avatar">{{ user.avatar }}</div>
               <div class="ua-info">
@@ -306,6 +321,24 @@
                 <div class="ua-email">{{ user.email }}</div>
               </div>
               <div class="ua-check" v-if="selectedUsers.includes(user.id)">✓</div>
+            </div>
+          </div>
+
+          <div class="user-assign-list">
+            <div style="font-size:12px; font-weight:bold; color:var(--text-secondary); margin-bottom:8px">Usuarios asignados:</div>
+            <div v-if="assignedUsersFull.length === 0" style="font-size:13px; color:var(--text-secondary);">Ninguno</div>
+            <div
+              v-for="user in assignedUsersFull"
+              :key="'a-'+user.id"
+              class="user-assign-item selected"
+              @click="toggleUserFromSearch(user)"
+            >
+              <div class="ua-avatar">{{ user.avatar }}</div>
+              <div class="ua-info">
+                <div class="ua-name">{{ user.name }}</div>
+                <div class="ua-email">{{ user.email }}</div>
+              </div>
+              <div class="ua-check">✓</div>
             </div>
           </div>
         </div>
@@ -430,6 +463,10 @@ import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
+import keycloak from '@/services/keycloak'
+
+const kcUrl = import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak.local'
+const kcRealm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
 
 const route = useRoute()
 const router = useRouter()
@@ -446,6 +483,12 @@ const configuringWidget = ref(null)
 const assigningDashboard = ref(null)
 const deletingDashboard = ref(null)
 const selectedUsers = ref([])
+const userSearchQuery = ref('')
+const userSearchResults = ref([])
+const isSearchingUsers = ref(false)
+const searchError = ref(null)
+const assignedUsersFull = ref([])
+
 const newName = ref('')
 const newDescription = ref('')
 const newWidgetTitle = ref('')
@@ -520,15 +563,80 @@ function viewDashboard(id) {
   router.push(`/dashboard/${id}`)
 }
 
-function openAssignModal(db) {
+async function openAssignModal(db) {
   assigningDashboard.value = db
   selectedUsers.value = [...db.assignedUsers]
+  
+  assignedUsersFull.value = []
+  userSearchQuery.value = ''
+  userSearchResults.value = []
+  searchError.value = null
+
+  if (selectedUsers.value.length > 0) {
+    try {
+       const userPromises = selectedUsers.value.map(id => 
+         fetch(`${kcUrl}/admin/realms/${kcRealm}/users/${id}`, {
+           headers: { Authorization: `Bearer ${keycloak.token}` }
+         }).then(r => r.ok ? r.json() : null)
+       )
+       const results = await Promise.all(userPromises)
+       assignedUsersFull.value = results.filter(u => u).map(u => ({
+          id: u.id,
+          name: (u.firstName && u.lastName) ? `${u.firstName} ${u.lastName}` : (u.firstName || u.lastName || u.username),
+          email: u.email || '',
+          username: u.username || '',
+          avatar: (u.firstName ? u.firstName[0] : (u.username?.[0] || '?')).toUpperCase()
+       }))
+    } catch(err) {
+       console.error("No se pudieron cargar perfiles de los usuarios asignados", err)
+    }
+  }
 }
 
-function toggleUser(userId) {
-  const idx = selectedUsers.value.indexOf(userId)
-  if (idx === -1) selectedUsers.value.push(userId)
-  else selectedUsers.value.splice(idx, 1)
+async function searchUsers() {
+  if (!userSearchQuery.value || userSearchQuery.value.trim().length < 2) {
+    userSearchResults.value = []
+    searchError.value = null
+    return
+  }
+  isSearchingUsers.value = true
+  searchError.value = null
+  try {
+    const url = `${kcUrl}/admin/realms/${kcRealm}/users?search=${encodeURIComponent(userSearchQuery.value.trim())}`
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${keycloak.token}` }
+    })
+    if (!response.ok) {
+      if (response.status === 403) throw new Error('Sin permiso (requiere rol view-users o realm-management en Keycloak)')
+      throw new Error(`Error al conectar con el servidor (HTTP ${response.status})`)
+    }
+    const json = await response.json()
+    userSearchResults.value = json.map(u => ({
+      id: u.id,
+      name: (u.firstName && u.lastName) ? `${u.firstName} ${u.lastName}` : (u.firstName || u.lastName || u.username),
+      email: u.email || '',
+      username: u.username || '',
+      avatar: (u.firstName ? u.firstName[0] : (u.username?.[0] || '?')).toUpperCase()
+    }))
+  } catch (err) {
+    searchError.value = err.message
+    userSearchResults.value = []
+  } finally {
+    isSearchingUsers.value = false
+  }
+}
+
+function toggleUserFromSearch(user) {
+  const isSelected = selectedUsers.value.includes(user.id)
+  if (!isSelected) {
+    selectedUsers.value.push(user.id)
+    if (!assignedUsersFull.value.find(u => u.id === user.id)) {
+      assignedUsersFull.value.push(user)
+    }
+  } else {
+    selectedUsers.value = selectedUsers.value.filter(id => id !== user.id)
+    assignedUsersFull.value = assignedUsersFull.value.filter(u => u.id !== user.id)
+  }
 }
 
 function saveAssignment() {
