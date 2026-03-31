@@ -607,7 +607,8 @@ REGLAS:
 2. El JSON debe ser un objeto con propiedades estándar de ECharts option (tooltip, legend, xAxis, yAxis, series, color, grid, title, etc.)
 3. Las opciones se fusionarán con las predeterminadas, no las reemplazarán
 4. No incluyas explicaciones fuera del bloque de código
-5. Si referencias series, usa arrays para afectar todas las series`
+5. Si referencias series, usa arrays para afectar todas las series
+6. IMPORTANTE: El JSON debe ser estrictamente válido. No uses saltos de línea literales dentro de las cadenas de texto (usa \\n si es necesario).`
 }
 
 async function generateWithAI() {
@@ -626,8 +627,17 @@ async function generateWithAI() {
     })
 
     // Extract JSON block from response
-    const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
-    const raw = match ? match[1].trim() : text.trim()
+    let raw = text.trim()
+    const match = raw.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/i)
+    if (match) {
+      raw = match[1].trim()
+    }
+    
+    const startIdx = raw.indexOf('{')
+    const endIdx = raw.lastIndexOf('}')
+    if (startIdx !== -1 && endIdx !== -1 && endIdx >= startIdx) {
+      raw = raw.substring(startIdx, endIdx + 1)
+    }
 
     // Validate JSON before showing
     JSON.parse(raw)

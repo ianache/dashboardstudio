@@ -26,7 +26,13 @@ export async function callLlm({ provider, modelId, apiKey, prompt, maxTokens = 2
       throw new Error(err.error?.message || `Gemini error ${response.status}`)
     }
     const data = await response.json()
-    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    const candidate = data.candidates?.[0]
+    const text = candidate?.content?.parts?.map(p => p.text || '').join('') ?? ''
+    
+    if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+      throw new Error(`Generación bloqueada o interrumpida por la IA (Razón de API: ${candidate.finishReason}).\n\nContenido parcial:\n${text}`)
+    }
+    return text;
   }
 
   // Default: Anthropic
@@ -48,5 +54,10 @@ export async function callLlm({ provider, modelId, apiKey, prompt, maxTokens = 2
     throw new Error(err.error?.message || `Anthropic error ${response.status}`)
   }
   const data = await response.json()
-  return data.content?.[0]?.text ?? ''
+  const text = data.content?.[0]?.text ?? ''
+  
+  if (data.stop_reason && data.stop_reason !== 'end_turn') {
+    throw new Error(`Generación bloqueada o interrumpida por Anthropic (Razón de API: ${data.stop_reason}).\n\nContenido parcial:\n${text}`)
+  }
+  return text;
 }

@@ -481,18 +481,41 @@
             {{ aiAssistLoading ? 'Generando...' : 'Generar tablas' }}
           </button>
 
-          <div v-if="aiAssistError" class="alert alert-error">{{ aiAssistError }}</div>
+          <div v-if="aiAssistError" class="alert alert-error">
+            <div style="font-weight:600;margin-bottom:6px">{{ aiAssistError }}</div>
+            <details v-if="aiRawJson" style="font-size:12px;background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;cursor:pointer">
+              <summary style="outline:none;font-weight:600">Ver respuesta original (Crudo)</summary>
+              <pre style="margin-top:8px;white-space:pre-wrap;word-wrap:break-word">{{ aiRawJson }}</pre>
+            </details>
+          </div>
 
           <!-- Result preview -->
           <div v-if="aiAssistResult" class="ai-result-section">
             <div class="ai-result-title">
               <span>{{ aiAssistResult.length }} tabla(s) generada(s) — selecciona las que quieres añadir</span>
               <div style="display:flex;gap:6px">
-                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(true)">Todas</button>
-                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(false)">Ninguna</button>
+                <button class="btn btn-secondary btn-sm" :class="{ 'btn-primary': aiViewMode === 'visual' }" @click="aiViewMode = 'visual'">Visor Visual</button>
+                <button class="btn btn-secondary btn-sm" :class="{ 'btn-primary': aiViewMode === 'json' }" @click="aiViewMode = 'json'">JSON</button>
               </div>
             </div>
-            <div class="ai-tables-list">
+
+            <!-- JSON Viewer -->
+            <div v-if="aiViewMode === 'json'" style="margin-top:12px">
+              <div style="display:flex; justify-content:flex-end; margin-bottom:8px">
+                <button class="btn btn-secondary btn-sm" @click="downloadAIAssistJSON">
+                  ⬇ Descargar Artifact (.json)
+                </button>
+              </div>
+              <textarea class="form-input json-editor" readonly :value="aiRawJson" rows="12"></textarea>
+            </div>
+
+            <!-- Visual View -->
+            <div v-show="aiViewMode === 'visual'">
+              <div style="display:flex;gap:6px;margin:12px 0 8px 0">
+                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(true)">Marcar Todas</button>
+                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(false)">Ninguna</button>
+              </div>
+              <div class="ai-tables-list">
               <div
                 v-for="(table, idx) in aiAssistResult"
                 :key="idx"
@@ -517,6 +540,7 @@
                 <div v-if="table.description" class="ai-table-desc">{{ table.description }}</div>
               </div>
             </div>
+            </div><!-- /visual view -->
           </div>
         </div>
 
@@ -1375,6 +1399,8 @@ const aiAssistLoading = ref(false)
 const aiAssistError   = ref(null)
 const aiAssistResult  = ref(null)   // array of { type, name, description, fields }
 const aiSelectedTables = ref([])
+const aiViewMode      = ref('visual') // 'visual' | 'json'
+const aiRawJson       = ref('')
 
 function buildModelAssistPrompt() {
   const existing = (model.value?.nodes || [])
@@ -1404,7 +1430,7 @@ INSTRUCCIONES:
 2. El JSON debe ser un array de objetos tabla con este formato EXACTO:
 [
   {
-    "type": "fact" | "dimension",
+    "type": "fact" | "dimension", // USA EXACTAMENTE UNA DE ESTAS DOS PALABRAS (NO TRADUCIR)
     "name": "NombreTabla",
     "description": "descripción breve",
     "fields": [
@@ -1416,7 +1442,8 @@ INSTRUCCIONES:
 3. Cada tabla de dimensión DEBE tener exactamente un campo con "isKey": true (la llave primaria)
 4. Los nombres de campo deben estar en snake_case
 5. Usa los dataTypeId exactos de la lista proporcionada
-6. No incluyas texto fuera del bloque JSON`
+6. No incluyas texto fuera del bloque JSON
+7. IMPORTANTE: El JSON debe ser estrictamente válido. No uses saltos de línea literales dentro de las cadenas de texto (usa \\n si es necesario).`
 }
 
 async function runAIAssist() {
@@ -1430,11 +1457,59 @@ async function runAIAssist() {
     const cfg = llmStore.configFor('modelAssist')
     const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildModelAssistPrompt() })
 
-    const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
-    const raw = match ? match[1].trim() : text.trim()
-    const tables = JSON.parse(raw)
+    let tables = null;
+    let extractedText = text.trim();
 
-    if (!Array.isArray(tables)) throw new Error('La respuesta no es un array de tablas')
+    // 1. Try raw directly
+    try {
+      const p = JSON.parse(extractedText);
+      if (Array.isArray(p)) { tables = p; }
+      else if (p.tables && Array.isArray(p.tables)) { tables = p.tables; }
+    } catch (e1) {
+      // 2. Try Markdown block
+      const match = extractedText.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/i)
+      const block = match ? match[1].trim() : extractedText;
+      try {
+        const p = JSON.parse(block);
+        if (Array.isArray(p)) { tables = p; }
+        else if (p.tables && Array.isArray(p.tables)) { tables = p.tables; }
+      } catch (e2) {
+        // 3. Try fallback array extraction
+        const startIdx = block.indexOf('[');
+        const endIdx = block.lastIndexOf(']');
+        if (startIdx !== -1 && endIdx !== -1 && endIdx >= startIdx) {
+          const arrStr = block.substring(startIdx, endIdx + 1);
+          try {
+            const p = JSON.parse(arrStr);
+            if (Array.isArray(p)) { tables = p; }
+          } catch (e3) {
+            aiRawJson.value = extractedText;
+            throw new Error(`Error de sintaxis JSON: ${e3.message}`);
+          }
+        } else {
+          aiRawJson.value = extractedText;
+          throw new Error('No se pudo encontrar un array JSON válido en la respuesta.');
+        }
+      }
+    }
+
+    if (!tables) {
+       aiRawJson.value = extractedText;
+       throw new Error('La respuesta de la IA no contiene el formato de tablas esperado.');
+    }
+
+    // Normalizar el tipo por si el LLM usa "hecho", "hechos", "fact_table", etc.
+    tables.forEach(t => {
+      if (typeof t.type === 'string') {
+        const typeStr = t.type.toLowerCase()
+        t.type = (typeStr.includes('fact') || typeStr.includes('hecho')) ? 'fact' : 'dimension'
+      } else {
+        t.type = 'dimension'
+      }
+    })
+
+    aiRawJson.value = JSON.stringify(tables, null, 2)
+    aiViewMode.value = 'visual'
 
     // Enrich with resolved dataType labels for display
     aiAssistResult.value = tables.map(t => ({
@@ -1461,6 +1536,17 @@ function aiToggleTable(idx) {
 
 function aiSelectAll(select) {
   aiSelectedTables.value = select ? (aiAssistResult.value || []).map((_, i) => i) : []
+}
+
+function downloadAIAssistJSON() {
+  if (!aiRawJson.value) return
+  const blob = new Blob([aiRawJson.value], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `ai_generated_tables_${new Date().getTime()}.json`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 function applyAITables() {
@@ -1498,6 +1584,7 @@ function applyAITables() {
   aiAssistResult.value = null
   aiAssistPrompt.value = ''
   aiSelectedTables.value = []
+  aiViewMode.value = 'visual'
 }
 
 // ── Global Model ──────────────────────────────────────────────
@@ -1597,6 +1684,16 @@ function addSelectedGlobalDims() {
   font-size: 14px; color: var(--text-secondary);
   text-align: center; max-width: 320px; line-height: 1.6;
   background: rgba(255,255,255,0.7); padding: 16px 24px; border-radius: 8px;
+}
+
+.json-editor {
+  font-family: monospace;
+  font-size: 13px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 6px;
+  padding: 12px;
+  resize: vertical;
 }
 
 /* Floating drag pill */
