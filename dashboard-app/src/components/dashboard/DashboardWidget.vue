@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="widgetRef"
     class="dashboard-widget"
     :class="{ 'is-design': isDesignMode, 'is-selected': isSelected }"
     @click.stop="isDesignMode && $emit('select')"
@@ -32,6 +33,18 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 4 23 10 17 10"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+        <button
+          v-if="['bar', 'line', 'pie'].includes(widget.chartType)"
+          class="widget-action-btn"
+          data-tooltip="Descargar PNG"
+          @click.stop="handleExportPNG"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
           </svg>
         </button>
         <button
@@ -96,10 +109,11 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, watch, ref } from 'vue'
 import EChartWrapper from '../charts/EChartWrapper.vue'
 import DataTableWidget from '../charts/DataTableWidget.vue'
 import { useCubeQuery, downloadCSV } from '@/composables/useCubeQuery'
+import html2canvas from 'html2canvas'
 
 const props = defineProps({
   widget: { type: Object, required: true },
@@ -122,6 +136,40 @@ const chartTypeIcon = computed(() => CHART_ICONS[props.widget.chartType] || 'ðŸ“
 
 function refresh() {
   fetchData()
+}
+
+const widgetRef = ref(null)
+
+async function handleExportPNG() {
+  if (!widgetRef.value) return
+  const el = widgetRef.value
+  const actionsEl = el.querySelector('.widget-actions')
+  
+  if (actionsEl) actionsEl.style.display = 'none'
+  
+  try {
+    const canvas = await html2canvas(el, {
+      backgroundColor: '#ffffff',
+      scale: 2
+    })
+    const dataUrl = canvas.toDataURL('image/png')
+    const baseName = (props.widget.title || 'grafico').toLowerCase()
+    
+    // Convert to slug (no accents, replaced spaces)
+    const fileName = baseName
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') + '.png'
+      
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = fileName
+    a.click()
+  } catch (err) {
+    console.error('Error exportando PNG:', err)
+  } finally {
+    if (actionsEl) actionsEl.style.display = ''
+  }
 }
 
 function handleDownload() {
