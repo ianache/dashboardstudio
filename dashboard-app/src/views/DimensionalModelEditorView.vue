@@ -31,6 +31,13 @@
       <div class="toolbar-actions">
         <!-- CubeJS / DDL / Import / Export -->
         <input ref="importInput" type="file" accept=".yaml,.yml" style="display:none" @change="handleImport" />
+        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Exportar Diagrama (.png)" @click="handleExportPNG">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </button>
         <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Exportar schema CubeJS (.js)" @click="handleExportCubeJS">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -614,6 +621,7 @@ import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 import yaml from 'js-yaml'
 import JSZip from 'jszip'
+import html2canvas from 'html2canvas'
 
 const router = useRouter()
 const route = useRoute()
@@ -643,6 +651,28 @@ function saveTitle() {
 
 // ── Import / Export ──────────────────────────────────────────
 const importInput = ref(null)
+
+async function handleExportPNG() {
+  if (!canvasEl.value) return
+  try {
+    const canvas = await html2canvas(canvasEl.value, {
+      backgroundColor: '#ffffff',
+      scale: 2 // Alta resolución
+    })
+    const dataUrl = canvas.toDataURL('image/png')
+    const fileName = (model.value?.name || 'modelo')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-') + '.png'
+      
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = fileName
+    a.click()
+  } catch (err) {
+    alert('Error al generar la imagen PNG: ' + err.message)
+  }
+}
 
 function handleExport() {
   if (!model.value) return
