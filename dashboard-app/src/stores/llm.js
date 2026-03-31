@@ -27,6 +27,19 @@ export const PROVIDERS = [
       { id: 'gemini-2.5-flash',     label: 'Gemini 2.5 Flash',      description: 'Balance ideal entre capacidad y velocidad.',               tier: 'balanced' },
       { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', description: 'Más rápido y económico. Ideal para tareas sencillas.',    tier: 'fast'     }
     ]
+  },
+  {
+    id: 'moonshot',
+    label: 'Moonshot AI (Kimi)',
+    icon: '🌙',
+    apiKeyLabel: 'API Key Moonshot',
+    apiKeyPlaceholder: 'sk-...',
+    docsUrl: 'https://platform.moonshot.ai/',
+    models: [
+      { id: 'moonshot-v1-128k', label: 'Kimi 128k',  description: 'Contexto enorme de 128k tokens. Ideal para documentos grandes.', tier: 'premium'  },
+      { id: 'moonshot-v1-32k',  label: 'Kimi 32k',   description: 'Balance entre contexto amplio y velocidad.',                     tier: 'balanced' },
+      { id: 'moonshot-v1-8k',   label: 'Kimi 8k',    description: 'Rápido y eficiente paro tareas de asistencia diaria.',            tier: 'fast'     }
+    ]
   }
 ]
 
@@ -85,7 +98,8 @@ export const useLlmStore = defineStore('llm', {
       // One API key per provider
       keys: {
         anthropic: saved?.keys?.anthropic ?? saved?.anthropicKey ?? '',
-        gemini:    saved?.keys?.gemini    ?? ''
+        gemini:    saved?.keys?.gemini    ?? '',
+        moonshot:  saved?.keys?.moonshot  ?? ''
       },
       // "providerId:modelId" per operation
       models: { ...buildDefaultModels(), ...(saved?.models ?? {}) }

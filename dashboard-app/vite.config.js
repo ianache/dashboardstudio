@@ -22,6 +22,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/gemini/, '')
       },
+      '/api/moonshot': {
+        target: 'https://api.moonshot.ai',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/moonshot/, '')
+      },
       '/keycloak': {
         target: 'http://keycloak.local',
         changeOrigin: true,

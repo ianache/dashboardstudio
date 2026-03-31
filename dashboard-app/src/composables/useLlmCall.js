@@ -35,13 +35,35 @@ export async function callLlm({ provider, modelId, apiKey, prompt, maxTokens = 2
     return text;
   }
 
+  if (provider === 'moonshot') {
+    const response = await fetch('/api/moonshot/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error?.message || `Moonshot error ${response.status}`)
+    }
+    const data = await response.json()
+    return data.choices?.[0]?.message?.content ?? ''
+  }
+
   // Default: Anthropic
   const response = await fetch('/api/anthropic/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
       model: modelId,
