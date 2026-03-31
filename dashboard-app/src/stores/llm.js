@@ -40,6 +40,19 @@ export const PROVIDERS = [
       { id: 'moonshot-v1-32k',  label: 'Kimi 32k',   description: 'Balance entre contexto amplio y velocidad.',                     tier: 'balanced' },
       { id: 'moonshot-v1-8k',   label: 'Kimi 8k',    description: 'Rápido y eficiente paro tareas de asistencia diaria.',            tier: 'fast'     }
     ]
+  },
+  {
+    id: 'groq',
+    label: 'Groq',
+    icon: '⚡',
+    apiKeyLabel: 'API Key Groq',
+    apiKeyPlaceholder: 'gsk_...',
+    docsUrl: 'https://console.groq.com/',
+    models: [
+      { id: 'llama-3.3-70b-versatile',  label: 'Llama 3.3 70B',      description: 'Meta Llama 70B ultra-rápido. Ideal para tareas complejas.', tier: 'premium'  },
+      { id: 'llama3-groq-8b-8192-tool-use-preview', label: 'Llama 3 8B Tools', description: 'Balance rendimiento / velocidad con tool-use.',         tier: 'balanced' },
+      { id: 'gemma2-9b-it',             label: 'Gemma 2 9B',         description: 'Google Gemma 2 9B rápido y eficiente.',                     tier: 'fast'     }
+    ]
   }
 ]
 
@@ -99,7 +112,8 @@ export const useLlmStore = defineStore('llm', {
       keys: {
         anthropic: saved?.keys?.anthropic ?? saved?.anthropicKey ?? '',
         gemini:    saved?.keys?.gemini    ?? '',
-        moonshot:  saved?.keys?.moonshot  ?? ''
+        moonshot:  saved?.keys?.moonshot  ?? '',
+        groq:      saved?.keys?.groq      ?? ''
       },
       // "providerId:modelId" per operation
       models: { ...buildDefaultModels(), ...(saved?.models ?? {}) }

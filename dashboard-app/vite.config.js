@@ -27,6 +27,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/moonshot/, '')
       },
+      '/api/groq': {
+        target: 'https://api.groq.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/groq/, '')
+      },
       '/keycloak': {
         target: 'http://keycloak.local',
         changeOrigin: true,

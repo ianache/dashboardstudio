@@ -56,6 +56,27 @@ export async function callLlm({ provider, modelId, apiKey, prompt, maxTokens = 2
     return data.choices?.[0]?.message?.content ?? ''
   }
 
+  if (provider === 'groq') {
+    const response = await fetch('/api/groq/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error?.message || `Groq error ${response.status}`)
+    }
+    const data = await response.json()
+    return data.choices?.[0]?.message?.content ?? ''
+  }
+
   // Default: Anthropic
   const response = await fetch('/api/anthropic/v1/messages', {
     method: 'POST',
