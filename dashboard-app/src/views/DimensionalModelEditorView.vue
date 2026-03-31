@@ -654,11 +654,28 @@ const importInput = ref(null)
 
 async function handleExportPNG() {
   if (!canvasEl.value) return
+  
+  const el = canvasEl.value
+  
+  // Guardamos el scroll original y forzamos a 0,0 para que no recorte la imagen
+  const oldScrollX = el.scrollLeft
+  const oldScrollY = el.scrollTop
+  const oldOverflow = el.style.overflow
+
   try {
-    const canvas = await html2canvas(canvasEl.value, {
+    el.scrollLeft = 0
+    el.scrollTop = 0
+    el.style.overflow = 'visible'
+
+    const canvas = await html2canvas(el, {
       backgroundColor: '#ffffff',
-      scale: 2 // Alta resolución
+      scale: 2, // Alta resolución
+      width: el.scrollWidth,
+      height: el.scrollHeight,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight
     })
+    
     const dataUrl = canvas.toDataURL('image/png')
     const fileName = (model.value?.name || 'modelo')
       .toLowerCase()
@@ -671,6 +688,11 @@ async function handleExportPNG() {
     a.click()
   } catch (err) {
     alert('Error al generar la imagen PNG: ' + err.message)
+  } finally {
+    // Restaurar los valores visuales en el DOM
+    el.style.overflow = oldOverflow
+    el.scrollLeft = oldScrollX
+    el.scrollTop = oldScrollY
   }
 }
 
