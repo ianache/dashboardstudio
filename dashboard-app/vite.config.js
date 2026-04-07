@@ -33,7 +33,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/groq/, '')
       },
       '/keycloak': {
-        target: 'http://keycloak.local',
+        target: 'https://oauth2.qa.comsatel.com.pe',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/keycloak/, '')
       }

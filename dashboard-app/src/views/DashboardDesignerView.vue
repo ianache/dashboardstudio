@@ -542,7 +542,7 @@ import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 
-const kcUrl = import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak.local'
+const kcUrl = ''
 const kcRealm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
 
 const route = useRoute()
@@ -748,8 +748,8 @@ async function openAssignModal(db) {
 
   if (selectedUsers.value.length > 0) {
     try {
-       const userPromises = selectedUsers.value.map(id => 
-         fetch(`${kcUrl}/admin/realms/${kcRealm}/users/${id}`, {
+        const userPromises = selectedUsers.value.map(id => 
+          fetch(`/keycloak/admin/realms/${kcRealm}/users/${id}`, {
            headers: { Authorization: `Bearer ${keycloak.token}` }
          }).then(r => r.ok ? r.json() : null)
        )
@@ -776,7 +776,7 @@ async function searchUsers() {
   isSearchingUsers.value = true
   searchError.value = null
   try {
-    const url = `${kcUrl}/admin/realms/${kcRealm}/users?search=${encodeURIComponent(userSearchQuery.value.trim())}`
+    const url = `/keycloak/admin/realms/${kcRealm}/users?search=${encodeURIComponent(userSearchQuery.value.trim())}`
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${keycloak.token}` }
     })
