@@ -1,0 +1,288 @@
+{
+  "__dashboardStudio": true,
+  "version": "1.0",
+  "exportedAt": "2026-04-06T18:39:12.148Z",
+  "dashboard": {
+    "name": "Tablero de Proyectos",
+    "description": "Información relacionada a las horas reportadas en el proyecto",
+    "isPublic": false,
+    "filters": [
+      {
+        "id": "2lc3x17mu",
+        "dimension": "fct_horasreportadas.area",
+        "label": "Area",
+        "type": "string"
+      },
+      {
+        "id": "4g7jhqn1s",
+        "dimension": "fct_horasreportadas.product",
+        "label": "Producto",
+        "type": "string"
+      },
+      {
+        "id": "cbfj469fb",
+        "dimension": "fct_horasreportadas.reg_date",
+        "label": "Fecha",
+        "type": "time"
+      },
+      {
+        "id": "dlk3bfc0b",
+        "dimension": "Colaborador.role",
+        "label": "Role",
+        "type": "string"
+      },
+      {
+        "id": "udirsz67l",
+        "dimension": "Colaborador.usuario",
+        "label": "Colaborador",
+        "type": "string"
+      }
+    ],
+    "colorPalette": "default",
+    "widgets": [
+      {
+        "id": "m520o3vqc",
+        "title": "Horas Reportadas",
+        "chartType": "bar",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 8,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "fct_horasreportadas.total_hours",
+              "label": "horas reportadas",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            },
+            {
+              "key": "Colaborador.jornada",
+              "label": "jornada",
+              "color": "#ff1af7",
+              "seriesType": "line"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.nombre",
+              "label": "nombre"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {
+          "xAxis": {
+            "axisLabel": {
+              "rotate": 45
+            },
+            "position": "bottom"
+          }
+        },
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": false,
+          "showPercent": true,
+          "showTotal": false
+        }
+      },
+      {
+        "id": "27ktzp9aw",
+        "title": "Horas x Categoria",
+        "chartType": "pie",
+        "position": {
+          "x": 0,
+          "y": 8,
+          "w": 4,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "fct_horasreportadas.total_hours",
+              "label": "horas",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "fct_horasreportadas.group",
+              "label": "categoria"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": false
+        }
+      },
+      {
+        "id": "dua8y097i",
+        "title": "Detalle de Tareas",
+        "chartType": "table",
+        "position": {
+          "x": 0,
+          "y": 4,
+          "w": 12,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "fct_horasreportadas.total_hours",
+              "label": "total_hours",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "fct_horasreportadas.reporter",
+              "label": "reporter"
+            },
+            {
+              "key": "fct_horasreportadas.issue_name",
+              "label": "issue_name"
+            },
+            {
+              "key": "Colaborador.nombre",
+              "label": "nombre"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": false,
+          "showPercent": true,
+          "showTotal": false
+        }
+      },
+      {
+        "id": "zplyq7svu",
+        "title": "Horas por Role",
+        "chartType": "pie",
+        "position": {
+          "x": 8,
+          "y": 0,
+          "w": 4,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "fct_horasreportadas.total_hours",
+              "label": "total_hours",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.role",
+              "label": "role"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": false
+        }
+      },
+      {
+        "id": "ra1f1y818",
+        "title": "Nro Colaboradores por Role",
+        "chartType": "pie",
+        "position": {
+          "x": 4,
+          "y": 8,
+          "w": 4,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "Colaborador.count",
+              "label": "count",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.role",
+              "label": "role"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": false
+        }
+      },
+      {
+        "id": "wqqdghtvw",
+        "title": "Costo por Role",
+        "chartType": "pie",
+        "position": {
+          "x": 8,
+          "y": 8,
+          "w": 4,
+          "h": 4
+        },
+        "cubeQuery": {
+          "measures": [
+            {
+              "key": "fct_horasreportadas.cost",
+              "label": "cost",
+              "color": "#1890ff",
+              "seriesType": "bar"
+            }
+          ],
+          "dimensions": [
+            {
+              "key": "Colaborador.role",
+              "label": "role"
+            }
+          ],
+          "timeDimension": null,
+          "filters": [],
+          "limit": 100
+        },
+        "chartOptions": {},
+        "useMockData": false,
+        "pieOptions": {
+          "showValue": true,
+          "showPercent": true,
+          "showTotal": false
+        }
+      }
+    ]
+  }
+}
