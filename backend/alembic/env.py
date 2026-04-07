@@ -1,5 +1,5 @@
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 from alembic import context
 import sys
 import os
@@ -43,7 +43,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        connection.execute(f"SET search_path TO {settings.postgres_schema}")
+        connection.execute(text(f"SET search_path TO {settings.postgres_schema}"))
         
         context.configure(
             connection=connection, target_metadata=target_metadata
