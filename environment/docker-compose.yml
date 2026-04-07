@@ -19,6 +19,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./initdb/01_keycloak.sql:/docker-entrypoint-initdb.d/01_keycloak.sql:ro
       - ./initdb/02_analytics.sql:/docker-entrypoint-initdb.d/02_analytics.sql:ro
+      - ./initdb/03_biportal.sql:/docker-entrypoint-initdb.d/03_biportal.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cubeuser} -d ${POSTGRES_DB:-analytics}"]
       interval: 10s
@@ -137,7 +138,46 @@ services:
       keycloak:
         condition: service_healthy
 
+  # ─────────────────────────────────────────────
+  #  BI Backend — FastAPI
+  # ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: bi_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-biportal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-biportal}
+      POSTGRES_DB: ${POSTGRES_DB:-biportal}
+      POSTGRES_SCHEMA: biportal
+      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://keycloak:8080}
+      KEYCLOAK_REALM: ${KC_REALM:-Apps}
+      KEYCLOAK_CLIENT_ID: bi-backend
+      KEYCLOAK_CLIENT_SECRET: ${KC_CLIENT_SECRET:-}
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      DEBUG: "false"
+    volumes:
+      - ../backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    env_file:
+      - ./bi-backend.env
+
 volumes:
   postgres_data:
   redis_data:
   cubestore_data:
+
+networks:
+  default:
+    name: biportal-network
