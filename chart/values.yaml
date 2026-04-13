@@ -27,7 +27,7 @@ backend:
     enabled: true
     annotations:
       kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: letsencrypt-dev
+      cert-manager.io/cluster-issuer: letseencrypt-dev
     tls: true
 
   env:
@@ -37,8 +37,8 @@ backend:
     POSTGRES_DB: biportal
     POSTGRES_SCHEMA: biportal
     KEYCLOAK_URL: https://oauth2.qa.comsatel.com.pe
-    KEYCLOAK_REALM: microservicios
-    KEYCLOAK_CLIENT_ID: bi-backend
+    KEYCLOAK_REALM: Apps
+    KEYCLOAK_CLIENT_ID: dashboard-app
     APP_HOST: 0.0.0.0
     APP_PORT: 8000
     DEBUG: "false"
@@ -66,14 +66,14 @@ frontend:
     enabled: true
     annotations:
       kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: letsencrypt-dev
+      cert-manager.io/cluster-issuer: letseencrypt-dev
     tls: true
 
   env:
     VITE_API_URL: https://backend.dev.comsatel.com.pe
     VITE_CUBEJS_API_URL: https://cubejs.dev.comsatel.com.pe/cubejs-api/v1
     VITE_KEYCLOAK_URL: https://oauth2.qa.comsatel.com.pe
-    VITE_KEYCLOAK_REALM: microservicios
+    VITE_KEYCLOAK_REALM: Apps
     VITE_KEYCLOAK_CLIENT_ID: dashboard-app
 
   resources: {}

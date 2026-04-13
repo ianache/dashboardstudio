@@ -3,7 +3,7 @@ environment: qa
 backend:
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-staging-qa
+      cert-manager.io/cluster-issuer: letseencrypt-qa
 
 frontend:
   env:
@@ -11,4 +11,4 @@ frontend:
     VITE_CUBEJS_API_URL: https://cubejs.qa.comsatel.com.pe/cubejs-api/v1
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-staging-qa
+      cert-manager.io/cluster-issuer: letseencrypt-qa

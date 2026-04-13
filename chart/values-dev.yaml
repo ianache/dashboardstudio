@@ -3,7 +3,7 @@ environment: dev
 backend:
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-dev
+      cert-manager.io/cluster-issuer: letseencrypt-dev
 
 frontend:
   env:
@@ -11,4 +11,4 @@ frontend:
     VITE_CUBEJS_API_URL: https://cubejs.dev.comsatel.com.pe/cubejs-api/v1
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-dev
+      cert-manager.io/cluster-issuer: letseencrypt-dev

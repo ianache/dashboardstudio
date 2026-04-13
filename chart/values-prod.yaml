@@ -4,7 +4,7 @@ backend:
   replicaCount: 2
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      cert-manager.io/cluster-issuer: letseencrypt-prod
 
 frontend:
   replicaCount: 2
@@ -13,4 +13,4 @@ frontend:
     VITE_CUBEJS_API_URL: https://cubejs.prod.comsatel.com.pe/cubejs-api/v1
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      cert-manager.io/cluster-issuer: letseencrypt-prod
