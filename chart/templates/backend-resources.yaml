@@ -55,6 +55,7 @@ metadata:
     component: backend
 spec:
   type: {{ .Values.backend.service.type }}
+  ingressClassName: nginx
   ports:
     - port: {{ .Values.backend.service.port }}
       targetPort: http
