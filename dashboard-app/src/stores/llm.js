@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { llmConfigApi } from '@/services/api'
 
 // ── Providers & models ────────────────────────────────────────
 export const PROVIDERS = [
@@ -95,30 +96,23 @@ export function getProvider(providerId) {
   return PROVIDERS.find(p => p.id === providerId) ?? PROVIDERS[0]
 }
 
-// ── Persistence ───────────────────────────────────────────────
-function loadState() {
-  try {
-    const raw = localStorage.getItem('llmConfig')
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
 // ── Store ─────────────────────────────────────────────────────
 export const useLlmStore = defineStore('llm', {
-  state: () => {
-    const saved = loadState()
-    return {
-      // One API key per provider
-      keys: {
-        anthropic: saved?.keys?.anthropic ?? saved?.anthropicKey ?? '',
-        gemini:    saved?.keys?.gemini    ?? '',
-        moonshot:  saved?.keys?.moonshot  ?? '',
-        groq:      saved?.keys?.groq      ?? ''
-      },
-      // "providerId:modelId" per operation
-      models: { ...buildDefaultModels(), ...(saved?.models ?? {}) }
-    }
-  },
+  state: () => ({
+    // One API key per provider (loaded from backend)
+    keys: {
+      anthropic: '',
+      gemini: '',
+      moonshot: '',
+      groq: ''
+    },
+    // "providerId:modelId" per operation
+    models: { ...buildDefaultModels() },
+    // Backend loading states
+    loading: false,
+    saving: false,
+    error: null
+  }),
 
   getters: {
     /** True if at least one provider has a key configured */
@@ -163,37 +157,110 @@ export const useLlmStore = defineStore('llm', {
   actions: {
     setKey(providerId, key) {
       this.keys[providerId] = key.trim()
-      this.persist()
     },
 
     setModel(operationId, providerModelId) {
       this.models[operationId] = providerModelId
-      this.persist()
     },
 
-    persist() {
-      localStorage.setItem('llmConfig', JSON.stringify({
-        keys:   this.keys,
-        models: this.models
-      }))
+    async loadConfigFromBackend() {
+      // Load LLM configurations from backend
+      this.loading = true
+      this.error = null
+      try {
+        const configs = await llmConfigApi.getAll()
+        // Reset keys first
+        this.keys = { anthropic: '', gemini: '', moonshot: '', groq: '' }
+        // Populate from backend response
+        for (const config of configs) {
+          if (config.provider in this.keys) {
+            this.keys[config.provider] = config.api_key || ''
+          }
+        }
+      } catch (err) {
+        this.error = err.message
+        console.warn('Failed to load LLM config from backend:', err)
+      } finally {
+        this.loading = false
+      }
     },
 
-    /** One-time migration from the old single-key format */
-    migrateFromLegacy() {
-      const legacyAiKey  = localStorage.getItem('aiApiKey')
+    async saveConfigToBackend() {
+      // Save all configured API keys to backend
+      this.saving = true
+      this.error = null
+      const errors = []
+
+      try {
+        for (const [provider, key] of Object.entries(this.keys)) {
+          if (key.trim()) {
+            try {
+              await llmConfigApi.save(provider, key.trim())
+            } catch (err) {
+              errors.push(`${provider}: ${err.message}`)
+            }
+          }
+        }
+
+        if (errors.length > 0) {
+          this.error = errors.join(', ')
+          return { success: false, error: this.error }
+        }
+
+        return { success: true }
+      } catch (err) {
+        this.error = err.message
+        return { success: false, error: err.message }
+      } finally {
+        this.saving = false
+      }
+    },
+
+    async deleteProviderConfig(providerId) {
+      // Delete a specific provider configuration
+      try {
+        await llmConfigApi.delete(providerId)
+        this.keys[providerId] = ''
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+
+    /** One-time migration from the old localStorage format to backend */
+    async migrateFromLegacy() {
+      const legacyAiKey = localStorage.getItem('aiApiKey')
       const legacyLlmRaw = localStorage.getItem('llmConfig')
 
-      // If old format stored anthropicKey at root level, it's already merged via loadState()
-      if (legacyAiKey && !this.keys.anthropic) {
-        this.keys.anthropic = legacyAiKey.trim()
-        this.persist()
-      }
-      localStorage.removeItem('aiApiKey')
+      let hasLegacyData = false
 
-      // Re-persist to normalise if old format was present
+      // Migrate single key format
+      if (legacyAiKey) {
+        this.keys.anthropic = legacyAiKey.trim()
+        hasLegacyData = true
+        localStorage.removeItem('aiApiKey')
+      }
+
+      // Migrate old config format
       if (legacyLlmRaw) {
-        const old = JSON.parse(legacyLlmRaw)
-        if ('anthropicKey' in old) this.persist()  // rewrite without legacy key
+        try {
+          const old = JSON.parse(legacyLlmRaw)
+          if (old.keys) {
+            Object.assign(this.keys, old.keys)
+            hasLegacyData = true
+          }
+          if (old.models) {
+            Object.assign(this.models, old.models)
+          }
+        } catch {
+          // Ignore parse errors
+        }
+        localStorage.removeItem('llmConfig')
+      }
+
+      // If we have legacy data, save it to backend
+      if (hasLegacyData) {
+        await this.saveConfigToBackend()
       }
     }
   }

@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
@@ -107,6 +107,11 @@ const router = useRouter()
 const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
+
+// Load data from backend on mount
+onMounted(async () => {
+  await dashboardStore.loadFromBackend()
+})
 
 uiStore.setBreadcrumbs(['Inicio'])
 

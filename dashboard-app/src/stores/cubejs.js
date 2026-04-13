@@ -1,17 +1,26 @@
 import { defineStore } from 'pinia'
 import cubejs from '@cubejs-client/core'
+import { cubeConfigApi } from '@/services/api'
 
 const dimValuesCache = new Map()
 const dimValuesLoading = new Map()
 
 export const useCubeStore = defineStore('cubejs', {
   state: () => ({
-    apiUrl: localStorage.getItem('cubeApiUrl') || import.meta.env.VITE_CUBEJS_API_URL || 'http://localhost:4000/cubejs-api/v1',
-    token: localStorage.getItem('cubeToken') || import.meta.env.VITE_CUBEJS_TOKEN || '',
+    // Primary source is now backend - start empty and load from API
+    apiUrl: import.meta.env.VITE_CUBEJS_API_URL || 'http://localhost:4000/cubejs-api/v1',
+    token: import.meta.env.VITE_CUBEJS_TOKEN || '',
+    // Backend config info
+    configId: null,
+    configName: 'Default',
+    // Meta state
     meta: null,
     metaLoading: false,
     metaError: null,
-    connected: false
+    connected: false,
+    // Loading states
+    loading: false,
+    error: null
   }),
 
   getters: {
@@ -55,11 +64,64 @@ export const useCubeStore = defineStore('cubejs', {
     setConfig(apiUrl, token) {
       this.apiUrl = apiUrl
       this.token = token
-      localStorage.setItem('cubeApiUrl', apiUrl)
-      localStorage.setItem('cubeToken', token)
       dimValuesCache.clear()
       this.meta = null
       this.connected = false
+    },
+
+    async loadConfigFromBackend() {
+      // Load active CubeJS configuration from backend
+      this.loading = true
+      this.error = null
+      try {
+        const config = await cubeConfigApi.getActive()
+        this.configId = config.id
+        this.configName = config.name
+        this.apiUrl = config.api_url || this.apiUrl
+        this.token = config.api_token || ''
+        this.connected = false // Will be set true after successful meta load
+      } catch (err) {
+        this.error = err.message
+        // Keep fallback values on error
+        console.warn('Failed to load CubeJS config from backend:', err)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async saveConfigToBackend(name, apiUrl, apiToken, isActive = true) {
+      // Save or update CubeJS configuration in backend
+      this.loading = true
+      this.error = null
+      try {
+        const configData = {
+          name: name || 'Default',
+          api_url: apiUrl,
+          api_token: apiToken,
+          is_active: isActive
+        }
+
+        let config
+        if (this.configId && this.configId !== 'demo') {
+          // Update existing
+          config = await cubeConfigApi.update(this.configId, configData)
+        } else {
+          // Create new
+          config = await cubeConfigApi.create(configData)
+        }
+
+        this.configId = config.id
+        this.configName = config.name
+        this.apiUrl = config.api_url
+        this.token = config.api_token
+
+        return { success: true, config }
+      } catch (err) {
+        this.error = err.message
+        return { success: false, error: err.message }
+      } finally {
+        this.loading = false
+      }
     },
 
     async loadMeta() {

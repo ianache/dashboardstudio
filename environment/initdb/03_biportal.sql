@@ -32,3 +32,5 @@ GRANT ALL ON SCHEMA biportal TO biportal;
 -- Grant default privileges for future tables
 ALTER DEFAULT PRIVILEGES IN SCHEMA biportal GRANT ALL ON TABLES TO biportal;
 ALTER DEFAULT PRIVILEGES IN SCHEMA biportal GRANT ALL ON SEQUENCES TO biportal;
+
+GRANT ALL PRIVILEGES ON SCHEMA biportal TO biportal;

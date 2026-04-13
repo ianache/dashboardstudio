@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     app_port: int = 8000
     debug: bool = False
 
+    # Encryption for sensitive data (API tokens, etc.)
+    encryption_key: str = "your-secret-encryption-key-change-in-production"
+
 
 @lru_cache
 def get_settings() -> Settings:

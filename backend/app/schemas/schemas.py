@@ -65,7 +65,7 @@ class WidgetCreate(WidgetBase):
 class WidgetUpdate(BaseModel):
     title: Optional[str] = None
     chart_type: Optional[str] = None
-    position: Optional[Position] = None
+    position: Optional[dict] = None
     cube_query: Optional[dict] = None
     chart_options: Optional[dict] = None
     use_mock_data: Optional[bool] = None
@@ -249,3 +249,31 @@ class MessageResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+# LLM Configuration Schemas
+class LlmProviderInfo(BaseModel):
+    id: str
+    label: str
+    icon: str
+    api_key_label: str
+    api_key_placeholder: str
+    docs_url: str
+
+
+class LlmConfigBase(BaseModel):
+    provider: str
+    api_key: str
+
+
+class LlmConfigCreate(LlmConfigBase):
+    pass
+
+
+class LlmConfigResponse(LlmConfigBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    created_by: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime

@@ -540,6 +540,22 @@ const seriesTypes = [
 // Deep clone widget for editing
 const form = ref(JSON.parse(JSON.stringify(props.widget)))
 
+// Ensure position exists with defaults
+if (!form.value.position) {
+  form.value.position = { x: 0, y: 0, w: 4, h: 3 }
+}
+
+// Ensure cubeQuery exists with defaults
+if (!form.value.cubeQuery) {
+  form.value.cubeQuery = {
+    measures: [],
+    dimensions: [],
+    timeDimension: null,
+    filters: [],
+    limit: 100
+  }
+}
+
 // Ensure pieOptions exists with defaults
 if (!form.value.pieOptions) {
   form.value.pieOptions = { showValue: false, showPercent: true, showTotal: false }
@@ -623,7 +639,8 @@ async function generateWithAI() {
       provider: cfg.provider,
       modelId:  cfg.modelId,
       apiKey:   cfg.apiKey,
-      prompt:   buildAIPrompt()
+      prompt:   buildAIPrompt(),
+      maxTokens: 16384
     })
 
     // Extract JSON block from response

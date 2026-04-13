@@ -1,16 +1,16 @@
 /**
  * Provider-agnostic LLM API caller.
- * Supports: Anthropic, Google Gemini
+ * Supports: Anthropic, Google Gemini, Moonshot, Groq
  *
  * @param {object} opts
- * @param {string} opts.provider   - 'anthropic' | 'gemini'
+ * @param {string} opts.provider   - 'anthropic' | 'gemini' | 'moonshot' | 'groq'
  * @param {string} opts.modelId    - model id for the provider
  * @param {string} opts.apiKey     - API key for the provider
  * @param {string} opts.prompt     - user prompt text
- * @param {number} [opts.maxTokens=2048]
+ * @param {number} [opts.maxTokens=16384] - Max tokens for response generation
  * @returns {Promise<string>} extracted text from the LLM response
  */
-export async function callLlm({ provider, modelId, apiKey, prompt, maxTokens = 2048 }) {
+export async function callLlm({ provider, modelId, apiKey, prompt, maxTokens = 16384 }) {
   if (provider === 'gemini') {
     const url = `/api/gemini/v1beta/models/${modelId}:generateContent?key=${apiKey}`
     const response = await fetch(url, {

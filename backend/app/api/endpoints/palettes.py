@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
-from app.core.security import get_current_user, require_role, TokenData
+from app.core.security import get_current_user, require_role, TokenData, ensure_user_exists
 from app.models import models
 from app.schemas import schemas
 
@@ -21,6 +21,9 @@ async def create_palette(
     current_user: TokenData = Depends(require_role(["admin", "designer"]))
 ):
     """Create a new color palette (admin/designer only)"""
+    # Ensure user exists in database
+    await ensure_user_exists(current_user)
+    
     if palette.is_default:
         db.query(models.ColorPalette).update({models.ColorPalette.is_default: False})
     

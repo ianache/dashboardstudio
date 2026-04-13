@@ -183,6 +183,11 @@ const authStore = useAuthStore()
 const modelStore = useDimensionalModelStore()
 const uiStore = useUIStore()
 
+// Load data from backend on mount
+onMounted(async () => {
+  await modelStore.loadFromBackend()
+})
+
 const showNewModal = ref(false)
 const newName = ref('')
 const newDescription = ref('')

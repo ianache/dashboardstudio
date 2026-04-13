@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
-from app.core.security import get_current_user, require_role, TokenData
+from app.core.security import get_current_user, require_role, TokenData, ensure_user_exists
 from app.models import models
 from app.schemas import schemas
 
@@ -21,6 +21,9 @@ async def create_model(
     current_user: TokenData = Depends(require_role(["admin", "designer"]))
 ):
     """Create a new dimensional model (admin/designer only)"""
+    # Ensure user exists in database
+    await ensure_user_exists(current_user)
+    
     if model.is_global:
         # Only one global model allowed
         db.query(models.DimensionalModel).filter(models.DimensionalModel.is_global == True).update({"is_global": False})

@@ -418,6 +418,27 @@
       </div>
     </div>
 
+    <!-- Modal: Confirm Leave -->
+    <div v-if="showConfirmLeave" class="modal-overlay" @click.self="showConfirmLeave = false">
+      <div class="modal card confirm-modal">
+        <div class="modal-header">
+          <h3>Cambios sin guardar</h3>
+          <button class="btn-icon" @click="showConfirmLeave = false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>¿Tienes cambios sin guardar. ¿Quieres guardarlos antes de salir?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="confirmLeaveDiscard">Descartar</button>
+          <button class="btn btn-primary" @click="confirmLeaveSave">Guardar y salir</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal: AI Assist -->
     <div v-if="aiAssistOpen" class="modal-overlay" @click.self="aiAssistOpen = false">
       <div class="modal card ai-assist-modal">
@@ -612,7 +633,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useDataTypeStore } from '@/stores/dataTypes'
@@ -631,8 +652,92 @@ const uiStore = useUIStore()
 
 const llmStore = useLlmStore()
 
+// Load data from backend on mount
+onMounted(async () => {
+  await modelStore.loadFromBackend()
+  enableUnsavedGuard()
+  nextTick(() => {
+    setTimeout(() => {
+      updateSnapshot()
+    }, 200)
+  })
+})
+
 const modelId = route.params.id
 const model = computed(() => modelStore.getModel(modelId))
+const hasUnsavedChanges = ref(false)
+let savedModelSnapshot = null
+
+function updateSnapshot() {
+  if (model.value) {
+    savedModelSnapshot = JSON.stringify({
+      name: model.value.name,
+      description: model.value.description,
+      nodes: model.value.nodes,
+      relationships: model.value.relationships
+    })
+    hasUnsavedChanges.value = false
+  }
+}
+
+function checkUnsavedChanges() {
+  if (!model.value || !savedModelSnapshot) return false
+  const current = JSON.stringify({
+    name: model.value.name,
+    description: model.value.description,
+    nodes: model.value.nodes,
+    relationships: model.value.relationships
+  })
+  return current !== savedModelSnapshot
+}
+
+async function saveAndContinue() {
+  try {
+    await modelStore.updateModel(modelId, {
+      name: model.value.name,
+      description: model.value.description,
+      nodes: model.value.nodes,
+      relationships: model.value.relationships
+    })
+    updateSnapshot()
+    hasUnsavedChanges.value = false
+    router.push('/models')
+  } catch (err) {
+    alert('Error al guardar: ' + err.message)
+  }
+}
+
+// ── Unsaved changes guard ─────────────────────────────────────
+let unsavedGuardEnabled = false
+let pendingNavigation = null
+
+const showConfirmLeave = ref(false)
+
+function confirmLeaveSave() {
+  showConfirmLeave.value = false
+  saveAndContinue()
+}
+
+function confirmLeaveDiscard() {
+  showConfirmLeave.value = false
+  hasUnsavedChanges.value = false
+  if (pendingNavigation) {
+    router.push(pendingNavigation)
+    pendingNavigation = null
+  }
+}
+
+function enableUnsavedGuard() {
+  if (unsavedGuardEnabled) return
+  unsavedGuardEnabled = true
+  
+  router.beforeEach((to, from) => {
+    if (!checkUnsavedChanges()) return
+    pendingNavigation = to.fullPath
+    showConfirmLeave.value = true
+    return false
+  })
+}
 
 // ── Title editing ────────────────────────────────────────────
 const editingTitle = ref(false)
@@ -647,6 +752,7 @@ function startEditTitle() {
 function saveTitle() {
   if (editTitleValue.value.trim()) modelStore.updateModel(modelId, { name: editTitleValue.value.trim() })
   editingTitle.value = false
+  hasUnsavedChanges.value = true
 }
 
 // ── Import / Export ──────────────────────────────────────────
@@ -739,6 +845,7 @@ function handleImport(e) {
       m.relationships = Array.isArray(doc.relationships) ? doc.relationships : []
       modelStore.persist()
       selectedNode.value = null; selectedRel.value = null
+      hasUnsavedChanges.value = true
     } catch (err) {
       alert(`Error al importar: ${err.message}`)
     } finally {
@@ -1249,6 +1356,7 @@ function addNode(type) {
   })
   selectedRel.value = null
   selectedNode.value = node
+  hasUnsavedChanges.value = true
 }
 
 // ── Node drag ────────────────────────────────────────────────
@@ -1267,6 +1375,7 @@ function onNodeDragMove(e) {
     x: Math.max(0, dragging.value.origX + dx),
     y: Math.max(0, dragging.value.origY + dy)
   })
+  hasUnsavedChanges.value = true
 }
 
 // ── Field drag start ─────────────────────────────────────────
@@ -1357,6 +1466,7 @@ function handleFieldDrop(factNode) {
       cardinality: '1:N'
     })
   }
+  hasUnsavedChanges.value = true
 }
 
 // ── Node click / selection ────────────────────────────────────
@@ -1385,6 +1495,7 @@ function updateNodeName(name) {
   if (!selectedNode.value) return
   modelStore.updateNode(modelId, selectedNode.value.id, { name })
   refreshSelectedNode()
+  hasUnsavedChanges.value = true
 }
 
 function addField() {
@@ -1404,6 +1515,7 @@ function addField() {
     isKey: autoKey
   })
   refreshSelectedNode()
+  hasUnsavedChanges.value = true
 }
 
 function setKeyField(fieldId) {
@@ -1416,12 +1528,14 @@ function updateField(fieldId, key, value) {
   if (!selectedNode.value) return
   modelStore.updateField(modelId, selectedNode.value.id, fieldId, { [key]: value })
   refreshSelectedNode()
+  hasUnsavedChanges.value = true
 }
 
 function deleteField(fieldId) {
   if (!selectedNode.value) return
   modelStore.deleteField(modelId, selectedNode.value.id, fieldId)
   refreshSelectedNode()
+  hasUnsavedChanges.value = true
 }
 
 function deleteNodeConfirm() {
@@ -1429,6 +1543,7 @@ function deleteNodeConfirm() {
   if (!confirm(`¿Eliminar "${selectedNode.value.name}" y todas sus relaciones?`)) return
   modelStore.deleteNode(modelId, selectedNode.value.id)
   selectedNode.value = null
+  hasUnsavedChanges.value = true
 }
 
 // ── Relationship updates ──────────────────────────────────────
@@ -1436,12 +1551,14 @@ function updateRelCardinality(cardinality) {
   if (!selectedRel.value) return
   modelStore.updateRelationship(modelId, selectedRel.value.id, { cardinality })
   selectedRel.value = model.value?.relationships.find(r => r.id === selectedRel.value.id) || null
+  hasUnsavedChanges.value = true
 }
 
 function deleteRelationship() {
   if (!selectedRel.value) return
   modelStore.deleteRelationship(modelId, selectedRel.value.id)
   selectedRel.value = null
+  hasUnsavedChanges.value = true
 }
 
 // ── AI Assist ─────────────────────────────────────────────────
@@ -1507,7 +1624,7 @@ async function runAIAssist() {
 
   try {
     const cfg = llmStore.configFor('modelAssist')
-    const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildModelAssistPrompt() })
+    const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildModelAssistPrompt(), maxTokens: 16384 })
 
     let tables = null;
     let extractedText = text.trim();
@@ -1973,6 +2090,8 @@ function addSelectedGlobalDims() {
   display: flex; justify-content: flex-end; gap: 8px;
   padding: 12px 20px; border-top: 1px solid var(--border); background: #fafafa;
 }
+.confirm-modal { max-width: 400px; }
+.confirm-modal .modal-body p { margin: 0; font-size: 14px; color: var(--text); }
 .modal-empty { font-size: 13px; color: var(--text-secondary); }
 .global-dim-list { display: flex; flex-direction: column; gap: 6px; }
 .global-dim-option {

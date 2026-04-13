@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
-from app.core.security import get_current_user, require_role, TokenData
+from app.core.security import get_current_user, require_role, TokenData, ensure_user_exists
 from app.models import models
 from app.schemas import schemas
 
@@ -22,6 +22,9 @@ async def create_widget(
     current_user: TokenData = Depends(require_role(["admin", "designer"]))
 ):
     """Create a new widget in a dashboard (admin/designer only)"""
+    # Ensure user exists in database
+    await ensure_user_exists(current_user)
+    
     dashboard = db.query(models.Dashboard).filter(models.Dashboard.id == dashboard_id).first()
     if not dashboard:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dashboard not found")
@@ -96,11 +99,11 @@ async def update_widget(
     update_data = widget_update.model_dump(exclude_unset=True)
     
     if "position" in update_data:
-        pos = update_data.pop("position")
-        widget.position_x = pos.x
-        widget.position_y = pos.y
-        widget.position_w = pos.w
-        widget.position_h = pos.h
+        pos = update_data.pop("position") or {}
+        widget.position_x = int(pos["x"]) if pos.get("x") is not None else widget.position_x
+        widget.position_y = int(pos["y"]) if pos.get("y") is not None else widget.position_y
+        widget.position_w = int(pos["w"]) if pos.get("w") is not None else widget.position_w
+        widget.position_h = int(pos["h"]) if pos.get("h") is not None else widget.position_h
     
     for key, value in update_data.items():
         setattr(widget, key, value)

@@ -527,7 +527,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
@@ -553,6 +553,14 @@ const uiStore = useUIStore()
 const paletteStore = useColorPaletteStore()
 const cubeStore = useCubeStore()
 const llmStore = useLlmStore()
+
+// Load data from backend on mount
+onMounted(async () => {
+  await Promise.all([
+    dashboardStore.loadFromBackend(),
+    paletteStore.loadFromBackend()
+  ])
+})
 
 // State
 const isDesignMode = ref(true)
@@ -682,7 +690,7 @@ async function runAIAssist() {
 
   try {
     const cfg = llmStore.configFor('modelAssist')
-    const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildWidgetAssistPrompt() })
+    const text = await callLlm({ provider: cfg.provider, modelId: cfg.modelId, apiKey: cfg.apiKey, prompt: buildWidgetAssistPrompt(), maxTokens: 16384 })
     
     let widgetDef = null
     const extractedText = text.trim()
@@ -850,16 +858,17 @@ function createDashboard() {
 
 function addWidget() {
   if (!activeDashboard.value) return
-  const widget = dashboardStore.addWidget(activeDashboard.value.id, {
+  dashboardStore.addWidget(activeDashboard.value.id, {
     title: newWidgetTitle.value || 'Nuevo Gráfico',
     chartType: newWidgetType.value,
     useMockData: true
+  }).then(widget => {
+    showAddWidget.value = false
+    newWidgetTitle.value = ''
+    newWidgetType.value = 'bar'
+    // Open config immediately
+    configuringWidget.value = widget
   })
-  showAddWidget.value = false
-  newWidgetTitle.value = ''
-  newWidgetType.value = 'bar'
-  // Open config immediately
-  configuringWidget.value = widget
 }
 
 function removeWidget(widgetId) {
@@ -872,7 +881,11 @@ function openConfigModal(widget) {
 }
 
 function saveWidgetConfig(updatedWidget) {
-  if (!activeDashboard.value) return
+  if (!activeDashboard.value || !updatedWidget.id) {
+    console.error('Cannot save widget config: missing dashboard or widget id', { dashboardId: activeDashboard.value?.id, widgetId: updatedWidget?.id })
+    configuringWidget.value = null
+    return
+  }
   dashboardStore.updateWidget(activeDashboard.value.id, updatedWidget.id, updatedWidget)
   configuringWidget.value = null
   uiStore.addAlert({ type: 'success', message: 'Widget actualizado correctamente' })

@@ -1,90 +1,16 @@
 import { defineStore } from 'pinia'
-import { normalizeMember } from '@/composables/useCubeQuery'
+import { dashboardApi } from '@/services/api'
 
 function generateId() {
   return Math.random().toString(36).substr(2, 9)
 }
 
-const SAMPLE_DASHBOARDS = [
-  {
-    id: 'demo-1',
-    name: 'Demo: Ventas por Región',
-    description: 'Dashboard de ejemplo con datos simulados',
-    isPublic: true,
-    assignedUsers: ['2', '3'],
-    createdBy: '1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    filters: [],
-    widgets: [
-      {
-        id: 'w1',
-        title: 'Ventas Mensuales',
-        chartType: 'bar',
-        position: { x: 0, y: 0, w: 6, h: 3 },
-        cubeQuery: {
-          measures: [{ key: 'Orders.totalRevenue', label: 'Revenue', color: '#1890ff' }],
-          dimensions: [{ key: 'Orders.month', label: 'Mes' }],
-          timeDimension: null,
-          filters: [],
-          limit: 12
-        },
-        chartOptions: {},
-        useMockData: true
-      },
-      {
-        id: 'w2',
-        title: 'Distribución por Categoría',
-        chartType: 'pie',
-        position: { x: 6, y: 0, w: 6, h: 3 },
-        cubeQuery: {
-          measures: [{ key: 'Products.count', label: 'Cantidad', color: '' }],
-          dimensions: [{ key: 'Products.category', label: 'Categoría' }],
-          timeDimension: null,
-          filters: [],
-          limit: 10
-        },
-        chartOptions: {},
-        useMockData: true
-      },
-      {
-        id: 'w3',
-        title: 'Tendencia de Pedidos',
-        chartType: 'line',
-        position: { x: 0, y: 3, w: 8, h: 3 },
-        cubeQuery: {
-          measures: [{ key: 'Orders.count', label: 'Pedidos', color: '#52c41a' }],
-          dimensions: [],
-          timeDimension: { dimension: 'Orders.createdAt', granularity: 'month' },
-          filters: [],
-          limit: 12
-        },
-        chartOptions: {},
-        useMockData: true
-      },
-      {
-        id: 'w4',
-        title: 'Meta Cumplida',
-        chartType: 'gauge',
-        position: { x: 8, y: 3, w: 4, h: 3 },
-        cubeQuery: {
-          measures: [{ key: 'KPI.achievement', label: 'Logro', color: '#faad14' }],
-          dimensions: [],
-          timeDimension: null,
-          filters: [],
-          limit: 1
-        },
-        chartOptions: {},
-        useMockData: true
-      }
-    ]
-  }
-]
-
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
-    dashboards: JSON.parse(localStorage.getItem('dashboards') || JSON.stringify(SAMPLE_DASHBOARDS)),
-    activeDashboardId: null
+    dashboards: [],
+    activeDashboardId: null,
+    loading: false,
+    error: null
   }),
 
   getters: {
@@ -95,122 +21,258 @@ export const useDashboardStore = defineStore('dashboard', {
     dashboardsForDesigner: (state) => state.dashboards,
 
     dashboardsForUser: (state) => (userId) => {
-      return state.dashboards.filter(d => d.assignedUsers.includes(userId) || d.isPublic)
+      return state.dashboards.filter(d => d.assignedUsers?.includes(userId) || d.isPublic)
     }
   },
 
   actions: {
-    persist() {
-      localStorage.setItem('dashboards', JSON.stringify(this.dashboards))
-    },
-
-    createDashboard(name, description = '', createdBy) {
-      const dashboard = {
-        id: generateId(),
-        name,
-        description,
-        isPublic: false,
-        assignedUsers: [],
-        createdBy,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        filters: [],
-        widgets: []
+    async loadFromBackend() {
+      this.loading = true
+      this.error = null
+      try {
+        const dashboards = await dashboardApi.getAll()
+        // Transform backend format to frontend format
+        this.dashboards = dashboards.map(d => this._transformBackendToFrontend(d))
+      } catch (err) {
+        this.error = err.message
+        console.error('Failed to load dashboards:', err)
+      } finally {
+        this.loading = false
       }
-      this.dashboards.push(dashboard)
-      this.persist()
-      return dashboard
     },
 
-    updateDashboard(id, updates) {
-      const idx = this.dashboards.findIndex(d => d.id === id)
-      if (idx !== -1) {
-        this.dashboards[idx] = {
-          ...this.dashboards[idx],
-          ...updates,
-          updatedAt: new Date().toISOString()
+    _transformBackendToFrontend(d) {
+      return {
+        id: d.id,
+        name: d.name,
+        description: d.description,
+        isPublic: d.is_public,
+        assignedUsers: d.assigned_users || [],
+        createdBy: d.created_by,
+        createdAt: d.created_at,
+        updatedAt: d.updated_at,
+        filters: d.filters || [],
+        widgets: (d.widgets || []).map(w => this._transformWidgetBackendToFrontend(w))
+      }
+    },
+
+    _transformFrontendToBackend(dashboard) {
+      return {
+        name: dashboard.name,
+        description: dashboard.description,
+        is_public: dashboard.isPublic,
+        filters: dashboard.filters || []
+      }
+    },
+
+    _transformWidgetBackendToFrontend(w) {
+      return {
+        id: w.id,
+        title: w.title,
+        chartType: w.chart_type,
+        position: { x: w.position?.x ?? 0, y: w.position?.y ?? 0, w: w.position?.w ?? 6, h: w.position?.h ?? 3 },
+        cubeQuery: w.cube_query || { measures: [], dimensions: [], timeDimension: null, filters: [], limit: 100 },
+        chartOptions: w.chart_options || {},
+        useMockData: w.use_mock_data
+      }
+    },
+
+    _transformWidgetFrontendToBackend(widget) {
+      return {
+        title: widget.title,
+        chart_type: widget.chartType,
+        position: widget.position,
+        cube_query: widget.cubeQuery,
+        chart_options: widget.chartOptions,
+        use_mock_data: widget.useMockData
+      }
+    },
+
+    async createDashboard(name, description = '', createdBy) {
+      try {
+        const dashboardData = {
+          name,
+          description,
+          is_public: false,
+          filters: []
         }
-        this.persist()
+        const created = await dashboardApi.create(dashboardData)
+        const frontendDashboard = this._transformBackendToFrontend(created)
+        frontendDashboard.createdBy = createdBy
+        frontendDashboard.assignedUsers = []
+        frontendDashboard.widgets = []
+        this.dashboards.push(frontendDashboard)
+        return frontendDashboard
+      } catch (err) {
+        console.error('Failed to create dashboard:', err)
+        throw err
       }
     },
 
-    deleteDashboard(id) {
-      this.dashboards = this.dashboards.filter(d => d.id !== id)
-      this.persist()
+    async updateDashboard(id, updates) {
+      try {
+        // Transform frontend updates to backend format
+        const backendUpdates = {}
+        if (updates.name !== undefined) backendUpdates.name = updates.name
+        if (updates.description !== undefined) backendUpdates.description = updates.description
+        if (updates.isPublic !== undefined) backendUpdates.is_public = updates.isPublic
+        if (updates.filters !== undefined) backendUpdates.filters = updates.filters
+
+        await dashboardApi.update(id, backendUpdates)
+        
+        // Update local state
+        const idx = this.dashboards.findIndex(d => d.id === id)
+        if (idx !== -1) {
+          this.dashboards[idx] = {
+            ...this.dashboards[idx],
+            ...updates,
+            updatedAt: new Date().toISOString()
+          }
+        }
+      } catch (err) {
+        console.error('Failed to update dashboard:', err)
+        throw err
+      }
+    },
+
+    async deleteDashboard(id) {
+      try {
+        await dashboardApi.delete(id)
+        this.dashboards = this.dashboards.filter(d => d.id !== id)
+        if (this.activeDashboardId === id) {
+          this.activeDashboardId = null
+        }
+      } catch (err) {
+        console.error('Failed to delete dashboard:', err)
+        throw err
+      }
     },
 
     setActiveDashboard(id) {
       this.activeDashboardId = id
     },
 
-    addWidget(dashboardId, widget) {
-      const dashboard = this.dashboards.find(d => d.id === dashboardId)
-      if (!dashboard) return
+    async addWidget(dashboardId, widget) {
+      try {
+        const position = this.nextAvailablePosition(this.dashboards.find(d => d.id === dashboardId))
+        const widgetData = {
+          title: widget.title || 'Nuevo Gráfico',
+          chart_type: widget.chartType || 'bar',
+          position: widget.position || position,
+          cube_query: widget.cubeQuery || { measures: [], dimensions: [], timeDimension: null, filters: [], limit: 100 },
+          chart_options: widget.chartOptions || {},
+          use_mock_data: widget.useMockData ?? false
+        }
 
-      const newWidget = {
-        id: generateId(),
-        title: 'Nuevo Gráfico',
-        chartType: 'bar',
-        position: this.nextAvailablePosition(dashboard),
-        cubeQuery: {
-          measures: [],
-          dimensions: [],
-          timeDimension: null,
-          filters: [],
-          limit: 100
-        },
-        chartOptions: {},
-        useMockData: false,
-        ...widget
-      }
-      dashboard.widgets.push(newWidget)
-      this.persist()
-      return newWidget
-    },
+        const created = await dashboardApi.createWidget(dashboardId, widgetData)
+        const frontendWidget = this._transformWidgetBackendToFrontend(created)
 
-    updateWidget(dashboardId, widgetId, updates) {
-      const dashboard = this.dashboards.find(d => d.id === dashboardId)
-      if (!dashboard) return
-      const widgetIdx = dashboard.widgets.findIndex(w => w.id === widgetId)
-      if (widgetIdx !== -1) {
-        Object.assign(dashboard.widgets[widgetIdx], updates)
-        this.persist()
+        const dashboard = this.dashboards.find(d => d.id === dashboardId)
+        if (dashboard) {
+          dashboard.widgets.push(frontendWidget)
+        }
+        return frontendWidget
+      } catch (err) {
+        console.error('Failed to add widget:', err)
+        throw err
       }
     },
 
-    removeWidget(dashboardId, widgetId) {
-      const dashboard = this.dashboards.find(d => d.id === dashboardId)
-      if (dashboard) {
-        dashboard.widgets = dashboard.widgets.filter(w => w.id !== widgetId)
-        this.persist()
+    async updateWidget(dashboardId, widgetId, updates) {
+      try {
+        // Transform frontend updates to backend format
+        const backendUpdates = {}
+        if (updates.title !== undefined) backendUpdates.title = updates.title
+        if (updates.chartType !== undefined) backendUpdates.chart_type = updates.chartType
+        if (updates.position !== undefined) backendUpdates.position = updates.position
+        if (updates.cubeQuery !== undefined) backendUpdates.cube_query = updates.cubeQuery
+        if (updates.chartOptions !== undefined) backendUpdates.chart_options = updates.chartOptions
+        if (updates.useMockData !== undefined) backendUpdates.use_mock_data = updates.useMockData
+
+        await dashboardApi.updateWidget(dashboardId, widgetId, backendUpdates)
+
+        // Update local state
+        const dashboard = this.dashboards.find(d => d.id === dashboardId)
+        if (dashboard) {
+          const widgetIdx = dashboard.widgets.findIndex(w => w.id === widgetId)
+          if (widgetIdx !== -1) {
+            dashboard.widgets[widgetIdx] = { ...dashboard.widgets[widgetIdx], ...updates }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to update widget:', err)
+        throw err
+      }
+    },
+
+    async removeWidget(dashboardId, widgetId) {
+      try {
+        await dashboardApi.deleteWidget(dashboardId, widgetId)
+        const dashboard = this.dashboards.find(d => d.id === dashboardId)
+        if (dashboard) {
+          dashboard.widgets = dashboard.widgets.filter(w => w.id !== widgetId)
+        }
+      } catch (err) {
+        console.error('Failed to remove widget:', err)
+        throw err
       }
     },
 
     updateWidgetPosition(dashboardId, widgetId, position) {
-      this.updateWidget(dashboardId, widgetId, { position })
-    },
-
-    assignDashboardToUsers(dashboardId, userIds) {
-      this.updateDashboard(dashboardId, { assignedUsers: userIds })
-    },
-
-    addDashboardFilter(dashboardId, { dimension, label, type }) {
+      // Optimistic update - will be synced to backend
       const dashboard = this.dashboards.find(d => d.id === dashboardId)
-      if (!dashboard) return
-      if (!dashboard.filters) dashboard.filters = []
-      dashboard.filters.push({ id: generateId(), dimension: normalizeMember(dimension), label, type })
-      this.persist()
+      if (dashboard) {
+        const widget = dashboard.widgets.find(w => w.id === widgetId)
+        if (widget) {
+          widget.position = position
+        }
+      }
     },
 
-    removeDashboardFilter(dashboardId, filterId) {
-      const dashboard = this.dashboards.find(d => d.id === dashboardId)
-      if (!dashboard?.filters) return
-      dashboard.filters = dashboard.filters.filter(f => f.id !== filterId)
-      this.persist()
+    async assignDashboardToUsers(dashboardId, userIds) {
+      try {
+        await dashboardApi.assign(dashboardId, userIds)
+        const dashboard = this.dashboards.find(d => d.id === dashboardId)
+        if (dashboard) {
+          dashboard.assignedUsers = userIds
+        }
+      } catch (err) {
+        console.error('Failed to assign dashboard:', err)
+        throw err
+      }
+    },
+
+    async addDashboardFilter(dashboardId, { dimension, label, type }) {
+      const filterData = { dimension, label, type }
+      try {
+        const updated = await dashboardApi.addFilter(dashboardId, filterData)
+        const dashboard = this.dashboards.find(d => d.id === dashboardId)
+        if (dashboard) {
+          dashboard.filters = updated.filters || []
+        }
+      } catch (err) {
+        console.error('Failed to add filter:', err)
+        throw err
+      }
+    },
+
+    async removeDashboardFilter(dashboardId, filterId) {
+      try {
+        await dashboardApi.removeFilter(dashboardId, filterId)
+        const dashboard = this.dashboards.find(d => d.id === dashboardId)
+        if (dashboard?.filters) {
+          dashboard.filters = dashboard.filters.filter(f => f.id !== filterId)
+        }
+      } catch (err) {
+        console.error('Failed to remove filter:', err)
+        throw err
+      }
     },
 
     nextAvailablePosition(dashboard) {
-      if (dashboard.widgets.length === 0) return { x: 0, y: 0, w: 6, h: 3 }
+      if (!dashboard || !dashboard.widgets || dashboard.widgets.length === 0) {
+        return { x: 0, y: 0, w: 6, h: 3 }
+      }
 
       // Find the lowest available row
       let maxRow = 0

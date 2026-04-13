@@ -131,6 +131,7 @@ import { computed, onMounted, watch, ref } from 'vue'
 import EChartWrapper from '../charts/EChartWrapper.vue'
 import DataTableWidget from '../charts/DataTableWidget.vue'
 import { useCubeQuery, downloadCSV } from '@/composables/useCubeQuery'
+import { useCubeStore } from '@/stores/cubejs'
 import html2canvas from 'html2canvas'
 
 const props = defineProps({
@@ -144,6 +145,7 @@ const props = defineProps({
 
 const emit = defineEmits(['configure', 'remove', 'select', 'resize-start', 'drag-start', 'toggle-maximize'])
 
+const cubeStore = useCubeStore()
 const dashboardFiltersRef = computed(() => props.dashboardFilters)
 const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget, dashboardFiltersRef)
 
@@ -205,6 +207,7 @@ onMounted(() => fetchData())
 watch(() => props.widget.cubeQuery, () => fetchData(), { deep: true })
 watch(() => props.widget.useMockData, () => fetchData())
 watch(() => props.dashboardFilters, () => fetchData())
+watch(() => cubeStore.token, (token) => { if (token) fetchData() })
 </script>
 
 

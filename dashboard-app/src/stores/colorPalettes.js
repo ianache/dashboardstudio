@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia'
-
-function generateId() {
-  return 'pal_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
-}
+import { paletteApi } from '@/services/api'
 
 const BUILT_IN_PALETTES = [
   {
@@ -47,18 +44,13 @@ const BUILT_IN_PALETTES = [
   }
 ]
 
-function loadState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('colorPalettes') || 'null')
-    if (saved?.palettes?.length) {
-      return { palettes: saved.palettes, defaultPaletteId: saved.defaultPaletteId ?? null }
-    }
-  } catch {}
-  return { palettes: BUILT_IN_PALETTES, defaultPaletteId: null }
-}
-
 export const useColorPaletteStore = defineStore('colorPalettes', {
-  state: () => loadState(),
+  state: () => ({
+    palettes: [],
+    defaultPaletteId: null,
+    loading: false,
+    error: null
+  }),
 
   getters: {
     allPalettes: (state) => state.palettes,
@@ -67,43 +59,100 @@ export const useColorPaletteStore = defineStore('colorPalettes', {
   },
 
   actions: {
-    _persist() {
-      localStorage.setItem('colorPalettes', JSON.stringify({
-        palettes: this.palettes,
-        defaultPaletteId: this.defaultPaletteId
-      }))
-    },
-
-    addPalette(label, colors) {
-      const palette = { id: generateId(), label, colors: [...colors] }
-      this.palettes.push(palette)
-      this._persist()
-      return palette
-    },
-
-    updatePalette(id, label, colors) {
-      const idx = this.palettes.findIndex(p => p.id === id)
-      if (idx !== -1) {
-        this.palettes[idx] = { ...this.palettes[idx], label, colors: [...colors] }
-        this._persist()
+    async loadFromBackend() {
+      this.loading = true
+      this.error = null
+      try {
+        const palettes = await paletteApi.getAll()
+        // Transform backend format to frontend format
+        this.palettes = palettes.map(p => ({
+          id: p.id,
+          label: p.label,
+          colors: p.colors,
+          is_default: p.is_default,
+          created_by: p.created_by
+        }))
+        // Set default palette ID
+        const defaultPalette = this.palettes.find(p => p.is_default)
+        this.defaultPaletteId = defaultPalette?.id ?? null
+      } catch (err) {
+        this.error = err.message
+        console.warn('Failed to load palettes from backend:', err)
+        // Fallback to built-in palettes
+        this.palettes = BUILT_IN_PALETTES
+        this.defaultPaletteId = 'default'
+      } finally {
+        this.loading = false
       }
     },
 
-    deletePalette(id) {
-      this.palettes = this.palettes.filter(p => p.id !== id)
-      if (this.defaultPaletteId === id) this.defaultPaletteId = null
-      this._persist()
+    async addPalette(label, colors) {
+      try {
+        const palette = await paletteApi.create({
+          label,
+          colors,
+          is_default: false
+        })
+        this.palettes.push({
+          id: palette.id,
+          label: palette.label,
+          colors: palette.colors,
+          is_default: palette.is_default
+        })
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
     },
 
-    setDefault(id) {
-      this.defaultPaletteId = (this.defaultPaletteId === id) ? null : id
-      this._persist()
+    async updatePalette(id, label, colors) {
+      try {
+        const palette = await paletteApi.update(id, {
+          label,
+          colors
+        })
+        const idx = this.palettes.findIndex(p => p.id === id)
+        if (idx !== -1) {
+          this.palettes[idx] = {
+            ...this.palettes[idx],
+            label: palette.label,
+            colors: palette.colors
+          }
+        }
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+
+    async deletePalette(id) {
+      try {
+        await paletteApi.delete(id)
+        this.palettes = this.palettes.filter(p => p.id !== id)
+        if (this.defaultPaletteId === id) this.defaultPaletteId = null
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+
+    async setDefault(id) {
+      try {
+        await paletteApi.setDefault(id)
+        // Update local state
+        this.palettes.forEach(p => {
+          p.is_default = p.id === id
+        })
+        this.defaultPaletteId = id
+        return { success: true }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
     },
 
     resetToBuiltIn() {
       this.palettes = BUILT_IN_PALETTES
-      this.defaultPaletteId = null
-      this._persist()
+      this.defaultPaletteId = 'default'
     }
   }
 })

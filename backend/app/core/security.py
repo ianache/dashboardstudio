@@ -5,6 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 import httpx
 from app.core.config import get_settings
+from app.core.database import get_db
 
 settings = get_settings()
 security = HTTPBearer(auto_error=False)
@@ -16,6 +17,34 @@ class TokenData:
         self.roles = roles
         self.email = email
         self.name = name
+
+
+async def ensure_user_exists(token_data: TokenData):
+    """Ensure user exists in database, create if not - returns user ID"""
+    from app.models import models
+    
+    db = next(get_db())
+    
+    # Check if user exists
+    user = db.query(models.User).filter(models.User.id == token_data.sub).first()
+    
+    if not user:
+        # Auto-create user from Keycloak token
+        user = models.User(
+            id=token_data.sub,
+            email=token_data.email,
+            username=token_data.name or token_data.sub,
+            full_name=token_data.name,
+            first_name=token_data.name.split()[0] if token_data.name else None,
+            last_name=" ".join(token_data.name.split()[1:]) if token_data.name and len(token_data.name.split()) > 1 else None,
+            role=token_data.roles[0] if token_data.roles else "viewer",
+            avatar=token_data.name[:2].upper() if token_data.name else token_data.sub[:2].upper(),
+            is_active=True
+        )
+        db.add(user)
+        db.commit()
+    
+    return token_data.sub
 
 
 async def get_jwks():
@@ -51,18 +80,29 @@ async def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Dep
             detail="Unable to find appropriate key",
         )
 
-    try:
-        payload = jwt.decode(
-            token,
-            jwk,
-            algorithms=["RS256"],
-            audience=settings.keycloak_client_id,
-            issuer=f"{settings.keycloak_url}/realms/{settings.keycloak_realm}",
-        )
-    except JWTError as e:
+    # Try to validate with the configured client_id, or allow dashboard-app client
+    valid_audiences = [settings.keycloak_client_id, "dashboard-app", "account"]
+    payload = None
+    last_error = None
+    
+    for audience in valid_audiences:
+        try:
+            payload = jwt.decode(
+                token,
+                jwk,
+                algorithms=["RS256"],
+                audience=audience,
+                issuer=f"{settings.keycloak_url}/realms/{settings.keycloak_realm}",
+            )
+            break  # Success, exit the loop
+        except JWTError as e:
+            last_error = e
+            continue  # Try next audience
+    
+    if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token validation failed: {str(e)}",
+            detail=f"Token validation failed: {str(last_error)}",
         )
 
     realm_access = payload.get("realm_access", {})

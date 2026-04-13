@@ -40,7 +40,9 @@ uv run alembic revision --autogenerate -m "create users table"
 
 Aplicar migraciones:
 ```bash
-uv run alembic upgrade head
+uv sync
+uv run alembic upgrade head  # requiere PostgreSQL
+uv run uvicorn app.main:app --reload --port 9001
 ```
 
 ## Estructura

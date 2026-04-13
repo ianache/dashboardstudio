@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
-from app.core.security import get_current_user, require_role, TokenData
+from app.core.security import get_current_user, require_role, TokenData, ensure_user_exists
 from app.models import models
 from app.schemas import schemas
 
@@ -21,6 +21,9 @@ async def create_dashboard(
     current_user: TokenData = Depends(require_role(["admin", "designer"]))
 ):
     """Create a new dashboard (admin/designer only)"""
+    # Ensure user exists in database
+    await ensure_user_exists(current_user)
+    
     db_dashboard = models.Dashboard(
         id=_generate_id(),
         name=dashboard.name,
@@ -178,9 +181,7 @@ async def add_filter(
     if not dashboard:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dashboard not found")
     
-    filters = dashboard.filters or []
-    filters.append({"id": _generate_id(), **filter_data})
-    dashboard.filters = filters
+    dashboard.filters = [*(dashboard.filters or []), {"id": _generate_id(), **filter_data}]
     
     db.commit()
     db.refresh(dashboard)

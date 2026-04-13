@@ -23,6 +23,20 @@
           <div v-else-if="cubeStore.metaError" class="alert alert-error" style="margin-bottom: 16px;">
             ⚠️ Error de conexión: {{ cubeStore.metaError }}
           </div>
+          <div v-else-if="cubeStore.error" class="alert alert-warning" style="margin-bottom: 16px;">
+            ⚠️ No se pudo cargar la configuración del servidor
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nombre de configuración</label>
+            <input
+              v-model="configName"
+              type="text"
+              class="form-input"
+              placeholder="Mi conexión CubeJS"
+            />
+            <span class="form-hint">Identificador para esta configuración</span>
+          </div>
 
           <div class="form-group">
             <label class="form-label">API URL</label>
@@ -53,7 +67,7 @@
                 {{ showToken ? '🙈' : '👁️' }}
               </button>
             </div>
-            <span class="form-hint">JWT token de autenticación generado con tu secret de Cube</span>
+            <span class="form-hint">JWT token de autenticación generado con tu secret de Cube (se almacena encriptado)</span>
           </div>
 
           <div class="sc-actions">
@@ -61,8 +75,13 @@
               <span v-if="testing" class="btn-spin"></span>
               <span v-else>🔍 Probar conexión</span>
             </button>
-            <button class="btn btn-primary" @click="saveConnection">
-              💾 Guardar
+            <button 
+              class="btn btn-primary" 
+              @click="saveConnection" 
+              :disabled="saving || !authStore.isDesigner"
+            >
+              <span v-if="saving" class="btn-spin"></span>
+              <span v-else>💾 Guardar en servidor</span>
             </button>
           </div>
 
@@ -172,6 +191,7 @@
             </div>
             <span class="form-hint">
               Obtén tu clave en <a :href="prov.docsUrl" target="_blank" rel="noopener">{{ prov.docsUrl }} →</a>
+              <span v-if="llmKeys[prov.id]" style="color:var(--success);"> • 🔒 Se almacenará encriptado</span>
             </span>
           </div>
 
@@ -204,7 +224,14 @@
           </div>
 
           <div class="sc-actions">
-            <button class="btn btn-primary" @click="saveLlm">💾 Guardar</button>
+            <button 
+              class="btn btn-primary" 
+              @click="saveLlm" 
+              :disabled="savingLlm || !authStore.isDesigner"
+            >
+              <span v-if="savingLlm" class="btn-spin"></span>
+              <span v-else>💾 Guardar en servidor</span>
+            </button>
           </div>
         </div>
       </div>
@@ -372,7 +399,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCubeStore } from '@/stores/cubejs'
 import { useDashboardStore } from '@/stores/dashboard'
@@ -387,28 +414,70 @@ const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 const llmStore = useLlmStore()
 
-// Migrate key stored by previous implementation (one-time)
-llmStore.migrateFromLegacy()
-
 uiStore.setBreadcrumbs(['Configuración'])
 
-const apiUrl = ref(cubeStore.apiUrl)
-const apiToken = ref(cubeStore.token)
+// CubeJS Config refs
+const apiUrl = ref('')
+const apiToken = ref('')
+const configName = ref('Default')
 const showToken = ref(false)
 const testing = ref(false)
+const saving = ref(false)
 const openCubes = ref([])
 
-// LLM
+// LLM refs
+const llmKeys = ref({})
+const showLlmKey = ref({})
+const savingLlm = ref(false)
+
+// Load config from backend on mount
+onMounted(async () => {
+  // Load CubeJS config
+  await cubeStore.loadConfigFromBackend()
+  apiUrl.value = cubeStore.apiUrl
+  apiToken.value = cubeStore.token
+  configName.value = cubeStore.configName
+
+  // Load LLM config
+  await llmStore.loadConfigFromBackend()
+  // Check for legacy data and migrate if needed
+  await llmStore.migrateFromLegacy()
+  // Initialize LLM refs from store
+  for (const prov of PROVIDERS) {
+    llmKeys.value[prov.id] = llmStore.keys[prov.id] || ''
+    showLlmKey.value[prov.id] = false
+  }
+
+  // Load palette config from backend
+  await paletteStore.loadFromBackend()
+})
+
+// LLM providers and operations
 const llmProviders = PROVIDERS
 const llmOperations = LLM_OPERATIONS
-const llmKeys = ref(Object.fromEntries(PROVIDERS.map(p => [p.id, llmStore.keys[p.id] ?? ''])))
-const showLlmKey = ref(Object.fromEntries(PROVIDERS.map(p => [p.id, false])))
 
-function saveLlm() {
+async function saveLlm() {
+  if (!authStore.isDesigner) {
+    uiStore.addAlert({ type: 'error', message: 'No tienes permisos para guardar la configuración' })
+    return
+  }
+
+  savingLlm.value = true
+
+  // Update store with current values
   for (const prov of PROVIDERS) {
     llmStore.setKey(prov.id, llmKeys.value[prov.id] ?? '')
   }
-  uiStore.addAlert({ type: 'success', message: 'Configuración LLM guardada' })
+
+  // Save to backend
+  const result = await llmStore.saveConfigToBackend()
+  savingLlm.value = false
+
+  if (result.success) {
+    uiStore.addAlert({ type: 'success', message: 'Configuración LLM guardada en el servidor' })
+  } else {
+    uiStore.addAlert({ type: 'error', message: `Error al guardar: ${result.error}` })
+  }
 }
 
 const myDashboards = computed(() => {
@@ -429,9 +498,26 @@ async function testConnection() {
   }
 }
 
-function saveConnection() {
-  cubeStore.setConfig(apiUrl.value, apiToken.value)
-  uiStore.addAlert({ type: 'success', message: 'Configuración guardada correctamente' })
+async function saveConnection() {
+  if (!authStore.isDesigner) {
+    uiStore.addAlert({ type: 'error', message: 'No tienes permisos para guardar la configuración' })
+    return
+  }
+
+  saving.value = true
+  const result = await cubeStore.saveConfigToBackend(
+    configName.value,
+    apiUrl.value,
+    apiToken.value,
+    true // isActive
+  )
+  saving.value = false
+
+  if (result.success) {
+    uiStore.addAlert({ type: 'success', message: 'Configuración guardada correctamente en el servidor' })
+  } else {
+    uiStore.addAlert({ type: 'error', message: `Error al guardar: ${result.error}` })
+  }
 }
 
 function toggleCube(name) {

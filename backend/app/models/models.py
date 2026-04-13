@@ -64,11 +64,15 @@ class Widget(Base):
     position_h = Column(Integer, default=3)
     cube_query = Column(JSON, default={})
     chart_options = Column(JSON, default={})
-    use_mock_data = Column(Boolean, default=True)
+    use_mock_data = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     dashboard = relationship("Dashboard", back_populates="widgets")
+
+    @property
+    def position(self):
+        return {"x": self.position_x, "y": self.position_y, "w": self.position_w, "h": self.position_h}
 
 
 class ColorPalette(Base):
@@ -121,6 +125,17 @@ class CubeConfig(Base):
     api_url = Column(String(500), nullable=False)
     api_token = Column(String(500), nullable=True)
     is_active = Column(Boolean, default=True)
+    created_by = Column(String(50), ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class LlmConfig(Base):
+    __tablename__ = "llm_config"
+
+    id = Column(String(50), primary_key=True)
+    provider = Column(String(50), nullable=False)  # anthropic, gemini, moonshot, groq
+    api_key = Column(String(500), nullable=False)  # Encrypted
     created_by = Column(String(50), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
