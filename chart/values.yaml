@@ -31,7 +31,7 @@ backend:
     tls: true
 
   env:
-    POSTGRES_HOST: postgres-service
+    POSTGRES_HOST: postgresql-rw.database.svc.custer.local
     POSTGRES_PORT: 5432
     POSTGRES_USER: biportal
     POSTGRES_DB: biportal
