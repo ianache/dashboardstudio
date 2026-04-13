@@ -14,7 +14,7 @@ backend:
   autoscaling:
     enabled: false  
   image:
-    repository: dashboardstudio-backend
+    repository: comsatel/dashboardstudio-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -54,7 +54,7 @@ frontend:
   autoscaling:
     enabled: false
   image:
-    repository: dashboardstudio-frontend
+    repository: comsatel/dashboardstudio-frontend
     pullPolicy: IfNotPresent
     tag: ""
 
