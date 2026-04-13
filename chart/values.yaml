@@ -11,6 +11,8 @@ global:
 backend:
   enabled: true
   replicaCount: 1
+  autoscaling:
+    enabled: false  
   image:
     repository: dashboardstudio-backend
     pullPolicy: IfNotPresent
@@ -49,6 +51,8 @@ backend:
 frontend:
   enabled: true
   replicaCount: 1
+  autoscaling:
+    enabled: false
   image:
     repository: dashboardstudio-frontend
     pullPolicy: IfNotPresent
