@@ -1,0 +1,14 @@
+environment: dev
+
+backend:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dev
+
+frontend:
+  env:
+    VITE_API_URL: https://dashboard-backend.dev.comsatel.com.pe
+    VITE_CUBEJS_API_URL: https://cubejs.dev.comsatel.com.pe/cubejs-api/v1
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dev

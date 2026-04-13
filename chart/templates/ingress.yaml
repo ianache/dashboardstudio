@@ -1,0 +1,69 @@
+{{- if .Values.backend.ingress.enabled -}}
+{{- $fullName := (include "dashboardstudio.fullname" .) -}}
+{{- $svcPort := .Values.backend.service.port -}}
+{{- $host := printf "backend.%s.%s" .Values.environment .Values.global.domainSuffix -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-backend
+  labels:
+    {{- include "dashboardstudio.labels" . | nindent 4 }}
+    component: backend
+  {{- with .Values.backend.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.backend.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ $fullName }}-backend-tls
+  {{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName }}-backend
+                port:
+                  number: {{ $svcPort }}
+---
+{{- end }}
+{{- if .Values.frontend.ingress.enabled -}}
+{{- $fullName := (include "dashboardstudio.fullname" .) -}}
+{{- $svcPort := .Values.frontend.service.port -}}
+{{- $host := printf "frontend.%s.%s" .Values.environment .Values.global.domainSuffix -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-frontend
+  labels:
+    {{- include "dashboardstudio.labels" . | nindent 4 }}
+    component: frontend
+  {{- with .Values.frontend.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.frontend.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ $fullName }}-frontend-tls
+  {{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName }}-frontend
+                port:
+                  number: {{ $svcPort }}
+{{- end }}

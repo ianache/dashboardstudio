@@ -1,0 +1,16 @@
+environment: prod
+
+backend:
+  replicaCount: 2
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+
+frontend:
+  replicaCount: 2
+  env:
+    VITE_API_URL: https://dashboard-backend.prod.comsatel.com.pe
+    VITE_CUBEJS_API_URL: https://cubejs.prod.comsatel.com.pe/cubejs-api/v1
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
