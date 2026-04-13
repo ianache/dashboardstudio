@@ -12,7 +12,7 @@ backend:
   enabled: true
   replicaCount: 1
   image:
-    repository: comsatel/dashboardstudio-backend
+    repository: dashboardstudio-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -50,7 +50,7 @@ frontend:
   enabled: true
   replicaCount: 1
   image:
-    repository: comsatel/dashboardstudio-frontend
+    repository: dashboardstudio-frontend
     pullPolicy: IfNotPresent
     tag: ""
 

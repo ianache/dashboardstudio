@@ -3,12 +3,12 @@ environment: qa
 backend:
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-production
+      cert-manager.io/cluster-issuer: letsencrypt-qa
 
 frontend:
   env:
-    VITE_API_URL: https://dashboard-backend.qa.comsatel.com.pe
+    VITE_API_URL: https://backend.qa.comsatel.com.pe
     VITE_CUBEJS_API_URL: https://cubejs.qa.comsatel.com.pe/cubejs-api/v1
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-production
+      cert-manager.io/cluster-issuer: letsencrypt-qa

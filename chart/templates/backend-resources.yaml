@@ -35,13 +35,16 @@ spec:
             - name: http
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
-          env:
-            {{- range $key, $value := .Values.backend.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
+          volumeMounts:
+            - name: env-volume
+              mountPath: /app/.env
+              subPath: .env
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
+      volumes:
+        - name: env-volume
+          configMap:
+            name: {{ include "dashboardstudio.fullname" . }}-backend-configmap
 ---
 apiVersion: v1
 kind: Service
