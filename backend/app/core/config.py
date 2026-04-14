@@ -59,9 +59,17 @@ class Settings(BaseSettings):
     def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+        elif isinstance(v, str) and v.startswith("["):
+            import json
+            try:
+                parsed = json.loads(v.replace("'", "\""))
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+        if isinstance(v, list):
             return v
-        raise ValueError(v)
+        return [v] if v else []
 
     # Encryption for sensitive data (API tokens, etc.)
     encryption_key: str = "your-secret-encryption-key-change-in-production"
