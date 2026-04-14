@@ -66,7 +66,7 @@ spec:
     {{- include "cubejs.selectorLabels" . | nindent 4 }}
     component: cubestore-router
 ---
-{{- if .Values.cubestore_router.persistence.enabled -}}
+{{ if .Values.cubestore_router.persistence.enabled -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

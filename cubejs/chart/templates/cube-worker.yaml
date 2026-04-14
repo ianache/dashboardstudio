@@ -47,7 +47,7 @@ spec:
             - name: {{ $key }}
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "cubejs.fullname" . }}-config
+                  name: {{ include "cubejs.fullname" $ }}-config
                   key: WORKER_{{ $key }}
             {{- end }}
       volumes:

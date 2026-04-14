@@ -51,7 +51,7 @@ spec:
             - name: {{ $key }}
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "cubejs.fullname" . }}-config
+                  name: {{ include "cubejs.fullname" $ }}-config
                   key: API_{{ $key }}
             {{- end }}
       volumes:
@@ -76,7 +76,7 @@ spec:
     {{- include "cubejs.selectorLabels" . | nindent 4 }}
     component: api
 ---
-{{- if .Values.cube_api.ingress.enabled -}}
+{{ if .Values.cube_api.ingress.enabled -}}
 {{- $host := printf "cubejs.%s.%s" .Values.environment .Values.global.domainSuffix -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
