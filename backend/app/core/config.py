@@ -1,7 +1,5 @@
 from functools import lru_cache
-from typing import Optional, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -51,25 +49,24 @@ class Settings(BaseSettings):
     app_port: int = 8000
     debug: bool = False
 
-    # CORS
-    cors_origins: Union[str, list[str]] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:9000"]
+    # CORS — keep as str so pydantic-settings never tries to JSON-decode it
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,http://localhost:9000"
 
-    @field_validator("cors_origins", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, str) and v.startswith("["):
+    def assemble_cors_origins(cls, v: str) -> list[str]:
+        """Convert a raw CORS_ORIGINS string to a list of origins."""
+        if not v or not v.strip():
+            return []
+        v = v.strip()
+        if v.startswith("["):
             import json
             try:
-                parsed = json.loads(v.replace("'", "\""))
+                parsed = json.loads(v.replace("'", '"'))
                 if isinstance(parsed, list):
-                    return parsed
+                    return [str(o) for o in parsed]
             except Exception:
                 pass
-        if isinstance(v, list):
-            return v
-        return [str(v)] if v else []
+        return [o.strip() for o in v.split(",") if o.strip()]
 
     # Encryption for sensitive data (API tokens, etc.)
     encryption_key: str = "your-secret-encryption-key-change-in-production"
