@@ -31,7 +31,7 @@ if "*" in origins:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["*"],
     )
 else:
@@ -39,8 +39,8 @@ else:
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
     )
 
 app.include_router(api_router, prefix="/api/v1")
