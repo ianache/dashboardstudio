@@ -1,6 +1,8 @@
 environment: qa
 
 backend:
+  env:
+    CORS_ORIGINS: "https://frontend.qa.comsatel.com.pe"
   ingress:
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-staging-qa

@@ -1,6 +1,25 @@
 environment: qa
 
+global:
+  domainSuffix: qa.comsatel.com.pe
+
+# Common database configuration (from *default_db in docker-compose)
+common_db:
+  CUBEJS_DB_TYPE: postgres
+  CUBEJS_DB_HOST: postgresql-rw.database.svc
+  CUBEJS_DB_NAME: analytics
+  CUBEJS_DB_USER: master
+  CUBEJS_DB_PASS: CHANGEME
+  CUBEJS_DB_SCHEMA: analytics
+
+# Cube definitions (JavaScript/YAML files) from Git
+cubes:
+  git:
+    repo: "https://project.comsatel.com.pe/comsatel/development/products/comunes/biconfig.git"
+    branch: "main"
+    image: "registry.k8s.io/git-sync/git-sync:v4.2.3" #"alpine/git:latest"
+
 cube_api:
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letseencrypt-qa
+      cert-manager.io/cluster-issuer: letsencrypt-staging-qa

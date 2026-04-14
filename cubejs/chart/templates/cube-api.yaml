@@ -18,16 +18,98 @@ spec:
         {{- include "cubejs.selectorLabels" . | nindent 8 }}
         component: api
     spec:
+      imagePullSecrets:
+        - name: regcred
       initContainers:
         - name: git-clone-cubes
           image: {{ .Values.cubes.git.image | quote }}
-          command:
-            - /bin/sh
-            - -c
-            - |
-              rm -rf /cube/conf/*
-              git clone -b {{ .Values.cubes.git.branch }} --single-branch {{ .Values.cubes.git.repo }} /tmp/cubes
-              cp -r /tmp/cubes/* /cube/conf/
+          #command:
+          #  - /bin/sh
+          #  - -c
+          #  - |
+          #    rm -rf /cube/conf/*
+          #    git clone -b {{ .Values.cubes.git.branch }} --single-branch {{ .Values.cubes.git.repo }} /tmp/cubes
+          #    cp -r /tmp/cubes/* /cube/conf/
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds
+                  key: username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: password
+            - name: GIT_SYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds
+                  key: username # GIT_SYNC_USERNAME
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: username # GITSYNC_USERNAME
+            - name: GIT_SYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: password # GIT_SYNC_PASSWORD
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: password # GITSYNC_PASSWORD
+            - name: GIT_SYNC_REV
+              value: HEAD
+            - name: GITSYNC_REF
+              value: v2-2-stable
+            - name: GIT_SYNC_BRANCH
+              value: certification
+            - name: GIT_SYNC_REPO
+              value: >-
+                {{ .Values.cubes.git.repo }}
+            - name: GITSYNC_REPO
+              value: >-
+                {{ .Values.cubes.git.repo }}
+            - name: GIT_SYNC_DEPTH
+              value: '1'
+            - name: GITSYNC_DEPTH
+              value: '1'
+            - name: GIT_SYNC_ROOT
+              value: /git
+            - name: GITSYNC_ROOT
+              value: /git
+            - name: GIT_SYNC_DEST
+              value: repo
+            - name: GITSYNC_LINK
+              value: repo
+            - name: GIT_SYNC_ADD_USER
+              value: 'true'
+            - name: GITSYNC_ADD_USER
+              value: 'true'
+            - name: GIT_SYNC_WAIT
+              value: '60'
+            - name: GITSYNC_PERIOD
+              value: 5s
+            - name: GIT_SYNC_MAX_SYNC_FAILURES
+              value: '0'
+            - name: GITSYNC_MAX_FAILURES
+              value: '0'
+            - name: GIT_SYNC_ONE_TIME
+              value: 'true'
+            - name: GITSYNC_ONE_TIME
+              value: 'true'
+          #command:
+          #  - /bin/sh
+          #  - -c
+          #  - |
+          #    git config --global credential.helper store
+          #    printf "https://%s:%s@project.comsatel.com.pe\n" "$USERNAME" "$PASSWORD" > ~/.git-credentials
+          #    # Clonamos en una carpeta temporal y movemos el contenido para evitar errores de directorio no vacío
+          #    git clone -b main --single-branch https://project.comsatel.com.pe/comsatel/development/products/comunes/biconfig.git /data
+          #    rm ~/.git-credentials
           volumeMounts:
             - name: cubes-volume
               mountPath: /cube/conf
@@ -54,6 +136,83 @@ spec:
                   name: {{ include "cubejs.fullname" $ }}-config
                   key: API_{{ $key }}
             {{- end }}
+        - name: git-sync
+          image: {{ .Values.cubes.git.image | quote }}
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds
+                  key: username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: password
+            - name: GIT_SYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds
+                  key: username # GIT_SYNC_USERNAME
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: username # GITSYNC_USERNAME
+            - name: GIT_SYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: password # GIT_SYNC_PASSWORD
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-creds # airflow-git-credentials
+                  key: password # GITSYNC_PASSWORD
+            - name: GIT_SYNC_REV
+              value: HEAD
+            - name: GITSYNC_REF
+              value: v2-2-stable
+            - name: GIT_SYNC_BRANCH
+              value: certification
+            - name: GIT_SYNC_REPO
+              value: >-
+                {{ .Values.cubes.git.repo }}
+            - name: GITSYNC_REPO
+              value: >-
+                {{ .Values.cubes.git.repo }}
+            - name: GIT_SYNC_DEPTH
+              value: '1'
+            - name: GITSYNC_DEPTH
+              value: '1'
+            - name: GIT_SYNC_ROOT
+              value: /git
+            - name: GITSYNC_ROOT
+              value: /git
+            - name: GIT_SYNC_DEST
+              value: repo
+            - name: GITSYNC_LINK
+              value: repo
+            - name: GIT_SYNC_ADD_USER
+              value: 'true'
+            - name: GITSYNC_ADD_USER
+              value: 'true'
+            - name: GIT_SYNC_WAIT
+              value: '60'
+            - name: GITSYNC_PERIOD
+              value: 5s
+            - name: GIT_SYNC_MAX_SYNC_FAILURES
+              value: '0'
+            - name: GITSYNC_MAX_FAILURES
+              value: '0'
+            - name: GIT_SYNC_ONE_TIME
+              value: 'true'
+            - name: GITSYNC_ONE_TIME
+              value: 'true'
+          volumeMounts:
+            - name: cubes-volume
+              mountPath: /cube/conf
+
       volumes:
         - name: cubes-volume
           emptyDir: {}

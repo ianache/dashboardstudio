@@ -1,6 +1,7 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -49,6 +50,18 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     debug: bool = False
+
+    # CORS
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:9000"]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
 
     # Encryption for sensitive data (API tokens, etc.)
     encryption_key: str = "your-secret-encryption-key-change-in-production"

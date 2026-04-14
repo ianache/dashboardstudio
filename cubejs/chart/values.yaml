@@ -1,4 +1,3 @@
-# Default values for cubejs.
 environment: dev
 
 global:
@@ -7,25 +6,26 @@ global:
 # Common database configuration (from *default_db in docker-compose)
 common_db:
   CUBEJS_DB_TYPE: postgres
-  CUBEJS_DB_HOST: pgdb
+  CUBEJS_DB_HOST: postgresql-rw.database.svc
   CUBEJS_DB_NAME: analytics
   CUBEJS_DB_USER: master
   CUBEJS_DB_PASS: welcome1
-  CUBEJS_DB_SCHEMA: public
+  CUBEJS_DB_SCHEMA: analytics
 
 # Cube definitions (JavaScript/YAML files) from Git
 cubes:
   git:
     repo: "https://github.com/your-org/your-cubes-repo.git"
     branch: "main"
-    image: "alpine/git:latest"
+    #image: "registry.k8s.io/git-sync/git-sync:v4.2.3"  # "alpine/git:latest"
+    image: registry.k8s.io/git-sync/git-sync:v4.3.0
 
 cube_api:
   enabled: true
   replicaCount: 1
   image:
     repository: comsatel/cubejs-cube
-    tag: "latest"
+    tag: "v1.2.17"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -47,7 +47,7 @@ cube_refresh_worker:
   replicaCount: 1
   image:
     repository: cubejs/cube
-    tag: "latest"
+    tag: "v1.2.17"
     pullPolicy: IfNotPresent
   env:
     CUBEJS_REFRESH_WORKER: "true"
@@ -57,7 +57,7 @@ cubestore_router:
   enabled: true
   image:
     repository: cubejs/cubestore
-    tag: "latest"
+    tag: "v1.2.17"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -72,10 +72,10 @@ cubestore_router:
 
 cubestore_worker:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
     repository: cubejs/cubestore
-    tag: "latest"
+    tag: "v1.2.17"
     pullPolicy: IfNotPresent
   env:
     CUBESTORE_WORKER_PORT: "3030"
