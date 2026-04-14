@@ -29,6 +29,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table_schema=settings.postgres_schema,
     )
 
     with context.begin_transaction():
@@ -46,7 +47,9 @@ def run_migrations_online() -> None:
         connection.execute(text(f"SET search_path TO {settings.postgres_schema}"))
         
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata,
+            version_table_schema=settings.postgres_schema,
         )
 
         with context.begin_transaction():
