@@ -30,8 +30,8 @@ class UserResponse(UserBase):
     last_name: Optional[str] = None
     avatar: Optional[str] = None
     is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class Position(BaseModel):
@@ -76,8 +76,8 @@ class WidgetResponse(WidgetBase):
 
     id: str
     dashboard_id: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class DashboardBase(BaseModel):
@@ -103,8 +103,8 @@ class DashboardResponse(DashboardBase):
 
     id: str
     created_by: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     widgets: List[WidgetResponse] = []
 
 
@@ -137,8 +137,8 @@ class ColorPaletteResponse(ColorPaletteBase):
 
     id: str
     created_by: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class DataTypeBase(BaseModel):
@@ -166,8 +166,8 @@ class DataTypeResponse(DataTypeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class DimensionalModelNode(BaseModel):
@@ -212,8 +212,8 @@ class DimensionalModelResponse(DimensionalModelBase):
 
     id: str
     created_by: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class CubeConfigBase(BaseModel):
@@ -239,8 +239,8 @@ class CubeConfigResponse(CubeConfigBase):
 
     id: str
     created_by: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class MessageResponse(BaseModel):
@@ -275,5 +275,5 @@ class LlmConfigResponse(LlmConfigBase):
 
     id: str
     created_by: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
