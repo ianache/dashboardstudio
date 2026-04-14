@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:9000"]
+    cors_origins: Union[str, list[str]] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:9000"]
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -69,7 +69,7 @@ class Settings(BaseSettings):
                 pass
         if isinstance(v, list):
             return v
-        return [v] if v else []
+        return [str(v)] if v else []
 
     # Encryption for sensitive data (API tokens, etc.)
     encryption_key: str = "your-secret-encryption-key-change-in-production"
