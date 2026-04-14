@@ -1,0 +1,84 @@
+{{- if .Values.cubestore_router.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cubejs.fullname" . }}-cubestore-router
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+    component: cubestore-router
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "cubejs.selectorLabels" . | nindent 6 }}
+      component: cubestore-router
+  template:
+    metadata:
+      labels:
+        {{- include "cubejs.selectorLabels" . | nindent 8 }}
+        component: cubestore-router
+    spec:
+      containers:
+        - name: cubestore-router
+          image: "{{ .Values.cubestore_router.image.repository }}:{{ .Values.cubestore_router.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cubestore_router.image.pullPolicy }}
+          ports:
+            - name: meta
+              containerPort: 9999
+          envFrom:
+            - configMapRef:
+                name: {{ include "cubejs.fullname" . }}-config
+          env:
+            - name: CUBESTORE_SERVER_NAME
+              value: "{{ include "cubejs.fullname" . }}-cubestore-router:9999"
+            - name: CUBESTORE_META_PORT
+              value: "9999"
+            - name: CUBESTORE_WORKERS
+              value: {{ range $i, $e := until (int .Values.cubestore_worker.replicaCount) }}{{ if $i }},{{ end }}{{ include "cubejs.fullname" $ }}-cubestore-worker-{{ $i }}.{{ include "cubejs.fullname" $ }}-cubestore-worker:3030{{ end }}
+          volumeMounts:
+            - name: data
+              mountPath: /cube/data
+      volumes:
+        - name: data
+          {{- if .Values.cubestore_router.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "cubejs.fullname" . }}-cubestore-router
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cubejs.fullname" . }}-cubestore-router
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+    component: cubestore-router
+spec:
+  ports:
+    - port: 9999
+      targetPort: meta
+      protocol: TCP
+      name: meta
+  selector:
+    {{- include "cubejs.selectorLabels" . | nindent 4 }}
+    component: cubestore-router
+---
+{{- if .Values.cubestore_router.persistence.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cubejs.fullname" . }}-cubestore-router
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+    component: cubestore-router
+spec:
+  accessModes:
+    - {{ .Values.cubestore_router.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.cubestore_router.persistence.size | quote }}
+{{- end }}
+{{- end }}

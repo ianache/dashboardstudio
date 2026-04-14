@@ -1,0 +1,69 @@
+{{- if .Values.cubestore_worker.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "cubejs.fullname" . }}-cubestore-worker
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+    component: cubestore-worker
+spec:
+  serviceName: {{ include "cubejs.fullname" . }}-cubestore-worker
+  replicas: {{ .Values.cubestore_worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "cubejs.selectorLabels" . | nindent 6 }}
+      component: cubestore-worker
+  template:
+    metadata:
+      labels:
+        {{- include "cubejs.selectorLabels" . | nindent 8 }}
+        component: cubestore-worker
+    spec:
+      containers:
+        - name: cubestore-worker
+          image: "{{ .Values.cubestore_worker.image.repository }}:{{ .Values.cubestore_worker.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cubestore_worker.image.pullPolicy }}
+          ports:
+            - name: worker
+              containerPort: 3030
+          envFrom:
+            - configMapRef:
+                name: {{ include "cubejs.fullname" . }}-config
+          env:
+            - name: CUBESTORE_SERVER_NAME
+              value: "$(POD_NAME).{{ include "cubejs.fullname" . }}-cubestore-worker:3030"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: data
+              mountPath: /cube/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - {{ .Values.cubestore_worker.persistence.accessMode | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.cubestore_worker.persistence.size | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cubejs.fullname" . }}-cubestore-worker
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+    component: cubestore-worker
+spec:
+  clusterIP: None
+  ports:
+    - port: 3030
+      targetPort: worker
+      protocol: TCP
+      name: worker
+  selector:
+    {{- include "cubejs.selectorLabels" . | nindent 4 }}
+    component: cubestore-worker
+{{- end }}

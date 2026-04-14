@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cubejs.fullname" . }}-config
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+data:
+  # Common DB
+  {{- range $key, $value := .Values.common_db }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  
+  # Cube API specific
+  {{- range $key, $value := .Values.cube_api.env }}
+  API_{{ $key }}: {{ $value | quote }}
+  {{- end }}
+
+  # Refresh Worker specific
+  {{- range $key, $value := .Values.cube_refresh_worker.env }}
+  WORKER_{{ $key }}: {{ $value | quote }}
+  {{- end }}
+
+  # CubeStore Router specific
+  {{- range $key, $value := .Values.cubestore_router.env }}
+  ROUTER_{{ $key }}: {{ $value | quote }}
+  {{- end }}
+
+  # CubeStore Worker specific
+  {{- range $key, $value := .Values.cubestore_worker.env }}
+  CSTORE_WORKER_{{ $key }}: {{ $value | quote }}
+  {{- end }}
+  
+  # Network discovery
+  CUBEJS_CUBESTORE_HOST: {{ include "cubejs.fullname" . }}-cubestore-router
+  CUBESTORE_META_ADDR: {{ include "cubejs.fullname" . }}-cubestore-router:9999

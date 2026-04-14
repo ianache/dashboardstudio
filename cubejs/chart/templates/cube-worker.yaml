@@ -1,0 +1,56 @@
+{{- if .Values.cube_refresh_worker.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cubejs.fullname" . }}-worker
+  labels:
+    {{- include "cubejs.labels" . | nindent 4 }}
+    component: worker
+spec:
+  replicas: {{ .Values.cube_refresh_worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "cubejs.selectorLabels" . | nindent 6 }}
+      component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "cubejs.selectorLabels" . | nindent 8 }}
+        component: worker
+    spec:
+      initContainers:
+        - name: git-clone-cubes
+          image: {{ .Values.cubes.git.image | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              rm -rf /cube/conf/*
+              git clone -b {{ .Values.cubes.git.branch }} --single-branch {{ .Values.cubes.git.repo }} /tmp/cubes
+              cp -r /tmp/cubes/* /cube/conf/
+          volumeMounts:
+            - name: cubes-volume
+              mountPath: /cube/conf
+      containers:
+        - name: worker
+          image: "{{ .Values.cube_refresh_worker.image.repository }}:{{ .Values.cube_refresh_worker.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cube_refresh_worker.image.pullPolicy }}
+          volumeMounts:
+            - name: cubes-volume
+              mountPath: /cube/conf
+          envFrom:
+            - configMapRef:
+                name: {{ include "cubejs.fullname" . }}-config
+          env:
+            # Override specific ones that differ from base
+            {{- range $key, $value := .Values.cube_refresh_worker.env }}
+            - name: {{ $key }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "cubejs.fullname" . }}-config
+                  key: WORKER_{{ $key }}
+            {{- end }}
+      volumes:
+        - name: cubes-volume
+          emptyDir: {}
+{{- end }}

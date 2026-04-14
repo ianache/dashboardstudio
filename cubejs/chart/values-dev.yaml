@@ -1,0 +1,6 @@
+environment: dev
+
+cube_api:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letseencrypt-dev

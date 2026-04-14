@@ -1,0 +1,168 @@
+volumes:
+  cubestore-data:
+
+networks:
+  backends:
+    external: true
+  databases:
+    external: true
+  frontends:
+    external: true
+
+x-default-database: &default_db
+  CUBEJS_DB_TYPE: postgres
+  CUBEJS_DB_HOST: pgdb
+  CUBEJS_DB_NAME: analytics
+  CUBEJS_DB_USER: master
+  CUBEJS_DB_PASS: welcome1
+  CUBEJS_DB_SCHEMA: public
+
+services:
+  #
+  ## Semantic Model
+  #
+  cube_api:
+    #image: cubejs/cube:${CUBE_VERSION} #:-latest
+    image: comsatel/cubejs-cube:${CUBE_VERSION}
+    ports:
+      - "3001:3000"
+      - "4000:4000"
+      - "15432:15432"
+    env_file:
+      - .env.cube
+    environment:
+      <<: *default_db
+      CUBEJS_DEV_MODE: true
+      NODE_ENV: production
+      #NODE_ENV: production
+      #CUBEJS_DB_SCHEMA: public
+      DOMAIN: cubejs.qa.comsatel.com.pe
+      LDAP_CONN_PASSWORD: 'CHANGEME'
+      LDAP_CONN_USERNAME: 'USERNAME_CONEXION_TO_LDAP'
+      LDAP_SEARCH_BASE: 'SEARCH_BASE'
+      LDAP_URL: 'ldap://[IP_ADDRESS]'
+      TEST_USERNAME: 'YOUREMAIL'
+      TEST_PASSWORD: 'CHANGEME'
+      CUBEJS_SQL_USER: analytic
+      CUBEJS_SQL_PASSWORD: CHANGEME
+    volumes:
+      - ./cube:/cube/conf
+    depends_on:
+      - cube_refresh_worker
+      - cubestore_router
+      - cubestore_worker_1
+      - cubestore_worker_2
+    profiles:
+      - cube
+    networks:
+    - frontends
+    - backends
+    labels:
+      traefik.enable: true
+      traefik.http.routers.cubeapi.rule: Host(`cubeapi.${DOMAIN:-pm.comsatel.com.pe}`)
+      traefik.http.routers.cubeapi.entrypoints: web
+      traefik.http.services.cubeapi.loadbalancer.server.port: 4000
+
+  #
+  ## Refresher
+  #
+  cube_refresh_worker:
+    image: cubejs/cube:${CUBE_VERSION} #:-v1.1.5}
+    #env_file:
+    #  - .env.cube
+    environment:
+      CUBEJS_REFRESH_WORKER: true
+      # .env
+      CUBEJS_CUBESTORE_HOST: cubestore_router
+      CUBEJS_API_SECRET: welcome1
+      <<: *default_db
+      # Si usamos cubestore, no podemos usar redis
+      #CUBEJS_REDIS_URL: redis://default:eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81@redis:6379
+    profiles:
+      - cube
+    networks:
+      - backends
+    volumes:
+      - ./cube:/cube/conf
+
+  #
+  ## Router to Worker
+  #
+  cubestore_router:
+    image: cubejs/cubestore:${CUBESTORE_VERSION} #:-v1.1.5-non-avx}
+    #image: cubejs/cube:${CUBE_VERSION:-v1.1.5}
+    #ports:
+    #  - "3306:3306"
+    env_file:
+      - .env.cube
+    environment:
+      CUBESTORE_REMOTE_DIR: /cube/data
+      CUBESTORE_WORKERS: cubestore_worker_1:3030,cubestore_worker_2:3030
+      CUBESTORE_SERVER_NAME: cubestore_router:9999
+      CUBESTORE_META_PORT: 9999
+      DEBUG_LOG: true
+    profiles:
+      - cube
+    volumes:
+      - cubestore-data:/cube/data
+    networks:
+    - backends
+
+  #
+  ## Worker 1
+  #
+  cubestore_worker_1:
+    image: cubejs/cubestore:${CUBESTORE_VERSION} #:-v1.1.5-non-avx}
+    env_file:
+      - .env.cube
+    environment:
+      CUBESTORE_SERVER_NAME: cubestore_worker_1:3030
+      CUBESTORE_WORKER_PORT: 3030
+      CUBESTORE_META_ADDR: cubestore_router:9999
+    volumes:
+      - cubestore-data:/cube/data
+    profiles:
+      - cube
+    networks:
+    - backends
+    depends_on:
+      - cubestore_router
+  #
+  ## Worker 2
+  #
+  cubestore_worker_2:
+    image: cubejs/cubestore:${CUBESTORE_VERSION} #:-v1.1.5-non-avx}
+    env_file:
+      - .env.cube
+    environment:
+      CUBESTORE_SERVER_NAME: cubestore_worker_2:3030
+      CUBESTORE_WORKER_PORT: 3030
+      CUBESTORE_META_ADDR: cubestore_router:9999
+    volumes:
+      - cubestore-data:/cube/data
+    profiles:
+      - cube
+    networks:
+    - backends
+    depends_on:
+      - cubestore_router
+  #
+  ## Hasura
+  #
+  #hasura:
+  #  image: hasura/graphql-engine:${HASURA_VERSION:-v1.3.2}
+  #  #ports:
+  #  #  - "8080:8080"
+  #  depends_on:
+  #    #- postgres
+  #    - cube_api
+  #  env_file:
+  #    - .env.hasura
+  #  networks:
+  #  - frontends
+  #  - backends
+  #  labels:
+  #    traefik.enable: true
+  #    traefik.http.routers.hasura.rule: Host(`hasura.${DOMAIN:-pm.comsatel.com.pe}`)
+  #    traefik.http.routers.hasura.entrypoints: web
+  #    traefik.http.services.hasura.loadbalancer.server.port: 8080

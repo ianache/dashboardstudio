@@ -1,0 +1,85 @@
+# Default values for cubejs.
+environment: dev
+
+global:
+  domainSuffix: comsatel.com.pe
+
+# Common database configuration (from *default_db in docker-compose)
+common_db:
+  CUBEJS_DB_TYPE: postgres
+  CUBEJS_DB_HOST: pgdb
+  CUBEJS_DB_NAME: analytics
+  CUBEJS_DB_USER: master
+  CUBEJS_DB_PASS: welcome1
+  CUBEJS_DB_SCHEMA: public
+
+# Cube definitions (JavaScript/YAML files) from Git
+cubes:
+  git:
+    repo: "https://github.com/your-org/your-cubes-repo.git"
+    branch: "main"
+    image: "alpine/git:latest"
+
+cube_api:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: comsatel/cubejs-cube
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 4000
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letseencrypt-dev
+    tls: true
+  env:
+    CUBEJS_DEV_MODE: "true"
+    NODE_ENV: "production"
+    CUBEJS_SQL_USER: "analytic"
+    CUBEJS_SQL_PASSWORD: "CHANGEME"
+
+cube_refresh_worker:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: cubejs/cube
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  env:
+    CUBEJS_REFRESH_WORKER: "true"
+    CUBEJS_API_SECRET: "welcome1"
+
+cubestore_router:
+  enabled: true
+  image:
+    repository: cubejs/cubestore
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 9999
+  env:
+    CUBESTORE_REMOTE_DIR: /cube/data
+    DEBUG_LOG: "true"
+  persistence:
+    enabled: true
+    size: 5Gi
+    accessMode: ReadWriteOnce
+
+cubestore_worker:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: cubejs/cubestore
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  env:
+    CUBESTORE_WORKER_PORT: "3030"
+  persistence:
+    enabled: true
+    size: 5Gi
+    accessMode: ReadWriteOnce

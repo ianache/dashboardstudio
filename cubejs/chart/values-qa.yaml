@@ -1,0 +1,6 @@
+environment: qa
+
+cube_api:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letseencrypt-qa

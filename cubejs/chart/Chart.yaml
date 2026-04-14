@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cubejs
+description: A Helm chart for Cube.js (API, Worker, and CubeStore Router/Workers)
+type: application
+version: 0.1.0
+appVersion: "latest"

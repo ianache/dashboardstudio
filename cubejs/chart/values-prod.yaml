@@ -1,0 +1,7 @@
+environment: prod
+
+cube_api:
+  replicaCount: 2
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letseencrypt-prod
