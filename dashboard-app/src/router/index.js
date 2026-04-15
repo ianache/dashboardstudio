@@ -31,6 +31,12 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Diseño', 'Editor'] }
       },
       {
+        path: 'designer/:id/configure',
+        name: 'VisualizationConfigurator',
+        component: () => import('@/views/VisualizationConfiguratorView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Diseño', 'Configurador'] }
+      },
+      {
         path: 'dashboard/:id',
         name: 'DashboardView',
         component: () => import('@/views/DashboardViewerView.vue'),
