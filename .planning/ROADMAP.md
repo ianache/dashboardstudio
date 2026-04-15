@@ -3,16 +3,18 @@
 ## Phase 1: Setup & UI Scaffolding
 **Goal:** Establish the foundation and layout for the new visualization configuration interface.
 **Plans:** 2 plans
-- [ ] phase01-01-PLAN.md — Store & Routing setup
-- [ ] phase01-02-PLAN.md — Base UI Scaffolding (3-column layout)
+- [x] phase01-01-PLAN.md — Store & Routing setup
+- [x] phase01-02-PLAN.md — Base UI Scaffolding (3-column layout)
 
 **Requirements:** [FR-01, FR-02, NFR-Modern Refinement]
 
 ## Phase 2: Drag-and-Drop Core
-- [ ] Implement Source Panel with Cube.js metadata.
-- [ ] Set up `vuedraggable` instances for Metrics and Dimensions.
-- [ ] Build Drop Zones in the Config Panel (Series and Analysis).
-- [ ] Add validation logic (prevent cross-panel drops).
+**Goal:** Implement the drag-and-drop interface for configuring visualizations.
+**Plans:** 2 plans
+- [ ] phase02-01-PLAN.md — Source Panel & Draggable Items
+- [ ] phase02-02-PLAN.md — Drop Zones & Validation
+
+**Requirements:** [FR-01, NFR-Modern Refinement]
 
 ## Phase 3: Real-time Preview & Charting
 - [ ] Integrate `useCubeQuery` for dynamic data fetching.
