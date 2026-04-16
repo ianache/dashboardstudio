@@ -38,7 +38,21 @@
       <!-- Left Panel: Data Source -->
       <aside class="panel panel-source">
         <header class="panel-header">
-          <h3>Origen de Datos</h3>
+          <h3>Fuente</h3>
+          <button
+            class="btn-icon toggle-cube-name"
+            :class="{ active: showCubeName }"
+            @click="showCubeName = !showCubeName"
+            :title="showCubeName ? 'Ocultar nombre del cubo' : 'Mostrar nombre del cubo'"
+          >
+            <svg v-if="showCubeName" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
         </header>
         <div class="panel-body">
           <div class="cube-selector">
@@ -78,7 +92,7 @@
                         </svg>
                       </div>
                       <span class="field-icon measure">#</span>
-                      <span class="field-label" :title="m.fullName">{{ m.title }}</span>
+                      <span class="field-label" :title="m.fullName">{{ showCubeName ? m.title : (m.shortTitle || m.title) }}</span>
                     </div>
                   </div>
                 </template>
@@ -114,7 +128,7 @@
                         </svg>
                       </div>
                       <span class="field-icon dimension">A</span>
-                      <span class="field-label" :title="d.fullName">{{ d.title }}</span>
+                      <span class="field-label" :title="d.fullName">{{ showCubeName ? d.title : (d.shortTitle || d.title) }}</span>
                     </div>
                   </div>
                 </template>
@@ -503,6 +517,9 @@ const dimensionSearch = ref('')
 const saving = ref(false)
 const configCollapsed = ref(false)
 const activeConfigField = ref(null) // { type: 'measures'|'dimensions', field: Object }
+
+// Source panel: show/hide cube name prefix (default: hidden)
+const showCubeName = ref(false)
 
 // Chart type combobox state
 const chartTypeOpen = ref(false)
@@ -1391,6 +1408,14 @@ const handleCancel = () => {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ---- Source panel: toggle cube name ---- */
+.toggle-cube-name {
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+.toggle-cube-name:hover,
+.toggle-cube-name.active { color: var(--primary); }
 
 /* ---- Chart type combobox ---- */
 .ct-combobox {
