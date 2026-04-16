@@ -17,7 +17,8 @@ import {
   GridComponent,
   DataZoomComponent,
   ToolboxComponent,
-  MarkLineComponent
+  MarkLineComponent,
+  GraphicComponent
 } from 'echarts/components'
 
 import App from './App.vue'
@@ -39,7 +40,8 @@ use([
   GridComponent,
   DataZoomComponent,
   ToolboxComponent,
-  MarkLineComponent
+  MarkLineComponent,
+  GraphicComponent
 ])
 
 keycloak

@@ -21,9 +21,8 @@
 **Goal:** Finalize the user experience and ensure persistence.
 - [x] phase04-01-PLAN.md — Save to Dashboard & UI Polish
 - [x] phase04-02-PLAN.md — Advanced Metric Configuration (aliases, formatting)
-- [ ] phase04-03-PLAN.md — Final Polish & Quick Filters
+- [x] phase04-03-PLAN.md — Final Polish & Quick Filters
 
 ## Phase 5: Testing & Deployment
-- [ ] End-to-end testing of the configuration-to-save flow.
-- [ ] Cross-browser validation.
-- [ ] Final review against `diseño_visualizacion.jpeg`.
+- [ ] phase05-01-PLAN.md — End-to-end testing & Validation
+- [ ] phase05-02-PLAN.md — Cross-browser & Final Review

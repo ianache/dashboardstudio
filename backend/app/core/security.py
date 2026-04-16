@@ -10,6 +10,9 @@ from app.core.database import get_db
 settings = get_settings()
 security = HTTPBearer(auto_error=False)
 
+# Simple in-memory cache for JWKS
+JWKS_CACHE = None
+JWKS_LAST_FETCH = None
 
 class TokenData:
     def __init__(self, sub: str, roles: list[str], email: Optional[str] = None, name: Optional[str] = None):
@@ -48,9 +51,26 @@ async def ensure_user_exists(token_data: TokenData):
 
 
 async def get_jwks():
-    async with httpx.AsyncClient() as client:
-        response = await client.get(settings.keycloak_jwks_url)
-        return response.json()
+    global JWKS_CACHE, JWKS_LAST_FETCH
+    
+    now = datetime.utcnow().timestamp()
+    if JWKS_CACHE and JWKS_LAST_FETCH and (now - JWKS_LAST_FETCH < 3600):
+        return JWKS_CACHE
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(settings.keycloak_jwks_url)
+            response.raise_for_status()
+            JWKS_CACHE = response.json()
+            JWKS_LAST_FETCH = now
+            return JWKS_CACHE
+    except Exception as e:
+        if JWKS_CACHE:
+            return JWKS_CACHE
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Could not fetch JWKS from Keycloak: {str(e)}"
+        )
 
 
 async def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> TokenData:
