@@ -23,30 +23,12 @@ import { useColorPaletteStore } from '@/stores/colorPalettes'
 const paletteStore = useColorPaletteStore()
 
 const props = defineProps({
-  chartType: {
-    type: String,
-    default: 'bar'
-  },
-  data: {
-    type: Array,
-    default: () => []
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  error: {
-    type: String,
-    default: null
-  },
-  widget: {
-    type: Object,
-    required: true
-  },
-  dashboardPalette: {
-    type: String,
-    default: null
-  }
+  chartType: { type: String, default: 'bar' },
+  data: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: null },
+  widget: { type: Object, required: true },
+  dashboardPalette: { type: String, default: null }
 })
 
 const COLORS = [
@@ -54,23 +36,17 @@ const COLORS = [
   '#13c2c2', '#fa8c16', '#eb2f96', '#2f54eb', '#a0d911'
 ]
 
-// Active palette resolution (priority order):
-//   widget 'none'     → no palette (use measure colors)
-//   widget <id>       → widget-specific palette
-//   dashboardPalette  → dashboard palette
-//   system default    → defaultPaletteId from settings
-//   fallback          → hardcoded COLORS
 const activePaletteId = computed(() => {
   const wp = props.widget.colorPalette
   if (wp === 'none') return null
   return wp || props.dashboardPalette || paletteStore.defaultPaletteId || null
 })
+
 const activeColors = computed(() => {
   if (!activePaletteId.value) return COLORS
   return paletteStore.getPaletteById(activePaletteId.value)?.colors ?? COLORS
 })
 
-// Resolve color for a series index
 function seriesColor(index, measureColor) {
   if (activePaletteId.value) return activeColors.value[index % activeColors.value.length]
   return measureColor || COLORS[index % COLORS.length]
@@ -84,8 +60,9 @@ const chartOption = computed(() => {
   const baseOption = buildBaseOption()
   const customOptions = props.widget.chartOptions || {}
 
-  // Inject palette as ECharts top-level color array (affects tooltip, legend, auto-series)
-  return deepMerge({ color: activeColors.value }, deepMerge(baseOption, customOptions))
+  // Inject palette and merge
+  const option = deepMerge({ color: activeColors.value }, baseOption)
+  return deepMerge(option, customOptions)
 })
 
 function buildBaseOption() {
@@ -176,7 +153,6 @@ function buildPieOption() {
     itemStyle: { color: activeColors.value[i % activeColors.value.length] }
   }))
 
-  // Build label formatter
   let labelParts = ['{b}']
   if (showValue && showPercent) labelParts.push('{c} ({d}%)')
   else if (showValue)           labelParts.push('{c}')
@@ -184,7 +160,6 @@ function buildPieOption() {
   const labelFormatter = labelParts.join('\n')
   const showLabel = showValue || showPercent
 
-  // Center graphic for total
   const graphic = showTotal ? [{
     type: 'text',
     left: 'center',
@@ -208,11 +183,7 @@ function buildPieOption() {
       radius: showTotal ? ['40%', '68%'] : ['35%', '65%'],
       center: ['50%', '45%'],
       data: seriesData,
-      label: {
-        show: showLabel,
-        formatter: labelFormatter,
-        fontSize: 12
-      },
+      label: { show: showLabel, formatter: labelFormatter, fontSize: 12 },
       labelLine: { show: showLabel },
       emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' } }
     }]
@@ -233,15 +204,10 @@ function buildGaugeOption() {
       radius: '80%',
       min: 0,
       max: 100,
-      splitNumber: 10,
       axisLine: {
         lineStyle: {
           width: 16,
-          color: [
-            [0.3, '#f5222d'],
-            [0.7, '#faad14'],
-            [1, '#52c41a']
-          ]
+          color: [[0.3, '#f5222d'], [0.7, '#faad14'], [1, '#52c41a']]
         }
       },
       pointer: { itemStyle: { color: 'auto' } },
@@ -327,12 +293,20 @@ function buildEmptyOption() {
   }
 }
 
-function deepMerge(target, source) {
+/**
+ * Safer deepMerge with recursion limit and basic circular reference guard
+ */
+function deepMerge(target, source, depth = 0) {
+  if (depth > 10) return target // Limit depth to avoid stack overflow
   if (!source || typeof source !== 'object') return target
+  if (Array.isArray(source)) return source // Don't merge arrays, replace them
+  
   const result = { ...target }
   for (const key of Object.keys(source)) {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key] || {}, source[key])
+      // Circular reference guard (simple check)
+      if (source[key] === source) continue
+      result[key] = deepMerge(result[key] || {}, source[key], depth + 1)
     } else {
       result[key] = source[key]
     }

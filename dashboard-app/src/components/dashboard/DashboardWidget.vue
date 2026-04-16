@@ -202,7 +202,12 @@ function formatUpdated(date) {
   return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
 }
 
-onMounted(() => fetchData())
+onMounted(() => {
+  // Use requestAnimationFrame to defer heavy work until after initial frame
+  requestAnimationFrame(() => {
+    fetchData()
+  })
+})
 
 watch(() => props.widget.cubeQuery, () => fetchData(), { deep: true })
 watch(() => props.widget.useMockData, () => fetchData())

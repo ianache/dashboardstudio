@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 import httpx
 from app.core.config import get_settings
-from app.core.database import get_db
+from app.core.database import SessionLocal
 
 settings = get_settings()
 security = HTTPBearer(auto_error=False)
@@ -23,31 +23,35 @@ class TokenData:
 
 
 async def ensure_user_exists(token_data: TokenData):
-    """Ensure user exists in database, create if not - returns user ID"""
+    """Ensure user exists in database, create if not"""
     from app.models import models
     
-    db = next(get_db())
-    
-    # Check if user exists
-    user = db.query(models.User).filter(models.User.id == token_data.sub).first()
-    
-    if not user:
-        # Auto-create user from Keycloak token
-        user = models.User(
-            id=token_data.sub,
-            email=token_data.email,
-            username=token_data.name or token_data.sub,
-            full_name=token_data.name,
-            first_name=token_data.name.split()[0] if token_data.name else None,
-            last_name=" ".join(token_data.name.split()[1:]) if token_data.name and len(token_data.name.split()) > 1 else None,
-            role=token_data.roles[0] if token_data.roles else "viewer",
-            avatar=token_data.name[:2].upper() if token_data.name else token_data.sub[:2].upper(),
-            is_active=True
-        )
-        db.add(user)
-        db.commit()
-    
-    return token_data.sub
+    db = SessionLocal()
+    try:
+        # Check if user exists
+        user = db.query(models.User).filter(models.User.id == token_data.sub).first()
+        
+        if not user:
+            # Auto-create user from Keycloak token
+            user = models.User(
+                id=token_data.sub,
+                email=token_data.email,
+                username=token_data.name or token_data.sub,
+                full_name=token_data.name,
+                first_name=token_data.name.split()[0] if token_data.name else None,
+                last_name=" ".join(token_data.name.split()[1:]) if token_data.name and len(token_data.name.split()) > 1 else None,
+                role=token_data.roles[0] if token_data.roles else "viewer",
+                avatar=token_data.name[:2].upper() if token_data.name else token_data.sub[:2].upper(),
+                is_active=True
+            )
+            db.add(user)
+            db.commit()
+    except Exception as e:
+        print(f"Error ensuring user exists: {e}")
+        # We don't want to crash the whole request if user creation fails
+        # but we should log it
+    finally:
+        db.close()
 
 
 async def get_jwks():
@@ -140,6 +144,7 @@ async def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Dep
 
 
 async def get_current_user(token_data: TokenData = Depends(verify_token)) -> TokenData:
+    await ensure_user_exists(token_data)
     return token_data
 
 

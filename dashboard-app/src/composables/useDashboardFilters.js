@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { buildCubeFilter } from './useCubeQuery'
 
 export function useDashboardFilters(dashboardRef) {
@@ -8,8 +8,10 @@ export function useDashboardFilters(dashboardRef) {
     return `ds_filters_${id}`
   }
 
-  function saveFilters() {
+  async function saveFilters() {
     if (!dashboardRef.value?.id) return
+    // Wait for next tick to ensure we're not doing this too often during reactive bursts
+    await nextTick()
     localStorage.setItem(getStorageKey(dashboardRef.value.id), JSON.stringify(activeFilterValues.value))
   }
 

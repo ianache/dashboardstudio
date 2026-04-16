@@ -86,35 +86,16 @@ const ROW_HEIGHT = 90  // px per row unit
 const GAP = 10         // px gap between cells
 
 const canvasRef = ref(null)
+const colWidth = ref(100)
 const selectedWidgetId = ref(null)
 const maximizedWidgetId = ref(null)
 
-// ── Drag state ────────────────────────────────────────────────
-const dragState = ref({
-  active: false,
-  widgetId: null,
-  grabOffsetX: 0,   // px from widget left edge where user grabbed
-  grabOffsetY: 0,   // px from widget top  edge where user grabbed
-  pointerX: 0,      // current pointer position in canvas coords
-  pointerY: 0
-})
-
-// ── Resize state ──────────────────────────────────────────────
-const resizeState = ref({
-  active: false,
-  widgetId: null,
-  direction: null,
-  startMouseX: 0,
-  startMouseY: 0,
-  startW: 0,
-  startH: 0,
-  startX: 0
-})
+let resizeObserver = null
 
 // ── Helpers ───────────────────────────────────────────────────
-function getColWidth() {
-  if (!canvasRef.value) return 100
-  return (canvasRef.value.offsetWidth - GAP * (COL_COUNT + 1)) / COL_COUNT
+function updateColWidth() {
+  if (!canvasRef.value) return
+  colWidth.value = (canvasRef.value.offsetWidth - GAP * (COL_COUNT + 1)) / COL_COUNT
 }
 
 // Convert a clientX/Y into canvas-content coordinates (accounts for scroll)
@@ -129,8 +110,7 @@ function clientToCanvas(clientX, clientY) {
 
 // Grid-unit snap functions — input is the desired pixel left/top of the widget
 function snapCol(pxLeft) {
-  const colW = getColWidth()
-  return Math.round((pxLeft - GAP) / (colW + GAP))
+  return Math.round((pxLeft - GAP) / (colWidth.value + GAP))
 }
 function snapRow(pxTop) {
   return Math.round((pxTop - GAP) / (ROW_HEIGHT + GAP))
@@ -139,7 +119,7 @@ function snapRow(pxTop) {
 // Widget position (grid units) → absolute pixel style
 function getItemStyle(widget) {
   const { x, y, w, h } = widget.position
-  const colW = getColWidth()
+  const colW = colWidth.value
   return {
     position: 'absolute',
     left:   `${GAP + x * (colW + GAP)}px`,
@@ -159,7 +139,7 @@ const ghostStyle = computed(() => {
   const widget = props.widgets.find(w => w.id === ds.widgetId)
   if (!widget) return {}
 
-  const colW = getColWidth()
+  const colW = colWidth.value
   const targetLeft = ds.pointerX - ds.grabOffsetX
   const targetTop  = ds.pointerY - ds.grabOffsetY
 
@@ -257,7 +237,7 @@ function onMouseMove(e) {
   }
 
   if (resizeState.value.active) {
-    const colW = getColWidth()
+    const colW = colWidth.value
     const rs = resizeState.value
     const dxCols = Math.round((e.clientX - rs.startMouseX) / (colW + GAP))
     const dyRows = Math.round((e.clientY - rs.startMouseY) / (ROW_HEIGHT + GAP))
@@ -310,11 +290,23 @@ function selectWidget(id) {
 onMounted(() => {
   document.addEventListener('mousemove', onMouseMove)
   document.addEventListener('mouseup',   onMouseUp)
+
+  if (canvasRef.value) {
+    updateColWidth()
+    resizeObserver = new ResizeObserver(() => {
+      updateColWidth()
+    })
+    resizeObserver.observe(canvasRef.value)
+  }
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup',   onMouseUp)
+  
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
 })
 </script>
 

@@ -1,16 +1,25 @@
-from fastapi import FastAPI
+import logging
+import traceback
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import get_settings
 from app.core.database import init_db
 from app.api.router import api_router
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
     if settings.debug:
-        init_db()
+        try:
+            init_db()
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}")
     yield
 
 
@@ -23,24 +32,37 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Use explicit origins if provided, otherwise default to common dev/qa origins
-origins = settings.assemble_cors_origins(settings.cors_origins)
-if "*" in origins:
-    # If wildcard is used, we can't allow credentials, but we can't do that if frontend needs auth
-    # For dev/testing we can use a permissive list or regex
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        allow_headers=["*"],
-    )
-else:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
+# CORS configuration
+# Using a more robust CORS setup for development
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# Add any origins from settings
+extra_origins = settings.assemble_cors_origins(settings.cors_origins)
+for o in extra_origins:
+    if o not in origins and o != "*":
+        origins.append(o)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins if "*" not in extra_origins else ["*"],
+    allow_credentials=True if "*" not in extra_origins else False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Global error handler for debugging 500 errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = "".join(traceback.format_exception(None, exc, exc.__traceback__))
+    logger.error(f"Unhandled exception: {error_msg}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "msg": str(exc), "traceback": error_msg if settings.debug else None},
     )
 
 app.include_router(api_router, prefix="/api/v1")
