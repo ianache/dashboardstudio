@@ -400,7 +400,7 @@ const measureSearch = ref('')
 const dimensionSearch = ref('')
 const saving = ref(false)
 const configCollapsed = ref(false)
-const activeConfigField = ref(null) // { type: 'measure'|'dimension', field: Object }
+const activeConfigField = ref(null) // { type: 'measures'|'dimensions', field: Object }
 
 const toggleConfig = () => {
   configCollapsed.value = !configCollapsed.value
@@ -432,8 +432,6 @@ const currentWidget = computed(() => ({
   useMockData: false
 }))
 
-// ... (fetchData and watchers)
-
 const openConfig = (type, field) => {
   activeConfigField.value = { type, field: { ...field } }
 }
@@ -446,9 +444,9 @@ const updateFieldConfig = () => {
   if (!activeConfigField.value) return
   
   const { type, field } = activeConfigField.value
-  if (type === 'measure') {
+  if (type === 'measures') {
     store.updateMeasure(field.fullName, { alias: field.alias, format: field.format })
-  } else {
+  } else if (type === 'dimensions') {
     store.updateDimension(field.fullName, { alias: field.alias })
   }
   closeConfig()
@@ -457,7 +455,7 @@ const updateFieldConfig = () => {
 const { data, loading, error, fetchData } = useCubeQuery(currentWidget)
 
 // Re-fetch data when query configuration changes
-watch([() => store.measures, () => store.dimensions, () => store.selectedCube], () => {
+watch([() => store.measures, () => store.dimensions, () => store.filters, () => store.selectedCube], () => {
   if (store.measures.length > 0) {
     fetchData()
   }
@@ -983,7 +981,6 @@ const handleCancel = () => {
   transition: transform 0.3s ease;
 }
 
-@keyframes spin {
 /* Config Panel Styles */
 .config-sections {
   display: flex;

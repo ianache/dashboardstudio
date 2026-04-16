@@ -67,7 +67,16 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
           return base
         })
         
-        this.filters = widget.cubeQuery.filters || []
+        this.filters = (widget.cubeQuery.filters || []).map(f => {
+          const fullName = f.member || f.fullName
+          const meta = cubeStore.allDimensions.find(ad => ad.fullName === fullName)
+          const base = meta || { fullName: fullName, title: fullName.split('.').pop() }
+          return {
+            ...base,
+            operator: f.operator,
+            values: f.values
+          }
+        })
         this.timeDimension = widget.cubeQuery.timeDimension || null
         
         // Infer selectedCube from measures or dimensions if available
@@ -135,13 +144,6 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       const index = this.filters.findIndex(f => f.fullName === fullName)
       if (index !== -1) {
         this.filters[index] = { ...this.filters[index], ...updates }
-      }
-    },
-
-    updateDimension(fullName, updates) {
-      const index = this.dimensions.findIndex(d => d.fullName === fullName)
-      if (index !== -1) {
-        this.dimensions[index] = { ...this.dimensions[index], ...updates }
       }
     },
 
