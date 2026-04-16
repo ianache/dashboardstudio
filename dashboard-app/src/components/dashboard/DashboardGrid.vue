@@ -90,6 +90,28 @@ const colWidth = ref(100)
 const selectedWidgetId = ref(null)
 const maximizedWidgetId = ref(null)
 
+// ── Drag state ────────────────────────────────────────────────
+const dragState = ref({
+  active: false,
+  widgetId: null,
+  grabOffsetX: 0,   // px from widget left edge where user grabbed
+  grabOffsetY: 0,   // px from widget top  edge where user grabbed
+  pointerX: 0,      // current pointer position in canvas coords
+  pointerY: 0
+})
+
+// ── Resize state ──────────────────────────────────────────────
+const resizeState = ref({
+  active: false,
+  widgetId: null,
+  direction: null,
+  startMouseX: 0,
+  startMouseY: 0,
+  startW: 0,
+  startH: 0,
+  startX: 0
+})
+
 let resizeObserver = null
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -193,7 +215,7 @@ function startDrag(e, widget) {
   e.preventDefault()
   selectWidget(widget.id)
 
-  const colW     = getColWidth()
+  const colW     = colWidth.value
   const canvasXY = clientToCanvas(e.clientX, e.clientY)
 
   // Where within the widget did the user grab?
