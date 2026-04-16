@@ -20,6 +20,10 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.dashboardId = id
     },
 
+    setTitle(title) {
+      this.title = title
+    },
+
     setWidget(widget) {
       if (!widget) return
       

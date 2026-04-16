@@ -3,24 +3,38 @@
     <!-- Header -->
     <header class="configurator-header">
       <div class="header-left">
-        <button class="btn btn-secondary btn-sm" @click="handleCancel">
+        <button class="btn btn-secondary btn-sm" @click="handleCancel" :disabled="saving">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
           </svg>
           Volver
         </button>
         <div class="header-title">
-          <span class="db-title-text">{{ store.title }}</span>
+          <input 
+            type="text" 
+            :value="store.title" 
+            @input="store.setTitle($event.target.value)"
+            placeholder="Título del gráfico"
+            class="title-input"
+          />
         </div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-secondary" @click="handleCancel">Cancelar</button>
-        <button class="btn btn-primary" @click="handleSave">Guardar</button>
+        <button class="btn btn-secondary" @click="handleCancel" :disabled="saving">Cancelar</button>
+        <button class="btn btn-primary" @click="handleSave" :disabled="saving || store.measures.length === 0">
+          <span v-if="saving" class="spinner-xs"></span>
+          {{ saving ? 'Guardando...' : 'Guardar' }}
+        </button>
       </div>
     </header>
 
     <!-- Main Content Grid -->
-    <main class="configurator-content">
+    <main class="configurator-content" :class="{ 'is-loading': saving || cubeStore.metaLoading }">
+      <!-- Loading Overlay -->
+      <div v-if="saving || cubeStore.metaLoading" class="panel-overlay">
+        <div class="spinner"></div>
+        <span>{{ saving ? 'Guardando configuración...' : 'Cargando metadatos...' }}</span>
+      </div>
       <!-- Left Panel: Data Source -->
       <aside class="panel panel-source">
         <header class="panel-header">
@@ -52,6 +66,7 @@
                 :sort="false"
                 item-key="fullName"
                 :clone="m => ({ ...m })"
+                :component-data="{ name: 'list', tag: 'div' }"
               >
                 <template #item="{ element: m }">
                   <div class="field-item">
@@ -125,6 +140,15 @@
       <section class="panel panel-config">
         <header class="panel-header">
           <h3>Configuración</h3>
+          <div class="chart-type-selector">
+            <select :value="store.chartType" @change="store.setChartType($event.target.value)" class="form-select select-sm">
+              <option value="bar">Barras</option>
+              <option value="line">Líneas</option>
+              <option value="pie">Circular</option>
+              <option value="gauge">Indicador</option>
+              <option value="radar">Radar</option>
+            </select>
+          </div>
         </header>
         <div class="panel-body">
           <div class="config-sections">
@@ -218,7 +242,16 @@
         </header>
         <div class="panel-body">
           <div class="preview-container card">
-            <div class="empty-state">
+            <template v-if="store.measures.length > 0">
+              <EChartWrapper
+                :chartType="store.chartType"
+                :data="data"
+                :loading="loading"
+                :error="error"
+                :widget="currentWidget"
+              />
+            </template>
+            <div v-else class="empty-state">
               <div class="empty-icon">📊</div>
               <h3>Sin vista previa</h3>
               <p>Configure métricas y dimensiones para generar el gráfico.</p>
@@ -231,13 +264,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import draggable from 'vuedraggable'
 import { useVisualizationConfiguratorStore } from '@/stores/visualizationConfigurator'
 import { useUIStore } from '@/stores/ui'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useCubeStore } from '@/stores/cubejs'
+import { useCubeQuery } from '@/composables/useCubeQuery'
+import EChartWrapper from '@/components/charts/EChartWrapper.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -249,6 +284,30 @@ const cubeStore = useCubeStore()
 // Search states
 const measureSearch = ref('')
 const dimensionSearch = ref('')
+const saving = ref(false)
+
+// Computed widget for useCubeQuery and persistence
+const currentWidget = computed(() => ({
+  id: store.widgetId,
+  title: store.title,
+  chartType: store.chartType,
+  cubeQuery: {
+    measures: store.measures.map(m => ({ key: m.fullName, label: m.title })),
+    dimensions: store.dimensions.map(d => ({ key: d.fullName, label: d.title })),
+    limit: 100
+  },
+  chartOptions: store.chartOptions,
+  useMockData: false
+}))
+
+const { data, loading, error, fetchData } = useCubeQuery(currentWidget)
+
+// Re-fetch data when query configuration changes
+watch([() => store.measures, () => store.dimensions, () => store.selectedCube], () => {
+  if (store.measures.length > 0) {
+    fetchData()
+  }
+}, { deep: true })
 
 // Data source computed properties
 const availableCubes = computed(() => cubeStore.cubes)
@@ -329,9 +388,22 @@ onUnmounted(() => {
   store.reset()
 })
 
-const handleSave = () => {
-  // Logic will be implemented in future plans
-  router.push(`/designer/${store.dashboardId}`)
+const handleSave = async () => {
+  if (!store.dashboardId) return
+  
+  saving.value = true
+  try {
+    if (store.widgetId) {
+      await dashboardStore.updateWidget(store.dashboardId, store.widgetId, currentWidget.value)
+    } else {
+      await dashboardStore.addWidget(store.dashboardId, currentWidget.value)
+    }
+    router.push(`/designer/${store.dashboardId}`)
+  } catch (err) {
+    console.error('Failed to save widget:', err)
+  } finally {
+    saving.value = false
+  }
 }
 
 const handleCancel = () => {
@@ -373,6 +445,31 @@ const handleCancel = () => {
   font-size: 16px;
   font-weight: 600;
   color: var(--text);
+  flex: 1;
+  max-width: 400px;
+}
+
+.title-input {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.title-input:hover {
+  background: #f0f0f0;
+}
+
+.title-input:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
 }
 
 .header-actions {
@@ -628,7 +725,6 @@ const handleCancel = () => {
   gap: 12px;
   color: var(--text-secondary);
 }
-
 .spinner-sm {
   width: 24px;
   height: 24px;
@@ -638,6 +734,62 @@ const handleCancel = () => {
   animation: spin 1s linear infinite;
 }
 
+.spinner-xs {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-left-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.panel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0,0,0,0.1);
+  border-left-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Transitions */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.list-move {
+  transition: transform 0.3s ease;
+}
+
+@keyframes spin {
 /* Config Panel Styles */
 .config-sections {
   display: flex;
