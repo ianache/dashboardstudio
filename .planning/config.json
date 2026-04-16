@@ -1,0 +1,11 @@
+{
+  "project_name": "Visualizacion Design Improvements",
+  "base_file": "PRD.md",
+  "workflow": {
+    "tech_stack": ["Vue 3", "FastAPI"],
+    "research_depth": "deep",
+    "scope": "full",
+    "ui_style": "modern_refinement"
+  },
+  "creation_date": "2026-04-15"
+}

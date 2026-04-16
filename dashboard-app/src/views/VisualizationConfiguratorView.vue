@@ -45,16 +45,31 @@
                   <input type="text" v-model="measureSearch" placeholder="Buscar métrica..." />
                 </div>
               </div>
-              <div class="field-list">
-                <div v-for="m in currentMeasures" :key="m.fullName" class="field-item">
-                  <div class="field-content">
-                    <span class="field-icon measure">#</span>
-                    <span class="field-label" :title="m.fullName">{{ m.title }}</span>
+              <draggable
+                class="field-list"
+                :list="currentMeasures"
+                :group="{ name: 'measures', pull: 'clone', put: false }"
+                :sort="false"
+                item-key="fullName"
+                :clone="m => ({ ...m })"
+              >
+                <template #item="{ element: m }">
+                  <div class="field-item">
+                    <div class="field-content">
+                      <div class="drag-handle">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+                          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+                        </svg>
+                      </div>
+                      <span class="field-icon measure">#</span>
+                      <span class="field-label" :title="m.fullName">{{ m.title }}</span>
+                    </div>
                   </div>
-                </div>
-                <div v-if="currentMeasures.length === 0" class="no-results">
-                  No se encontraron métricas
-                </div>
+                </template>
+              </draggable>
+              <div v-if="currentMeasures.length === 0" class="no-results">
+                No se encontraron métricas
               </div>
             </div>
 
@@ -66,16 +81,31 @@
                   <input type="text" v-model="dimensionSearch" placeholder="Buscar dimensión..." />
                 </div>
               </div>
-              <div class="field-list">
-                <div v-for="d in currentDimensions" :key="d.fullName" class="field-item">
-                  <div class="field-content">
-                    <span class="field-icon dimension">A</span>
-                    <span class="field-label" :title="d.fullName">{{ d.title }}</span>
+              <draggable
+                class="field-list"
+                :list="currentDimensions"
+                :group="{ name: 'dimensions', pull: 'clone', put: false }"
+                :sort="false"
+                item-key="fullName"
+                :clone="d => ({ ...d })"
+              >
+                <template #item="{ element: d }">
+                  <div class="field-item">
+                    <div class="field-content">
+                      <div class="drag-handle">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+                          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+                        </svg>
+                      </div>
+                      <span class="field-icon dimension">A</span>
+                      <span class="field-label" :title="d.fullName">{{ d.title }}</span>
+                    </div>
                   </div>
-                </div>
-                <div v-if="currentDimensions.length === 0" class="no-results">
-                  No se encontraron dimensiones
-                </div>
+                </template>
+              </draggable>
+              <div v-if="currentDimensions.length === 0" class="no-results">
+                No se encontraron dimensiones
               </div>
             </div>
           </div>
@@ -125,6 +155,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import draggable from 'vuedraggable'
 import { useVisualizationConfiguratorStore } from '@/stores/visualizationConfigurator'
 import { useUIStore } from '@/stores/ui'
 import { useDashboardStore } from '@/stores/dashboard'
@@ -456,6 +487,20 @@ const handleCancel = () => {
   align-items: center;
   gap: 10px;
   overflow: hidden;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  opacity: 0.3;
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.field-item:hover .drag-handle {
+  opacity: 0.7;
 }
 
 .field-icon {
