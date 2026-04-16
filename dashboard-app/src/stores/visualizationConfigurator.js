@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useCubeStore } from './cubejs'
 
 export const useVisualizationConfiguratorStore = defineStore('visualizationConfigurator', {
   state: () => ({
@@ -6,8 +7,8 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
     widgetId: null,
     title: 'Nuevo Gráfico',
     selectedCube: null,
-    measures: [],
-    dimensions: [],
+    measures: [], // Array of objects: { fullName, title, type, memberType }
+    dimensions: [], // Array of objects: { fullName, title, type, memberType }
     filters: [],
     timeDimension: null,
     chartType: 'bar',
@@ -28,16 +29,29 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.chartOptions = widget.chartOptions || {}
       
       if (widget.cubeQuery) {
-        this.measures = widget.cubeQuery.measures || []
-        this.dimensions = widget.cubeQuery.dimensions || []
+        const cubeStore = useCubeStore()
+        
+        // Map string names to full objects from metadata if available
+        this.measures = (widget.cubeQuery.measures || []).map(m => {
+          const fullName = typeof m === 'string' ? m : m.fullName
+          const meta = cubeStore.allMeasures.find(am => am.fullName === fullName)
+          return meta || { fullName: fullName, title: fullName.split('.').pop() }
+        })
+        
+        this.dimensions = (widget.cubeQuery.dimensions || []).map(d => {
+          const fullName = typeof d === 'string' ? d : d.fullName
+          const meta = cubeStore.allDimensions.find(ad => ad.fullName === fullName)
+          return meta || { fullName: fullName, title: fullName.split('.').pop() }
+        })
+        
         this.filters = widget.cubeQuery.filters || []
         this.timeDimension = widget.cubeQuery.timeDimension || null
         
         // Infer selectedCube from measures or dimensions if available
         if (this.measures.length > 0) {
-          this.selectedCube = this.measures[0].split('.')[0]
+          this.selectedCube = this.measures[0].fullName.split('.')[0]
         } else if (this.dimensions.length > 0) {
-          this.selectedCube = this.dimensions[0].split('.')[0]
+          this.selectedCube = this.dimensions[0].fullName.split('.')[0]
         }
       }
     },
@@ -54,23 +68,33 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
     },
 
     addMeasure(measure) {
-      if (!this.measures.includes(measure)) {
-        this.measures.push(measure)
+      const fullName = typeof measure === 'string' ? measure : measure.fullName
+      if (!this.measures.find(m => m.fullName === fullName)) {
+        if (typeof measure === 'string') {
+          this.measures.push({ fullName, title: fullName.split('.').pop() })
+        } else {
+          this.measures.push(measure)
+        }
       }
     },
 
-    removeMeasure(measureName) {
-      this.measures = this.measures.filter(m => m !== measureName)
+    removeMeasure(measureFullName) {
+      this.measures = this.measures.filter(m => m.fullName !== measureFullName)
     },
 
     addDimension(dimension) {
-      if (!this.dimensions.includes(dimension)) {
-        this.dimensions.push(dimension)
+      const fullName = typeof dimension === 'string' ? dimension : dimension.fullName
+      if (!this.dimensions.find(d => d.fullName === fullName)) {
+        if (typeof dimension === 'string') {
+          this.dimensions.push({ fullName, title: fullName.split('.').pop() })
+        } else {
+          this.dimensions.push(dimension)
+        }
       }
     },
 
-    removeDimension(dimensionName) {
-      this.dimensions = this.dimensions.filter(d => d !== dimensionName)
+    removeDimension(dimensionFullName) {
+      this.dimensions = this.dimensions.filter(d => d.fullName !== dimensionFullName)
     },
 
     setChartType(type) {
