@@ -148,18 +148,25 @@
             <h3 v-if="!configCollapsed">Configuración</h3>
           </div>
           <div v-if="!configCollapsed" class="chart-type-selector">
-            <div class="chart-type-buttons">
-              <button
-                v-for="ct in chartTypes"
-                :key="ct.value"
-                class="chart-type-btn"
-                :class="{ active: store.chartType === ct.value }"
-                @click="store.setChartType(ct.value)"
-                :title="ct.label"
-              >
-                <span class="ct-icon">{{ ct.icon }}</span>
-                <span class="ct-label">{{ ct.label }}</span>
-              </button>
+            <div class="ct-combobox" :class="{ open: chartTypeOpen }" @click.stop="chartTypeOpen = !chartTypeOpen">
+              <div class="ct-combobox-trigger">
+                <span class="ct-icon">{{ activeChartType.icon }}</span>
+                <span class="ct-name">{{ activeChartType.label }}</span>
+                <svg class="ct-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div v-if="chartTypeOpen" class="ct-combobox-dropdown" @click.stop>
+                <div
+                  v-for="ct in chartTypes"
+                  :key="ct.value"
+                  class="ct-combobox-option"
+                  :class="{ selected: store.chartType === ct.value }"
+                  @click="store.setChartType(ct.value); chartTypeOpen = false"
+                >
+                  <span class="ct-icon">{{ ct.icon }}</span>
+                  <span class="ct-name">{{ ct.label }}</span>
+                  <svg v-if="store.chartType === ct.value" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -497,6 +504,10 @@ const saving = ref(false)
 const configCollapsed = ref(false)
 const activeConfigField = ref(null) // { type: 'measures'|'dimensions', field: Object }
 
+// Chart type combobox state
+const chartTypeOpen = ref(false)
+const activeChartType = computed(() => chartTypes.find(ct => ct.value === store.chartType) || chartTypes[0])
+
 // Filter multiselect state
 const filterOptions = ref({}) // { fullName: string[] }
 const openFilterDropdown = ref(null)
@@ -517,7 +528,7 @@ const toggleConfig = () => {
 }
 
 // Close filter dropdown when clicking outside
-function onDocClick() { openFilterDropdown.value = null }
+function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false }
 onMounted(() => document.addEventListener('click', onDocClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
@@ -1381,31 +1392,58 @@ const handleCancel = () => {
   to { transform: rotate(360deg); }
 }
 
-/* ---- Chart type button grid ---- */
-.chart-type-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+/* ---- Chart type combobox ---- */
+.ct-combobox {
+  position: relative;
+  width: 100%;
 }
-.chart-type-btn {
+.ct-combobox-trigger {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 5px 8px;
+  gap: 8px;
+  padding: 6px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: white;
   cursor: pointer;
-  font-size: 11px;
-  color: var(--text-secondary);
-  transition: all 0.15s;
-  min-width: 48px;
+  transition: border-color 0.15s;
+  user-select: none;
 }
-.chart-type-btn:hover { border-color: var(--primary); color: var(--primary); }
-.chart-type-btn.active { border-color: var(--primary); background: rgba(24,144,255,0.08); color: var(--primary); font-weight: 600; }
-.ct-icon { font-size: 14px; line-height: 1; }
-.ct-label { font-size: 10px; white-space: nowrap; }
+.ct-combobox-trigger:hover,
+.ct-combobox.open .ct-combobox-trigger { border-color: var(--primary); }
+.ct-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.ct-name { flex: 1; font-size: 13px; color: var(--text); }
+.ct-arrow {
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.ct-combobox.open .ct-arrow { transform: rotate(180deg); }
+.ct-combobox-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.ct-combobox-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  font-size: 13px;
+  color: var(--text);
+}
+.ct-combobox-option:hover { background: #f5f7fa; }
+.ct-combobox-option.selected { background: rgba(24,144,255,0.06); color: var(--primary); font-weight: 500; }
+.ct-check { margin-left: auto; color: var(--primary); flex-shrink: 0; }
 
 /* ---- Preview table ---- */
 .preview-table-wrap {
