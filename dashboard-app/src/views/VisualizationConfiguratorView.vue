@@ -148,13 +148,19 @@
             <h3 v-if="!configCollapsed">Configuración</h3>
           </div>
           <div v-if="!configCollapsed" class="chart-type-selector">
-            <select :value="store.chartType" @change="store.setChartType($event.target.value)" class="form-select select-sm">
-              <option value="bar">Barras</option>
-              <option value="line">Líneas</option>
-              <option value="pie">Circular</option>
-              <option value="gauge">Indicador</option>
-              <option value="radar">Radar</option>
-            </select>
+            <div class="chart-type-buttons">
+              <button
+                v-for="ct in chartTypes"
+                :key="ct.value"
+                class="chart-type-btn"
+                :class="{ active: store.chartType === ct.value }"
+                @click="store.setChartType(ct.value)"
+                :title="ct.label"
+              >
+                <span class="ct-icon">{{ ct.icon }}</span>
+                <span class="ct-label">{{ ct.label }}</span>
+              </button>
+            </div>
           </div>
         </header>
         <div v-if="!configCollapsed" class="panel-body">
@@ -283,23 +289,62 @@
                       </button>
                     </div>
                     <div class="filter-settings">
-                      <select 
-                        :value="f.operator || 'equals'" 
-                        @change="store.updateFilter(f.fullName, { operator: $event.target.value })"
-                        class="form-select select-xs"
-                      >
-                        <option value="equals">Es igual a</option>
-                        <option value="notEquals">No es igual a</option>
-                        <option value="contains">Contiene</option>
-                        <option value="set">Está definido</option>
-                      </select>
-                      <input 
-                        type="text" 
-                        :value="(f.values || []).join(', ')"
-                        @change="store.updateFilter(f.fullName, { values: $event.target.value.split(',').map(v => v.trim()) })"
-                        placeholder="Valores..."
-                        class="form-control input-xs"
-                      />
+                      <!-- String dimension: multiselect checkbox dropdown -->
+                      <template v-if="f.type === 'string' || f.memberType === 'string'">
+                        <div class="filter-multiselect">
+                          <button
+                            class="filter-ms-trigger"
+                            @click.stop="toggleFilterDropdown(f.fullName)"
+                          >
+                            <span class="filter-ms-label">{{ getFilterDisplayValue(f) }}</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                          </button>
+                          <div v-if="openFilterDropdown === f.fullName" class="filter-ms-dropdown" @click.stop>
+                            <label class="filter-ms-option">
+                              <input
+                                type="checkbox"
+                                :checked="!f.values || f.values.length === 0"
+                                @change="store.updateFilter(f.fullName, { values: [] })"
+                              />
+                              <span>Todos</span>
+                            </label>
+                            <template v-if="filterOptions[f.fullName] && filterOptions[f.fullName].length > 0">
+                              <label v-for="opt in filterOptions[f.fullName]" :key="opt" class="filter-ms-option">
+                                <input
+                                  type="checkbox"
+                                  :value="opt"
+                                  :checked="(f.values || []).includes(String(opt))"
+                                  @change="toggleFilterValue(f.fullName, String(opt), f.values || [])"
+                                />
+                                <span>{{ opt }}</span>
+                              </label>
+                            </template>
+                            <div v-else class="filter-ms-empty">
+                              <small>{{ cubeStore.token ? 'Cargando valores...' : 'Sin conexión al cubo' }}</small>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                      <!-- Other types: operator + text input -->
+                      <template v-else>
+                        <select
+                          :value="f.operator || 'equals'"
+                          @change="store.updateFilter(f.fullName, { operator: $event.target.value })"
+                          class="form-select select-xs"
+                        >
+                          <option value="equals">Es igual a</option>
+                          <option value="notEquals">No es igual a</option>
+                          <option value="contains">Contiene</option>
+                          <option value="set">Está definido</option>
+                        </select>
+                        <input
+                          type="text"
+                          :value="(f.values || []).join(', ')"
+                          @change="store.updateFilter(f.fullName, { values: $event.target.value.split(',').map(v => v.trim()) })"
+                          placeholder="Valores..."
+                          class="form-control input-xs"
+                        />
+                      </template>
                     </div>
                   </div>
                 </template>
@@ -322,7 +367,29 @@
         <div class="panel-body">
           <div class="preview-container card">
             <template v-if="store.measures.length > 0">
+              <!-- Table preview -->
+              <div v-if="store.chartType === 'table'" class="preview-table-wrap">
+                <div v-if="loading" class="chart-loading"><div class="spinner"></div></div>
+                <div v-else-if="error" class="chart-error">⚠️ {{ error }}</div>
+                <table v-else class="preview-table">
+                  <thead>
+                    <tr>
+                      <th v-for="col in tableColumns" :key="col.key">{{ col.label }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, i) in data" :key="i">
+                      <td v-for="col in tableColumns" :key="col.key">{{ getTableCell(row, col) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div v-if="!loading && data.length === 0" class="empty-state">
+                  <p>Sin datos para mostrar.</p>
+                </div>
+              </div>
+              <!-- Chart preview -->
               <EChartWrapper
+                v-else
                 :chartType="store.chartType"
                 :data="data"
                 :loading="loading"
@@ -367,6 +434,34 @@
               <option value="percent">Porcentaje</option>
             </select>
           </div>
+          <!-- Decimal places: only for number/currency -->
+          <div v-if="activeConfigField.type === 'measures' && (activeConfigField.field.format === 'number' || activeConfigField.field.format === 'currency')" class="form-group">
+            <label>Decimales</label>
+            <input
+              type="number"
+              v-model.number="activeConfigField.field.decimalPlaces"
+              min="0" max="6" step="1"
+              placeholder="2"
+              class="form-control"
+              style="width: 80px"
+            />
+          </div>
+          <!-- Series type: only for bar chart -->
+          <div v-if="activeConfigField.type === 'measures' && store.chartType === 'bar'" class="form-group">
+            <label>Tipo de serie</label>
+            <div class="series-type-toggle">
+              <button
+                class="series-type-btn"
+                :class="{ active: !activeConfigField.field.seriesType || activeConfigField.field.seriesType === 'bar' }"
+                @click="activeConfigField.field.seriesType = 'bar'"
+              >📊 Barra</button>
+              <button
+                class="series-type-btn"
+                :class="{ active: activeConfigField.field.seriesType === 'line' }"
+                @click="activeConfigField.field.seriesType = 'line'"
+              >📈 Línea</button>
+            </div>
+          </div>
         </div>
         <footer class="modal-footer">
           <button class="btn btn-secondary" @click="closeConfig">Cancelar</button>
@@ -378,7 +473,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import draggable from 'vuedraggable'
 import { useVisualizationConfiguratorStore } from '@/stores/visualizationConfigurator'
@@ -402,9 +497,29 @@ const saving = ref(false)
 const configCollapsed = ref(false)
 const activeConfigField = ref(null) // { type: 'measures'|'dimensions', field: Object }
 
+// Filter multiselect state
+const filterOptions = ref({}) // { fullName: string[] }
+const openFilterDropdown = ref(null)
+
+// Chart type definitions
+const chartTypes = [
+  { value: 'bar',      label: 'Barras',    icon: '📊' },
+  { value: 'line',     label: 'Líneas',    icon: '📈' },
+  { value: 'pie',      label: 'Circular',  icon: '🥧' },
+  { value: 'gauge',    label: 'Indicador', icon: '🎯' },
+  { value: 'radar',    label: 'Radar',     icon: '🕸️' },
+  { value: 'combined', label: 'Combinado', icon: '📉' },
+  { value: 'table',    label: 'Tabla',     icon: '🗒️' },
+]
+
 const toggleConfig = () => {
   configCollapsed.value = !configCollapsed.value
 }
+
+// Close filter dropdown when clicking outside
+function onDocClick() { openFilterDropdown.value = null }
+onMounted(() => document.addEventListener('click', onDocClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 // Computed widget for useCubeQuery and persistence
 const currentWidget = computed(() => ({
@@ -412,10 +527,12 @@ const currentWidget = computed(() => ({
   title: store.title,
   chartType: store.chartType,
   cubeQuery: {
-    measures: store.measures.map(m => ({ 
-      key: m.fullName, 
+    measures: store.measures.map(m => ({
+      key: m.fullName,
       label: m.alias || m.title,
-      format: m.format
+      format: m.format,
+      decimalPlaces: m.decimalPlaces,
+      seriesType: m.seriesType,
     })),
     dimensions: store.dimensions.map(d => ({ 
       key: d.fullName, 
@@ -445,7 +562,12 @@ const updateFieldConfig = () => {
   
   const { type, field } = activeConfigField.value
   if (type === 'measures') {
-    store.updateMeasure(field.fullName, { alias: field.alias, format: field.format })
+    store.updateMeasure(field.fullName, {
+      alias: field.alias,
+      format: field.format,
+      decimalPlaces: field.decimalPlaces,
+      seriesType: field.seriesType,
+    })
   } else if (type === 'dimensions') {
     store.updateDimension(field.fullName, { alias: field.alias })
   }
@@ -460,6 +582,60 @@ watch([() => store.measures, () => store.dimensions, () => store.filters, () => 
     fetchData()
   }
 }, { deep: true })
+
+// --- Table preview ---
+const tableColumns = computed(() => {
+  const cols = []
+  store.dimensions.forEach(d => cols.push({ key: d.fullName, label: d.alias || d.title, kind: 'dimension' }))
+  store.measures.forEach(m => cols.push({ key: m.fullName, label: m.alias || m.title, kind: 'measure' }))
+  return cols
+})
+
+function getTableCell(row, col) {
+  // Real cube data: raw contains the cube keys
+  if (row.raw && row.raw[col.key] !== undefined) return row.raw[col.key]
+  // Mock data fallback
+  if (col.kind === 'measure') return row.value ?? ''
+  return row.label ?? ''
+}
+
+// --- Filter multiselect ---
+async function loadFilterOptions(fullName) {
+  if (filterOptions.value[fullName] !== undefined) return
+  if (!cubeStore.token || !cubeStore.apiUrl) { filterOptions.value[fullName] = []; return }
+  filterOptions.value[fullName] = [] // mark as loading
+  try {
+    const result = await cubeStore.executeQuery({ dimensions: [fullName], limit: 500 })
+    const rows = result.tablePivot ? result.tablePivot() : []
+    filterOptions.value[fullName] = [...new Set(rows.map(r => r[fullName]).filter(v => v != null && v !== ''))]
+  } catch {
+    filterOptions.value[fullName] = []
+  }
+}
+
+watch(() => store.filters, (filters) => {
+  filters.forEach(f => {
+    if (f.type === 'string' || f.memberType === 'string') loadFilterOptions(f.fullName)
+  })
+}, { deep: true, immediate: true })
+
+function toggleFilterDropdown(fullName) {
+  openFilterDropdown.value = openFilterDropdown.value === fullName ? null : fullName
+}
+
+function toggleFilterValue(fullName, value, current) {
+  const next = current.includes(value)
+    ? current.filter(v => v !== value)
+    : [...current, value]
+  store.updateFilter(fullName, { values: next, operator: 'equals' })
+}
+
+function getFilterDisplayValue(f) {
+  const vals = f.values || []
+  if (vals.length === 0) return 'Todos'
+  if (vals.length === 1) return vals[0]
+  return `${vals.length} seleccionados`
+}
 
 // Data source computed properties
 const availableCubes = computed(() => cubeStore.cubes)
@@ -1204,4 +1380,122 @@ const handleCancel = () => {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ---- Chart type button grid ---- */
+.chart-type-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.chart-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  min-width: 48px;
+}
+.chart-type-btn:hover { border-color: var(--primary); color: var(--primary); }
+.chart-type-btn.active { border-color: var(--primary); background: rgba(24,144,255,0.08); color: var(--primary); font-weight: 600; }
+.ct-icon { font-size: 14px; line-height: 1; }
+.ct-label { font-size: 10px; white-space: nowrap; }
+
+/* ---- Preview table ---- */
+.preview-table-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.preview-table th {
+  position: sticky;
+  top: 0;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.preview-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preview-table tbody tr:hover { background: #fafafa; }
+
+/* ---- Filter multiselect ---- */
+.filter-multiselect { position: relative; flex: 1; }
+.filter-ms-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+.filter-ms-trigger:hover { border-color: var(--primary); }
+.filter-ms-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filter-ms-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 200;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  min-width: 180px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.filter-ms-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.1s;
+}
+.filter-ms-option:hover { background: #f5f5f5; }
+.filter-ms-option input[type="checkbox"] { margin: 0; cursor: pointer; }
+.filter-ms-empty { padding: 8px 12px; color: var(--text-secondary); font-size: 11px; }
+
+/* ---- Series type toggle ---- */
+.series-type-toggle { display: flex; gap: 6px; }
+.series-type-btn {
+  flex: 1;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.series-type-btn:hover { border-color: var(--primary); color: var(--primary); }
+.series-type-btn.active { border-color: var(--primary); background: rgba(24,144,255,0.1); color: var(--primary); font-weight: 600; }
 </style>

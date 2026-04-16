@@ -89,6 +89,16 @@ function buildSeriesItem(name, data, color, seriesType) {
   }
 }
 
+function formatValue(value, measure) {
+  if (value == null) return ''
+  const decimals = measure?.decimalPlaces ?? 2
+  const fmt = measure?.format
+  if (fmt === 'currency') return new Intl.NumberFormat('es', { style: 'currency', currency: 'USD', minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)
+  if (fmt === 'percent') return `${(value * 100).toFixed(decimals)}%`
+  if (fmt === 'number') return new Intl.NumberFormat('es', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)
+  return value
+}
+
 function buildBarOption() {
   const labels = props.data.map(d => d.label)
   const measures = props.widget.cubeQuery?.measures || []
@@ -99,7 +109,15 @@ function buildBarOption() {
   )
 
   return {
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: (params) => {
+        const label = params[0]?.axisValueLabel || params[0]?.name || ''
+        const lines = params.map((p, i) => `${p.marker}${p.seriesName}: <b>${formatValue(p.value, measures[i])}</b>`)
+        return [label, ...lines].join('<br/>')
+      }
+    },
     legend: { bottom: 0, type: 'scroll' },
     grid: { top: 10, left: 40, right: 16, bottom: 40, containLabel: true },
     xAxis: {
