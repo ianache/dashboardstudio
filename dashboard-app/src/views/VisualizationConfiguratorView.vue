@@ -127,8 +127,86 @@
           <h3>Configuración</h3>
         </header>
         <div class="panel-body">
-          <div class="empty-state">
-            <p>Arrastre campos aquí para configurar el gráfico.</p>
+          <div class="config-sections">
+            <!-- Measures (Series) -->
+            <div class="config-section">
+              <div class="section-label">
+                <span>Series</span>
+                <small>(Métricas)</small>
+              </div>
+              <draggable
+                class="drop-zone"
+                v-model="store.measures"
+                :group="{ name: 'measures', put: (to, from, element) => !store.measures.some(m => m.fullName === element.fullName) }"
+                item-key="fullName"
+                :animation="200"
+              >
+                <template #item="{ element: m }">
+                  <div class="field-item active-field">
+                    <div class="field-content">
+                      <div class="drag-handle">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+                          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+                        </svg>
+                      </div>
+                      <span class="field-icon measure">#</span>
+                      <span class="field-label">{{ m.title }}</span>
+                    </div>
+                    <button class="remove-btn" @click="store.removeMeasure(m.fullName)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  </div>
+                </template>
+                <template #footer>
+                  <div v-if="store.measures.length === 0" class="drop-placeholder">
+                    Arrastre métricas aquí
+                  </div>
+                </template>
+              </draggable>
+            </div>
+
+            <!-- Dimensions (Análisis) -->
+            <div class="config-section">
+              <div class="section-label">
+                <span>Análisis</span>
+                <small>(Dimensiones)</small>
+              </div>
+              <draggable
+                class="drop-zone"
+                v-model="store.dimensions"
+                :group="{ name: 'dimensions', put: (to, from, element) => !store.dimensions.some(d => d.fullName === element.fullName) }"
+                item-key="fullName"
+                :animation="200"
+              >
+                <template #item="{ element: d }">
+                  <div class="field-item active-field">
+                    <div class="field-content">
+                      <div class="drag-handle">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+                          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+                        </svg>
+                      </div>
+                      <span class="field-icon dimension">A</span>
+                      <span class="field-label">{{ d.title }}</span>
+                    </div>
+                    <button class="remove-btn" @click="store.removeDimension(d.fullName)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  </div>
+                </template>
+                <template #footer>
+                  <div v-if="store.dimensions.length === 0" class="drop-placeholder">
+                    Arrastre dimensiones aquí
+                  </div>
+                </template>
+              </draggable>
+            </div>
           </div>
         </div>
       </section>
@@ -558,6 +636,93 @@ const handleCancel = () => {
   border-left-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+/* Config Panel Styles */
+.config-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.section-label span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-label small {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.drop-zone {
+  min-height: 50px;
+  background: #fcfcfc;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.drop-zone:empty {
+  display: none; /* Hide if truly empty to let footer show */
+}
+
+.drop-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.active-field {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  cursor: default !important;
+}
+
+.active-field .drag-handle {
+  cursor: grab;
+}
+
+.remove-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  opacity: 1;
 }
 
 @keyframes spin {
