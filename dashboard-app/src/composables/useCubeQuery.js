@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, unref } from 'vue'
 import { useCubeStore } from '@/stores/cubejs'
 
 // Mock data generators per chart type
@@ -101,25 +101,26 @@ export function useCubeQuery(widget, dashboardFilters) {
   const lastUpdated = ref(null)
 
   async function fetchData() {
+    const w = unref(widget)
     loading.value = true
     error.value = null
 
     try {
-      if (widget.useMockData || !cubeStore.token || !cubeStore.apiUrl) {
+      if (w.useMockData || !cubeStore.token || !cubeStore.apiUrl) {
         // Use mock data
         await new Promise(r => setTimeout(r, 300 + Math.random() * 400))
-        data.value = generateMockData(widget)
+        data.value = generateMockData(w)
       } else {
         // Build CubeJS query from widget config
-        const query = buildCubeQuery(widget)
+        const query = buildCubeQuery(w)
         const result = await cubeStore.executeQuery(query)
-        data.value = transformCubeResult(result, widget)
+        data.value = transformCubeResult(result, w)
       }
       lastUpdated.value = new Date()
     } catch (err) {
       error.value = err.message
       // Fallback to mock data on error
-      data.value = generateMockData(widget)
+      data.value = generateMockData(w)
     } finally {
       loading.value = false
     }

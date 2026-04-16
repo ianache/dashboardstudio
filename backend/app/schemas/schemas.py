@@ -1,5 +1,6 @@
+import json
 from typing import Optional, List
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 
 
@@ -120,6 +121,20 @@ class ColorPaletteBase(BaseModel):
     label: str
     colors: List[str]
     is_default: bool = False
+
+    @field_validator('colors', mode='before')
+    @classmethod
+    def parse_colors(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                pass
+        return v
 
 
 class ColorPaletteCreate(ColorPaletteBase):

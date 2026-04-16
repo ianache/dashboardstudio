@@ -56,13 +56,29 @@ app.add_middleware(
 )
 
 # Global error handler for debugging 500 errors
+# NOTE: We manually add CORS headers here because unhandled exceptions can bypass
+# CORSMiddleware when propagated via Starlette's ServerErrorMiddleware.
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    error_msg = "".join(traceback.format_exception(None, exc, exc.__traceback__))
+    error_msg = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
     logger.error(f"Unhandled exception: {error_msg}")
+
+    origin = request.headers.get("origin", "")
+    allowed = [
+        "http://localhost:3000", "http://127.0.0.1:3000",
+        "http://localhost:5173", "http://127.0.0.1:5173",
+    ]
+    cors_headers = {}
+    if origin in allowed:
+        cors_headers = {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+        }
+
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal Server Error", "msg": str(exc), "traceback": error_msg if settings.debug else None},
+        headers=cors_headers,
     )
 
 app.include_router(api_router, prefix="/api/v1")

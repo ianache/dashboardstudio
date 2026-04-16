@@ -70,6 +70,24 @@ export const useDashboardStore = defineStore('dashboard', {
       }
     },
 
+    async createDashboard(name, description, createdBy) {
+      try {
+        const payload = {
+          name,
+          description: description || '',
+          is_public: false,
+          assigned_users: []
+        }
+        const created = await dashboardApi.create(payload)
+        const dashboard = this._transformBackendToFrontend(created)
+        this.dashboards.push(dashboard)
+        return dashboard
+      } catch (err) {
+        console.error('Failed to create dashboard:', err)
+        throw err
+      }
+    },
+
     async addWidget(dashboardId, widgetData) {
       try {
         const backendWidget = {
@@ -81,7 +99,7 @@ export const useDashboardStore = defineStore('dashboard', {
           use_mock_data: widgetData.useMockData || false
         }
         
-        const created = await dashboardApi.addWidget(dashboardId, backendWidget)
+        const created = await dashboardApi.createWidget(dashboardId, backendWidget)
         const frontendWidget = this._transformWidgetBackendToFrontend(created)
         
         const dashboard = this.dashboards.find(d => d.id === dashboardId)
@@ -119,6 +137,10 @@ export const useDashboardStore = defineStore('dashboard', {
         console.error('Failed to update widget:', err)
         throw err
       }
+    },
+
+    async updateWidgetPosition(dashboardId, widgetId, position) {
+      return this.updateWidget(dashboardId, widgetId, { position })
     },
 
     async removeWidget(dashboardId, widgetId) {

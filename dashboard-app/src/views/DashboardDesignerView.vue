@@ -204,7 +204,7 @@
         <button
           v-if="isDesignMode"
           class="btn btn-primary btn-sm"
-          @click="showAddWidget = true"
+          @click="addWidget"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -356,44 +356,6 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="assigningDashboard = null">Cancelar</button>
           <button class="btn btn-primary" @click="saveAssignment">Guardar asignación</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add Widget Panel -->
-    <div v-if="showAddWidget" class="modal-overlay" @click.self="showAddWidget = false">
-      <div class="modal-box" style="max-width: 500px;">
-        <div class="modal-header">
-          <h3>Añadir Widget</h3>
-          <button class="btn-icon" @click="showAddWidget = false">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group" style="margin-bottom:16px">
-            <label class="form-label">Título del widget</label>
-            <input v-model="newWidgetTitle" class="form-input" placeholder="Ej: Ventas Mensuales" />
-          </div>
-          <label class="form-label" style="margin-bottom:8px">Selecciona el tipo de gráfico</label>
-          <div class="widget-type-grid">
-            <div
-              v-for="ct in chartTypes"
-              :key="ct.value"
-              class="widget-type-card"
-              :class="{ selected: newWidgetType === ct.value }"
-              @click="newWidgetType = ct.value"
-            >
-              <span class="wt-icon">{{ ct.icon }}</span>
-              <span class="wt-label">{{ ct.label }}</span>
-              <span class="wt-desc">{{ ct.desc }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showAddWidget = false">Cancelar</button>
-          <button class="btn btn-primary" @click="addWidget">Añadir</button>
         </div>
       </div>
     </div>
@@ -565,7 +527,6 @@ onMounted(async () => {
 // State
 const isDesignMode = ref(true)
 const showNewModal = ref(false)
-const showAddWidget = ref(false)
 const configuringWidget = ref(null)
 const assigningDashboard = ref(null)
 const deletingDashboard = ref(null)
@@ -578,8 +539,6 @@ const assignedUsersFull = ref([])
 
 const newName = ref('')
 const newDescription = ref('')
-const newWidgetTitle = ref('')
-const newWidgetType = ref('bar')
 const editingTitle = ref(false)
 const editTitleValue = ref('')
 const editDescription = ref('')
@@ -598,16 +557,6 @@ const vClickOutside = {
     document.removeEventListener('mousedown', el._clickOutsideHandler)
   }
 }
-
-const chartTypes = [
-  { value: 'bar', label: 'Barras', icon: '📊', desc: 'Comparar categorías' },
-  { value: 'line', label: 'Líneas', icon: '📈', desc: 'Tendencias en el tiempo' },
-  { value: 'pie', label: 'Pastel', icon: '🥧', desc: 'Distribución porcentual' },
-  { value: 'gauge', label: 'Gauge', icon: '🎯', desc: 'Valor único / KPI' },
-  { value: 'radar', label: 'Radar', icon: '🕸️', desc: 'Múltiples variables' },
-  { value: 'combined', label: 'Combinado', icon: '📉', desc: 'Barras + Líneas' },
-  { value: 'table',    label: 'Tabla',     icon: '🗒️', desc: 'Datos con paginación y ordenamiento' }
-]
 
 // Active dashboard from route
 const activeDashboard = computed(() => {
@@ -846,9 +795,9 @@ function deleteDashboard() {
   uiStore.addAlert({ type: 'success', message: `Dashboard "${name}" eliminado` })
 }
 
-function createDashboard() {
+async function createDashboard() {
   if (!newName.value.trim()) return
-  const db = dashboardStore.createDashboard(newName.value.trim(), newDescription.value.trim(), authStore.user.id)
+  const db = await dashboardStore.createDashboard(newName.value.trim(), newDescription.value.trim(), authStore.user.id)
   showNewModal.value = false
   newName.value = ''
   newDescription.value = ''
@@ -858,17 +807,7 @@ function createDashboard() {
 
 function addWidget() {
   if (!activeDashboard.value) return
-  dashboardStore.addWidget(activeDashboard.value.id, {
-    title: newWidgetTitle.value || 'Nuevo Gráfico',
-    chartType: newWidgetType.value,
-    useMockData: true
-  }).then(widget => {
-    showAddWidget.value = false
-    newWidgetTitle.value = ''
-    newWidgetType.value = 'bar'
-    // Open config immediately
-    configuringWidget.value = widget
-  })
+  router.push(`/designer/${activeDashboard.value.id}/configure`)
 }
 
 function removeWidget(widgetId) {
@@ -877,7 +816,7 @@ function removeWidget(widgetId) {
 }
 
 function openConfigModal(widget) {
-  configuringWidget.value = JSON.parse(JSON.stringify(widget))
+  router.push(`/designer/${activeDashboard.value.id}/configure/${widget.id}`)
 }
 
 function saveWidgetConfig(updatedWidget) {
