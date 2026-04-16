@@ -137,10 +137,17 @@
       </aside>
 
       <!-- Center Panel: Configuration -->
-      <section class="panel panel-config">
+      <section class="panel panel-config" :class="{ 'collapsed': configCollapsed }">
         <header class="panel-header">
-          <h3>Configuración</h3>
-          <div class="chart-type-selector">
+          <div class="header-left-group">
+            <button class="toggle-btn" @click="toggleConfig">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/><polyline v-if="!configCollapsed" points="12 19 5 12 12 5"/><polyline v-else points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+            <h3 v-if="!configCollapsed">Configuración</h3>
+          </div>
+          <div v-if="!configCollapsed" class="chart-type-selector">
             <select :value="store.chartType" @change="store.setChartType($event.target.value)" class="form-select select-sm">
               <option value="bar">Barras</option>
               <option value="line">Líneas</option>
@@ -150,7 +157,7 @@
             </select>
           </div>
         </header>
-        <div class="panel-body">
+        <div v-if="!configCollapsed" class="panel-body">
           <div class="config-sections">
             <!-- Measures (Series) -->
             <div class="config-section">
@@ -164,6 +171,7 @@
                 :group="{ name: 'measures', put: (to, from, element) => !store.measures.some(m => m.fullName === element.fullName) }"
                 item-key="fullName"
                 :animation="200"
+                :component-data="{ name: 'list', tag: 'div' }"
               >
                 <template #item="{ element: m }">
                   <div class="field-item active-field">
@@ -175,7 +183,7 @@
                         </svg>
                       </div>
                       <span class="field-icon measure">#</span>
-                      <span class="field-label">{{ m.title }}</span>
+                      <span class="field-label">{{ m.alias || m.title }}</span>
                     </div>
                     <div class="field-actions">
                       <button class="action-btn" @click="openConfig('measures', m)">
@@ -211,6 +219,7 @@
                 :group="{ name: 'dimensions', put: (to, from, element) => !store.dimensions.some(d => d.fullName === element.fullName) }"
                 item-key="fullName"
                 :animation="200"
+                :component-data="{ name: 'list', tag: 'div' }"
               >
                 <template #item="{ element: d }">
                   <div class="field-item active-field">
@@ -222,7 +231,7 @@
                         </svg>
                       </div>
                       <span class="field-icon dimension">A</span>
-                      <span class="field-label">{{ d.title }}</span>
+                      <span class="field-label">{{ d.alias || d.title }}</span>
                     </div>
                     <div class="field-actions">
                       <button class="action-btn" @click="openConfig('dimensions', d)">
@@ -241,6 +250,62 @@
                 <template #footer>
                   <div v-if="store.dimensions.length === 0" class="drop-placeholder">
                     Arrastre dimensiones aquí
+                  </div>
+                </template>
+              </draggable>
+            </div>
+
+            <!-- Quick Filters -->
+            <div class="config-section">
+              <div class="section-label">
+                <span>Filtros Rápidos</span>
+                <small>(Dimensiones)</small>
+              </div>
+              <draggable
+                class="drop-zone"
+                v-model="store.filters"
+                :group="{ name: 'dimensions', pull: false, put: (to, from, element) => !store.filters.some(f => f.fullName === element.fullName) }"
+                item-key="fullName"
+                :animation="200"
+                :component-data="{ name: 'list', tag: 'div' }"
+              >
+                <template #item="{ element: f }">
+                  <div class="field-item active-field filter-field-config">
+                    <div class="filter-main">
+                      <div class="field-content">
+                        <span class="field-icon dimension">F</span>
+                        <span class="field-label">{{ f.alias || f.title }}</span>
+                      </div>
+                      <button class="remove-btn" @click="store.removeFilter(f.fullName)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="filter-settings">
+                      <select 
+                        :value="f.operator || 'equals'" 
+                        @change="store.updateFilter(f.fullName, { operator: $event.target.value })"
+                        class="form-select select-xs"
+                      >
+                        <option value="equals">Es igual a</option>
+                        <option value="notEquals">No es igual a</option>
+                        <option value="contains">Contiene</option>
+                        <option value="set">Está definido</option>
+                      </select>
+                      <input 
+                        type="text" 
+                        :value="(f.values || []).join(', ')"
+                        @change="store.updateFilter(f.fullName, { values: $event.target.value.split(',').map(v => v.trim()) })"
+                        placeholder="Valores..."
+                        class="form-control input-xs"
+                      />
+                    </div>
+                  </div>
+                </template>
+                <template #footer>
+                  <div v-if="store.filters.length === 0" class="drop-placeholder">
+                    Arrastre dimensiones para filtrar
                   </div>
                 </template>
               </draggable>
@@ -334,7 +399,12 @@ const cubeStore = useCubeStore()
 const measureSearch = ref('')
 const dimensionSearch = ref('')
 const saving = ref(false)
+const configCollapsed = ref(false)
 const activeConfigField = ref(null) // { type: 'measure'|'dimension', field: Object }
+
+const toggleConfig = () => {
+  configCollapsed.value = !configCollapsed.value
+}
 
 // Computed widget for useCubeQuery and persistence
 const currentWidget = computed(() => ({
@@ -350,6 +420,11 @@ const currentWidget = computed(() => ({
     dimensions: store.dimensions.map(d => ({ 
       key: d.fullName, 
       label: d.alias || d.title 
+    })),
+    filters: store.filters.map(f => ({
+      member: f.fullName,
+      operator: f.operator || 'equals',
+      values: f.values || []
     })),
     limit: 100
   },
@@ -562,7 +637,47 @@ const handleCancel = () => {
   grid-template-columns: 280px 320px 1fr;
   gap: 16px;
   flex: 1;
-  min-height: 0; /* Important for grid item scrolling */
+  min-height: 0;
+  transition: grid-template-columns 0.3s ease;
+}
+
+.configurator-content.is-collapsed {
+  grid-template-columns: 280px 48px 1fr;
+}
+
+.panel-config.collapsed {
+  width: 48px;
+  padding: 0;
+}
+
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-btn {
+  background: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  background: #f0f0f0;
+  color: var(--primary);
+}
+
+.filter-field {
+  border-style: dotted !important;
+  border-color: #94a3b8 !important;
 }
 
 .panel {
@@ -1055,6 +1170,38 @@ const handleCancel = () => {
   justify-content: flex-end;
   gap: 12px;
   background: #fafafa;
+}
+
+.filter-field-config {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  padding: 10px !important;
+}
+
+.filter-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-settings {
+  display: flex;
+  gap: 6px;
+}
+
+.select-xs {
+  padding: 2px 4px !important;
+  font-size: 11px !important;
+  height: 24px !important;
+  width: 100px !important;
+}
+
+.input-xs {
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  height: 24px !important;
+  flex: 1;
 }
 
 @keyframes spin {

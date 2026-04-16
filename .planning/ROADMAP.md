@@ -20,7 +20,7 @@
 ## Phase 4: Refinement & Integration
 **Goal:** Finalize the user experience and ensure persistence.
 - [x] phase04-01-PLAN.md — Save to Dashboard & UI Polish
-- [ ] phase04-02-PLAN.md — Advanced Metric Configuration (aliases, formatting)
+- [x] phase04-02-PLAN.md — Advanced Metric Configuration (aliases, formatting)
 - [ ] phase04-03-PLAN.md — Final Polish & Quick Filters
 
 ## Phase 5: Testing & Deployment
