@@ -56,7 +56,17 @@ async def list_palettes(
             {"id": "sunset", "label": "Atardecer", "colors": ["#7b2d00","#d4380d","#fa541c","#fa8c16","#faad14","#ffc53d","#ffe58f","#eb2f96","#c41d7f","#9e1068"]},
             {"id": "forest", "label": "Bosque", "colors": ["#092b00","#135200","#237804","#389e0d","#52c41a","#73d13d","#95de64","#b7eb8f","#6abe39","#2d8653"]},
         ]
-        return [schemas.ColorPaletteResponse(id=p["id"], label=p["label"], colors=p["colors"], is_default=p["id"]=="default", created_by=None, created_at=None, updated_at=None) for p in built_in]
+        return [
+            schemas.ColorPaletteResponse(
+                id=p["id"], 
+                label=p["label"], 
+                colors=p["colors"], 
+                is_default=(p["id"] == "default"),
+                created_by=None,
+                created_at=None,
+                updated_at=None
+            ) for p in built_in
+        ]
     
     return palettes
 

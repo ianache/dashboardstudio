@@ -37,15 +37,34 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
         
         // Map string names to full objects from metadata if available
         this.measures = (widget.cubeQuery.measures || []).map(m => {
-          const fullName = typeof m === 'string' ? m : m.fullName
+          const fullName = typeof m === 'string' ? m : m.key || m.fullName
           const meta = cubeStore.allMeasures.find(am => am.fullName === fullName)
-          return meta || { fullName: fullName, title: fullName.split('.').pop() }
+          const base = meta || { fullName: fullName, title: fullName.split('.').pop() }
+          
+          // Restore alias and format if they exist in the saved query
+          if (typeof m === 'object') {
+            return {
+              ...base,
+              alias: m.label !== base.title ? m.label : undefined,
+              format: m.format
+            }
+          }
+          return base
         })
         
         this.dimensions = (widget.cubeQuery.dimensions || []).map(d => {
-          const fullName = typeof d === 'string' ? d : d.fullName
+          const fullName = typeof d === 'string' ? d : d.key || d.fullName
           const meta = cubeStore.allDimensions.find(ad => ad.fullName === fullName)
-          return meta || { fullName: fullName, title: fullName.split('.').pop() }
+          const base = meta || { fullName: fullName, title: fullName.split('.').pop() }
+          
+          // Restore alias if it exists
+          if (typeof d === 'object') {
+            return {
+              ...base,
+              alias: d.label !== base.title ? d.label : undefined
+            }
+          }
+          return base
         })
         
         this.filters = widget.cubeQuery.filters || []
@@ -86,6 +105,13 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.measures = this.measures.filter(m => m.fullName !== measureFullName)
     },
 
+    updateMeasure(fullName, updates) {
+      const index = this.measures.findIndex(m => m.fullName === fullName)
+      if (index !== -1) {
+        this.measures[index] = { ...this.measures[index], ...updates }
+      }
+    },
+
     addDimension(dimension) {
       const fullName = typeof dimension === 'string' ? dimension : dimension.fullName
       if (!this.dimensions.find(d => d.fullName === fullName)) {
@@ -99,6 +125,13 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
 
     removeDimension(dimensionFullName) {
       this.dimensions = this.dimensions.filter(d => d.fullName !== dimensionFullName)
+    },
+
+    updateDimension(fullName, updates) {
+      const index = this.dimensions.findIndex(d => d.fullName === fullName)
+      if (index !== -1) {
+        this.dimensions[index] = { ...this.dimensions[index], ...updates }
+      }
     },
 
     setChartType(type) {

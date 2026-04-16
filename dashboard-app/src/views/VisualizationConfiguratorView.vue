@@ -177,11 +177,18 @@
                       <span class="field-icon measure">#</span>
                       <span class="field-label">{{ m.title }}</span>
                     </div>
-                    <button class="remove-btn" @click="store.removeMeasure(m.fullName)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                      </svg>
-                    </button>
+                    <div class="field-actions">
+                      <button class="action-btn" @click="openConfig('measures', m)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                      </button>
+                      <button class="remove-btn" @click="store.removeMeasure(m.fullName)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </template>
                 <template #footer>
@@ -217,11 +224,18 @@
                       <span class="field-icon dimension">A</span>
                       <span class="field-label">{{ d.title }}</span>
                     </div>
-                    <button class="remove-btn" @click="store.removeDimension(d.fullName)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                      </svg>
-                    </button>
+                    <div class="field-actions">
+                      <button class="action-btn" @click="openConfig('dimensions', d)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                      </button>
+                      <button class="remove-btn" @click="store.removeDimension(d.fullName)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </template>
                 <template #footer>
@@ -260,6 +274,41 @@
         </div>
       </section>
     </main>
+
+    <!-- Field Config Modal -->
+    <div v-if="activeConfigField" class="modal-backdrop" @click.self="closeConfig">
+      <div class="modal-content field-config-modal">
+        <header class="modal-header">
+          <h3>Configurar {{ activeConfigField.type === 'measures' ? 'Métrica' : 'Dimensión' }}</h3>
+          <button class="close-btn" @click="closeConfig">&times;</button>
+        </header>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nombre Visible (Alias)</label>
+            <input 
+              type="text" 
+              v-model="activeConfigField.field.alias" 
+              :placeholder="activeConfigField.field.title"
+              class="form-control"
+            />
+          </div>
+          
+          <div v-if="activeConfigField.type === 'measures'" class="form-group">
+            <label>Formato</label>
+            <select v-model="activeConfigField.field.format" class="form-select">
+              <option :value="undefined">Predeterminado</option>
+              <option value="number">Número</option>
+              <option value="currency">Moneda</option>
+              <option value="percent">Porcentaje</option>
+            </select>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button class="btn btn-secondary" @click="closeConfig">Cancelar</button>
+          <button class="btn btn-primary" @click="updateFieldConfig">Aplicar</button>
+        </footer>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -285,6 +334,7 @@ const cubeStore = useCubeStore()
 const measureSearch = ref('')
 const dimensionSearch = ref('')
 const saving = ref(false)
+const activeConfigField = ref(null) // { type: 'measure'|'dimension', field: Object }
 
 // Computed widget for useCubeQuery and persistence
 const currentWidget = computed(() => ({
@@ -292,13 +342,42 @@ const currentWidget = computed(() => ({
   title: store.title,
   chartType: store.chartType,
   cubeQuery: {
-    measures: store.measures.map(m => ({ key: m.fullName, label: m.title })),
-    dimensions: store.dimensions.map(d => ({ key: d.fullName, label: d.title })),
+    measures: store.measures.map(m => ({ 
+      key: m.fullName, 
+      label: m.alias || m.title,
+      format: m.format
+    })),
+    dimensions: store.dimensions.map(d => ({ 
+      key: d.fullName, 
+      label: d.alias || d.title 
+    })),
     limit: 100
   },
   chartOptions: store.chartOptions,
   useMockData: false
 }))
+
+// ... (fetchData and watchers)
+
+const openConfig = (type, field) => {
+  activeConfigField.value = { type, field: { ...field } }
+}
+
+const closeConfig = () => {
+  activeConfigField.value = null
+}
+
+const updateFieldConfig = () => {
+  if (!activeConfigField.value) return
+  
+  const { type, field } = activeConfigField.value
+  if (type === 'measure') {
+    store.updateMeasure(field.fullName, { alias: field.alias, format: field.format })
+  } else {
+    store.updateDimension(field.fullName, { alias: field.alias })
+  }
+  closeConfig()
+}
 
 const { data, loading, error, fetchData } = useCubeQuery(currentWidget)
 
@@ -875,6 +954,107 @@ const handleCancel = () => {
   background: #fee2e2;
   color: #ef4444;
   opacity: 1;
+}
+
+/* Field Actions & Modal */
+.field-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: #f0f0f0;
+  color: var(--primary);
+  opacity: 1;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.field-config-modal {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #fafafa;
 }
 
 @keyframes spin {
