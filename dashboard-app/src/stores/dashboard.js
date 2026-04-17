@@ -59,13 +59,17 @@ export const useDashboardStore = defineStore('dashboard', {
     },
 
     _transformWidgetBackendToFrontend(w) {
+      const chartOptions = { ...(w.chart_options || {}) }
+      const pieOptions = chartOptions._pie || null
+      delete chartOptions._pie
       return {
         id: w.id,
         title: w.title,
         chartType: w.chart_type,
         position: { x: w.position?.x ?? 0, y: w.position?.y ?? 0, w: w.position?.w ?? 6, h: w.position?.h ?? 3 },
         cubeQuery: w.cube_query || { measures: [], dimensions: [], timeDimension: null, filters: [], limit: 100 },
-        chartOptions: w.chart_options || {},
+        chartOptions,
+        pieOptions: pieOptions || { showValue: false, showPercent: true, showTotal: false },
         useMockData: w.use_mock_data
       }
     },
@@ -90,12 +94,14 @@ export const useDashboardStore = defineStore('dashboard', {
 
     async addWidget(dashboardId, widgetData) {
       try {
+        const chart_options = { ...(widgetData.chartOptions || {}) }
+        if (widgetData.pieOptions) chart_options._pie = widgetData.pieOptions
         const backendWidget = {
           title: widgetData.title,
           chart_type: widgetData.chartType,
           position: widgetData.position || { x: 0, y: 0, w: 6, h: 3 },
           cube_query: widgetData.cubeQuery,
-          chart_options: widgetData.chartOptions || {},
+          chart_options,
           use_mock_data: widgetData.useMockData || false
         }
         
@@ -121,7 +127,11 @@ export const useDashboardStore = defineStore('dashboard', {
         if (updates.chartType !== undefined) backendUpdates.chart_type = updates.chartType
         if (updates.position !== undefined) backendUpdates.position = updates.position
         if (updates.cubeQuery !== undefined) backendUpdates.cube_query = updates.cubeQuery
-        if (updates.chartOptions !== undefined) backendUpdates.chart_options = updates.chartOptions
+        if (updates.chartOptions !== undefined || updates.pieOptions !== undefined) {
+          const chart_options = { ...(updates.chartOptions || {}) }
+          if (updates.pieOptions) chart_options._pie = updates.pieOptions
+          backendUpdates.chart_options = chart_options
+        }
         if (updates.useMockData !== undefined) backendUpdates.use_mock_data = updates.useMockData
 
         await dashboardApi.updateWidget(dashboardId, widgetId, backendUpdates)
