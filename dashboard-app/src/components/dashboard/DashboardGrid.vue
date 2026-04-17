@@ -112,6 +112,10 @@ const resizeState = ref({
   startX: 0
 })
 
+// Local preview position during resize — avoids store writes (and data
+// refetches) until the user releases the mouse.
+const resizePreview = ref(null) // { widgetId, position } | null
+
 let resizeObserver = null
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -140,7 +144,11 @@ function snapRow(pxTop) {
 
 // Widget position (grid units) → absolute pixel style
 function getItemStyle(widget) {
-  const { x, y, w, h } = widget.position
+  // Use local preview position while resizing to avoid store writes on every pixel
+  const pos = (resizePreview.value?.widgetId === widget.id)
+    ? resizePreview.value.position
+    : widget.position
+  const { x, y, w, h } = pos
   const colW = colWidth.value
   return {
     position: 'absolute',
@@ -274,7 +282,8 @@ function onMouseMove(e) {
     if (rs.direction.includes('s')) {
       newPos.h = Math.max(1, rs.startH + dyRows)
     }
-    dashboardStore.updateWidgetPosition(props.dashboardId, rs.widgetId, newPos)
+    // Update only the local preview — no store write, no data refetch
+    resizePreview.value = { widgetId: rs.widgetId, position: newPos }
   }
 }
 
@@ -300,6 +309,11 @@ function onMouseUp(e) {
   }
 
   if (resizeState.value.active) {
+    // Commit the final position to the store exactly once on release
+    if (resizePreview.value) {
+      dashboardStore.updateWidgetPosition(props.dashboardId, resizePreview.value.widgetId, resizePreview.value.position)
+      resizePreview.value = null
+    }
     resizeState.value.active   = false
     resizeState.value.widgetId = null
   }
