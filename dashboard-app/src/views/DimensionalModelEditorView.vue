@@ -26,6 +26,15 @@
           @keyup.enter="saveTitle"
           @keyup.escape="editingTitle = false"
         />
+        <span v-if="hasUnsavedChanges" class="unsaved-badge">Sin guardar</span>
+        <button v-if="hasUnsavedChanges" class="btn btn-primary btn-sm toolbar-save-btn" @click="saveModel" title="Guardar cambios">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Guardar
+        </button>
       </div>
 
       <div class="toolbar-actions">
@@ -700,8 +709,24 @@ async function saveAndContinue() {
       relationships: model.value.relationships
     })
     updateSnapshot()
-    hasUnsavedChanges.value = false
-    router.push('/models')
+    const dest = pendingNavigation || '/models'
+    pendingNavigation = null
+    router.push(dest)
+  } catch (err) {
+    alert('Error al guardar: ' + err.message)
+  }
+}
+
+async function saveModel() {
+  try {
+    await modelStore.updateModel(modelId, {
+      name: model.value.name,
+      description: model.value.description,
+      nodes: model.value.nodes,
+      relationships: model.value.relationships
+    })
+    updateSnapshot()
+    uiStore.addAlert({ message: 'Modelo guardado correctamente', type: 'success' })
   } catch (err) {
     alert('Error al guardar: ' + err.message)
   }
@@ -710,6 +735,7 @@ async function saveAndContinue() {
 // ── Unsaved changes guard ─────────────────────────────────────
 let unsavedGuardEnabled = false
 let pendingNavigation = null
+let removeUnsavedGuard = null
 
 const showConfirmLeave = ref(false)
 
@@ -720,18 +746,18 @@ function confirmLeaveSave() {
 
 function confirmLeaveDiscard() {
   showConfirmLeave.value = false
-  hasUnsavedChanges.value = false
+  updateSnapshot()   // sync snapshot → guard no vuelve a disparar en el push siguiente
   if (pendingNavigation) {
-    router.push(pendingNavigation)
+    const dest = pendingNavigation
     pendingNavigation = null
+    router.push(dest)
   }
 }
 
 function enableUnsavedGuard() {
   if (unsavedGuardEnabled) return
   unsavedGuardEnabled = true
-  
-  router.beforeEach((to, from) => {
+  removeUnsavedGuard = router.beforeEach((to, from) => {
     if (!checkUnsavedChanges()) return
     pendingNavigation = to.fullPath
     showConfirmLeave.value = true
@@ -1300,6 +1326,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onGlobalMouseMove)
   document.removeEventListener('mouseup', onGlobalMouseUp)
+  if (removeUnsavedGuard) removeUnsavedGuard()
 })
 
 watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) })
@@ -1748,6 +1775,7 @@ function applyAITables() {
     })
   })
 
+  hasUnsavedChanges.value = true
   uiStore.addAlert({ message: `${aiSelectedTables.value.length} tabla(s) añadidas al canvas`, type: 'success' })
   aiAssistOpen.value = false
   aiAssistResult.value = null
@@ -1807,14 +1835,35 @@ function addSelectedGlobalDims() {
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
-.toolbar-title { flex: 1; min-width: 0; display: flex; align-items: center; }
+.toolbar-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .title-text {
   font-size: 16px; font-weight: 600; color: var(--text);
   cursor: pointer; display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
 }
 .edit-hint { color: var(--text-secondary); opacity: 0.5; }
 .title-text:hover .edit-hint { opacity: 1; }
 .title-edit-input { font-size: 15px; font-weight: 600; max-width: 300px; }
+
+.unsaved-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  color: #d46b08;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.toolbar-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
 .toolbar-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: center; }
 .btn-icon-only { width: 30px; padding: 0; justify-content: center; }
 .toolbar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
