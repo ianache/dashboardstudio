@@ -26,3 +26,18 @@
 ## Phase 5: Testing & Deployment
 - [ ] phase05-01-PLAN.md — End-to-end testing & Validation
 - [ ] phase05-02-PLAN.md — Cross-browser & Final Review
+
+### Phase 6: Multi-diagram Dimensional Model
+
+**Goal:** Extend the Dimensional Model editor so each model can have one permanent main diagram plus N user-managed sub-diagrams showing node subsets, with shared canonical node data and Markdown-enabled diagram descriptions.
+**Requirements**: MD-01, MD-02, MD-03, MD-04, MD-05, MD-06, MD-07
+**Depends on:** Phase 5
+**Plans:** 6 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Backend diagrams column + Pydantic schemas
+- [ ] 06-02-PLAN.md — Store diagram CRUD actions + migration logic
+- [ ] 06-03-PLAN.md — DiagramTabBar + EditorView canvas refactor
+- [ ] 06-04-PLAN.md — Install marked/DOMPurify + DiagramPropsPanel component
+- [ ] 06-05-PLAN.md — Wire DiagramPropsPanel + AddNodeToDiagramModal into EditorView
+- [ ] 06-06-PLAN.md — Automated smoke checks + end-to-end human verification
