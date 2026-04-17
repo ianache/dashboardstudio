@@ -87,7 +87,9 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
         id: r.id,
         fromNodeId: r.fromNodeId || r.from_node_id,
         toNodeId: r.toNodeId || r.to_node_id,
-        cardinality: r.cardinality || '1:N'
+        cardinality: r.cardinality || '1:N',
+        fromFieldId: r.fromFieldId || r.from_field_id || undefined,
+        toFieldId: r.toFieldId || r.to_field_id || undefined
       }
     },
 
@@ -130,7 +132,9 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
         id: r.id,
         fromNodeId: r.fromNodeId,
         toNodeId: r.toNodeId,
-        cardinality: r.cardinality
+        cardinality: r.cardinality,
+        fromFieldId: r.fromFieldId || undefined,
+        toFieldId: r.toFieldId || undefined
       }
     },
 
@@ -294,10 +298,12 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
       node.fields = node.fields.filter(f => f.id !== fieldId)
     },
 
-    addRelationship(modelId, { fromNodeId, toNodeId, cardinality = '1:N' }) {
+    addRelationship(modelId, { fromNodeId, toNodeId, cardinality = '1:N', fromFieldId, toFieldId }) {
       const m = this.models.find(m => m.id === modelId)
       if (!m) return
       const rel = { id: generateId(), fromNodeId, toNodeId, cardinality }
+      if (fromFieldId) rel.fromFieldId = fromFieldId
+      if (toFieldId) rel.toFieldId = toFieldId
       m.relationships.push(rel)
       return rel
     },

@@ -144,24 +144,45 @@
         <!-- SVG overlay for relationships + guide line -->
         <svg class="canvas-svg" :width="canvasSize.w" :height="canvasSize.h">
           <defs>
-            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
-            </marker>
+            <!-- Field drag guide line arrow -->
             <marker id="arrowhead-key" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
               <polygon points="0 0, 10 3.5, 0 7" fill="#52c41a"/>
+            </marker>
+            <!-- Relationship: source end — filled circle (1-side, dim) -->
+            <marker id="rel-source" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <circle cx="4" cy="4" r="3" fill="#888"/>
+            </marker>
+            <marker id="rel-source-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <circle cx="4" cy="4" r="3" fill="var(--primary)"/>
+            </marker>
+            <!-- Relationship: target end — open chevron (N-side, fact) -->
+            <marker id="rel-target" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+              <path d="M 1 1 L 11 4 L 1 7" fill="none" stroke="#888" stroke-width="1.5" stroke-linejoin="round"/>
+            </marker>
+            <marker id="rel-target-sel" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+              <path d="M 1 1 L 11 4 L 1 7" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round"/>
             </marker>
           </defs>
 
           <!-- Relationships -->
           <g v-for="rel in visibleRelationships" :key="rel.id">
-            <line
-              :x1="nodeCenter(rel.fromNodeId).x"
-              :y1="nodeCenter(rel.fromNodeId).y"
-              :x2="nodeCenter(rel.toNodeId).x"
-              :y2="nodeCenter(rel.toNodeId).y"
+            <!-- Wide invisible hit area -->
+            <path
+              :d="relPath(rel)"
+              fill="none"
+              stroke="transparent"
+              stroke-width="12"
+              style="cursor:pointer"
+              @click.stop="selectRelationship(rel)"
+            />
+            <!-- Visible bezier path -->
+            <path
+              :d="relPath(rel)"
+              fill="none"
               :stroke="selectedRel?.id === rel.id ? 'var(--primary)' : '#888'"
-              stroke-width="2"
-              marker-end="url(#arrowhead)"
+              stroke-width="1.8"
+              :marker-start="selectedRel?.id === rel.id ? 'url(#rel-source-sel)' : 'url(#rel-source)'"
+              :marker-end="selectedRel?.id === rel.id ? 'url(#rel-target-sel)' : 'url(#rel-target)'"
               class="rel-line"
               @click.stop="selectRelationship(rel)"
             />
@@ -1438,15 +1459,66 @@ function nodeHeight(node) {
   return 40 + (node?.fields?.length || 0) * 28 + 8 + (warn ? 24 : 0)
 }
 
-function nodeCenter(nodeId) {
-  const node = model.value?.nodes.find(n => n.id === nodeId)
-  if (!node) return { x: 0, y: 0 }
-  return { x: node.x + NODE_WIDTH / 2, y: node.y + nodeHeight(node) / 2 }
+const HEADER_H = 44
+const FIELD_H = 28
+
+function relAnchorPoints(rel) {
+  const fromNode = activeDiagramNodes.value.find(n => n.id === rel.fromNodeId)
+  const toNode = activeDiagramNodes.value.find(n => n.id === rel.toNodeId)
+  if (!fromNode || !toNode) return null
+
+  const toSnake = s => s.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
+
+  // Source field index — use stored ID, else find key field
+  let fromIdx = rel.fromFieldId
+    ? fromNode.fields.findIndex(f => f.id === rel.fromFieldId)
+    : fromNode.fields.findIndex(f => f.isKey)
+
+  // Target field index — use stored ID, else infer FK by naming convention
+  let toIdx = -1
+  if (rel.toFieldId) {
+    toIdx = toNode.fields.findIndex(f => f.id === rel.toFieldId)
+  }
+  if (toIdx === -1) {
+    const keyField = fromNode.fields.find(f => f.isKey)
+    if (keyField) {
+      const fkName = `${toSnake(fromNode.name)}_${toSnake(keyField.name)}`
+      toIdx = toNode.fields.findIndex(f => f.name === fkName && f.isFk)
+    }
+  }
+
+  const x1 = fromNode.x + NODE_WIDTH
+  const y1 = fromIdx >= 0
+    ? fromNode.y + HEADER_H + fromIdx * FIELD_H + FIELD_H / 2
+    : fromNode.y + nodeHeight(fromNode) / 2
+
+  const x2 = toNode.x
+  const y2 = toIdx >= 0
+    ? toNode.y + HEADER_H + toIdx * FIELD_H + FIELD_H / 2
+    : toNode.y + nodeHeight(toNode) / 2
+
+  return { x1, y1, x2, y2 }
+}
+
+function relPath(rel) {
+  const pts = relAnchorPoints(rel)
+  if (!pts) return ''
+  const { x1, y1, x2, y2 } = pts
+  const cp = Math.max(60, Math.abs(x2 - x1) * 0.45)
+  return `M ${x1} ${y1} C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2}`
 }
 
 function relMidpoint(rel) {
-  const a = nodeCenter(rel.fromNodeId), b = nodeCenter(rel.toNodeId)
-  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  const pts = relAnchorPoints(rel)
+  if (!pts) return { x: 0, y: 0 }
+  const { x1, y1, x2, y2 } = pts
+  const cp = Math.max(60, Math.abs(x2 - x1) * 0.45)
+  const cx1 = x1 + cp, cy1 = y1, cx2 = x2 - cp, cy2 = y2
+  const t = 0.5
+  return {
+    x: Math.pow(1-t,3)*x1 + 3*Math.pow(1-t,2)*t*cx1 + 3*(1-t)*t*t*cx2 + Math.pow(t,3)*x2,
+    y: Math.pow(1-t,3)*y1 + 3*Math.pow(1-t,2)*t*cy1 + 3*(1-t)*t*t*cy2 + Math.pow(t,3)*y2
+  }
 }
 
 function nodeName(nodeId) {
@@ -1595,10 +1667,14 @@ function handleFieldDrop(factNode) {
          (r.fromNodeId === factNode.id && r.toNodeId === dimNode.id)
   )
   if (!relExists) {
+    const fkField = model.value?.nodes.find(n => n.id === factNode.id)
+                        ?.fields.find(f => f.name === fkName && f.isFk)
     modelStore.addRelationship(modelId, {
       fromNodeId: dimNode.id,
       toNodeId: factNode.id,
-      cardinality: '1:N'
+      cardinality: '1:N',
+      fromFieldId: dragField.value.fieldId,
+      toFieldId: fkField?.id
     })
   }
   hasUnsavedChanges.value = true
