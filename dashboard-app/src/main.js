@@ -44,22 +44,47 @@ use([
   GraphicComponent
 ])
 
+// ── Session persistence ───────────────────────────────────────
+// Storing tokens in sessionStorage lets keycloak-js rehydrate them on
+// page refresh, bypassing the need for any iframe or browser redirect.
+// The Keycloak server at oauth2.qa.comsatel.com.pe sets
+// "frame-ancestors 'self'" CSP, which blocks iframe-based silent checks.
+const KC_TOKEN     = 'kc_token'
+const KC_REFRESH   = 'kc_refresh'
+const KC_ID_TOKEN  = 'kc_id'
+
+function storeTokens() {
+  if (keycloak.token)        sessionStorage.setItem(KC_TOKEN,    keycloak.token)
+  if (keycloak.refreshToken) sessionStorage.setItem(KC_REFRESH,  keycloak.refreshToken)
+  if (keycloak.idToken)      sessionStorage.setItem(KC_ID_TOKEN, keycloak.idToken)
+}
+
+function clearStoredTokens() {
+  sessionStorage.removeItem(KC_TOKEN)
+  sessionStorage.removeItem(KC_REFRESH)
+  sessionStorage.removeItem(KC_ID_TOKEN)
+}
+
 keycloak
   .init({
-    // 'check-sso' silently verifies an existing session via a hidden iframe
-    // without redirecting the browser on every page refresh.
-    // Falls back to keycloak.login() only when there truly is no active session.
+    // Pass any previously stored tokens. When valid, keycloak-js uses them
+    // directly — no redirect, no iframe. Falls back to onLoad behavior only
+    // when both the access token and refresh token are expired.
     onLoad: 'check-sso',
-    silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+    token:        sessionStorage.getItem(KC_TOKEN)    || undefined,
+    refreshToken: sessionStorage.getItem(KC_REFRESH)  || undefined,
+    idToken:      sessionStorage.getItem(KC_ID_TOKEN) || undefined,
     checkLoginIframe: false,
     pkceMethod: 'S256'
   })
   .then(authenticated => {
     if (!authenticated) {
-      // No active Keycloak session — redirect to login
+      clearStoredTokens()
       keycloak.login({ redirectUri: window.location.href })
       return
     }
+
+    storeTokens()
 
     const app = createApp(App)
     const pinia = createPinia()
@@ -76,9 +101,15 @@ keycloak
       keycloak
         .updateToken(60)
         .then(refreshed => {
-          if (refreshed) authStore.onTokenRefreshed()
+          if (refreshed) {
+            storeTokens()
+            authStore.onTokenRefreshed()
+          }
         })
-        .catch(() => authStore.logout())
+        .catch(() => {
+          clearStoredTokens()
+          authStore.logout()
+        })
     }
 
     app.mount('#app')

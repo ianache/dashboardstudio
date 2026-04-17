@@ -78,6 +78,10 @@ export const useAuthStore = defineStore('auth', {
       const kc = _keycloak
       this.user = null
       _keycloak = null
+      // Clear persisted tokens so the next page load does not rehydrate the session
+      sessionStorage.removeItem('kc_token')
+      sessionStorage.removeItem('kc_refresh')
+      sessionStorage.removeItem('kc_id')
       kc?.logout({ redirectUri: window.location.origin })
     },
 
