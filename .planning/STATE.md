@@ -15,7 +15,7 @@
 - [x] Phase 3 executed
 - [x] Phase 4 executed
 - [x] Phase 5 executed
-- [x] Phase 6 in progress — plan 06-04 complete (DiagramPropsPanel + marked/dompurify installed)
+- [x] Phase 6 in progress — plan 06-03 complete (DiagramTabBar + canvas multi-diagram rendering)
 
 ## Accumulated Context
 ### Roadmap Evolution
@@ -28,5 +28,6 @@
 - MD-05 (node move between diagrams) satisfied by addNodeToDiagram/removeNodeFromDiagram modal flow, not drag-and-drop (per 06-RESEARCH.md)
 - Main diagram protected by isMain flag: deleteDiagram and removeNodeFromDiagram silently no-op on main diagram
 - addGlobalDimRef intentionally not synced to main diagram — global refs have separate position tracking
-- 06-04: marked chosen over vue-markdown-it; dompurify chosen over sanitize-html — always paired, never raw v-html
-- 06-04: DiagramPropsPanel is UI-only (no store imports); parent EditorView handles store calls on emitted events
+- 06-03: canvas-column wrapper div added to support tab bar above canvas inside flex-row editor-body
+- 06-03: activeDiagramNodes wraps resolveNode() to preserve global-ref node resolution in sub-diagrams
+- 06-03: DiagramTabBar v-if guards on activeDiagramId non-null to avoid String prop type violation before model loads
