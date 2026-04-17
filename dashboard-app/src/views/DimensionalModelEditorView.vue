@@ -663,6 +663,8 @@ import { useUIStore } from '@/stores/ui'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 import DiagramTabBar from '@/components/dimensional-model/DiagramTabBar.vue'
+import DiagramPropsPanel from '@/components/dimensional-model/DiagramPropsPanel.vue'
+import AddNodeToDiagramModal from '@/components/dimensional-model/AddNodeToDiagramModal.vue'
 import yaml from 'js-yaml'
 import JSZip from 'jszip'
 import html2canvas from 'html2canvas'
@@ -1345,6 +1347,13 @@ watch(model, (m) => {
   }
 }, { immediate: true })
 
+// Clear all selections when switching diagram tabs
+watch(activeDiagramId, () => {
+  selectedNode.value = null
+  selectedRel.value = null
+  selectedDiagram.value = null
+})
+
 function canvasPos(clientX, clientY) {
   const rect = canvasEl.value.getBoundingClientRect()
   return {
@@ -1356,6 +1365,8 @@ function canvasPos(clientX, clientY) {
 // ── Selection ────────────────────────────────────────────────
 const selectedNode = ref(null)
 const selectedRel = ref(null)
+const selectedDiagram = ref(null)
+const showAddNodeModal = ref(false)
 const showFieldDesc = ref(false)
 
 // ── Node drag state ──────────────────────────────────────────
@@ -1561,16 +1572,19 @@ function handleFieldDrop(factNode) {
 function onNodeClick(node) {
   selectedNode.value = model.value?.nodes.find(n => n.id === node.id) || null
   selectedRel.value = null
+  selectedDiagram.value = null
 }
 
 function selectRelationship(rel) {
   selectedRel.value = model.value?.relationships.find(r => r.id === rel.id) || null
   selectedNode.value = null
+  selectedDiagram.value = null
 }
 
 function onCanvasClick() {
   selectedNode.value = null
   selectedRel.value = null
+  selectedDiagram.value = activeDiagram.value || null
 }
 
 // ── Node property updates ─────────────────────────────────────
@@ -1897,6 +1911,36 @@ function handleDeleteDiagram(diagramId) {
 function handleRenameDiagram(diagramId, newName) {
   if (!model.value) return
   modelStore.renameDiagram(model.value.id, diagramId, newName)
+  enableUnsavedGuard()
+}
+
+// ── DiagramPropsPanel handlers ─────────────────────────────────
+function handleDiagramRename(newName) {
+  if (!model.value || !selectedDiagram.value) return
+  modelStore.renameDiagram(model.value.id, selectedDiagram.value.id, newName)
+  enableUnsavedGuard()
+}
+
+function handleDiagramDescription(description) {
+  if (!model.value || !selectedDiagram.value) return
+  modelStore.updateDiagramDescription(model.value.id, selectedDiagram.value.id, description)
+  enableUnsavedGuard()
+}
+
+// ── Sub-diagram node management ────────────────────────────────
+function removeNodeFromActiveDiagram(node) {
+  if (!model.value || !activeDiagram.value || activeDiagram.value.isMain) return
+  modelStore.removeNodeFromDiagram(model.value.id, activeDiagramId.value, node.id)
+  if (selectedNode.value?.id === node.id) selectedNode.value = null
+  enableUnsavedGuard()
+}
+
+function handleAddNodesToDiagram(nodeIds) {
+  if (!model.value || !activeDiagramId.value) return
+  nodeIds.forEach(nodeId => {
+    modelStore.addNodeToDiagram(model.value.id, activeDiagramId.value, nodeId)
+  })
+  showAddNodeModal.value = false
   enableUnsavedGuard()
 }
 </script>
