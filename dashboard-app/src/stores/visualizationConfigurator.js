@@ -12,7 +12,8 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
     filters: [],
     timeDimension: null,
     chartType: 'bar',
-    chartOptions: {}
+    chartOptions: {},
+    pieOptions: { showValue: false, showPercent: true, showTotal: false }
   }),
 
   actions: {
@@ -31,6 +32,7 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.title = widget.title || 'Nuevo Gráfico'
       this.chartType = widget.chartType || 'bar'
       this.chartOptions = widget.chartOptions || {}
+      this.pieOptions = widget.pieOptions || { showValue: false, showPercent: true, showTotal: false }
       
       if (widget.cubeQuery) {
         const cubeStore = useCubeStore()
@@ -146,6 +148,10 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.chartType = type
     },
 
+    setPieOptions(opts) {
+      this.pieOptions = { ...this.pieOptions, ...opts }
+    },
+
     reset() {
       this.dashboardId = null
       this.widgetId = null
@@ -157,6 +163,7 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.timeDimension = null
       this.chartType = 'bar'
       this.chartOptions = {}
+      this.pieOptions = { showValue: false, showPercent: true, showTotal: false }
     }
   }
 })

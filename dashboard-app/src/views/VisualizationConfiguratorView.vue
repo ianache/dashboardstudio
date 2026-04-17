@@ -471,6 +471,25 @@
               style="width: 80px"
             />
           </div>
+          <!-- Pie chart display options -->
+          <div v-if="activeConfigField.type === 'measures' && store.chartType === 'pie'" class="form-group">
+            <label>Etiquetas del gráfico</label>
+            <div class="pie-label-options">
+              <label class="pie-opt">
+                <input type="checkbox" v-model="store.pieOptions.showValue" />
+                <span>Valor</span>
+              </label>
+              <label class="pie-opt">
+                <input type="checkbox" v-model="store.pieOptions.showPercent" />
+                <span>Porcentaje</span>
+              </label>
+              <label class="pie-opt">
+                <input type="checkbox" v-model="store.pieOptions.showTotal" />
+                <span>Total en centro</span>
+              </label>
+            </div>
+          </div>
+
           <!-- Series type: only for bar chart -->
           <div v-if="activeConfigField.type === 'measures' && store.chartType === 'bar'" class="form-group">
             <label>Tipo de serie</label>
@@ -578,6 +597,7 @@ const currentWidget = computed(() => ({
     limit: 100
   },
   chartOptions: store.chartOptions,
+  pieOptions: store.pieOptions,
   useMockData: false
 }))
 
@@ -1579,6 +1599,18 @@ const handleCancel = () => {
 .filter-ms-option:hover { background: #f5f5f5; }
 .filter-ms-option input[type="checkbox"] { margin: 0; cursor: pointer; }
 .filter-ms-empty { padding: 8px 12px; color: var(--text-secondary); font-size: 11px; }
+
+/* ---- Pie label options ---- */
+.pie-label-options { display: flex; flex-direction: column; gap: 8px; }
+.pie-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+.pie-opt input[type="checkbox"] { cursor: pointer; }
 
 /* ---- Series type toggle ---- */
 .series-type-toggle { display: flex; gap: 6px; }
