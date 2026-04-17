@@ -468,12 +468,22 @@
           
           <div v-if="activeConfigField.type === 'measures'" class="form-group">
             <label>Formato</label>
-            <select v-model="activeConfigField.field.format" class="form-select">
-              <option :value="undefined">Predeterminado</option>
-              <option value="number">Número</option>
-              <option value="currency">Moneda</option>
-              <option value="percent">Porcentaje</option>
-            </select>
+            <div class="ct-combobox" :class="{ open: formatOpen }" @click.stop="formatOpen = !formatOpen">
+              <div class="ct-combobox-trigger">
+                <span class="ct-name">{{ activeFormatLabel }}</span>
+                <svg class="ct-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div v-if="formatOpen" class="ct-combobox-dropdown" @click.stop>
+                <div class="ct-combobox-option" :class="{ selected: !activeConfigField.field.format }" @click="activeConfigField.field.format = undefined; formatOpen = false">
+                  <span class="ct-name">Predeterminado</span>
+                  <svg v-if="!activeConfigField.field.format" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div v-for="fmt in formatOptions" :key="fmt.value" class="ct-combobox-option" :class="{ selected: activeConfigField.field.format === fmt.value }" @click="activeConfigField.field.format = fmt.value; formatOpen = false">
+                  <span class="ct-name">{{ fmt.label }}</span>
+                  <svg v-if="activeConfigField.field.format === fmt.value" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </div>
+            </div>
           </div>
           <!-- Decimal places: only for number/currency -->
           <div v-if="activeConfigField.type === 'measures' && (activeConfigField.field.format === 'number' || activeConfigField.field.format === 'currency')" class="form-group">
@@ -508,13 +518,18 @@
               </div>
               <div class="form-col">
                 <label>Posición</label>
-                <select v-model="activeConfigField.field.labelPosition" class="form-select">
-                  <option value="top">Arriba</option>
-                  <option value="inside">Dentro</option>
-                  <option value="insideTop">Dentro arriba</option>
-                  <option value="bottom">Abajo</option>
-                  <option value="right">Derecha</option>
-                </select>
+                <div class="ct-combobox" :class="{ open: labelPositionOpen }" @click.stop="labelPositionOpen = !labelPositionOpen">
+                  <div class="ct-combobox-trigger">
+                    <span class="ct-name">{{ activeLabelPositionLabel }}</span>
+                    <svg class="ct-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                  <div v-if="labelPositionOpen" class="ct-combobox-dropdown" @click.stop>
+                    <div v-for="pos in labelPositions" :key="pos.value" class="ct-combobox-option" :class="{ selected: activeConfigField.field.labelPosition === pos.value }" @click="activeConfigField.field.labelPosition = pos.value; labelPositionOpen = false">
+                      <span class="ct-name">{{ pos.label }}</span>
+                      <svg v-if="activeConfigField.field.labelPosition === pos.value" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </template>
@@ -603,6 +618,32 @@ const activeCubeLabel = computed(() => {
 const chartTypeOpen = ref(false)
 const activeChartType = computed(() => chartTypes.find(ct => ct.value === store.chartType) || chartTypes[0])
 
+// Format combobox state (modal Configurar Métrica)
+const formatOpen = ref(false)
+const formatOptions = [
+  { value: 'number',   label: 'Número' },
+  { value: 'currency', label: 'Moneda' },
+  { value: 'percent',  label: 'Porcentaje' },
+]
+const activeFormatLabel = computed(() => {
+  const fmt = formatOptions.find(f => f.value === activeConfigField.value?.field?.format)
+  return fmt ? fmt.label : 'Predeterminado'
+})
+
+// Label position combobox state (modal Configurar Métrica)
+const labelPositionOpen = ref(false)
+const labelPositions = [
+  { value: 'top',       label: 'Arriba' },
+  { value: 'inside',    label: 'Dentro' },
+  { value: 'insideTop', label: 'Dentro arriba' },
+  { value: 'bottom',    label: 'Abajo' },
+  { value: 'right',     label: 'Derecha' },
+]
+const activeLabelPositionLabel = computed(() => {
+  const pos = labelPositions.find(p => p.value === activeConfigField.value?.field?.labelPosition)
+  return pos ? pos.label : 'Arriba'
+})
+
 // Filter multiselect state
 const filterOptions = ref({}) // { fullName: string[] }
 const openFilterDropdown = ref(null)
@@ -623,7 +664,7 @@ const toggleConfig = () => {
 }
 
 // Close filter dropdown when clicking outside
-function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false; cubeOpen.value = false }
+function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false; cubeOpen.value = false; formatOpen.value = false; labelPositionOpen.value = false }
 onMounted(() => document.addEventListener('click', onDocClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 

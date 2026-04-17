@@ -36,11 +36,11 @@
 
       <!-- Filter bar -->
       <DashboardFilterBar
-        v-if="dashboard.filters?.length > 0"
         :dashboard-id="dashboard.id"
         :filters="dashboard.filters || []"
         :is-design-mode="false"
         v-model="activeFilterValues"
+        @refresh="refreshAll"
       />
 
       <!-- Dashboard grid -->

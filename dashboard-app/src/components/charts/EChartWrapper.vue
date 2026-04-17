@@ -140,10 +140,14 @@ function buildBarOption() {
 
 function buildLineOption() {
   const labels = props.data.map(d => d.label)
-  const values = props.data.map(d => d.value)
   const measures = props.widget.cubeQuery?.measures || []
-  const seriesName = measures[0]?.label || 'Valor'
-  const color = seriesColor(0, measures[0]?.color)
+  const m0 = measures[0]
+  const seriesName = m0?.label || 'Valor'
+  const color = seriesColor(0, m0?.color)
+
+  const series = buildSeriesItem(seriesName, props.data.map(d => d.value), color, 'line', m0)
+  // Line chart always has area fill when not configured via seriesType
+  if (!series.areaStyle) series.areaStyle = { color, opacity: 0.1 }
 
   return {
     tooltip: { trigger: 'axis' },
@@ -151,15 +155,7 @@ function buildLineOption() {
     grid: { top: 10, left: 40, right: 16, bottom: 40, containLabel: true },
     xAxis: { type: 'category', data: labels, boundaryGap: false },
     yAxis: { type: 'value' },
-    series: [{
-      name: seriesName,
-      type: 'line',
-      data: values,
-      smooth: true,
-      lineStyle: { color, width: 2 },
-      itemStyle: { color },
-      areaStyle: { color, opacity: 0.1 }
-    }]
+    series: [series]
   }
 }
 
@@ -292,8 +288,8 @@ function buildCombinedOption() {
   const color0 = seriesColor(0, m0.color)
   const color1 = seriesColor(1, m1.color)
 
-  const s0 = { ...buildSeriesItem(name0, props.data.map(d => d.value), color0, m0.seriesType || 'bar'), yAxisIndex: 0 }
-  const s1 = { ...buildSeriesItem(name1, props.data.map(d => d.value2 || 0), color1, m1.seriesType || 'line'), yAxisIndex: 1 }
+  const s0 = { ...buildSeriesItem(name0, props.data.map(d => d.value), color0, m0.seriesType || 'bar', m0), yAxisIndex: 0 }
+  const s1 = { ...buildSeriesItem(name1, props.data.map(d => d.value2 || 0), color1, m1.seriesType || 'line', m1), yAxisIndex: 1 }
 
   return {
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },

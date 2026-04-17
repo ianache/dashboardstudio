@@ -242,6 +242,7 @@
         :filters="activeDashboard.filters || []"
         :is-design-mode="isDesignMode"
         v-model="activeFilterValues"
+        @refresh="refreshDesign"
       />
 
       <!-- Dashboard canvas -->
@@ -252,6 +253,7 @@
           :dashboard-id="activeDashboard.id"
           :dashboard-filters="resolvedDashboardFilters"
           :dashboard-palette="activeDashboard.colorPalette || null"
+          :key="designRefreshKey"
           @configure-widget="openConfigModal"
           @remove-widget="removeWidget"
         />
@@ -526,6 +528,8 @@ onMounted(async () => {
 
 // State
 const isDesignMode = ref(true)
+const designRefreshKey = ref(0)
+function refreshDesign() { designRefreshKey.value++ }
 const showNewModal = ref(false)
 const configuringWidget = ref(null)
 const assigningDashboard = ref(null)

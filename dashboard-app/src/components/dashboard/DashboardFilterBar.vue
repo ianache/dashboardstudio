@@ -1,6 +1,7 @@
 <template>
-  <div v-if="filters.length > 0 || isDesignMode" class="filter-bar">
+  <div class="filter-bar">
     <!-- Filtros configurados -->
+    <template v-if="filters.length > 0 || isDesignMode">
     <div v-for="filter in filters" :key="filter.id" class="filter-chip">
       <span class="filter-label">{{ filter.label }}</span>
 
@@ -135,6 +136,78 @@
         </div>
       </template>
     </div>
+    </template>
+
+    <!-- Refresh control -->
+    <div class="refresh-control" ref="refreshControlRef">
+      <button
+        class="refresh-trigger"
+        :class="{ 'is-auto': refreshInterval !== 'manual' }"
+        @click.stop="refreshOpen = !refreshOpen"
+        title="Frecuencia de actualización"
+      >
+        <svg
+          class="refresh-icon"
+          :class="{ spinning: refreshInterval !== 'manual' }"
+          width="13" height="13" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.2"
+        >
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        <span class="refresh-label-text">{{ refreshLabel }}</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      <div v-if="refreshOpen" class="refresh-dropdown" @click.stop>
+        <div
+          v-for="preset in REFRESH_PRESETS"
+          :key="preset.value"
+          class="refresh-option"
+          :class="{ selected: isPresetSelected(preset.value) }"
+          @click="selectRefresh(preset.value)"
+        >
+          <span>{{ preset.label }}</span>
+          <svg v-if="isPresetSelected(preset.value)" class="refresh-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom interval modal -->
+    <Teleport to="body">
+      <div v-if="showCustomModal" class="custom-refresh-overlay" @click.self="showCustomModal = false">
+        <div class="custom-refresh-box">
+          <header class="crb-header">
+            <h4>Intervalo personalizado</h4>
+            <button class="crb-close" @click="showCustomModal = false">&times;</button>
+          </header>
+          <div class="crb-body">
+            <label class="crb-label">Duración entre actualizaciones</label>
+            <div class="crb-input-row">
+              <input
+                type="number"
+                v-model.number="customMinutes"
+                min="0.5"
+                step="0.5"
+                class="form-input crb-input"
+                @keyup.enter="confirmCustom"
+                autofocus
+              />
+              <span class="crb-unit">minutos</span>
+            </div>
+            <p class="crb-hint">Mínimo 0.5 minutos (30 segundos)</p>
+          </div>
+          <footer class="crb-footer">
+            <button class="btn btn-secondary btn-sm" @click="showCustomModal = false">Cancelar</button>
+            <button class="btn btn-primary btn-sm" @click="confirmCustom" :disabled="!customMinutes || customMinutes < 0.5">Aplicar</button>
+          </footer>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -150,7 +223,7 @@ const props = defineProps({
   isDesignMode: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'refresh'])
 
 const cubeStore = useCubeStore()
 const dashboardStore = useDashboardStore()
@@ -162,6 +235,64 @@ const openDropdown = ref(null)
 // refs de los wrappers para detectar click fuera
 const wrapperRefs = ref({})
 function setRef(id, el) { wrapperRefs.value[id] = el }
+
+// ── Auto-refresh ──────────────────────────────────────────────
+const REFRESH_PRESETS = [
+  { value: 'manual', label: 'Manual' },
+  { value: 5000,     label: '5s' },
+  { value: 10000,    label: '10s' },
+  { value: 30000,    label: '30s' },
+  { value: 'custom', label: 'Personalizado' },
+]
+const refreshInterval = ref('manual')   // 'manual' | ms (number)
+const refreshOpen = ref(false)
+const showCustomModal = ref(false)
+const customMinutes = ref(1)
+const refreshControlRef = ref(null)
+let refreshTimer = null
+
+const refreshLabel = computed(() => {
+  const v = refreshInterval.value
+  if (v === 'manual') return 'Manual'
+  if (v === 5000)  return '5s'
+  if (v === 10000) return '10s'
+  if (v === 30000) return '30s'
+  const mins = v / 60000
+  return Number.isInteger(mins) ? `${mins} min` : `${mins.toFixed(1)} min`
+})
+
+function isPresetSelected(presetValue) {
+  const v = refreshInterval.value
+  if (presetValue === 'custom') {
+    return typeof v === 'number' && ![5000, 10000, 30000].includes(v)
+  }
+  return v === presetValue
+}
+
+function selectRefresh(value) {
+  refreshOpen.value = false
+  if (value === 'custom') { showCustomModal.value = true; return }
+  applyRefreshMs(value)
+}
+
+function applyRefreshMs(ms) {
+  stopTimer()
+  refreshInterval.value = ms
+  if (ms !== 'manual') {
+    refreshTimer = setInterval(() => emit('refresh'), ms)
+  }
+}
+
+function confirmCustom() {
+  if (!customMinutes.value || customMinutes.value < 0.5) return
+  showCustomModal.value = false
+  applyRefreshMs(Math.round(customMinutes.value * 60000))
+}
+
+function stopTimer() {
+  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null }
+}
+// ─────────────────────────────────────────────────────────────
 
 // Panel de añadir filtro
 const showAddPanel = ref(false)
@@ -201,6 +332,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('mousedown', onClickOutside)
+  stopTimer()
 })
 
 watch(() => props.filters.map(f => f.id).join(','), () => {
@@ -209,9 +341,14 @@ watch(() => props.filters.map(f => f.id).join(','), () => {
 
 // Cerrar dropdown al hacer click fuera
 function onClickOutside(e) {
-  if (!openDropdown.value) return
-  const el = wrapperRefs.value[openDropdown.value]
-  if (el && !el.contains(e.target)) openDropdown.value = null
+  if (openDropdown.value) {
+    const el = wrapperRefs.value[openDropdown.value]
+    if (el && !el.contains(e.target)) openDropdown.value = null
+  }
+  if (refreshOpen.value) {
+    const rc = refreshControlRef.value
+    if (rc && !rc.contains(e.target)) refreshOpen.value = false
+  }
 }
 
 function toggleDropdown(filterId) {
@@ -437,12 +574,129 @@ function removeFilter(filterId) {
 }
 .filter-remove-btn:hover { background: #fff2f0; color: var(--error); }
 
-.filter-add-area { margin-left: auto; }
+.filter-add-area { }
 
 .filter-add-panel {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+/* ── Refresh control ── */
+.refresh-control {
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.refresh-trigger {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.refresh-trigger:hover { border-color: var(--primary); color: var(--primary); }
+.refresh-trigger.is-auto { border-color: var(--primary); color: var(--primary); background: rgba(24,144,255,0.05); }
+
+.refresh-icon { flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.refresh-icon.spinning { animation: spin 2s linear infinite; }
+
+.refresh-label-text { font-weight: 500; }
+
+.refresh-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 300;
+  padding: 4px 0;
+}
+
+.refresh-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.refresh-option:hover { background: #f5f7fa; }
+.refresh-option.selected { color: var(--primary); font-weight: 500; background: rgba(24,144,255,0.05); }
+.refresh-check { color: var(--primary); flex-shrink: 0; }
+
+/* ── Custom interval modal ── */
+.custom-refresh-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.custom-refresh-box {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 320px;
+  max-width: 95vw;
+  overflow: hidden;
+}
+
+.crb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.crb-header h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.crb-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0 2px;
+}
+.crb-close:hover { color: var(--text); }
+
+.crb-body { padding: 16px; }
+.crb-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+
+.crb-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.crb-input { width: 100px; }
+.crb-unit { font-size: 13px; color: var(--text-secondary); }
+.crb-hint { font-size: 12px; color: var(--text-secondary); margin: 8px 0 0; }
+
+.crb-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
 }
 </style>
