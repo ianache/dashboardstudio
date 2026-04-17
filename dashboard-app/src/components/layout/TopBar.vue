@@ -125,11 +125,9 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter()
 const uiStore = useUIStore()
 const authStore = useAuthStore()
 
@@ -138,7 +136,8 @@ const breadcrumbs = computed(() => uiStore.breadcrumbs)
 function handleLogout() {
   uiStore.closeDropdowns()
   authStore.logout()
-  router.push('/login')
+  // kc.logout() handles the browser redirect to Keycloak's logout endpoint
+  // and back to the app — do NOT call router.push() here or it may abort that redirect
 }
 
 function formatTime(iso) {

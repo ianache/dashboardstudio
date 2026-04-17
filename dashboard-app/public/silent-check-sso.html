@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <body>
+    <script>
+      // Used by keycloak-js for silent SSO check (check-sso with silentCheckSsoRedirectUri).
+      // Keycloak loads this page inside a hidden iframe; this script posts the current URL
+      // back to the parent window so keycloak-js can extract the auth state without
+      // a visible redirect.
+      parent.postMessage(location.href, location.origin)
+    </script>
+  </body>
+</html>

@@ -46,14 +46,18 @@ use([
 
 keycloak
   .init({
-    onLoad: 'login-required',
+    // 'check-sso' silently verifies an existing session via a hidden iframe
+    // without redirecting the browser on every page refresh.
+    // Falls back to keycloak.login() only when there truly is no active session.
+    onLoad: 'check-sso',
+    silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
     checkLoginIframe: false,
     pkceMethod: 'S256'
   })
   .then(authenticated => {
     if (!authenticated) {
-      // Shouldn't happen with onLoad: 'login-required', but guard anyway
-      keycloak.login()
+      // No active Keycloak session — redirect to login
+      keycloak.login({ redirectUri: window.location.href })
       return
     }
 
