@@ -56,12 +56,16 @@
         </header>
         <div class="panel-body">
           <div class="cube-selector">
-            <label>Cubo Principal</label>
+            <label>Cubo</label>
             <select :value="store.selectedCube" @change="store.setCube($event.target.value)" class="form-select">
               <option v-for="cube in availableCubes" :key="cube.name" :value="cube.name">
-                {{ cube.title || cube.name }}
+                {{ cube.title || cube.name }}{{ usedCubes.has(cube.name) ? ' ●' : '' }}
               </option>
             </select>
+            <div v-if="usedCubes.size > 0" class="used-cubes-hint">
+              <span>En uso:</span>
+              <span v-for="c in [...usedCubes]" :key="c" class="used-cube-tag">{{ c }}</span>
+            </div>
           </div>
 
           <div v-if="store.selectedCube" class="source-lists">
@@ -605,7 +609,8 @@ const updateFieldConfig = () => {
 const { data, loading, error, fetchData } = useCubeQuery(currentWidget)
 
 // Re-fetch data when query configuration changes
-watch([() => store.measures, () => store.dimensions, () => store.filters, () => store.selectedCube], () => {
+// Re-fetch only when the actual query config changes, not when the user browses a different cube
+watch([() => store.measures, () => store.dimensions, () => store.filters], () => {
   if (store.measures.length > 0) {
     fetchData()
   }
@@ -667,6 +672,16 @@ function getFilterDisplayValue(f) {
 
 // Data source computed properties
 const availableCubes = computed(() => cubeStore.cubes)
+
+// Set of cube names that already have fields in the current config
+const usedCubes = computed(() => {
+  const names = new Set()
+  ;[...store.measures, ...store.dimensions, ...store.filters].forEach(f => {
+    const cube = f.fullName?.split('.')[0]
+    if (cube) names.add(cube)
+  })
+  return names
+})
 
 const currentMeasures = computed(() => {
   if (!store.selectedCube) return []
@@ -1407,6 +1422,25 @@ const handleCancel = () => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ---- Used cubes hint ---- */
+.used-cubes-hint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.used-cube-tag {
+  background: rgba(24,144,255,0.1);
+  color: var(--primary);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 500;
 }
 
 /* ---- Source panel: toggle cube name ---- */

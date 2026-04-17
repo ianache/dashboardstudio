@@ -89,14 +89,9 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
     },
 
     setCube(cubeName) {
-      if (this.selectedCube !== cubeName) {
-        this.selectedCube = cubeName
-        // Reset selections when cube changes
-        this.measures = []
-        this.dimensions = []
-        this.filters = []
-        this.timeDimension = null
-      }
+      // Only update the browsed cube — do NOT reset configuration.
+      // Fields from multiple cubes can coexist in a single chart.
+      this.selectedCube = cubeName
     },
 
     addMeasure(measure) {
