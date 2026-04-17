@@ -120,6 +120,7 @@ class DimensionalModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     nodes = Column(JSON, default=[])
     relationships = Column(JSON, default=[])
+    diagrams = Column(JSON, default=[])
 
     owner = relationship("User", foreign_keys=[created_by])
 
