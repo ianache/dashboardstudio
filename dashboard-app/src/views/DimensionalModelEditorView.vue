@@ -121,6 +121,70 @@
 
     <!-- Canvas + Properties panel -->
     <div class="editor-body">
+      <!-- Left panel -->
+      <div class="left-panel" :class="{ collapsed: !leftPanelOpen }">
+        <button class="panel-toggle-btn" :title="leftPanelOpen ? 'Ocultar panel' : 'Mostrar tablas'" @click="leftPanelOpen = !leftPanelOpen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline :points="leftPanelOpen ? '15 18 9 12 15 6' : '9 18 15 12 9 6'"/>
+          </svg>
+        </button>
+        <div class="panel-content">
+          <div class="panel-search-wrap">
+            <input v-model="tableSearch" class="panel-search" placeholder="Buscar tabla..." />
+          </div>
+
+          <!-- Hechos group -->
+          <div class="panel-group">
+            <div class="panel-group-header" @click="factsExpanded = !factsExpanded">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline :points="factsExpanded ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+              </svg>
+              <span>Hechos</span>
+              <span class="panel-group-count">{{ filteredFacts.length }}</span>
+            </div>
+            <div v-show="factsExpanded" class="panel-group-body">
+              <div
+                v-for="node in filteredFacts"
+                :key="node.id"
+                class="panel-node-item fact"
+                draggable="true"
+                @dragstart="onPanelDragStart(node, $event)"
+                @dragend="panelDragNodeId = null"
+              >
+                <span class="panel-node-badge">H</span>
+                <span class="panel-node-name">{{ node.name }}</span>
+              </div>
+              <div v-if="!filteredFacts.length" class="panel-empty">Sin coincidencias</div>
+            </div>
+          </div>
+
+          <!-- Dimensiones group -->
+          <div class="panel-group">
+            <div class="panel-group-header" @click="dimsExpanded = !dimsExpanded">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline :points="dimsExpanded ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+              </svg>
+              <span>Dimensiones</span>
+              <span class="panel-group-count">{{ filteredDims.length }}</span>
+            </div>
+            <div v-show="dimsExpanded" class="panel-group-body">
+              <div
+                v-for="node in filteredDims"
+                :key="node.id"
+                class="panel-node-item dimension"
+                draggable="true"
+                @dragstart="onPanelDragStart(node, $event)"
+                @dragend="panelDragNodeId = null"
+              >
+                <span class="panel-node-badge">D</span>
+                <span class="panel-node-name">{{ node.name }}</span>
+              </div>
+              <div v-if="!filteredDims.length" class="panel-empty">Sin coincidencias</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Canvas column: tab bar + canvas -->
       <div class="canvas-column">
         <!-- Diagram tab bar -->
@@ -140,6 +204,8 @@
           :class="{ 'dragging-field': !!dragField, 'sub-diagram': activeDiagram && !activeDiagram.isMain }"
           @click="onCanvasClick"
           @mousemove="onNodeDragMove"
+          @dragover.prevent="onCanvasDragOver"
+          @drop="onCanvasDrop"
         >
         <!-- SVG overlay for relationships + guide line -->
         <svg class="canvas-svg" :width="canvasSize.w" :height="canvasSize.h">
@@ -1406,6 +1472,22 @@ const visibleRelationships = computed(() =>
   )
 )
 
+const filteredFacts = computed(() => {
+  const q = tableSearch.value.trim().toLowerCase()
+  const nodes = (model.value?.nodes || [])
+    .filter(n => n.type === 'fact')
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  return q ? nodes.filter(n => n.name.toLowerCase().includes(q)) : nodes
+})
+
+const filteredDims = computed(() => {
+  const q = tableSearch.value.trim().toLowerCase()
+  const nodes = (model.value?.nodes || [])
+    .filter(n => n.type === 'dimension')
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+  return q ? nodes.filter(n => n.name.toLowerCase().includes(q)) : nodes
+})
+
 // Initialize activeDiagramId when model loads
 watch(model, (m) => {
   if (m && !activeDiagramId.value) {
@@ -1444,6 +1526,13 @@ const dragging = ref(null)  // { nodeId, startX, startY, origX, origY }
 const dragField = ref(null)  // { nodeId, nodeName, fieldId, fieldName, startPos:{x,y} }
 const dropTargetId = ref(null)
 const mousePos = ref({ x: 0, y: 0 })
+
+// ── Left panel state ─────────────────────────────────────────
+const leftPanelOpen = ref(true)
+const tableSearch = ref('')
+const factsExpanded = ref(true)
+const dimsExpanded = ref(true)
+const panelDragNodeId = ref(null)
 
 // ── Lifecycle ────────────────────────────────────────────────
 onMounted(() => {
@@ -1634,6 +1723,41 @@ function onGlobalMouseUp(e) {
   dragField.value = null
   dropTargetId.value = null
   dragging.value = null
+}
+
+// ── Left panel drag-and-drop ──────────────────────────────────
+function onPanelDragStart(node, e) {
+  e.dataTransfer.effectAllowed = 'copyMove'
+  e.dataTransfer.setData('text/plain', node.id)
+  panelDragNodeId.value = node.id
+}
+
+function onCanvasDragOver(e) {
+  if (panelDragNodeId.value) {
+    e.dataTransfer.dropEffect = 'copy'
+  }
+}
+
+function onCanvasDrop(e) {
+  e.preventDefault()
+  const nodeId = e.dataTransfer.getData('text/plain')
+  if (!nodeId || !canvasEl.value) { panelDragNodeId.value = null; return }
+
+  const pos = canvasPos(e.clientX, e.clientY)
+
+  if (!activeDiagram.value || activeDiagram.value.isMain) {
+    // Main diagram: reposition the existing node
+    modelStore.updateNode(modelId, nodeId, { x: Math.max(0, pos.x - 100), y: Math.max(0, pos.y - 20) })
+  } else {
+    // Sub-diagram: add node if not present, then set its position
+    const already = activeDiagram.value.diagramNodes?.some(dn => dn.nodeId === nodeId)
+    if (!already) {
+      modelStore.addNodeToDiagram(modelId, activeDiagramId.value, nodeId)
+    }
+    modelStore.updateDiagramNodePosition(modelId, activeDiagramId.value, nodeId, Math.max(0, pos.x - 100), Math.max(0, pos.y - 20))
+  }
+  hasUnsavedChanges.value = true
+  panelDragNodeId.value = null
 }
 
 // ── Drop: link dim key → fact ─────────────────────────────────
@@ -2554,5 +2678,129 @@ function handleAddNodesToDiagram(nodeIds) {
 
 .sub-diagram-hint .btn {
   pointer-events: all;
+}
+
+/* ── Left panel ───────────────────────────────────────────── */
+.left-panel {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: row;
+  transition: width 0.2s ease;
+  overflow: hidden;
+  position: relative;
+}
+.left-panel.collapsed {
+  width: 28px;
+}
+.panel-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  background: #f5f5f5;
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  z-index: 2;
+  padding: 0;
+}
+.panel-toggle-btn:hover { background: #e8e8e8; color: var(--primary); }
+.panel-content {
+  width: 192px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 8px;
+}
+.panel-search-wrap {
+  padding: 0 10px 8px;
+}
+.panel-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+}
+.panel-search:focus { border-color: var(--primary); }
+.panel-group { border-top: 1px solid var(--border); }
+.panel-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #555;
+  user-select: none;
+}
+.panel-group-header:hover { background: #f9f9f9; }
+.panel-group-count {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 400;
+  color: #999;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 1px 6px;
+}
+.panel-group-body { padding-bottom: 4px; }
+.panel-node-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 5px 14px;
+  font-size: 12px;
+  cursor: grab;
+  user-select: none;
+  transition: background 0.12s;
+}
+.panel-node-item:hover { background: #f0f7ff; }
+.panel-node-item:active { cursor: grabbing; }
+.panel-node-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.panel-node-item.fact .panel-node-badge {
+  background: #fff1f0;
+  color: #cf1322;
+  border: 1px solid #ffa39e;
+}
+.panel-node-item.dimension .panel-node-badge {
+  background: #e6f4ff;
+  color: #0958d9;
+  border: 1px solid #91caff;
+}
+.panel-node-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #333;
+}
+.panel-empty {
+  padding: 6px 14px;
+  font-size: 11px;
+  color: #bbb;
+  font-style: italic;
 }
 </style>
