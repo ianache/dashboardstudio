@@ -57,11 +57,27 @@
         <div class="panel-body">
           <div class="cube-selector">
             <label>Cubo</label>
-            <select :value="store.selectedCube" @change="store.setCube($event.target.value)" class="form-select">
-              <option v-for="cube in availableCubes" :key="cube.name" :value="cube.name">
-                {{ cube.title || cube.name }}{{ usedCubes.has(cube.name) ? ' ●' : '' }}
-              </option>
-            </select>
+            <div class="ct-combobox" :class="{ open: cubeOpen }" @click.stop="cubeOpen = !cubeOpen">
+              <div class="ct-combobox-trigger">
+                <span class="ct-icon">🗄️</span>
+                <span class="ct-name">{{ activeCubeLabel }}</span>
+                <svg class="ct-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div v-if="cubeOpen" class="ct-combobox-dropdown" @click.stop>
+                <div
+                  v-for="cube in availableCubes"
+                  :key="cube.name"
+                  class="ct-combobox-option"
+                  :class="{ selected: store.selectedCube === cube.name }"
+                  @click="store.setCube(cube.name); cubeOpen = false"
+                >
+                  <span class="ct-icon">🗄️</span>
+                  <span class="ct-name">{{ cube.title || cube.name }}</span>
+                  <span v-if="usedCubes.has(cube.name)" class="used-dot" title="Tiene campos en uso">●</span>
+                  <svg v-if="store.selectedCube === cube.name" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </div>
+            </div>
             <div v-if="usedCubes.size > 0" class="used-cubes-hint">
               <span>En uso:</span>
               <span v-for="c in [...usedCubes]" :key="c" class="used-cube-tag">{{ c }}</span>
@@ -576,6 +592,13 @@ const activeConfigField = ref(null) // { type: 'measures'|'dimensions', field: O
 // Source panel: show/hide cube name prefix (default: hidden)
 const showCubeName = ref(false)
 
+// Cube combobox state
+const cubeOpen = ref(false)
+const activeCubeLabel = computed(() => {
+  const cube = availableCubes.value.find(c => c.name === store.selectedCube)
+  return cube ? (cube.title || cube.name) : 'Seleccionar cubo...'
+})
+
 // Chart type combobox state
 const chartTypeOpen = ref(false)
 const activeChartType = computed(() => chartTypes.find(ct => ct.value === store.chartType) || chartTypes[0])
@@ -600,7 +623,7 @@ const toggleConfig = () => {
 }
 
 // Close filter dropdown when clicking outside
-function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false }
+function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false; cubeOpen.value = false }
 onMounted(() => document.addEventListener('click', onDocClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
@@ -1641,6 +1664,31 @@ const handleCancel = () => {
 /* ---- Form helpers ---- */
 .form-row { display: flex; gap: 10px; }
 .form-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.field-config-modal .form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+.field-config-modal .form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(24,144,255,0.12);
+}
+.field-config-modal label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+/* used-dot in cube combobox */
+.used-dot { margin-left: auto; color: var(--primary); font-size: 10px; }
 
 /* ---- Pie label options ---- */
 .pie-label-options { display: flex; flex-direction: column; gap: 8px; }

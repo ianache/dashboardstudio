@@ -138,6 +138,13 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.dimensions = this.dimensions.filter(d => d.fullName !== dimensionFullName)
     },
 
+    updateDimension(fullName, updates) {
+      const index = this.dimensions.findIndex(d => d.fullName === fullName)
+      if (index !== -1) {
+        this.dimensions[index] = { ...this.dimensions[index], ...updates }
+      }
+    },
+
     removeFilter(filterFullName) {
       this.filters = this.filters.filter(f => f.fullName !== filterFullName)
     },
