@@ -15,7 +15,7 @@
 - [x] Phase 3 executed
 - [x] Phase 4 executed
 - [x] Phase 5 executed
-- [x] Phase 6 in progress — plan 06-03 complete (DiagramTabBar + canvas multi-diagram rendering)
+- [x] Phase 6 in progress — plan 06-05 complete (DiagramPropsPanel + AddNodeToDiagramModal wired into EditorView)
 
 ## Accumulated Context
 ### Roadmap Evolution
@@ -31,3 +31,7 @@
 - 06-03: canvas-column wrapper div added to support tab bar above canvas inside flex-row editor-body
 - 06-03: activeDiagramNodes wraps resolveNode() to preserve global-ref node resolution in sub-diagrams
 - 06-03: DiagramTabBar v-if guards on activeDiagramId non-null to avoid String prop type violation before model loads
+- 06-05: selectedDiagram cleared on node/rel click to keep right panel exclusive — avoids ambiguous selection state
+- 06-05: Add-nodes confirmed in modal then iterated in parent (not modal) to keep modal stateless after emit
+- 06-05: Remove button opacity:0 default, opacity:1 on canvas-node:hover — avoids UI clutter in dense diagrams
+- MD-03, MD-05, MD-07 requirements satisfied by plan 06-05
