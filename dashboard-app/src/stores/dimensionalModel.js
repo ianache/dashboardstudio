@@ -166,6 +166,7 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
         if (patch.isGlobal !== undefined) backendPatch.is_global = patch.isGlobal
         if (patch.nodes !== undefined) backendPatch.nodes = patch.nodes.map(n => this._transformNodeFrontendToBackend(n))
         if (patch.relationships !== undefined) backendPatch.relationships = patch.relationships.map(r => this._transformRelationshipFrontendToBackend(r))
+        if (patch.diagrams !== undefined) backendPatch.diagrams = patch.diagrams
 
         await dimensionalModelApi.update(id, backendPatch)
 
