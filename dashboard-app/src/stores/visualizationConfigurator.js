@@ -43,12 +43,17 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
           const meta = cubeStore.allMeasures.find(am => am.fullName === fullName)
           const base = meta || { fullName: fullName, title: fullName.split('.').pop() }
           
-          // Restore alias and format if they exist in the saved query
+          // Restore all saved per-measure config
           if (typeof m === 'object') {
             return {
               ...base,
               alias: m.label !== base.title ? m.label : undefined,
-              format: m.format
+              format: m.format,
+              decimalPlaces: m.decimalPlaces,
+              seriesType: m.seriesType,
+              showLabel: m.showLabel,
+              labelRotate: m.labelRotate,
+              labelPosition: m.labelPosition,
             }
           }
           return base

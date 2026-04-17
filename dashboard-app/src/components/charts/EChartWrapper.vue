@@ -77,15 +77,23 @@ function buildBaseOption() {
   }
 }
 
-function buildSeriesItem(name, data, color, seriesType) {
+function buildSeriesItem(name, data, color, seriesType, measure) {
+  const labelCfg = measure ? {
+    show: !!measure.showLabel,
+    rotate: measure.labelRotate || 0,
+    position: measure.labelPosition || 'top',
+    formatter: (p) => formatValue(p.value, measure),
+  } : { show: false }
+
   if (seriesType === 'bar') {
-    return { name, type: 'bar', data, itemStyle: { color, borderRadius: [4, 4, 0, 0] }, barMaxWidth: 60 }
+    return { name, type: 'bar', data, itemStyle: { color, borderRadius: [4, 4, 0, 0] }, barMaxWidth: 60, label: labelCfg }
   }
   return {
     name, type: 'line', data, smooth: true,
     lineStyle: { color, width: 2 },
     itemStyle: { color },
-    areaStyle: seriesType === 'area' ? { color, opacity: 0.15 } : undefined
+    areaStyle: seriesType === 'area' ? { color, opacity: 0.15 } : undefined,
+    label: labelCfg
   }
 }
 
@@ -105,7 +113,7 @@ function buildBarOption() {
   const rawData = [props.data.map(d => d.value), props.data.map(d => d.value2 || 0)]
 
   const series = measures.slice(0, 2).map((m, i) =>
-    buildSeriesItem(m.label || `Serie ${i + 1}`, rawData[i], seriesColor(i, m.color), m.seriesType || 'bar')
+    buildSeriesItem(m.label || `Serie ${i + 1}`, rawData[i], seriesColor(i, m.color), m.seriesType || 'bar', m)
   )
 
   return {

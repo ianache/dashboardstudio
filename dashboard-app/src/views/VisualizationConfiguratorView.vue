@@ -471,6 +471,38 @@
               style="width: 80px"
             />
           </div>
+          <!-- Show value label (all chart types) -->
+          <div v-if="activeConfigField.type === 'measures'" class="form-group">
+            <label class="pie-opt">
+              <input type="checkbox" v-model="activeConfigField.field.showLabel" />
+              <span>Mostrar valor en el gráfico</span>
+            </label>
+          </div>
+          <template v-if="activeConfigField.type === 'measures' && activeConfigField.field.showLabel">
+            <div class="form-group form-row">
+              <div class="form-col">
+                <label>Rotación etiqueta (°)</label>
+                <input
+                  type="number"
+                  v-model.number="activeConfigField.field.labelRotate"
+                  min="-90" max="90" step="5"
+                  placeholder="0"
+                  class="form-control"
+                />
+              </div>
+              <div class="form-col">
+                <label>Posición</label>
+                <select v-model="activeConfigField.field.labelPosition" class="form-select">
+                  <option value="top">Arriba</option>
+                  <option value="inside">Dentro</option>
+                  <option value="insideTop">Dentro arriba</option>
+                  <option value="bottom">Abajo</option>
+                  <option value="right">Derecha</option>
+                </select>
+              </div>
+            </div>
+          </template>
+
           <!-- Pie chart display options -->
           <div v-if="activeConfigField.type === 'measures' && store.chartType === 'pie'" class="form-group">
             <label>Etiquetas del gráfico</label>
@@ -584,6 +616,9 @@ const currentWidget = computed(() => ({
       format: m.format,
       decimalPlaces: m.decimalPlaces,
       seriesType: m.seriesType,
+      showLabel: m.showLabel,
+      labelRotate: m.labelRotate,
+      labelPosition: m.labelPosition,
     })),
     dimensions: store.dimensions.map(d => ({ 
       key: d.fullName, 
@@ -619,6 +654,9 @@ const updateFieldConfig = () => {
       format: field.format,
       decimalPlaces: field.decimalPlaces,
       seriesType: field.seriesType,
+      showLabel: field.showLabel,
+      labelRotate: field.labelRotate,
+      labelPosition: field.labelPosition,
     })
   } else if (type === 'dimensions') {
     store.updateDimension(field.fullName, { alias: field.alias })
@@ -1599,6 +1637,10 @@ const handleCancel = () => {
 .filter-ms-option:hover { background: #f5f5f5; }
 .filter-ms-option input[type="checkbox"] { margin: 0; cursor: pointer; }
 .filter-ms-empty { padding: 8px 12px; color: var(--text-secondary); font-size: 11px; }
+
+/* ---- Form helpers ---- */
+.form-row { display: flex; gap: 10px; }
+.form-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 
 /* ---- Pie label options ---- */
 .pie-label-options { display: flex; flex-direction: column; gap: 8px; }
