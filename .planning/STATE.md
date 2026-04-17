@@ -15,7 +15,7 @@
 - [x] Phase 3 executed
 - [x] Phase 4 executed
 - [x] Phase 5 executed
-- [x] Phase 6 in progress — plan 06-02 complete (store diagram CRUD actions + migration logic)
+- [x] Phase 6 in progress — plan 06-04 complete (DiagramPropsPanel + marked/dompurify installed)
 
 ## Accumulated Context
 ### Roadmap Evolution
@@ -28,3 +28,5 @@
 - MD-05 (node move between diagrams) satisfied by addNodeToDiagram/removeNodeFromDiagram modal flow, not drag-and-drop (per 06-RESEARCH.md)
 - Main diagram protected by isMain flag: deleteDiagram and removeNodeFromDiagram silently no-op on main diagram
 - addGlobalDimRef intentionally not synced to main diagram — global refs have separate position tracking
+- 06-04: marked chosen over vue-markdown-it; dompurify chosen over sanitize-html — always paired, never raw v-html
+- 06-04: DiagramPropsPanel is UI-only (no store imports); parent EditorView handles store calls on emitted events

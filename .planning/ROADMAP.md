@@ -32,7 +32,7 @@
 **Goal:** Extend the Dimensional Model editor so each model can have one permanent main diagram plus N user-managed sub-diagrams showing node subsets, with shared canonical node data and Markdown-enabled diagram descriptions.
 **Requirements**: MD-01, MD-02, MD-03, MD-04, MD-05, MD-06, MD-07
 **Depends on:** Phase 5
-**Plans:** 6 plans
+**Plans:** 3/6 plans executed
 
 Plans:
 - [x] 06-01-PLAN.md — Backend diagrams column + Pydantic schemas
