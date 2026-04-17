@@ -35,6 +35,16 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
     },
 
     _transformBackendToFrontend(m) {
+      const nodes = (m.nodes || []).map(n => this._transformNodeBackendToFrontend(n))
+      const diagrams = Array.isArray(m.diagrams) && m.diagrams.length
+        ? m.diagrams
+        : [{
+            id: 'main',
+            name: 'Principal',
+            description: '',
+            isMain: true,
+            diagramNodes: nodes.map(n => ({ nodeId: n.id, x: n.x || 100, y: n.y || 100 }))
+          }]
       return {
         id: m.id,
         name: m.name,
@@ -43,8 +53,9 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
         createdBy: m.created_by,
         createdAt: m.created_at,
         updatedAt: m.updated_at,
-        nodes: (m.nodes || []).map(n => this._transformNodeBackendToFrontend(n)),
-        relationships: (m.relationships || []).map(r => this._transformRelationshipBackendToFrontend(r))
+        nodes,
+        relationships: (m.relationships || []).map(r => this._transformRelationshipBackendToFrontend(r)),
+        diagrams
       }
     },
 
@@ -86,7 +97,8 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
         description: model.description,
         is_global: model.isGlobal,
         nodes: model.nodes.map(n => this._transformNodeFrontendToBackend(n)),
-        relationships: model.relationships.map(r => this._transformRelationshipFrontendToBackend(r))
+        relationships: model.relationships.map(r => this._transformRelationshipFrontendToBackend(r)),
+        diagrams: model.diagrams || []
       }
     },
 
@@ -198,6 +210,11 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
       if (!m) return
       const node = { id: generateId(), type, name, x, y, globalRef: null, fields: [] }
       m.nodes.push(node)
+      // Keep main diagram in sync
+      const mainDiagram = m.diagrams?.find(d => d.isMain)
+      if (mainDiagram) {
+        mainDiagram.diagramNodes.push({ nodeId: node.id, x, y })
+      }
       return node
     },
 
@@ -232,6 +249,12 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
       if (!m) return
       m.nodes = m.nodes.filter(n => n.id !== nodeId)
       m.relationships = m.relationships.filter(r => r.fromNodeId !== nodeId && r.toNodeId !== nodeId)
+      // Remove dangling references from all diagrams
+      if (m.diagrams) {
+        m.diagrams.forEach(diag => {
+          diag.diagramNodes = diag.diagramNodes.filter(dn => dn.nodeId !== nodeId)
+        })
+      }
     },
 
     setKeyField(modelId, nodeId, fieldId) {
