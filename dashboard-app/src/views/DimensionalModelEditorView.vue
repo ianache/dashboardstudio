@@ -1459,7 +1459,7 @@ function keyFieldStartPos(dimNode, field) {
 }
 
 function factNodeAt(pos) {
-  return model.value?.nodes.find(n => {
+  return activeDiagramNodes.value.find(n => {
     if (n.type !== 'fact') return false
     const h = nodeHeight(n)
     return pos.x >= n.x && pos.x <= n.x + NODE_WIDTH && pos.y >= n.y && pos.y <= n.y + h
