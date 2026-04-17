@@ -214,19 +214,19 @@
             <marker id="arrowhead-key" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
               <polygon points="0 0, 10 3.5, 0 7" fill="#52c41a"/>
             </marker>
-            <!-- Relationship: source end — filled circle (1-side, dim) -->
-            <marker id="rel-source" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-              <circle cx="4" cy="4" r="3" fill="#888"/>
+            <!-- Relationship: source end — single bar (1-side, dimension) -->
+            <marker id="rel-source" markerWidth="6" markerHeight="12" refX="1" refY="6" orient="auto">
+              <line x1="1" y1="0" x2="1" y2="12" stroke="#888" stroke-width="1.8" stroke-linecap="round"/>
             </marker>
-            <marker id="rel-source-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-              <circle cx="4" cy="4" r="3" fill="var(--primary)"/>
+            <marker id="rel-source-sel" markerWidth="6" markerHeight="12" refX="1" refY="6" orient="auto">
+              <line x1="1" y1="0" x2="1" y2="12" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round"/>
             </marker>
-            <!-- Relationship: target end — open chevron (N-side, fact) -->
-            <marker id="rel-target" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
-              <path d="M 1 1 L 11 4 L 1 7" fill="none" stroke="#888" stroke-width="1.5" stroke-linejoin="round"/>
+            <!-- Relationship: target end — solid arrow (N-side, fact) -->
+            <marker id="rel-target" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 7,4 0,8" fill="#888"/>
             </marker>
-            <marker id="rel-target-sel" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
-              <path d="M 1 1 L 11 4 L 1 7" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round"/>
+            <marker id="rel-target-sel" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 7,4 0,8" fill="var(--primary)"/>
             </marker>
           </defs>
 
@@ -789,7 +789,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useDataTypeStore } from '@/stores/dataTypes'
 import { useUIStore } from '@/stores/ui'
@@ -813,7 +813,6 @@ const llmStore = useLlmStore()
 // Load data from backend on mount
 onMounted(async () => {
   await modelStore.loadFromBackend()
-  enableUnsavedGuard()
   nextTick(() => {
     setTimeout(() => {
       updateSnapshot()
@@ -832,7 +831,8 @@ function updateSnapshot() {
       name: model.value.name,
       description: model.value.description,
       nodes: model.value.nodes,
-      relationships: model.value.relationships
+      relationships: model.value.relationships,
+      diagrams: model.value.diagrams
     })
     hasUnsavedChanges.value = false
   }
@@ -844,7 +844,8 @@ function checkUnsavedChanges() {
     name: model.value.name,
     description: model.value.description,
     nodes: model.value.nodes,
-    relationships: model.value.relationships
+    relationships: model.value.relationships,
+    diagrams: model.value.diagrams
   })
   return current !== savedModelSnapshot
 }
@@ -855,7 +856,8 @@ async function saveAndContinue() {
       name: model.value.name,
       description: model.value.description,
       nodes: model.value.nodes,
-      relationships: model.value.relationships
+      relationships: model.value.relationships,
+      diagrams: model.value.diagrams
     })
     updateSnapshot()
     const dest = pendingNavigation || '/models'
@@ -872,7 +874,8 @@ async function saveModel() {
       name: model.value.name,
       description: model.value.description,
       nodes: model.value.nodes,
-      relationships: model.value.relationships
+      relationships: model.value.relationships,
+      diagrams: model.value.diagrams
     })
     updateSnapshot()
     uiStore.addAlert({ message: 'Modelo guardado correctamente', type: 'success' })
@@ -882,9 +885,7 @@ async function saveModel() {
 }
 
 // ── Unsaved changes guard ─────────────────────────────────────
-let unsavedGuardEnabled = false
 let pendingNavigation = null
-let removeUnsavedGuard = null
 
 const showConfirmLeave = ref(false)
 
@@ -895,7 +896,7 @@ function confirmLeaveSave() {
 
 function confirmLeaveDiscard() {
   showConfirmLeave.value = false
-  updateSnapshot()   // sync snapshot → guard no vuelve a disparar en el push siguiente
+  updateSnapshot()   // sync snapshot so the guard passes on the next push
   if (pendingNavigation) {
     const dest = pendingNavigation
     pendingNavigation = null
@@ -903,16 +904,13 @@ function confirmLeaveDiscard() {
   }
 }
 
-function enableUnsavedGuard() {
-  if (unsavedGuardEnabled) return
-  unsavedGuardEnabled = true
-  removeUnsavedGuard = router.beforeEach((to, from) => {
-    if (!checkUnsavedChanges()) return
-    pendingNavigation = to.fullPath
-    showConfirmLeave.value = true
-    return false
-  })
-}
+// Component-scoped guard — auto-removed on unmount, never blocks other routes
+onBeforeRouteLeave((to) => {
+  if (!checkUnsavedChanges()) return true
+  pendingNavigation = to.fullPath
+  showConfirmLeave.value = true
+  return false
+})
 
 // ── Title editing ────────────────────────────────────────────
 const editingTitle = ref(false)
@@ -1545,7 +1543,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onGlobalMouseMove)
   document.removeEventListener('mouseup', onGlobalMouseUp)
-  if (removeUnsavedGuard) removeUnsavedGuard()
 })
 
 watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) })
@@ -1573,8 +1570,9 @@ function relAnchorPoints(rel) {
     ? fromNode.fields.findIndex(f => f.id === rel.fromFieldId)
     : fromNode.fields.findIndex(f => f.isKey)
 
-  // Target field index — use stored ID, else infer FK by naming convention
+  // Target field index — cascading lookup so the arrow always lands on the right row
   let toIdx = -1
+  // 1) Stored ID (most reliable)
   if (rel.toFieldId) {
     toIdx = toNode.fields.findIndex(f => f.id === rel.toFieldId)
   }
@@ -1582,8 +1580,19 @@ function relAnchorPoints(rel) {
     const keyField = fromNode.fields.find(f => f.isKey)
     if (keyField) {
       const fkName = `${toSnake(fromNode.name)}_${toSnake(keyField.name)}`
+      // 2) FK name + isFk flag
       toIdx = toNode.fields.findIndex(f => f.name === fkName && f.isFk)
+      // 3) FK name without isFk (reused field)
+      if (toIdx === -1) toIdx = toNode.fields.findIndex(f => f.name === fkName)
+      // 4) Same name as the source key field (reused field)
+      if (toIdx === -1) toIdx = toNode.fields.findIndex(f => f.name === keyField.name)
     }
+  }
+  // 5) Description-based lookup for legacy relationships (format "FK → DimName.field")
+  if (toIdx === -1) {
+    toIdx = toNode.fields.findIndex(f =>
+      f.description && f.description.startsWith(`FK → ${fromNode.name}.`)
+    )
   }
 
   const fromFieldY = fromIdx >= 0
@@ -1775,8 +1784,12 @@ function handleFieldDrop(factNode) {
   const toSnake = s => s.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
   const fkName = `${toSnake(dimNode.name)}_${toSnake(dragField.value.fieldName)}`
 
-  // Add FK field if not present
-  if (!factNode.fields.find(f => f.name === fkName)) {
+  // Reuse existing field if the fact table already has one with the same name
+  // as the source key field OR the derived FK name — otherwise create it.
+  let toField = factNode.fields.find(f => f.name === dragField.value.fieldName)
+             ?? factNode.fields.find(f => f.name === fkName)
+
+  if (!toField) {
     // Match key field type but SERIAL→INTEGER and BIGSERIAL→BIGINT (FK cols can't be sequences)
     const dimKeyField = dimNode.fields.find(f => f.isKey)
     let fkDataType
@@ -1794,7 +1807,7 @@ function handleFieldDrop(factNode) {
                ?? dtStore.allTypes.find(t => t.baseType === 'INTEGER')?.id
                ?? dtStore.allTypes[0]?.id
     }
-    modelStore.addField(modelId, factNode.id, {
+    toField = modelStore.addField(modelId, factNode.id, {
       name: fkName,
       description: `FK → ${dimNode.name}.${dragField.value.fieldName}`,
       dataType: fkDataType,
@@ -1808,14 +1821,12 @@ function handleFieldDrop(factNode) {
          (r.fromNodeId === factNode.id && r.toNodeId === dimNode.id)
   )
   if (!relExists) {
-    const fkField = model.value?.nodes.find(n => n.id === factNode.id)
-                        ?.fields.find(f => f.name === fkName && f.isFk)
     modelStore.addRelationship(modelId, {
       fromNodeId: dimNode.id,
       toNodeId: factNode.id,
       cardinality: '1:N',
       fromFieldId: dragField.value.fieldId,
-      toFieldId: fkField?.id
+      toFieldId: toField?.id
     })
   }
   hasUnsavedChanges.value = true
@@ -2147,7 +2158,7 @@ function handleCreateDiagram() {
   if (!model.value) return
   const diag = modelStore.createDiagram(model.value.id)
   if (diag) activeDiagramId.value = diag.id
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 
 function handleDeleteDiagram(diagramId) {
@@ -2158,26 +2169,26 @@ function handleDeleteDiagram(diagramId) {
     const main = model.value.diagrams?.find(d => d.isMain) || model.value.diagrams?.[0]
     activeDiagramId.value = main?.id || null
   }
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 
 function handleRenameDiagram(diagramId, newName) {
   if (!model.value) return
   modelStore.renameDiagram(model.value.id, diagramId, newName)
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 
 // ── DiagramPropsPanel handlers ─────────────────────────────────
 function handleDiagramRename(newName) {
   if (!model.value || !selectedDiagram.value) return
   modelStore.renameDiagram(model.value.id, selectedDiagram.value.id, newName)
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 
 function handleDiagramDescription(description) {
   if (!model.value || !selectedDiagram.value) return
   modelStore.updateDiagramDescription(model.value.id, selectedDiagram.value.id, description)
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 
 // ── Sub-diagram node management ────────────────────────────────
@@ -2185,7 +2196,7 @@ function removeNodeFromActiveDiagram(node) {
   if (!model.value || !activeDiagram.value || activeDiagram.value.isMain) return
   modelStore.removeNodeFromDiagram(model.value.id, activeDiagramId.value, node.id)
   if (selectedNode.value?.id === node.id) selectedNode.value = null
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 
 function handleAddNodesToDiagram(nodeIds) {
@@ -2194,7 +2205,7 @@ function handleAddNodesToDiagram(nodeIds) {
     modelStore.addNodeToDiagram(model.value.id, activeDiagramId.value, nodeId)
   })
   showAddNodeModal.value = false
-  enableUnsavedGuard()
+  hasUnsavedChanges.value = true
 }
 </script>
 
