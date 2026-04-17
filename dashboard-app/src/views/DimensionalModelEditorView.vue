@@ -1586,33 +1586,40 @@ function relAnchorPoints(rel) {
     }
   }
 
-  const x1 = fromNode.x + NODE_WIDTH
-  const y1 = fromIdx >= 0
+  const fromFieldY = fromIdx >= 0
     ? fromNode.y + HEADER_H + fromIdx * FIELD_H + FIELD_H / 2
     : fromNode.y + nodeHeight(fromNode) / 2
 
-  const x2 = toNode.x
-  const y2 = toIdx >= 0
+  const toFieldY = toIdx >= 0
     ? toNode.y + HEADER_H + toIdx * FIELD_H + FIELD_H / 2
     : toNode.y + nodeHeight(toNode) / 2
 
-  return { x1, y1, x2, y2 }
+  // If source right edge is at or left of target left edge → exit right, enter left (ltr)
+  // Otherwise source is to the right → exit left, enter right (rtl)
+  if (fromNode.x + NODE_WIDTH <= toNode.x) {
+    return { x1: fromNode.x + NODE_WIDTH, y1: fromFieldY, x2: toNode.x, y2: toFieldY, dir: 'ltr' }
+  } else {
+    return { x1: fromNode.x, y1: fromFieldY, x2: toNode.x + NODE_WIDTH, y2: toFieldY, dir: 'rtl' }
+  }
 }
 
 function relPath(rel) {
   const pts = relAnchorPoints(rel)
   if (!pts) return ''
-  const { x1, y1, x2, y2 } = pts
+  const { x1, y1, x2, y2, dir } = pts
   const cp = Math.max(60, Math.abs(x2 - x1) * 0.45)
-  return `M ${x1} ${y1} C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2}`
+  return dir === 'ltr'
+    ? `M ${x1} ${y1} C ${x1 + cp} ${y1}, ${x2 - cp} ${y2}, ${x2} ${y2}`
+    : `M ${x1} ${y1} C ${x1 - cp} ${y1}, ${x2 + cp} ${y2}, ${x2} ${y2}`
 }
 
 function relMidpoint(rel) {
   const pts = relAnchorPoints(rel)
   if (!pts) return { x: 0, y: 0 }
-  const { x1, y1, x2, y2 } = pts
+  const { x1, y1, x2, y2, dir } = pts
   const cp = Math.max(60, Math.abs(x2 - x1) * 0.45)
-  const cx1 = x1 + cp, cy1 = y1, cx2 = x2 - cp, cy2 = y2
+  const cx1 = dir === 'ltr' ? x1 + cp : x1 - cp, cy1 = y1
+  const cx2 = dir === 'ltr' ? x2 - cp : x2 + cp, cy2 = y2
   const t = 0.5
   return {
     x: Math.pow(1-t,3)*x1 + 3*Math.pow(1-t,2)*t*cx1 + 3*(1-t)*t*t*cx2 + Math.pow(t,3)*x2,
