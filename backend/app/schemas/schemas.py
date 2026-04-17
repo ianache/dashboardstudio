@@ -208,6 +208,7 @@ class DimensionalModelBase(BaseModel):
     is_global: bool = False
     nodes: List[DimensionalModelNode] = []
     relationships: List[DimensionalModelRelationship] = []
+    diagrams: List[dict] = []
 
 
 class DimensionalModelCreate(DimensionalModelBase):
@@ -220,6 +221,7 @@ class DimensionalModelUpdate(BaseModel):
     is_global: Optional[bool] = None
     nodes: Optional[List[dict]] = None
     relationships: Optional[List[dict]] = None
+    diagrams: Optional[List[dict]] = None
 
 
 class DimensionalModelResponse(DimensionalModelBase):
