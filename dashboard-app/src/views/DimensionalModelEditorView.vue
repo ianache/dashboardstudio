@@ -380,7 +380,7 @@
             </div>
             <div class="fields-list">
               <div v-for="f in selectedNode.fields" :key="f.id" class="field-item">
-                <!-- Row 1: key toggle · name · type · delete -->
+                <!-- Row 1: key toggle · fk badge · name · type · delete -->
                 <div class="field-row1">
                   <button
                     class="key-toggle"
@@ -388,6 +388,16 @@
                     :title="f.isKey ? 'Llave primaria' : 'Marcar como llave'"
                     @click="setKeyField(f.id)"
                   >🔑</button>
+                  <span
+                    v-if="f.isFk"
+                    class="fk-badge"
+                    title="Llave foránea (FK) — generada por relación"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                  </span>
                   <input
                     :value="f.name"
                     type="text"
@@ -2310,6 +2320,12 @@ function handleAddNodesToDiagram(nodeIds) {
 }
 .key-toggle:hover { opacity: 0.7; border-color: #52c41a; }
 .key-toggle.active { opacity: 1; background: #f6ffed; border-color: #52c41a; }
+.fk-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex-shrink: 0;
+  color: #fa8c16; border: 1px solid #ffd591; background: #fff7e6;
+  border-radius: 4px; cursor: default;
+}
 
 .field-row1 { display: flex; align-items: center; gap: 4px; }
 .field-row2 { padding-left: 28px; margin-top: 3px; }
