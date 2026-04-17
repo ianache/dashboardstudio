@@ -649,6 +649,7 @@ import { useDataTypeStore } from '@/stores/dataTypes'
 import { useUIStore } from '@/stores/ui'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
+import DiagramTabBar from '@/components/dimensional-model/DiagramTabBar.vue'
 import yaml from 'js-yaml'
 import JSZip from 'jszip'
 import html2canvas from 'html2canvas'
@@ -1286,12 +1287,50 @@ async function handleExportCubeJS() {
 // ── Canvas ───────────────────────────────────────────────────
 const canvasEl = ref(null)
 
+// ── Active diagram (UI-local state — NOT in store) ───────────
+const activeDiagramId = ref(null)  // null until model loads, then set to main diagram id
+
 const canvasSize = computed(() => {
   const nodes = model.value?.nodes || []
   const maxX = Math.max(900, ...nodes.map(n => n.x + 240))
   const maxY = Math.max(600, ...nodes.map(n => n.y + nodeHeight(n) + 60))
   return { w: maxX, h: maxY }
 })
+
+const activeDiagram = computed(() => {
+  if (!model.value) return null
+  const diagrams = model.value.diagrams
+  if (!diagrams?.length) return null
+  return diagrams.find(d => d.id === activeDiagramId.value) || diagrams.find(d => d.isMain) || diagrams[0]
+})
+
+const activeDiagramNodes = computed(() => {
+  if (!activeDiagram.value || activeDiagram.value.isMain) {
+    return (model.value?.nodes || []).map(resolveNode)
+  }
+  return activeDiagram.value.diagramNodes
+    .map(dn => {
+      const canonical = model.value.nodes.find(n => n.id === dn.nodeId)
+      if (!canonical) return null
+      return resolveNode({ ...canonical, x: dn.x, y: dn.y })
+    })
+    .filter(Boolean)
+})
+
+const visibleRelationships = computed(() =>
+  (model.value?.relationships || []).filter(r =>
+    activeDiagramNodes.value.some(n => n.id === r.fromNodeId) &&
+    activeDiagramNodes.value.some(n => n.id === r.toNodeId)
+  )
+)
+
+// Initialize activeDiagramId when model loads
+watch(model, (m) => {
+  if (m && !activeDiagramId.value) {
+    const main = m.diagrams?.find(d => d.isMain) || m.diagrams?.[0]
+    if (main) activeDiagramId.value = main.id
+  }
+}, { immediate: true })
 
 function canvasPos(clientX, clientY) {
   const rect = canvasEl.value.getBoundingClientRect()
@@ -1393,15 +1432,24 @@ function startDrag(node, e) {
   dragging.value = { nodeId: node.id, startX: e.clientX, startY: e.clientY, origX: node.x, origY: node.y }
 }
 
+function onNodeDragEnd(nodeId, newX, newY) {
+  if (activeDiagram.value?.isMain || !activeDiagram.value) {
+    modelStore.updateNode(modelId, nodeId, { x: newX, y: newY })
+  } else {
+    modelStore.updateDiagramNodePosition(modelId, activeDiagramId.value, nodeId, newX, newY)
+  }
+}
+
 // Handles only node drag (called from canvas @mousemove to update node position)
 function onNodeDragMove(e) {
   if (!dragging.value) return
   const dx = e.clientX - dragging.value.startX
   const dy = e.clientY - dragging.value.startY
-  modelStore.updateNode(modelId, dragging.value.nodeId, {
-    x: Math.max(0, dragging.value.origX + dx),
-    y: Math.max(0, dragging.value.origY + dy)
-  })
+  onNodeDragEnd(
+    dragging.value.nodeId,
+    Math.max(0, dragging.value.origX + dx),
+    Math.max(0, dragging.value.origY + dy)
+  )
   hasUnsavedChanges.value = true
 }
 
@@ -1812,6 +1860,31 @@ function addSelectedGlobalDims() {
   })
   selectedGlobalDims.value = []
   showGlobalDimModal.value = false
+}
+
+// ── DiagramTabBar handlers ─────────────────────────────────────
+function handleCreateDiagram() {
+  if (!model.value) return
+  const diag = modelStore.createDiagram(model.value.id)
+  if (diag) activeDiagramId.value = diag.id
+  enableUnsavedGuard()
+}
+
+function handleDeleteDiagram(diagramId) {
+  if (!model.value) return
+  const wasActive = activeDiagramId.value === diagramId
+  modelStore.deleteDiagram(model.value.id, diagramId)
+  if (wasActive) {
+    const main = model.value.diagrams?.find(d => d.isMain) || model.value.diagrams?.[0]
+    activeDiagramId.value = main?.id || null
+  }
+  enableUnsavedGuard()
+}
+
+function handleRenameDiagram(diagramId, newName) {
+  if (!model.value) return
+  modelStore.renameDiagram(model.value.id, diagramId, newName)
+  enableUnsavedGuard()
 }
 </script>
 
