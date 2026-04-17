@@ -98,6 +98,12 @@
           Dimensión
         </button>
         <button
+          v-if="activeDiagram && !activeDiagram.isMain"
+          class="btn btn-secondary btn-sm"
+          @click="showAddNodeModal = true"
+        >+ Añadir tabla</button>
+
+        <button
           v-if="!model?.isGlobal && modelStore.globalModel"
           class="btn btn-secondary btn-sm"
           data-tooltip="Añadir dimensión del modelo Global"
@@ -207,6 +213,12 @@
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           </div>
+          <button
+            v-if="activeDiagram && !activeDiagram.isMain"
+            class="node-btn-remove-diagram"
+            title="Quitar del diagrama"
+            @click.stop="removeNodeFromActiveDiagram(node)"
+          >−</button>
           <div class="node-fields">
             <div
               v-for="f in node.fields"
@@ -245,6 +257,12 @@
           <p>Usa los botones de la barra para añadir tablas de <strong>Hecho</strong> o <strong>Dimensión</strong></p>
         </div>
 
+        <!-- Sub-diagram empty hint -->
+        <div v-if="activeDiagram && !activeDiagram.isMain && !activeDiagramNodes.length" class="canvas-hint sub-diagram-hint">
+          <p>Este diagrama está vacío.</p>
+          <button class="btn btn-primary" style="pointer-events:all" @click="showAddNodeModal = true">+ Añadir tabla</button>
+        </div>
+
         <!-- Field drag floating label -->
         <div
           v-if="dragField"
@@ -258,7 +276,7 @@
       </div>
 
       <!-- Properties panel -->
-      <div v-if="selectedNode || selectedRel" class="props-panel card">
+      <div v-if="selectedNode || selectedRel || selectedDiagram" class="props-panel card">
         <!-- Node properties -->
         <template v-if="selectedNode">
           <div class="props-header">
@@ -399,6 +417,15 @@
           </div><!-- end v-else editable props-body -->
         </template>
 
+        <!-- Diagram properties -->
+        <template v-else-if="selectedDiagram">
+          <DiagramPropsPanel
+            :diagram="selectedDiagram"
+            @rename="handleDiagramRename"
+            @update-description="handleDiagramDescription"
+          />
+        </template>
+
         <!-- Relationship properties -->
         <template v-if="selectedRel">
           <div class="props-header">
@@ -439,6 +466,15 @@
         </template>
       </div>
     </div>
+
+    <!-- Modal: Add Node to Sub-Diagram -->
+    <AddNodeToDiagramModal
+      v-if="showAddNodeModal && activeDiagram && !activeDiagram.isMain"
+      :model="model"
+      :active-diagram="activeDiagram"
+      @close="showAddNodeModal = false"
+      @add-nodes="handleAddNodesToDiagram"
+    />
 
     <!-- Modal: Confirm Leave -->
     <div v-if="showConfirmLeave" class="modal-overlay" @click.self="showConfirmLeave = false">
@@ -2384,4 +2420,47 @@ function handleAddNodesToDiagram(nodeIds) {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
+
+/* Sub-diagram node remove button */
+.node-btn-remove-diagram {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: none;
+  border: 1px solid #f5222d44;
+  border-radius: 3px;
+  color: #f5222d;
+  font-size: 14px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 2;
+}
+
+.model-node:hover .node-btn-remove-diagram {
+  opacity: 1;
+}
+
+/* Sub-diagram empty hint */
+.sub-diagram-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #888;
+  pointer-events: none;
+}
+
+.sub-diagram-hint p {
+  pointer-events: none;
+}
+
+.sub-diagram-hint .btn {
+  pointer-events: all;
+}
 </style>
