@@ -115,14 +115,26 @@
 
     <!-- Canvas + Properties panel -->
     <div class="editor-body">
-      <!-- Canvas -->
-      <div
-        ref="canvasEl"
-        class="model-canvas"
-        :class="{ 'dragging-field': !!dragField }"
-        @click="onCanvasClick"
-        @mousemove="onNodeDragMove"
-      >
+      <!-- Canvas column: tab bar + canvas -->
+      <div class="canvas-column">
+        <!-- Diagram tab bar -->
+        <DiagramTabBar
+          v-if="model?.diagrams?.length && activeDiagramId"
+          :diagrams="model.diagrams"
+          :active-diagram-id="activeDiagramId"
+          @update:active-diagram-id="activeDiagramId = $event"
+          @create-diagram="handleCreateDiagram"
+          @delete-diagram="handleDeleteDiagram"
+          @rename-diagram="handleRenameDiagram"
+        />
+        <!-- Canvas -->
+        <div
+          ref="canvasEl"
+          class="model-canvas"
+          :class="{ 'dragging-field': !!dragField, 'sub-diagram': activeDiagram && !activeDiagram.isMain }"
+          @click="onCanvasClick"
+          @mousemove="onNodeDragMove"
+        >
         <!-- SVG overlay for relationships + guide line -->
         <svg class="canvas-svg" :width="canvasSize.w" :height="canvasSize.h">
           <defs>
@@ -135,7 +147,7 @@
           </defs>
 
           <!-- Relationships -->
-          <g v-for="rel in model?.relationships" :key="rel.id">
+          <g v-for="rel in visibleRelationships" :key="rel.id">
             <line
               :x1="nodeCenter(rel.fromNodeId).x"
               :y1="nodeCenter(rel.fromNodeId).y"
@@ -174,7 +186,7 @@
 
         <!-- Nodes -->
         <div
-          v-for="node in resolvedNodes"
+          v-for="node in activeDiagramNodes"
           :key="node.id"
           class="model-node"
           :class="[
@@ -241,6 +253,7 @@
         >
           🔑 {{ dragField.fieldName }}
           <span v-if="dropTargetId" class="drag-pill-hint">→ soltar para vincular</span>
+        </div>
         </div>
       </div>
 
@@ -1950,6 +1963,15 @@ function handleRenameDiagram(diagramId, newName) {
   overflow: hidden;
 }
 
+/* Canvas column: wraps tab bar + canvas in a column */
+.canvas-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* Canvas */
 .model-canvas {
   flex: 1;
@@ -1958,6 +1980,9 @@ function handleRenameDiagram(diagramId, newName) {
   min-height: 500px;
 }
 .model-canvas.dragging-field { cursor: crosshair; }
+.model-canvas.sub-diagram {
+  background-color: var(--diagram-bg, #f7f0ff);
+}
 
 .canvas-svg {
   position: absolute; top: 0; left: 0;
