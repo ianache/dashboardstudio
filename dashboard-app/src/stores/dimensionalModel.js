@@ -315,6 +315,76 @@ export const useDimensionalModelStore = defineStore('dimensionalModel', {
       m.relationships = m.relationships.filter(r => r.id !== relId)
     },
 
+    // ─── Diagram actions ─────────────────────────────────────────────────────────
+
+    createDiagram(modelId, { name = 'Nuevo diagrama' } = {}) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      if (!m.diagrams) m.diagrams = []
+      const diag = {
+        id: generateId(),
+        name,
+        description: '',
+        isMain: false,
+        diagramNodes: []
+      }
+      m.diagrams.push(diag)
+      return diag
+    },
+
+    renameDiagram(modelId, diagramId, newName) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      const diag = m.diagrams?.find(d => d.id === diagramId)
+      if (diag) diag.name = newName
+    },
+
+    updateDiagramDescription(modelId, diagramId, description) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      const diag = m.diagrams?.find(d => d.id === diagramId)
+      if (diag) diag.description = description
+    },
+
+    deleteDiagram(modelId, diagramId) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      // Never delete the main diagram
+      const diag = m.diagrams?.find(d => d.id === diagramId)
+      if (!diag || diag.isMain) return
+      m.diagrams = m.diagrams.filter(d => d.id !== diagramId)
+    },
+
+    addNodeToDiagram(modelId, diagramId, nodeId) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      const diag = m.diagrams?.find(d => d.id === diagramId)
+      if (!diag) return
+      // Avoid duplicates
+      if (diag.diagramNodes.some(dn => dn.nodeId === nodeId)) return
+      const canonical = m.nodes.find(n => n.id === nodeId)
+      if (!canonical) return
+      diag.diagramNodes.push({ nodeId, x: canonical.x || 100, y: canonical.y || 100 })
+    },
+
+    removeNodeFromDiagram(modelId, diagramId, nodeId) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      const diag = m.diagrams?.find(d => d.id === diagramId)
+      // Never remove from main diagram via this action — use deleteNode for canonical removal
+      if (!diag || diag.isMain) return
+      diag.diagramNodes = diag.diagramNodes.filter(dn => dn.nodeId !== nodeId)
+    },
+
+    updateDiagramNodePosition(modelId, diagramId, nodeId, x, y) {
+      const m = this.models.find(m => m.id === modelId)
+      if (!m) return
+      const diag = m.diagrams?.find(d => d.id === diagramId)
+      if (!diag) return
+      const dn = diag.diagramNodes.find(dn => dn.nodeId === nodeId)
+      if (dn) { dn.x = x; dn.y = y }
+    },
+
     async saveModelToBackend(modelId) {
       try {
         const model = this.models.find(m => m.id === modelId)
