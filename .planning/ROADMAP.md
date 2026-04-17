@@ -35,8 +35,8 @@
 **Plans:** 6 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Backend diagrams column + Pydantic schemas
-- [ ] 06-02-PLAN.md — Store diagram CRUD actions + migration logic
+- [x] 06-01-PLAN.md — Backend diagrams column + Pydantic schemas
+- [x] 06-02-PLAN.md — Store diagram CRUD actions + migration logic
 - [ ] 06-03-PLAN.md — DiagramTabBar + EditorView canvas refactor
 - [ ] 06-04-PLAN.md — Install marked/DOMPurify + DiagramPropsPanel component
 - [ ] 06-05-PLAN.md — Wire DiagramPropsPanel + AddNodeToDiagramModal into EditorView
