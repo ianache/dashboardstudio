@@ -176,6 +176,41 @@ export const useDashboardStore = defineStore('dashboard', {
       }
     },
 
+    async addDashboardFilter(dashboardId, { dimension, label, type }) {
+      const dashboard = this.dashboards.find(d => d.id === dashboardId)
+      if (!dashboard) return
+      if (!dashboard.filters) dashboard.filters = []
+      const filter = {
+        id: Math.random().toString(36).substr(2, 9),
+        dimension,
+        label,
+        type
+      }
+      dashboard.filters.push(filter)
+      try {
+        await dashboardApi.update(dashboardId, { filters: dashboard.filters })
+      } catch (err) {
+        dashboard.filters.pop()
+        console.error('Failed to add dashboard filter:', err)
+        throw err
+      }
+      return filter
+    },
+
+    async removeDashboardFilter(dashboardId, filterId) {
+      const dashboard = this.dashboards.find(d => d.id === dashboardId)
+      if (!dashboard) return
+      const prev = dashboard.filters || []
+      dashboard.filters = prev.filter(f => f.id !== filterId)
+      try {
+        await dashboardApi.update(dashboardId, { filters: dashboard.filters })
+      } catch (err) {
+        dashboard.filters = prev
+        console.error('Failed to remove dashboard filter:', err)
+        throw err
+      }
+    },
+
     async assignDashboardToUsers(dashboardId, userIds) {
       try {
         await dashboardApi.assign(dashboardId, userIds)
