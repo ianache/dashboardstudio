@@ -27,6 +27,7 @@
           @select="selectWidget(widget.id)"
           @toggle-maximize="maximizedWidgetId = maximizedWidgetId === widget.id ? null : widget.id"
           @configure="$emit('configure-widget', widget)"
+          @layout="$emit('layout-widget', widget)"
           @remove="$emit('remove-widget', widget.id)"
           @drag-start="(e) => startDrag(e, widget)"
           @resize-start="(dir, e) => startResize(e, widget, dir)"
@@ -76,7 +77,7 @@ const props = defineProps({
   dashboardPalette: { type: String, default: null }
 })
 
-const emit = defineEmits(['configure-widget', 'remove-widget', 'widget-moved'])
+const emit = defineEmits(['configure-widget', 'layout-widget', 'remove-widget', 'widget-moved'])
 
 const dashboardStore = useDashboardStore()
 

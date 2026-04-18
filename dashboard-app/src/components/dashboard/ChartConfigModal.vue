@@ -479,6 +479,13 @@
       </div>
 
       <div class="modal-footer">
+        <button class="btn btn-secondary btn-icon-text" data-tooltip="Formato del widget" @click="$emit('open-layout')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <div style="flex:1"></div>
         <button class="btn btn-secondary" @click="$emit('close')">Cancelar</button>
         <button class="btn btn-primary" @click="save">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -16,6 +16,17 @@
         <button
           v-if="isDesignMode"
           class="widget-action-btn"
+          data-tooltip="Formato del widget"
+          @click.stop="$emit('layout')"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button
+          v-if="isDesignMode"
+          class="widget-action-btn"
           data-tooltip="Configurar gráfico"
           @click.stop="$emit('configure')"
         >
@@ -142,7 +153,7 @@ const props = defineProps({
   dashboardPalette: { type: String, default: null }
 })
 
-const emit = defineEmits(['configure', 'remove', 'select', 'resize-start', 'drag-start', 'toggle-maximize'])
+const emit = defineEmits(['configure', 'layout', 'remove', 'select', 'resize-start', 'drag-start', 'toggle-maximize'])
 
 const cubeStore = useCubeStore()
 const dashboardFiltersRef = computed(() => props.dashboardFilters)

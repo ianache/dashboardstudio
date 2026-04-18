@@ -255,6 +255,7 @@
           :dashboard-palette="activeDashboard.colorPalette || null"
           :key="designRefreshKey"
           @configure-widget="openConfigModal"
+          @layout-widget="openLayoutModal"
           @remove-widget="removeWidget"
         />
       </div>
@@ -398,10 +399,19 @@
 
     <!-- Chart Config Modal -->
     <ChartConfigModal
-      v-if="configuringWidget"
+      v-if="configuringWidget && !layoutWidget"
       :widget="configuringWidget"
       @close="configuringWidget = null"
       @save="saveWidgetConfig"
+      @open-layout="openLayoutModal(configuringWidget)"
+    />
+
+    <!-- Chart Layout Modal -->
+    <ChartLayoutModal
+      v-if="layoutWidget"
+      :widget="layoutWidget"
+      @close="layoutWidget = null"
+      @save="saveLayoutConfig"
     />
 
     <!-- Delete confirm -->
@@ -498,6 +508,7 @@ import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
+import ChartLayoutModal from '@/components/dashboard/ChartLayoutModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
@@ -532,6 +543,7 @@ const designRefreshKey = ref(0)
 function refreshDesign() { designRefreshKey.value++ }
 const showNewModal = ref(false)
 const configuringWidget = ref(null)
+const layoutWidget = ref(null)
 const assigningDashboard = ref(null)
 const deletingDashboard = ref(null)
 const selectedUsers = ref([])
@@ -821,6 +833,18 @@ function removeWidget(widgetId) {
 
 function openConfigModal(widget) {
   router.push(`/designer/${activeDashboard.value.id}/configure/${widget.id}`)
+}
+
+function openLayoutModal(widget) {
+  configuringWidget.value = null
+  layoutWidget.value = activeDashboard.value?.widgets.find(w => w.id === widget.id) || widget
+}
+
+function saveLayoutConfig(patch) {
+  if (!activeDashboard.value || !layoutWidget.value) return
+  dashboardStore.updateWidget(activeDashboard.value.id, layoutWidget.value.id, patch)
+  layoutWidget.value = null
+  uiStore.addAlert({ type: 'success', message: 'Formato del widget actualizado' })
 }
 
 function saveWidgetConfig(updatedWidget) {
