@@ -21,6 +21,23 @@ import {
   GraphicComponent
 } from 'echarts/components'
 
+// ECharts registers mousewheel listeners without { passive: true }, triggering
+// browser violations. Patch addEventListener globally so wheel-type events are
+// always passive, which is safe — ECharts never calls preventDefault() on them.
+;(function patchPassiveWheelListeners() {
+  const original = EventTarget.prototype.addEventListener
+  EventTarget.prototype.addEventListener = function (type, fn, options) {
+    if (type === 'mousewheel' || type === 'wheel' || type === 'touchstart' || type === 'touchmove') {
+      if (typeof options === 'object' && options !== null) {
+        options = { ...options, passive: true }
+      } else {
+        options = { passive: true, capture: options === true }
+      }
+    }
+    return original.call(this, type, fn, options)
+  }
+})()
+
 import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'

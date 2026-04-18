@@ -107,6 +107,17 @@ class DataType(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class Currency(Base):
+    __tablename__ = "currencies"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    code = Column(String(10), nullable=False)
+    symbol = Column(String(10), nullable=False)
+    name = Column(String(100), nullable=False)
+    is_active = Column(Boolean, default=True)
+
+
 class DimensionalModel(Base):
     __tablename__ = "dimensional_models"
     __table_args__ = {"schema": "biportal"}

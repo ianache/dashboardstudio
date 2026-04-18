@@ -293,10 +293,18 @@ export const dimensionalModelApi = {
   }
 }
 
+// Currencies API
+export const currenciesApi = {
+  async getAll() {
+    return apiRequest('/api/v1/currencies/')
+  }
+}
+
 export default {
   cubeConfig: cubeConfigApi,
   llmConfig: llmConfigApi,
   palette: paletteApi,
   dashboard: dashboardApi,
-  dimensionalModel: dimensionalModelApi
+  dimensionalModel: dimensionalModelApi,
+  currencies: currenciesApi
 }

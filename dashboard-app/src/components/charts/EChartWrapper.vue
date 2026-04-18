@@ -19,8 +19,11 @@
 <script setup>
 import { computed } from 'vue'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
+import { useCurrencyStore } from '@/stores/currencies'
 
 const paletteStore = useColorPaletteStore()
+const currencyStore = useCurrencyStore()
+currencyStore.loadFromBackend()
 
 const props = defineProps({
   chartType: { type: String, default: 'bar' },
@@ -101,8 +104,16 @@ function formatValue(value, measure) {
   if (value == null) return ''
   const decimals = measure?.decimalPlaces ?? 2
   const fmt = measure?.format
-  if (fmt === 'currency') return new Intl.NumberFormat('es', { style: 'currency', currency: 'USD', minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)
-  if (fmt === 'percent') return `${(value * 100).toFixed(decimals)}%`
+  if (fmt === 'currency') {
+    const currency = currencyStore.getById(measure?.currencyId)
+    const symbol = currency?.symbol ?? 'US$'
+    const formatted = new Intl.NumberFormat('es', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    }).format(value)
+    return `${symbol} ${formatted}`
+  }
+  if (fmt === 'percent') return `${Number(value).toFixed(decimals)}%`
   if (fmt === 'number') return new Intl.NumberFormat('es', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)
   return value
 }
@@ -167,7 +178,8 @@ function buildPieOption() {
 
   const total = props.data.reduce((s, d) => s + (d.value || 0), 0)
   const measures = props.widget.cubeQuery?.measures || []
-  const metricLabel = measures[0]?.label || 'Total'
+  const m0 = measures[0]
+  const metricLabel = m0?.label || 'Total'
 
   const seriesData = props.data.map((d, i) => ({
     name: d.label,
@@ -175,19 +187,30 @@ function buildPieOption() {
     itemStyle: { color: activeColors.value[i % activeColors.value.length] }
   }))
 
-  let labelParts = ['{b}']
-  if (showValue && showPercent) labelParts.push('{c} ({d}%)')
-  else if (showValue)           labelParts.push('{c}')
-  else if (showPercent)         labelParts.push('{d}%')
-  const labelFormatter = labelParts.join('\n')
+  // Label formatter: use formatValue so currency symbol + decimals are respected
+  let labelFormatter
+  if (showValue && showPercent) {
+    labelFormatter = (p) => `${p.name}\n${formatValue(p.value, m0)} (${p.percent}%)`
+  } else if (showValue) {
+    labelFormatter = (p) => `${p.name}\n${formatValue(p.value, m0)}`
+  } else if (showPercent) {
+    labelFormatter = (p) => `${p.name}\n${p.percent}%`
+  } else {
+    labelFormatter = '{b}'
+  }
   const showLabel = showValue || showPercent
 
+  // Tooltip formatter with proper value formatting
+  const tooltipFormatter = (p) => `${p.name}: <b>${formatValue(p.value, m0)}</b> (${p.percent}%)`
+
+  // Total in center: apply formatValue if format is set, otherwise plain number
+  const totalText = m0?.format ? formatValue(total, m0) : total.toLocaleString('es', { maximumFractionDigits: 2 })
   const graphic = showTotal ? [{
     type: 'text',
     left: 'center',
     top: 'center',
     style: {
-      text: `${metricLabel}\n${total.toLocaleString('es', { maximumFractionDigits: 2 })}`,
+      text: `${metricLabel}\n${totalText}`,
       textAlign: 'center',
       fill: '#333',
       fontSize: 13,
@@ -197,7 +220,7 @@ function buildPieOption() {
   }] : []
 
   return {
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    tooltip: { trigger: 'item', formatter: tooltipFormatter },
     legend: { bottom: 0, type: 'scroll' },
     graphic,
     series: [{
@@ -287,19 +310,24 @@ function buildCombinedOption() {
   const name1 = m1.label || 'Serie 2'
   const color0 = seriesColor(0, m0.color)
   const color1 = seriesColor(1, m1.color)
+  const showSecondaryY = props.widget.combinedOptions?.showSecondaryYAxis ?? false
 
   const s0 = { ...buildSeriesItem(name0, props.data.map(d => d.value), color0, m0.seriesType || 'bar', m0), yAxisIndex: 0 }
-  const s1 = { ...buildSeriesItem(name1, props.data.map(d => d.value2 || 0), color1, m1.seriesType || 'line', m1), yAxisIndex: 1 }
+  const s1 = { ...buildSeriesItem(name1, props.data.map(d => d.value2 || 0), color1, m1.seriesType || 'line', m1), yAxisIndex: showSecondaryY ? 1 : 0 }
+
+  const yAxis = showSecondaryY
+    ? [
+        { type: 'value', name: name0, position: 'left' },
+        { type: 'value', name: name1, position: 'right' }
+      ]
+    : [{ type: 'value' }]
 
   return {
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
     legend: { bottom: 0, data: [name0, name1] },
-    grid: { top: 10, left: 40, right: 40, bottom: 40, containLabel: true },
+    grid: { top: 10, left: 40, right: showSecondaryY ? 40 : 16, bottom: 40, containLabel: true },
     xAxis: { type: 'category', data: labels },
-    yAxis: [
-      { type: 'value', name: name0, position: 'left' },
-      { type: 'value', name: name1, position: 'right' }
-    ],
+    yAxis,
     series: [s0, s1]
   }
 }

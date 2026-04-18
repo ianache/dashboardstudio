@@ -485,6 +485,37 @@
               </div>
             </div>
           </div>
+          <!-- Currency selector: only when format = currency -->
+          <div v-if="activeConfigField.type === 'measures' && activeConfigField.field.format === 'currency'" class="form-group">
+            <label>Moneda</label>
+            <div class="ct-combobox" :class="{ open: currencyOpen }" @click.stop="currencyOpen = !currencyOpen">
+              <div class="ct-combobox-trigger">
+                <span class="ct-name">{{ currencyStore.getById(activeConfigField.field.currencyId)?.code ? `${currencyStore.getById(activeConfigField.field.currencyId).symbol} ${currencyStore.getById(activeConfigField.field.currencyId).code}` : '— Seleccionar —' }}</span>
+                <svg class="ct-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div v-if="currencyOpen" class="ct-combobox-dropdown" @click.stop>
+                <div
+                  class="ct-combobox-option"
+                  :class="{ selected: !activeConfigField.field.currencyId }"
+                  @click="activeConfigField.field.currencyId = null; currencyOpen = false"
+                >
+                  <span class="ct-name">— Seleccionar —</span>
+                  <svg v-if="!activeConfigField.field.currencyId" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div
+                  v-for="cur in currencyStore.activeCurrencies"
+                  :key="cur.id"
+                  class="ct-combobox-option"
+                  :class="{ selected: activeConfigField.field.currencyId === cur.id }"
+                  @click="activeConfigField.field.currencyId = cur.id; currencyOpen = false"
+                >
+                  <span class="ct-name">{{ cur.symbol }} {{ cur.code }} — {{ cur.name }}</span>
+                  <svg v-if="activeConfigField.field.currencyId === cur.id" class="ct-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Decimal places: only for number/currency -->
           <div v-if="activeConfigField.type === 'measures' && (activeConfigField.field.format === 'number' || activeConfigField.field.format === 'currency')" class="form-group">
             <label>Decimales</label>
@@ -553,6 +584,15 @@
             </div>
           </div>
 
+          <!-- Eje Y secundario: solo para gráfico combinado -->
+          <div v-if="store.chartType === 'combined'" class="form-group">
+            <label>Eje Y secundario (derecho)</label>
+            <label class="pie-opt" style="cursor:pointer" @click="store.combinedOptions.showSecondaryYAxis = !store.combinedOptions.showSecondaryYAxis">
+              <input type="checkbox" :checked="store.combinedOptions.showSecondaryYAxis" readonly />
+              <span>{{ store.combinedOptions.showSecondaryYAxis ? 'Activado' : 'Desactivado' }}</span>
+            </label>
+          </div>
+
           <!-- Series type: only for bar chart -->
           <div v-if="activeConfigField.type === 'measures' && store.chartType === 'bar'" class="form-group">
             <label>Tipo de serie</label>
@@ -587,6 +627,7 @@ import { useVisualizationConfiguratorStore } from '@/stores/visualizationConfigu
 import { useUIStore } from '@/stores/ui'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useCubeStore } from '@/stores/cubejs'
+import { useCurrencyStore } from '@/stores/currencies'
 import { useCubeQuery } from '@/composables/useCubeQuery'
 import EChartWrapper from '@/components/charts/EChartWrapper.vue'
 
@@ -596,6 +637,8 @@ const store = useVisualizationConfiguratorStore()
 const uiStore = useUIStore()
 const dashboardStore = useDashboardStore()
 const cubeStore = useCubeStore()
+const currencyStore = useCurrencyStore()
+currencyStore.loadFromBackend()
 
 // Search states
 const measureSearch = ref('')
@@ -620,6 +663,7 @@ const activeChartType = computed(() => chartTypes.find(ct => ct.value === store.
 
 // Format combobox state (modal Configurar Métrica)
 const formatOpen = ref(false)
+const currencyOpen = ref(false)
 const formatOptions = [
   { value: 'number',   label: 'Número' },
   { value: 'currency', label: 'Moneda' },
@@ -664,7 +708,7 @@ const toggleConfig = () => {
 }
 
 // Close filter dropdown when clicking outside
-function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false; cubeOpen.value = false; formatOpen.value = false; labelPositionOpen.value = false }
+function onDocClick() { openFilterDropdown.value = null; chartTypeOpen.value = false; cubeOpen.value = false; formatOpen.value = false; currencyOpen.value = false; labelPositionOpen.value = false }
 onMounted(() => document.addEventListener('click', onDocClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
@@ -678,6 +722,7 @@ const currentWidget = computed(() => ({
       key: m.fullName,
       label: m.alias || m.title,
       format: m.format,
+      currencyId: m.currencyId ?? null,
       decimalPlaces: m.decimalPlaces,
       seriesType: m.seriesType,
       showLabel: m.showLabel,
@@ -697,6 +742,7 @@ const currentWidget = computed(() => ({
   },
   chartOptions: store.chartOptions,
   pieOptions: store.pieOptions,
+  combinedOptions: store.combinedOptions,
   useMockData: false
 }))
 
@@ -716,6 +762,7 @@ const updateFieldConfig = () => {
     store.updateMeasure(field.fullName, {
       alias: field.alias,
       format: field.format,
+      currencyId: field.currencyId ?? null,
       decimalPlaces: field.decimalPlaces,
       seriesType: field.seriesType,
       showLabel: field.showLabel,

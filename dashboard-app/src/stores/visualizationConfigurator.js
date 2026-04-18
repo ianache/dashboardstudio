@@ -13,7 +13,8 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
     timeDimension: null,
     chartType: 'bar',
     chartOptions: {},
-    pieOptions: { showValue: false, showPercent: true, showTotal: false }
+    pieOptions: { showValue: false, showPercent: true, showTotal: false },
+    combinedOptions: { showSecondaryYAxis: false }
   }),
 
   actions: {
@@ -33,6 +34,7 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.chartType = widget.chartType || 'bar'
       this.chartOptions = widget.chartOptions || {}
       this.pieOptions = widget.pieOptions || { showValue: false, showPercent: true, showTotal: false }
+      this.combinedOptions = widget.combinedOptions || { showSecondaryYAxis: false }
       
       if (widget.cubeQuery) {
         const cubeStore = useCubeStore()
@@ -49,6 +51,7 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
               ...base,
               alias: m.label !== base.title ? m.label : undefined,
               format: m.format,
+              currencyId: m.currencyId ?? null,
               decimalPlaces: m.decimalPlaces,
               seriesType: m.seriesType,
               showLabel: m.showLabel,
@@ -176,6 +179,7 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
       this.chartType = 'bar'
       this.chartOptions = {}
       this.pieOptions = { showValue: false, showPercent: true, showTotal: false }
+      this.combinedOptions = { showSecondaryYAxis: false }
     }
   }
 })

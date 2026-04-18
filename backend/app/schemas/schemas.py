@@ -185,6 +185,19 @@ class DataTypeResponse(DataTypeBase):
     updated_at: Optional[datetime] = None
 
 
+class CurrencyBase(BaseModel):
+    code: str
+    symbol: str
+    name: str
+    is_active: bool = True
+
+
+class CurrencyResponse(CurrencyBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+
+
 class DimensionalModelNode(BaseModel):
     id: str
     type: str

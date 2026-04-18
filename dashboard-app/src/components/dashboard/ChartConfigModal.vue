@@ -107,6 +107,30 @@
                     class="color-picker"
                     :title="'Color serie ' + (idx+1)"
                   />
+                  <!-- Formato de la medida -->
+                  <select
+                    v-model="measure.format"
+                    class="form-input form-select measure-format-select"
+                    :title="'Formato de la medida'"
+                  >
+                    <option value="numero">Número</option>
+                    <option value="moneda">Moneda</option>
+                    <option value="porcentaje">Porcentaje</option>
+                  </select>
+                  <!-- Selector de moneda (solo si formato = moneda) -->
+                  <select
+                    v-if="measure.format === 'moneda'"
+                    v-model="measure.currencyId"
+                    class="form-input form-select measure-currency-select"
+                    :title="'Moneda'"
+                  >
+                    <option :value="null">— Moneda —</option>
+                    <option
+                      v-for="cur in currencyStore.activeCurrencies"
+                      :key="cur.id"
+                      :value="cur.id"
+                    >{{ cur.symbol }} {{ cur.code }}</option>
+                  </select>
                   <!-- Estilo de serie (solo bar y combined) -->
                   <div
                     v-if="form.chartType === 'bar' || form.chartType === 'combined'"
@@ -309,6 +333,21 @@
               </div>
             </div>
 
+            <!-- Combined-specific options -->
+            <div v-if="form.chartType === 'combined'" class="form-group pie-options-group">
+              <label class="form-label">Opciones del gráfico Combinado</label>
+              <div class="pie-options-row">
+                <label
+                  class="pie-opt-toggle"
+                  :class="{ active: form.combinedOptions.showSecondaryYAxis }"
+                  @click="form.combinedOptions.showSecondaryYAxis = !form.combinedOptions.showSecondaryYAxis"
+                >
+                  <span class="pie-opt-icon">{{ form.combinedOptions.showSecondaryYAxis ? '✓' : '' }}</span>
+                  Eje Y secundario (derecho)
+                </label>
+              </div>
+            </div>
+
             <div class="form-group">
               <div class="visual-label-row">
                 <label class="form-label">Opciones ECharts (JSON)</label>
@@ -506,8 +545,11 @@ import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
+import { useCurrencyStore } from '@/stores/currencies'
 
 const paletteStore = useColorPaletteStore()
+const currencyStore = useCurrencyStore()
+currencyStore.loadFromBackend()
 
 const props = defineProps({
   widget: { type: Object, required: true }
@@ -563,9 +605,22 @@ if (!form.value.cubeQuery) {
   }
 }
 
+// Backfill format/currencyId for existing measures that predate this field
+// Using map+replace to guarantee Vue 3 tracks the new properties reactively
+form.value.cubeQuery.measures = form.value.cubeQuery.measures.map(m => ({
+  ...m,
+  format: m.format ?? 'numero',
+  currencyId: m.currencyId ?? null
+}))
+
 // Ensure pieOptions exists with defaults
 if (!form.value.pieOptions) {
   form.value.pieOptions = { showValue: false, showPercent: true, showTotal: false }
+}
+
+// Ensure combinedOptions exists with defaults
+if (!form.value.combinedOptions) {
+  form.value.combinedOptions = { showSecondaryYAxis: false }
 }
 
 // colorPalette: null = inherit dashboard, 'none' = no palette, <id> = specific palette
@@ -715,7 +770,7 @@ watch(chartOptionsJson, (v) => {
 })
 
 function addMeasure() {
-  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff', seriesType: 'bar' })
+  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff', seriesType: 'bar', format: 'numero', currencyId: null })
 }
 function removeMeasure(idx) {
   form.value.cubeQuery.measures.splice(idx, 1)
@@ -741,7 +796,7 @@ function getMemberKey(cubeName, memberName) {
 
 function insertMeasure(key) {
   const label = key.split('.').pop()
-  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff', seriesType: 'bar' })
+  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff', seriesType: 'bar', format: 'numero', currencyId: null })
   activeTab.value = 'data'
 }
 function insertDimension(key) {
@@ -1030,6 +1085,14 @@ if (cubeStore.token && !cubeStore.meta) {
 .pie-opt-toggle:hover { border-color: var(--primary); color: var(--primary); }
 .pie-opt-toggle.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
 .pie-opt-icon { font-size: 11px; width: 12px; text-align: center; }
+
+.measure-format-select {
+  flex: 0 0 110px;
+}
+
+.measure-currency-select {
+  flex: 0 0 100px;
+}
 
 .series-type-toggle {
   display: flex;
