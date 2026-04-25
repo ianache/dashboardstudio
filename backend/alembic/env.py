@@ -42,11 +42,10 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"options": f"-c search_path={settings.postgres_schema},public"}
     )
 
     with connectable.connect() as connection:
-        connection.execute(text(f"SET search_path TO {settings.postgres_schema}"))
-        
         context.configure(
             connection=connection, 
             target_metadata=target_metadata,
