@@ -4,7 +4,32 @@
       "Bash(npm install:*)",
       "Bash(npm run:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Skill(gsd:progress)",
+      "Bash(npx vite *)",
+      "Bash(git push *)",
+      "Skill(gsd:add-phase)",
+      "Bash(ls .planning/phases/06-multi-diagram-dimensional-model/*-SUMMARY.md)",
+      "Bash(node __TRACKED_VAR__/.claude/get-shit-done/bin/gsd-tools.cjs state advance-plan)",
+      "Bash(node __TRACKED_VAR__/.claude/get-shit-done/bin/gsd-tools.cjs state update-progress)",
+      "Bash(node __TRACKED_VAR__/.claude/get-shit-done/bin/gsd-tools.cjs state record-session --stopped-at 'Completed 06-04-PLAN.md \\(DiagramPropsPanel + Markdown\\)')",
+      "Bash(node __TRACKED_VAR__/.claude/get-shit-done/bin/gsd-tools.cjs roadmap update-plan-progress 6)",
+      "Bash(node __TRACKED_VAR__/.claude/get-shit-done/bin/gsd-tools.cjs requirements mark-complete MD-07)",
+      "Bash(git *)",
+      "Bash(python -c ' *)",
+      "Bash(.venv/Scripts/alembic upgrade *)",
+      "Bash(.venv/Scripts/alembic current *)",
+      "Bash(.venv/Scripts/alembic stamp *)",
+      "Bash(xargs grep *)",
+      "Bash(grep -v \"//\")",
+      "Bash(alembic upgrade *)",
+      "Bash(python -m alembic upgrade head)",
+      "Bash(ls *.bat *.sh *.ps1)",
+      "Bash(ls venv* .venv*)",
+      "Bash(.venv/Scripts/python.exe -m alembic upgrade head)",
+      "Bash(.venv/Scripts/python.exe -m alembic stamp 004)",
+      "Bash(.venv/Scripts/python.exe -m alembic current)",
+      "Bash(.venv/Scripts/python.exe -c ' *)"
     ]
   }
 }
