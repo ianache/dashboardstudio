@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fefcff",
+                        "primary-container": "#2170e4",
+                        "outline-variant": "#c2c6d6",
+                        "on-primary-fixed": "#001a42",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed": "#131b2e",
+                        "surface-variant": "#e0e3e5",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-container": "#5c647a",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-container": "#6063ee",
+                        "on-error-container": "#93000a",
+                        "secondary": "#565e74",
+                        "secondary-fixed": "#dae2fd",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed": "#e1e0ff",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "outline": "#727785",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "surface-dim": "#d8dadc",
+                        "surface-tint": "#005ac2",
+                        "inverse-on-surface": "#eff1f3",
+                        "background": "#f7f9fb",
+                        "on-background": "#191c1e",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-container-high": "#e6e8ea",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-container": "#dae2fd",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#4648d4",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#424754",
+                        "primary": "#0058be"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "h3": ["Plus Jakarta Sans"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            background-color: #f7f9fb;
+        }
+    </style>
+</head>
+
+<body class="font-body-md text-on-surface">
+    <!-- Background Shell (Dashboard) -->
+    <div class="fixed inset-0 flex">
+        <!-- Sidebar Shell -->
+        <aside
+            class="flex flex-col h-screen py-6 fixed left-0 top-0 h-full w-[280px] border-r border-slate-800 bg-slate-950 font-plus-jakarta text-sm antialiased shadow-2xl z-0 blur-[2px]">
+            <div class="px-6 mb-8">
+                <h1 class="text-xl font-bold tracking-tight text-white">AI Analytics</h1>
+                <p class="text-xs text-slate-500">Enterprise Console</p>
+            </div>
+            <nav class="flex-1 space-y-1">
+                <div class="flex items-center gap-3 px-4 py-3 text-slate-400">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>Dashboard</span>
+                </div>
+                <div
+                    class="flex items-center gap-3 px-4 py-3 text-white bg-blue-600/10 border-r-4 border-blue-500 font-semibold">
+                    <span class="material-symbols-outlined">group</span>
+                    <span>Team</span>
+                </div>
+                <div class="flex items-center gap-3 px-4 py-3 text-slate-400">
+                    <span class="material-symbols-outlined">assessment</span>
+                    <span>Reports</span>
+                </div>
+                <div class="flex items-center gap-3 px-4 py-3 text-slate-400">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </aside>
+        <!-- Main Content Area (Blurred) -->
+        <main class="ml-[280px] w-full blur-[4px]">
+            <!-- TopNavBar Shell -->
+            <header
+                class="flex justify-between items-center h-16 px-8 sticky top-0 w-full z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+                <div class="flex items-center gap-4">
+                    <span class="text-lg font-black text-slate-900">AIAnalyticsPlatform</span>
+                    <div class="h-8 w-[1px] bg-slate-200"></div>
+                    <span class="text-slate-500">Dashboard / User Access</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-slate-500">notifications</span>
+                    <img alt="User Profile" class="h-8 w-8 rounded-full border border-slate-200"
+                        data-alt="professional corporate headshot of a business woman with a friendly expression and neutral background"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_6ArOoZgs70psX1MGWd52rhxX8h3rp4rD_5lITN5D-3R94_wjCJBmXorY3YTSXdPUwxIVryxnM_bqMEY4Wp9jrEd_mjiMSsB134hNM8Pb4Kxhxcsuk5d5TuPijUiiePOJRiaM6S7fUNg2MdBqNBinz5EKMpkYQ5lnMHN8ZV8_tPzey3OFNPVviTiPHySDqetxO7FoPMhe2_08wn775SVprtrc_PP4-bF5y1Yq6CcKaCy6MiixKK54iBBj8r7_x_9Cz7xjF1Kxw58" />
+                </div>
+            </header>
+            <div class="p-8 max-w-[1600px] mx-auto space-y-8">
+                <div class="grid grid-cols-12 gap-6">
+                    <!-- Dashboard Cards Placeholders -->
+                    <div class="col-span-8 h-64 bg-white rounded-xl border border-slate-200 shadow-sm p-6"></div>
+                    <div class="col-span-4 h-64 bg-white rounded-xl border border-slate-200 shadow-sm p-6"></div>
+                    <div class="col-span-4 h-96 bg-white rounded-xl border border-slate-200 shadow-sm p-6"></div>
+                    <div class="col-span-8 h-96 bg-white rounded-xl border border-slate-200 shadow-sm p-6"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Modal Overlay -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <!-- Assignment Modal -->
+        <div
+            class="bg-surface-container-lowest w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[921px]">
+            <!-- Header -->
+            <div class="px-6 py-4 flex items-center justify-between border-b border-surface-variant">
+                <div>
+                    <h2 class="font-h2 text-h3 text-on-surface">Asignar usuarios — Concesionaria</h2>
+                </div>
+                <button
+                    class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface-variant">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <!-- Content Area -->
+            <div class="p-6 overflow-y-auto space-y-6">
+                <!-- Instruction & Search -->
+                <div class="space-y-4">
+                    <p class="text-body-md text-on-surface-variant">
+                        Busca y selecciona los usuarios que tendrán acceso a este dashboard.
+                    </p>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                            <input
+                                class="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-sm"
+                                placeholder="Buscar por nombre o correo..." type="text" />
+                        </div>
+                        <button
+                            class="flex items-center justify-center gap-2 px-4 py-2.5 text-primary border border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-lg font-label-md transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">hub</span>
+                            <span>Buscar en Keycloak</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Assigned Users List -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between px-1">
+                        <h3 class="font-h3 text-label-md text-on-surface-variant uppercase tracking-wider">Usuarios
+                            asignados</h3>
+                        <span
+                            class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded text-[10px] font-bold">3
+                            ASIGNADOS</span>
+                    </div>
+                    <div class="space-y-2">
+                        <!-- User Item 1 -->
+                        <div
+                            class="flex items-center justify-between p-3 bg-white border border-outline-variant/30 rounded-xl hover:shadow-md transition-all group">
+                            <div class="flex items-center gap-3">
+                                <img alt="User 1" class="w-10 h-10 rounded-full bg-surface-container"
+                                    data-alt="vibrant illustrated male avatar with glasses and a blue shirt on a plain background"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7b7CerTMVzSmay2zgUfH5TBUFvWJuBJNc2HVr_oQrjeT7VWn74NHIMpMGb7depTx_WNAf8KE8nn3UU3MSIxeysVQGd1aIVq5lH52-5VlqU1az-NVxMJTegAw-ZiJaCNb1JU8J-sztxS3z95F-Qx7Nn7C5aEDhRm5wnOGKgJm-7qnqMd-Iuef9EF4mxcupZsqG0dzXZrceMgKENEs1_xkqP5IS_-TD9ZBhlQSFpTw0KK0OdQd0wFtVTs7rhmuG1w9aSocibIAeBJk" />
+                                <div>
+                                    <p class="font-label-md text-on-surface">Ricardo Valenzuela</p>
+                                    <p class="text-body-sm text-outline">ricardo.v@concesionaria.mx</p>
+                                </div>
+                            </div>
+                            <button
+                                class="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full transition-all">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                        <!-- User Item 2 -->
+                        <div
+                            class="flex items-center justify-between p-3 bg-white border border-outline-variant/30 rounded-xl hover:shadow-md transition-all group">
+                            <div class="flex items-center gap-3">
+                                <img alt="User 2" class="w-10 h-10 rounded-full bg-surface-container"
+                                    data-alt="minimalist illustrated female avatar with long hair and a yellow top on a solid soft background"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq41UWwsHoivQsrF5uTntzeSu10DWCYSW9wkpCdVMgQFp0nrW0bB5V_KZP64MCoP891Vgm9ivZx-uukEVXU073yD-t4kM0kxcC29cPxoiUDf6cchGW6dp2VR3BtHCz9_7P1mmTHbbu_J4i7grazcjGMGv4lv63xMneT6J_BhgSO5iI08HGeDs-LNZ6ZuSyMC5DOY-gnWcalMRLT_EvcmtTL55XB0bm0hd2DnAnYCRkRwFN2E0W2O9Ljs3_3KqEfeTt2_xCB3bBHMc" />
+                                <div>
+                                    <p class="font-label-md text-on-surface">Elena Martínez</p>
+                                    <p class="text-body-sm text-outline">elena.mtz@concesionaria.mx</p>
+                                </div>
+                            </div>
+                            <button
+                                class="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full transition-all">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                        <!-- User Item 3 -->
+                        <div
+                            class="flex items-center justify-between p-3 bg-white border border-outline-variant/30 rounded-xl hover:shadow-md transition-all group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-white font-bold text-sm">
+                                    JS
+                                </div>
+                                <div>
+                                    <p class="font-label-md text-on-surface">Jorge Salinas</p>
+                                    <p class="text-body-sm text-outline">jorge.s@concesionaria.mx</p>
+                                </div>
+                            </div>
+                            <button
+                                class="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full transition-all">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Empty State (Hidden) -->
+                <div
+                    class="hidden flex-col items-center justify-center py-12 border-2 border-dashed border-outline-variant rounded-2xl bg-surface-container-low">
+                    <span class="material-symbols-outlined text-4xl text-outline mb-3">person_search</span>
+                    <p class="font-label-md text-on-surface-variant">No hay usuarios asignados</p>
+                    <p class="text-body-sm text-outline">Comienza buscando un usuario arriba.</p>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div
+                class="px-6 py-5 bg-surface-container-low border-t border-surface-variant flex items-center justify-end gap-3">
+                <button
+                    class="px-6 py-2.5 font-label-md text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+                    Cancelar
+                </button>
+                <button
+                    class="px-6 py-2.5 font-label-md bg-primary text-white hover:bg-primary/90 rounded-lg shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                    Guardar asignación
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

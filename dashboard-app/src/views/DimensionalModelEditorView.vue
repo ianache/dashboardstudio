@@ -186,7 +186,7 @@
       </div>
 
       <!-- Canvas column: tab bar + canvas -->
-      <div class="canvas-column">
+      <div ref="canvasColumnEl" class="canvas-column">
         <!-- Diagram tab bar -->
         <DiagramTabBar
           v-if="model?.diagrams?.length && activeDiagramId"
@@ -206,159 +206,179 @@
           @mousemove="onNodeDragMove"
           @dragover.prevent="onCanvasDragOver"
           @drop="onCanvasDrop"
+          @wheel.ctrl.prevent="onCanvasWheel"
         >
-        <!-- SVG overlay for relationships + guide line -->
-        <svg class="canvas-svg" :width="canvasSize.w" :height="canvasSize.h">
-          <defs>
-            <!-- Field drag guide line arrow -->
-            <marker id="arrowhead-key" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#52c41a"/>
-            </marker>
-            <!-- Relationship: source end — single bar (1-side, dimension) -->
-            <marker id="rel-source" markerWidth="6" markerHeight="12" refX="1" refY="6" orient="auto">
-              <line x1="1" y1="0" x2="1" y2="12" stroke="#888" stroke-width="1.8" stroke-linecap="round"/>
-            </marker>
-            <marker id="rel-source-sel" markerWidth="6" markerHeight="12" refX="1" refY="6" orient="auto">
-              <line x1="1" y1="0" x2="1" y2="12" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round"/>
-            </marker>
-            <!-- Relationship: target end — solid arrow (N-side, fact) -->
-            <marker id="rel-target" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-              <polygon points="0,0 7,4 0,8" fill="#888"/>
-            </marker>
-            <marker id="rel-target-sel" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-              <polygon points="0,0 7,4 0,8" fill="var(--primary)"/>
-            </marker>
-          </defs>
-
-          <!-- Relationships -->
-          <g v-for="rel in visibleRelationships" :key="rel.id">
-            <!-- Wide invisible hit area -->
-            <path
-              :d="relPath(rel)"
-              fill="none"
-              stroke="transparent"
-              stroke-width="12"
-              style="cursor:pointer"
-              @click.stop="selectRelationship(rel)"
-            />
-            <!-- Visible bezier path -->
-            <path
-              :d="relPath(rel)"
-              fill="none"
-              :stroke="selectedRel?.id === rel.id ? 'var(--primary)' : '#888'"
-              stroke-width="1.8"
-              :marker-start="selectedRel?.id === rel.id ? 'url(#rel-source-sel)' : 'url(#rel-source)'"
-              :marker-end="selectedRel?.id === rel.id ? 'url(#rel-target-sel)' : 'url(#rel-target)'"
-              class="rel-line"
-              @click.stop="selectRelationship(rel)"
-            />
-            <text
-              :x="relMidpoint(rel).x"
-              :y="relMidpoint(rel).y - 6"
-              text-anchor="middle"
-              class="rel-label"
-              :fill="selectedRel?.id === rel.id ? 'var(--primary)' : '#555'"
-              @click.stop="selectRelationship(rel)"
-            >{{ rel.cardinality }}</text>
-          </g>
-
-          <!-- Field drag guide line -->
-          <line
-            v-if="dragField"
-            :x1="dragField.startPos.x"
-            :y1="dragField.startPos.y"
-            :x2="mousePos.x"
-            :y2="mousePos.y"
-            stroke="#52c41a"
-            stroke-width="2"
-            stroke-dasharray="6 4"
-            marker-end="url(#arrowhead-key)"
-            pointer-events="none"
-          />
-        </svg>
-
-        <!-- Nodes -->
-        <div
-          v-for="node in activeDiagramNodes"
-          :key="node.id"
-          class="model-node"
-          :class="[
-            node.type,
-            { selected: selectedNode?.id === node.id },
-            { 'drop-target': dragField && node.type === 'fact' && node.id === dropTargetId },
-            { 'global-ref': node.globalRef }
-          ]"
-          :style="{ left: node.x + 'px', top: node.y + 'px' }"
-          @click.stop="onNodeClick(node)"
-          @mousedown.stop="startDrag(node, $event)"
-        >
-          <div class="node-header" :class="node.type">
-            <span class="node-badge">{{ node.type === 'fact' ? 'HECHO' : 'DIM' }}</span>
-            <span class="node-name">{{ node.name }}</span>
-            <svg v-if="node.globalRef" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;flex-shrink:0">
-              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-            </svg>
-          </div>
-          <button
-            v-if="activeDiagram && !activeDiagram.isMain"
-            class="node-btn-remove-diagram"
-            title="Quitar del diagrama"
-            @click.stop="removeNodeFromActiveDiagram(node)"
-          >−</button>
-          <div class="node-fields">
+          <!-- Scaler: drives scrollbar dimensions at current zoom level -->
+          <div class="canvas-scaler" :style="{ width: canvasScalerSize.w + 'px', height: canvasScalerSize.h + 'px' }">
+            <!-- Inner: all diagram content, scaled -->
             <div
-              v-for="f in node.fields"
-              :key="f.id"
-              class="node-field"
-              :class="{ 'is-key': f.isKey, 'is-fk': f.isFk }"
+              class="canvas-inner"
+              :style="{ width: canvasSize.w + 'px', height: canvasSize.h + 'px', transform: `scale(${zoomLevel})` }"
             >
-              <!-- Drag handle: only on key field of dimension nodes -->
-              <span
-                v-if="node.type === 'dimension' && f.isKey"
-                class="key-drag-handle"
-                title="Arrastrar para vincular con tabla de hechos"
-                @mousedown.stop="startFieldDrag(node, f, $event)"
-              >⠿</span>
-              <span v-else class="field-icon-placeholder"></span>
+              <!-- Snap grid overlay -->
+              <div v-if="snapEnabled" class="canvas-snap-grid" :style="{ backgroundSize: `${SNAP_GRID}px ${SNAP_GRID}px` }" />
 
-              <span class="field-icon">
-                <span v-if="f.isKey" class="key-icon" title="Llave primaria">🔑</span>
-                <span v-else-if="f.isFk" class="fk-icon" title="Llave foránea">🔗</span>
-                <span v-else>{{ fieldIcon(node.type, f.dataType) }}</span>
-              </span>
-              <span class="field-name">{{ f.name }}</span>
-              <span class="field-type">{{ dtStore.getById(f.dataType)?.name ?? f.dataType }}</span>
-            </div>
+              <!-- SVG overlay for relationships + guide line -->
+              <svg class="canvas-svg" :width="canvasSize.w" :height="canvasSize.h">
+                <defs>
+                  <marker id="arrowhead-key" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#52c41a"/>
+                  </marker>
+                  <marker id="rel-source" markerWidth="6" markerHeight="12" refX="1" refY="6" orient="auto">
+                    <line x1="1" y1="0" x2="1" y2="12" stroke="#888" stroke-width="1.8" stroke-linecap="round"/>
+                  </marker>
+                  <marker id="rel-source-sel" markerWidth="6" markerHeight="12" refX="1" refY="6" orient="auto">
+                    <line x1="1" y1="0" x2="1" y2="12" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round"/>
+                  </marker>
+                  <marker id="rel-target" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <polygon points="0,0 7,4 0,8" fill="#888"/>
+                  </marker>
+                  <marker id="rel-target-sel" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <polygon points="0,0 7,4 0,8" fill="var(--primary)"/>
+                  </marker>
+                </defs>
 
-            <!-- Hint for dimensions without key -->
-            <div v-if="node.type === 'dimension' && node.fields.length && !node.fields.some(f => f.isKey)" class="node-warn">
-              ⚠ Sin llave definida
-            </div>
-            <div v-if="!node.fields.length" class="node-empty">Sin campos</div>
-          </div>
-        </div>
+                <!-- Relationships -->
+                <g v-for="rel in visibleRelationships" :key="rel.id">
+                  <path :d="relPath(rel)" fill="none" stroke="transparent" stroke-width="12" style="cursor:pointer" @click.stop="selectRelationship(rel)" />
+                  <path
+                    :d="relPath(rel)" fill="none"
+                    :stroke="selectedRel?.id === rel.id ? 'var(--primary)' : '#888'"
+                    stroke-width="1.8"
+                    :marker-start="selectedRel?.id === rel.id ? 'url(#rel-source-sel)' : 'url(#rel-source)'"
+                    :marker-end="selectedRel?.id === rel.id ? 'url(#rel-target-sel)' : 'url(#rel-target)'"
+                    class="rel-line"
+                    @click.stop="selectRelationship(rel)"
+                  />
+                  <text
+                    :x="relMidpoint(rel).x" :y="relMidpoint(rel).y - 6"
+                    text-anchor="middle" class="rel-label"
+                    :fill="selectedRel?.id === rel.id ? 'var(--primary)' : '#555'"
+                    @click.stop="selectRelationship(rel)"
+                  >{{ rel.cardinality }}</text>
+                </g>
 
-        <!-- Empty canvas hint -->
-        <div v-if="!model?.nodes.length" class="canvas-hint">
-          <p>Usa los botones de la barra para añadir tablas de <strong>Hecho</strong> o <strong>Dimensión</strong></p>
-        </div>
+                <!-- Field drag guide line -->
+                <line
+                  v-if="dragField"
+                  :x1="dragField.startPos.x" :y1="dragField.startPos.y"
+                  :x2="mousePos.x" :y2="mousePos.y"
+                  stroke="#52c41a" stroke-width="2" stroke-dasharray="6 4"
+                  marker-end="url(#arrowhead-key)" pointer-events="none"
+                />
+              </svg>
 
-        <!-- Sub-diagram empty hint -->
-        <div v-if="activeDiagram && !activeDiagram.isMain && !activeDiagramNodes.length" class="canvas-hint sub-diagram-hint">
-          <p>Este diagrama está vacío.</p>
-          <button class="btn btn-primary" style="pointer-events:all" @click="showAddNodeModal = true">+ Añadir tabla</button>
-        </div>
+              <!-- Nodes -->
+              <div
+                v-for="node in activeDiagramNodes"
+                :key="node.id"
+                class="model-node"
+                :class="[
+                  node.type,
+                  { selected: selectedNode?.id === node.id },
+                  { 'drop-target': dragField && node.type === 'fact' && node.id === dropTargetId },
+                  { 'global-ref': node.globalRef }
+                ]"
+                :style="{ left: node.x + 'px', top: node.y + 'px' }"
+                @click.stop="onNodeClick(node)"
+                @mousedown.stop="startDrag(node, $event)"
+              >
+                <div class="node-header" :class="node.type">
+                  <span class="node-badge">{{ node.type === 'fact' ? 'HECHO' : 'DIM' }}</span>
+                  <span class="node-name">{{ node.name }}</span>
+                  <svg v-if="node.globalRef" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;flex-shrink:0">
+                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </div>
+                <button
+                  v-if="activeDiagram && !activeDiagram.isMain"
+                  class="node-btn-remove-diagram"
+                  title="Quitar del diagrama"
+                  @click.stop="removeNodeFromActiveDiagram(node)"
+                >−</button>
+                <div class="node-fields">
+                  <div v-for="f in node.fields" :key="f.id" class="node-field" :class="{ 'is-key': f.isKey, 'is-fk': f.isFk }">
+                    <span
+                      v-if="node.type === 'dimension' && f.isKey"
+                      class="key-drag-handle"
+                      title="Arrastrar para vincular con tabla de hechos"
+                      @mousedown.stop="startFieldDrag(node, f, $event)"
+                    >⠿</span>
+                    <span v-else class="field-icon-placeholder"></span>
+                    <span class="field-icon">
+                      <span v-if="f.isKey" class="key-icon" title="Llave primaria">🔑</span>
+                      <span v-else-if="f.isFk" class="fk-icon" title="Llave foránea">🔗</span>
+                      <span v-else>{{ fieldIcon(node.type, f.dataType) }}</span>
+                    </span>
+                    <span class="field-name">{{ f.name }}</span>
+                    <span class="field-type">{{ dtStore.getById(f.dataType)?.name ?? f.dataType }}</span>
+                  </div>
+                  <div v-if="node.type === 'dimension' && node.fields.length && !node.fields.some(f => f.isKey)" class="node-warn">
+                    ⚠ Sin llave definida
+                  </div>
+                  <div v-if="!node.fields.length" class="node-empty">Sin campos</div>
+                </div>
+              </div>
 
-        <!-- Field drag floating label -->
+              <!-- Empty canvas hint -->
+              <div v-if="!model?.nodes.length" class="canvas-hint">
+                <p>Usa los botones de la barra para añadir tablas de <strong>Hecho</strong> o <strong>Dimensión</strong></p>
+              </div>
+
+              <!-- Sub-diagram empty hint -->
+              <div v-if="activeDiagram && !activeDiagram.isMain && !activeDiagramNodes.length" class="canvas-hint sub-diagram-hint">
+                <p>Este diagrama está vacío.</p>
+                <button class="btn btn-primary" style="pointer-events:all" @click="showAddNodeModal = true">+ Añadir tabla</button>
+              </div>
+
+              <!-- Field drag floating label -->
+              <div
+                v-if="dragField"
+                class="drag-pill"
+                :style="{ left: mousePos.x + 16 + 'px', top: mousePos.y - 12 + 'px' }"
+              >
+                🔑 {{ dragField.fieldName }}
+                <span v-if="dropTargetId" class="drag-pill-hint">→ soltar para vincular</span>
+              </div>
+            </div><!-- /canvas-inner -->
+          </div><!-- /canvas-scaler -->
+        </div><!-- /model-canvas -->
+
+        <!-- Floating diagram toolbar — draggable, fixed relative to canvas-column -->
         <div
-          v-if="dragField"
-          class="drag-pill"
-          :style="{ left: mousePos.x + 16 + 'px', top: mousePos.y - 12 + 'px' }"
+          class="float-toolbar"
+          :style="{ left: toolbarPos.x + 'px', top: toolbarPos.y + 'px' }"
         >
-          🔑 {{ dragField.fieldName }}
-          <span v-if="dropTargetId" class="drag-pill-hint">→ soltar para vincular</span>
-        </div>
+          <!-- Drag handle -->
+          <div class="ft-handle" @mousedown.prevent="onToolbarDragStart" title="Mover barra">
+            <MIcon icon="drag_indicator" :size="18" />
+          </div>
+          <div class="ft-sep" />
+          <!-- Zoom out -->
+          <button class="ft-btn" :disabled="zoomLevel <= 0.25" data-tooltip="Reducir zoom" @click="zoomOut">
+            <MIcon icon="zoom_out" :size="20" />
+          </button>
+          <!-- Zoom level — click to reset -->
+          <span class="ft-zoom-label" title="Restablecer zoom (100%)" @click="zoomReset">{{ zoomPercent }}%</span>
+          <!-- Zoom in -->
+          <button class="ft-btn" :disabled="zoomLevel >= 2.0" data-tooltip="Ampliar zoom" @click="zoomIn">
+            <MIcon icon="zoom_in" :size="20" />
+          </button>
+          <div class="ft-sep" />
+          <!-- Snap to grid toggle -->
+          <button
+            class="ft-btn"
+            :class="{ 'ft-btn--active': snapEnabled }"
+            data-tooltip="Snap a cuadrícula"
+            @click="snapEnabled = !snapEnabled"
+          >
+            <MIcon :icon="snapEnabled ? 'grid_on' : 'grid_off'" :size="20" />
+          </button>
+          <!-- Center diagram -->
+          <button class="ft-btn" data-tooltip="Centrar diagrama" @click="centerDiagram">
+            <MIcon icon="center_focus_strong" :size="20" />
+          </button>
         </div>
       </div>
 
@@ -795,6 +815,7 @@ import { useDataTypeStore } from '@/stores/dataTypes'
 import { useUIStore } from '@/stores/ui'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
+import MIcon from '@/components/common/MIcon.vue'
 import DiagramTabBar from '@/components/dimensional-model/DiagramTabBar.vue'
 import DiagramPropsPanel from '@/components/dimensional-model/DiagramPropsPanel.vue'
 import AddNodeToDiagramModal from '@/components/dimensional-model/AddNodeToDiagramModal.vue'
@@ -1486,7 +1507,70 @@ const filteredDims = computed(() => {
   return q ? nodes.filter(n => n.name.toLowerCase().includes(q)) : nodes
 })
 
-// Initialize activeDiagramId when model loads
+// ── Zoom & snap ──────────────────────────────────────────────
+const SNAP_GRID = 20
+const zoomLevel = ref(1.0)
+const snapEnabled = ref(false)
+
+const zoomPercent = computed(() => Math.round(zoomLevel.value * 100))
+const canvasScalerSize = computed(() => ({
+  w: canvasSize.value.w * zoomLevel.value,
+  h: canvasSize.value.h * zoomLevel.value,
+}))
+
+function zoomIn()    { zoomLevel.value = Math.min(2.0,  Math.round((zoomLevel.value + 0.1) * 10) / 10) }
+function zoomOut()   { zoomLevel.value = Math.max(0.25, Math.round((zoomLevel.value - 0.1) * 10) / 10) }
+function zoomReset() { zoomLevel.value = 1.0 }
+
+function onCanvasWheel(e) {
+  e.deltaY < 0 ? zoomIn() : zoomOut()
+}
+
+function centerDiagram() {
+  if (!canvasEl.value || !activeDiagramNodes.value.length) return
+  const nodes = activeDiagramNodes.value
+  const minX = Math.min(...nodes.map(n => n.x))
+  const minY = Math.min(...nodes.map(n => n.y))
+  const maxX = Math.max(...nodes.map(n => n.x + NODE_WIDTH))
+  const maxY = Math.max(...nodes.map(n => n.y + nodeHeight(n)))
+  const cx = ((minX + maxX) / 2) * zoomLevel.value
+  const cy = ((minY + maxY) / 2) * zoomLevel.value
+  canvasEl.value.scrollLeft = cx - canvasEl.value.clientWidth / 2
+  canvasEl.value.scrollTop  = cy - canvasEl.value.clientHeight / 2
+}
+
+// ── Floating toolbar drag ─────────────────────────────────────
+const canvasColumnEl = ref(null)
+const toolbarPos = ref({ x: 16, y: 200 })  // updated on mount
+const toolbarDragging = ref(null)
+
+function onToolbarDragStart(e) {
+  toolbarDragging.value = {
+    startMouseX: e.clientX, startMouseY: e.clientY,
+    startX: toolbarPos.value.x, startY: toolbarPos.value.y,
+  }
+  document.addEventListener('mousemove', onToolbarDragMove)
+  document.addEventListener('mouseup', onToolbarDragEnd, { once: true })
+}
+
+function onToolbarDragMove(e) {
+  if (!toolbarDragging.value || !canvasColumnEl.value) return
+  const dx = e.clientX - toolbarDragging.value.startMouseX
+  const dy = e.clientY - toolbarDragging.value.startMouseY
+  const colW = canvasColumnEl.value.clientWidth
+  const colH = canvasColumnEl.value.clientHeight
+  toolbarPos.value = {
+    x: Math.max(0, Math.min(colW - 260, toolbarDragging.value.startX + dx)),
+    y: Math.max(0, Math.min(colH - 52,  toolbarDragging.value.startY + dy)),
+  }
+}
+
+function onToolbarDragEnd() {
+  toolbarDragging.value = null
+  document.removeEventListener('mousemove', onToolbarDragMove)
+}
+
+// ── Initialize activeDiagramId when model loads ───────────────
 watch(model, (m) => {
   if (m && !activeDiagramId.value) {
     const main = m.diagrams?.find(d => d.isMain) || m.diagrams?.[0]
@@ -1504,8 +1588,8 @@ watch(activeDiagramId, () => {
 function canvasPos(clientX, clientY) {
   const rect = canvasEl.value.getBoundingClientRect()
   return {
-    x: clientX - rect.left + canvasEl.value.scrollLeft,
-    y: clientY - rect.top + canvasEl.value.scrollTop
+    x: (clientX - rect.left + canvasEl.value.scrollLeft) / zoomLevel.value,
+    y: (clientY - rect.top  + canvasEl.value.scrollTop)  / zoomLevel.value,
   }
 }
 
@@ -1520,7 +1604,6 @@ const showFieldDesc = ref(false)
 const dragging = ref(null)  // { nodeId, startX, startY, origX, origY }
 
 // ── Field drag state ─────────────────────────────────────────
-// Active when user drags the 🔑 handle from a dimension key field
 const dragField = ref(null)  // { nodeId, nodeName, fieldId, fieldName, startPos:{x,y} }
 const dropTargetId = ref(null)
 const mousePos = ref({ x: 0, y: 0 })
@@ -1536,13 +1619,19 @@ const panelDragNodeId = ref(null)
 onMounted(() => {
   if (!model.value) { router.push('/models'); return }
   uiStore.setBreadcrumbs(['Modelos', model.value.name])
-  // Global listeners capture mouse events even outside the component
   document.addEventListener('mousemove', onGlobalMouseMove)
   document.addEventListener('mouseup', onGlobalMouseUp)
+  // Place toolbar near bottom-left of canvas column
+  nextTick(() => {
+    if (canvasColumnEl.value) {
+      toolbarPos.value = { x: 16, y: canvasColumnEl.value.clientHeight - 80 }
+    }
+  })
 })
 onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onGlobalMouseMove)
   document.removeEventListener('mouseup', onGlobalMouseUp)
+  document.removeEventListener('mousemove', onToolbarDragMove)
 })
 
 watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) })
@@ -1690,13 +1779,15 @@ function onNodeDragEnd(nodeId, newX, newY) {
 // Handles only node drag (called from canvas @mousemove to update node position)
 function onNodeDragMove(e) {
   if (!dragging.value) return
-  const dx = e.clientX - dragging.value.startX
-  const dy = e.clientY - dragging.value.startY
-  onNodeDragEnd(
-    dragging.value.nodeId,
-    Math.max(0, dragging.value.origX + dx),
-    Math.max(0, dragging.value.origY + dy)
-  )
+  const dx = (e.clientX - dragging.value.startX) / zoomLevel.value
+  const dy = (e.clientY - dragging.value.startY) / zoomLevel.value
+  let nx = Math.max(0, dragging.value.origX + dx)
+  let ny = Math.max(0, dragging.value.origY + dy)
+  if (snapEnabled.value) {
+    nx = Math.round(nx / SNAP_GRID) * SNAP_GRID
+    ny = Math.round(ny / SNAP_GRID) * SNAP_GRID
+  }
+  onNodeDragEnd(dragging.value.nodeId, nx, ny)
   hasUnsavedChanges.value = true
 }
 
@@ -2273,6 +2364,7 @@ function handleAddNodesToDiagram(nodeIds) {
 
 /* Canvas column: wraps tab bar + canvas in a column */
 .canvas-column {
+  position: relative;  /* anchor for float-toolbar */
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -2288,8 +2380,32 @@ function handleAddNodesToDiagram(nodeIds) {
   min-height: 500px;
 }
 .model-canvas.dragging-field { cursor: crosshair; }
-.model-canvas.sub-diagram {
-  background-color: var(--diagram-bg, #f7f0ff);
+.model-canvas.sub-diagram { background-color: var(--diagram-bg, #f7f0ff); }
+
+/* Scaler: explicit zoomed dimensions to drive scroll area */
+.canvas-scaler {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Inner: all content, scaled via transform */
+.canvas-inner {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Snap grid background */
+.canvas-snap-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .canvas-svg {
@@ -2298,6 +2414,94 @@ function handleAddNodesToDiagram(nodeIds) {
 }
 .canvas-svg .rel-line { pointer-events: stroke; cursor: pointer; }
 .canvas-svg .rel-label { font-size: 12px; font-weight: 600; pointer-events: all; cursor: pointer; }
+
+/* ── Floating diagram toolbar ── */
+.float-toolbar {
+  position: absolute;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--outline-variant);
+  border-radius: 12px;
+  padding: 4px 6px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
+  user-select: none;
+  pointer-events: all;
+}
+
+.ft-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 32px;
+  color: var(--outline);
+  cursor: grab;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.ft-handle:hover { background: var(--surface-container); color: var(--on-surface-variant); }
+.ft-handle:active { cursor: grabbing; }
+
+.ft-sep {
+  width: 1px; height: 18px;
+  background: var(--outline-variant);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.ft-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  transition: background 0.15s, color 0.15s;
+}
+.ft-btn:hover { background: var(--surface-container); color: var(--on-surface); }
+.ft-btn.ft-btn--active { background: rgba(0, 88, 190, 0.1); color: var(--primary); }
+.ft-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.ft-btn:disabled:hover { background: transparent; color: var(--on-surface-variant); }
+
+.ft-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+.ft-btn[data-tooltip]:hover::after { opacity: 1; }
+
+.ft-zoom-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-surface);
+  min-width: 38px;
+  text-align: center;
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.ft-zoom-label:hover { background: var(--surface-container); }
 
 .canvas-hint {
   position: absolute; inset: 0;

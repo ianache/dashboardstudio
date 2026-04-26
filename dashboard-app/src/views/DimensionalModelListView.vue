@@ -1,115 +1,55 @@
 <template>
   <div class="model-list-view">
-    <div class="page-header">
+    <!-- Page header -->
+    <div class="ds-page-header">
       <div>
-        <h2 class="page-title">Modelos Dimensionales</h2>
-        <p class="page-subtitle">Diseña y gestiona tus modelos de datos dimensionales</p>
+        <h2 class="ds-page-title">Modelos Dimensionales</h2>
+        <p class="ds-page-subtitle">Diseña y gestiona tus modelos de datos dimensionales</p>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn btn-primary btn-icon-only" data-tooltip="Añadir nuevo Modelo Dimensional" @click="showNewModal = true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
-        
+      <div class="ds-header-actions">
         <input ref="importInput" type="file" accept=".yaml,.yml" style="display:none" @change="handleImport" />
-        <button class="btn btn-secondary btn-icon-only" data-tooltip="Importar YAML" @click="importInput.click()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+        <button class="ds-btn-secondary" @click="importInput.click()">
+          <MIcon icon="upload" :size="18" />
+          Importar
+        </button>
+        <button class="ds-btn-primary" @click="showNewModal = true">
+          <MIcon icon="add" :size="18" />
+          Nuevo
         </button>
       </div>
     </div>
 
+    <!-- Empty state -->
     <div v-if="modelStore.allModels.length === 0" class="empty-state card">
-      <div class="empty-icon">🗄️</div>
+      <MIcon icon="account_tree" :size="48" style="color: var(--outline-variant)" />
       <h3>Sin modelos dimensionales</h3>
       <p>Crea tu primer modelo dimensional para documentar la estructura de tus datos.</p>
-      <button class="btn btn-primary" @click="showNewModal = true">Crear modelo</button>
+      <button class="ds-btn-primary" @click="showNewModal = true">Crear modelo</button>
     </div>
 
-    <div v-else class="model-grid">
-      <div v-for="model in modelStore.allModels" :key="model.id" class="model-card card">
-        <div class="model-card-header">
-          <div class="model-icon-wrap">
-            <span class="model-icon">🗄️</span>
-            <span v-if="model.isGlobal" class="global-badge">GLOBAL</span>
-          </div>
-          <div class="model-card-actions">
-            <button class="btn-icon" data-tooltip="Exportar YAML" @click.stop="exportModel(model.id)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-            </button>
-            <button class="btn-icon" data-tooltip="Editar" @click="openEditor(model.id)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button
-              v-if="!model.isGlobal"
-              class="btn-icon"
-              data-tooltip="Eliminar"
-              @click="confirmDelete(model)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--error)">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="model-card-body">
-          <h3
-            v-if="editingId !== model.id + ':name'"
-            class="model-name editable"
-            @click.stop="startEdit(model, 'name')"
-          >{{ model.name }}</h3>
-          <input
-            v-else
-            :ref="el => { if (el) el.focus() }"
-            :value="editValue"
-            type="text"
-            class="form-input inline-edit-input"
-            @input="editValue = $event.target.value"
-            @blur="saveEdit(model)"
-            @keyup.enter="saveEdit(model)"
-            @keyup.escape="cancelEdit"
-            @click.stop
-          />
-
-          <p
-            v-if="editingId !== model.id + ':description'"
-            class="model-desc editable"
-            @click.stop="startEdit(model, 'description')"
-          >{{ model.description || 'Sin descripción' }}</p>
-          <textarea
-            v-else
-            :ref="el => { if (el) el.focus() }"
-            :value="editValue"
-            class="form-input inline-edit-textarea"
-            rows="2"
-            placeholder="Sin descripción"
-            @input="editValue = $event.target.value"
-            @blur="saveEdit(model)"
-            @keyup.escape="cancelEdit"
-            @click.stop
-          />
-          <div class="model-card-meta">
-            <span class="badge badge-blue">{{ factCount(model) }} hechos</span>
-            <span class="badge badge-green">{{ dimCount(model) }} dimensiones</span>
-            <span v-if="model.relationships.length" class="badge" style="background:#fff7e6;color:#d46b08">
-              {{ model.relationships.length }} relaciones
-            </span>
-          </div>
-        </div>
-      </div>
+    <!-- Models grid -->
+    <div v-else class="designer-grid">
+      <ModelCard
+        v-for="(model, idx) in modelStore.allModels"
+        :key="model.id"
+        :name="model.name"
+        :description="model.description"
+        :is-global="model.isGlobal"
+        :fact-count="factCount(model)"
+        :dim-count="dimCount(model)"
+        :rel-count="model.relationships.length"
+        :color-index="idx"
+        @edit="openEditor(model.id)"
+        @export="exportModel(model.id)"
+        @delete="confirmDelete(model)"
+        @update:name="val => modelStore.updateModel(model.id, { name: val })"
+        @update:description="val => modelStore.updateModel(model.id, { description: val })"
+      />
+      <!-- New model card -->
+      <button class="designer-new-card" @click="showNewModal = true">
+        <MIcon icon="add_circle" :size="32" style="color: var(--outline)" />
+        <span>Nuevo modelo</span>
+      </button>
     </div>
 
     <!-- Modal: Nuevo Modelo -->
@@ -176,6 +116,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useUIStore } from '@/stores/ui'
 import yaml from 'js-yaml'
+import ModelCard from '@/components/dimensional-model/ModelCard.vue'
+import MIcon from '@/components/common/MIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -193,32 +135,6 @@ const newName = ref('')
 const newDescription = ref('')
 const deleteTarget = ref(null)
 const importInput = ref(null)
-
-// Inline editing: editingId = '{modelId}:{field}'
-const editingId = ref(null)
-const editValue = ref('')
-
-function startEdit(model, field) {
-  editingId.value = `${model.id}:${field}`
-  editValue.value = field === 'name' ? model.name : (model.description || '')
-}
-
-function saveEdit(model) {
-  if (!editingId.value) return
-  const field = editingId.value.split(':')[1]
-  const val = editValue.value.trim()
-  if (field === 'name' && val) {
-    modelStore.updateModel(model.id, { name: val })
-  } else if (field === 'description') {
-    modelStore.updateModel(model.id, { description: val })
-  }
-  cancelEdit()
-}
-
-function cancelEdit() {
-  editingId.value = null
-  editValue.value = ''
-}
 
 onMounted(() => {
   modelStore.ensureGlobalModel()
@@ -325,79 +241,110 @@ function doDelete() {
 </script>
 
 <style scoped>
-.model-list-view { display: flex; flex-direction: column; gap: 20px; }
+.model-list-view { display: flex; flex-direction: column; gap: 24px; }
 
-.page-header {
+/* ── Page header ── */
+.ds-page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
 }
-.page-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.page-subtitle { font-size: 14px; color: var(--text-secondary); margin: 0; }
-
-.model-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+.ds-page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--on-surface);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.2;
+  margin: 0 0 6px;
 }
-
-.model-card {
-  padding: 0;
-  overflow: hidden;
-  transition: box-shadow 0.2s, transform 0.15s;
+.ds-page-subtitle {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  margin: 0;
 }
-.model-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-
-.model-card-header {
+.ds-header-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--border);
-  background: #fafafa;
+  gap: 10px;
+  flex-shrink: 0;
 }
-.model-icon-wrap { display: flex; align-items: center; gap: 8px; }
-.model-icon { font-size: 28px; line-height: 1; }
-.global-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
-  background: #722ed1; color: #fff;
-  padding: 2px 7px; border-radius: 10px;
-}
-.model-card-actions { display: flex; gap: 6px; align-items: center; }
-
-.model-card-body { padding: 14px 16px; }
-.model-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-.model-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; min-height: 36px; }
-
-.editable {
-  cursor: text;
-  border-radius: 4px;
+.ds-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
   transition: background 0.15s;
-  padding: 2px 4px;
-  margin-left: -4px;
 }
-.editable:hover { background: var(--bg); }
+.ds-btn-primary:hover { background: var(--primary-dark); }
+.ds-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ds-btn-secondary:hover { background: var(--surface-container); }
 
-.inline-edit-input {
-  font-size: 15px;
-  font-weight: 600;
-  width: 100%;
-  margin-bottom: 6px;
-  padding: 2px 6px;
-  height: 30px;
+/* ── Grid ── */
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
-.inline-edit-textarea {
-  font-size: 13px;
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 4px 6px;
-  resize: none;
-  line-height: 1.5;
-}
-.model-card-meta { display: flex; flex-wrap: wrap; gap: 6px; }
 
-/* Modals */
+/* ── New model dashed card ── */
+.designer-new-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 340px;
+  background: transparent;
+  border: 2px dashed var(--outline-variant);
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.designer-new-card:hover {
+  border-color: var(--primary);
+  background: rgba(0, 88, 190, 0.04);
+  color: var(--primary);
+}
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+  text-align: center;
+}
+.empty-state h3 { font-size: 18px; font-weight: 600; color: var(--on-surface); margin: 0; }
+.empty-state p { font-size: 14px; color: var(--on-surface-variant); margin: 0; }
+
+/* ── Modals ── */
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.45);

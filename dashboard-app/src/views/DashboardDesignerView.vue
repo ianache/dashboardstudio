@@ -2,30 +2,24 @@
   <div class="designer-view">
     <!-- Dashboard list mode -->
     <div v-if="!activeDashboard">
-      <div class="page-header">
+      <!-- Page header -->
+      <div class="ds-page-header">
         <div>
-          <h2 class="page-title">Mis Dashboards</h2>
-          <p class="page-subtitle">Diseña y gestiona tus dashboards</p>
+          <h2 class="ds-page-title">Mis Dashboards</h2>
+          <p class="ds-page-subtitle">Diseña y gestiona tus dashboards para obtener insights en tiempo real.</p>
         </div>
-        <div class="header-actions">
+        <div class="ds-header-actions">
           <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
-          <div class="header-btn-group">
-            <button class="header-btn-group__btn" data-tooltip="Importar dashboard" @click="importFileInput.click()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-            </button>
-            <button class="header-btn-group__btn header-btn-group__btn--primary" data-tooltip="Nuevo dashboard" @click="showNewModal = true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-            </button>
-          </div>
+          <button class="ds-btn-secondary" @click="importFileInput.click()">
+            <MIcon icon="upload" :size="18" /> Importar
+          </button>
+          <button class="ds-btn-primary" @click="showNewModal = true">
+            <MIcon icon="add" :size="18" /> Nuevo
+          </button>
         </div>
       </div>
 
+      <!-- Empty state -->
       <div v-if="dashboardStore.allDashboards.length === 0" class="empty-state card">
         <div class="empty-icon">🎨</div>
         <h3>Sin dashboards</h3>
@@ -33,62 +27,33 @@
         <button class="btn btn-primary" @click="showNewModal = true">Crear dashboard</button>
       </div>
 
-      <div v-else class="dashboard-grid-list">
-        <div
-          v-for="db in dashboardStore.allDashboards"
+      <!-- Designer grid -->
+      <div v-else class="designer-grid">
+        <DesignerCard
+          v-for="(db, idx) in dashboardStore.allDashboards"
           :key="db.id"
-          class="db-card card"
-        >
-          <div class="db-card-header">
-            <div class="db-icon-wrap">📊</div>
-            <div class="db-card-actions">
-              <button class="btn-icon" data-tooltip="Diseñar" @click="openDesigner(db.id)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                  <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-                </svg>
-              </button>
-              <button class="btn-icon" data-tooltip="Asignar usuarios" @click="openAssignModal(db)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </button>
-              <button class="btn-icon" data-tooltip="Ver dashboard" @click="viewDashboard(db.id)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-              <button class="btn-icon" data-tooltip="Exportar dashboard" @click="handleExportDashboard(db)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-              </button>
-              <button class="btn-icon" data-tooltip="Eliminar" @click="confirmDelete(db)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--error)">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                  <path d="M10 11v6M14 11v6"/>
-                </svg>
-              </button>
-            </div>
+          :name="db.name"
+          :description="db.description"
+          :widget-count="db.widgets.length"
+          :is-public="db.isPublic"
+          :assigned-users-count="db.assignedUsers.length"
+          :color-index="idx"
+          :category-icon="categoryIcons[idx % categoryIcons.length]"
+          @design="openDesigner(db.id)"
+          @assign="openAssignModal(db)"
+          @view="viewDashboard(db.id)"
+          @export="handleExportDashboard(db)"
+          @delete="confirmDelete(db)"
+        />
+
+        <!-- Create new card -->
+        <button class="designer-new-card" @click="showNewModal = true">
+          <div class="new-card-icon-wrap">
+            <MIcon icon="add" :size="28" />
           </div>
-          <div class="db-card-body">
-            <h3 class="db-name">{{ db.name }}</h3>
-            <p class="db-desc">{{ db.description || 'Sin descripción' }}</p>
-            <div class="db-card-meta">
-              <span class="badge badge-blue">{{ db.widgets.length }} widgets</span>
-              <span v-if="db.isPublic" class="badge badge-green">Público</span>
-              <span v-if="db.assignedUsers.length > 0" class="badge" style="background:#f9f0ff;color:#722ed1">
-                {{ db.assignedUsers.length }} usuario(s)
-              </span>
-            </div>
-          </div>
-        </div>
+          <span class="new-card-title">Nuevo Dashboard</span>
+          <span class="new-card-sub">Comienza un diseño desde cero</span>
+        </button>
       </div>
     </div>
 
@@ -293,72 +258,110 @@
 
     <!-- Assign Users Modal -->
     <div v-if="assigningDashboard" class="modal-overlay" @click.self="assigningDashboard = null">
-      <div class="modal-box" style="max-width: 460px;">
-        <div class="modal-header">
-          <h3>Asignar usuarios — {{ assigningDashboard.name }}</h3>
-          <button class="btn-icon" @click="assigningDashboard = null">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+      <div class="am-box">
+        <!-- Header -->
+        <div class="am-header">
+          <div>
+            <h2 class="am-title">Asignar usuarios</h2>
+            <p class="am-subtitle">{{ assigningDashboard.name }}</p>
+          </div>
+          <button class="am-close" @click="assigningDashboard = null">
+            <MIcon icon="close" :size="22" />
           </button>
         </div>
-        <div class="modal-body">
-          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px">
-            Busca y selecciona los usuarios que tendrán acceso a este dashboard:
-          </p>
-          
-          <div class="form-group" style="margin-bottom: 16px;">
-            <input 
-              v-model="userSearchQuery" 
-              class="form-input" 
-              placeholder="Buscar por nombre o correo..." 
-              @keyup.enter="searchUsers"
-            />
-            <button class="btn btn-secondary btn-sm" style="margin-top: 6px;" @click="searchUsers" :disabled="isSearchingUsers">
-              {{ isSearchingUsers ? 'Buscando...' : 'Buscar en Keycloak' }}
+
+        <!-- Body -->
+        <div class="am-body">
+          <!-- Instruction -->
+          <p class="am-instruction">Busca y selecciona los usuarios que tendrán acceso a este dashboard.</p>
+
+          <!-- Search row -->
+          <div class="am-search-row">
+            <div class="am-search-wrap">
+              <MIcon icon="search" :size="20" class="am-search-icon" />
+              <input
+                v-model="userSearchQuery"
+                class="am-search-input"
+                placeholder="Buscar por nombre o correo..."
+                @keyup.enter="searchUsers"
+              />
+            </div>
+            <button class="am-kc-btn" @click="searchUsers" :disabled="isSearchingUsers">
+              <MIcon icon="hub" :size="20" />
+              <span>{{ isSearchingUsers ? 'Buscando...' : 'Buscar en Keycloak' }}</span>
             </button>
-            <div v-if="searchError" style="color:var(--error); font-size:12px; margin-top:4px">{{ searchError }}</div>
           </div>
 
-          <div v-if="userSearchResults.length > 0" class="user-assign-list" style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
-            <div style="font-size:12px; font-weight:bold; color:var(--text-secondary); margin-bottom:8px">Resultados de búsqueda:</div>
-            <div
-              v-for="user in userSearchResults"
-              :key="'s-'+user.id"
-              class="user-assign-item"
-              :class="{ selected: selectedUsers.includes(user.id) }"
-              @click="toggleUserFromSearch(user)"
-            >
-              <div class="ua-avatar">{{ user.avatar }}</div>
-              <div class="ua-info">
-                <div class="ua-name">{{ user.name }}</div>
-                <div class="ua-email">{{ user.email }}</div>
+          <!-- Search error -->
+          <div v-if="searchError" class="am-error">
+            <MIcon icon="error" :size="16" />
+            {{ searchError }}
+          </div>
+
+          <!-- Search results -->
+          <div v-if="userSearchResults.length > 0" class="am-section">
+            <div class="am-section-header">
+              <span class="am-section-label">Resultados</span>
+              <span class="am-section-count">{{ userSearchResults.length }}</span>
+            </div>
+            <div class="am-user-list">
+              <div
+                v-for="user in userSearchResults"
+                :key="'s-'+user.id"
+                class="am-user-item"
+                :class="{ 'am-user-item--selected': selectedUsers.includes(user.id) }"
+                @click="toggleUserFromSearch(user)"
+              >
+                <div class="am-avatar">{{ user.avatar }}</div>
+                <div class="am-user-info">
+                  <div class="am-user-name">{{ user.name }}</div>
+                  <div class="am-user-email">{{ user.email || user.username }}</div>
+                </div>
+                <div class="am-user-action">
+                  <MIcon v-if="selectedUsers.includes(user.id)" icon="check_circle" :size="20" :fill="1" style="color: var(--primary)" />
+                  <MIcon v-else icon="add_circle" :size="20" style="color: var(--outline)" />
+                </div>
               </div>
-              <div class="ua-check" v-if="selectedUsers.includes(user.id)">✓</div>
             </div>
           </div>
 
-          <div class="user-assign-list">
-            <div style="font-size:12px; font-weight:bold; color:var(--text-secondary); margin-bottom:8px">Usuarios asignados:</div>
-            <div v-if="assignedUsersFull.length === 0" style="font-size:13px; color:var(--text-secondary);">Ninguno</div>
-            <div
-              v-for="user in assignedUsersFull"
-              :key="'a-'+user.id"
-              class="user-assign-item selected"
-              @click="toggleUserFromSearch(user)"
-            >
-              <div class="ua-avatar">{{ user.avatar }}</div>
-              <div class="ua-info">
-                <div class="ua-name">{{ user.name }}</div>
-                <div class="ua-email">{{ user.email }}</div>
+          <!-- Assigned users -->
+          <div class="am-section">
+            <div class="am-section-header">
+              <span class="am-section-label">Usuarios asignados</span>
+              <span class="am-section-count" v-if="assignedUsersFull.length">{{ assignedUsersFull.length }} asignado{{ assignedUsersFull.length !== 1 ? 's' : '' }}</span>
+            </div>
+
+            <!-- Empty assigned state -->
+            <div v-if="assignedUsersFull.length === 0" class="am-empty">
+              <MIcon icon="person_search" :size="36" style="color: var(--outline-variant)" />
+              <p>No hay usuarios asignados</p>
+              <span>Comienza buscando un usuario arriba.</span>
+            </div>
+
+            <div v-else class="am-user-list">
+              <div
+                v-for="user in assignedUsersFull"
+                :key="'a-'+user.id"
+                class="am-user-item"
+              >
+                <div class="am-avatar">{{ user.avatar }}</div>
+                <div class="am-user-info">
+                  <div class="am-user-name">{{ user.name }}</div>
+                  <div class="am-user-email">{{ user.email || user.username }}</div>
+                </div>
+                <button class="am-remove-btn" @click.stop="toggleUserFromSearch(user)" data-tooltip="Quitar acceso">
+                  <MIcon icon="delete" :size="20" />
+                </button>
               </div>
-              <div class="ua-check">✓</div>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="assigningDashboard = null">Cancelar</button>
-          <button class="btn btn-primary" @click="saveAssignment">Guardar asignación</button>
+
+        <!-- Footer -->
+        <div class="am-footer">
+          <button class="am-btn-cancel" @click="assigningDashboard = null">Cancelar</button>
+          <button class="am-btn-save" @click="saveAssignment">Guardar asignación</button>
         </div>
       </div>
     </div>
@@ -507,6 +510,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
+import DesignerCard from '@/components/dashboard/DesignerCard.vue'
+import MIcon from '@/components/common/MIcon.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import ChartLayoutModal from '@/components/dashboard/ChartLayoutModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
@@ -517,6 +522,7 @@ import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 
+const categoryIcons = ['dashboard', 'directions_car', 'account_tree', 'campaign', 'security', 'monitoring', 'bar_chart', 'pie_chart']
 const kcUrl = ''
 const kcRealm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
 
@@ -964,42 +970,69 @@ function confirmImport() {
 <style scoped>
 .designer-view { display: flex; flex-direction: column; height: 100%; }
 
-.page-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 20px; gap: 16px;
+/* ── Page header ── */
+.ds-page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 32px; gap: 16px; flex-wrap: wrap;
 }
-.page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.page-subtitle { font-size: 14px; color: var(--text-secondary); }
-
-.header-actions { display: flex; align-items: center; }
-.header-btn-group { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.header-btn-group__btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border: none; background: #fff;
-  color: var(--text-secondary); cursor: pointer; transition: background 0.15s, color 0.15s;
+.ds-page-title {
+  font-size: 32px; font-weight: 700; color: var(--on-surface);
+  letter-spacing: -0.02em; line-height: 1.2;
+  font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 6px;
 }
-.header-btn-group__btn + .header-btn-group__btn { border-left: 1px solid var(--border); }
-.header-btn-group__btn:hover { background: var(--primary-light); color: var(--primary); }
-.header-btn-group__btn--primary { background: var(--primary); color: #fff; }
-.header-btn-group__btn--primary:hover { background: #40a9ff; color: #fff; }
+.ds-page-subtitle { font-size: 16px; color: var(--secondary); line-height: 1.5; }
+.ds-header-actions { display: flex; align-items: center; gap: 10px; }
+.ds-btn-secondary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant); color: var(--on-surface);
+  font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer;
+  transition: background 0.2s;
+}
+.ds-btn-secondary:hover { background: var(--surface-container-low); }
+.ds-btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; background: var(--primary); color: #fff;
+  border: none; font-size: 13px; font-weight: 600; border-radius: 10px;
+  cursor: pointer; transition: background 0.2s, box-shadow 0.2s;
+}
+.ds-btn-primary:hover { background: var(--primary-container); box-shadow: var(--shadow-md); }
+.ds-btn-primary:active { transform: scale(0.98); }
 
-/* Dashboard cards */
-.dashboard-grid-list {
+/* ── Designer grid ── */
+.designer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
-.db-card { overflow: hidden; }
-.db-card-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px 0;
+
+/* Create new card */
+.designer-new-card {
+  border: 2px dashed var(--outline-variant);
+  border-radius: 12px;
+  padding: 32px 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; cursor: pointer; background: transparent;
+  transition: border-color 0.2s, background 0.2s;
+  min-height: 300px;
 }
-.db-icon-wrap { font-size: 24px; }
-.db-card-actions { display: flex; align-items: center; gap: 4px; }
-.db-card-body { padding: 10px 16px 16px; }
-.db-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.db-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px; }
-.db-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.designer-new-card:hover {
+  border-color: var(--primary);
+  background: rgba(0, 88, 190, 0.04);
+}
+.designer-new-card:hover .new-card-icon-wrap { background: rgba(0, 88, 190, 0.1); color: var(--primary); }
+.designer-new-card:hover .new-card-title { color: var(--primary); }
+.new-card-icon-wrap {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--surface-container); color: var(--on-surface-variant);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.new-card-title {
+  font-size: 14px; font-weight: 600; color: var(--on-surface);
+  transition: color 0.2s;
+}
+.new-card-sub { font-size: 13px; color: var(--secondary); }
 
 /* Import preview */
 .import-preview-card {
@@ -1184,35 +1217,264 @@ function confirmImport() {
   padding: 10px 14px; border: 2px solid var(--border);
   border-radius: 8px; cursor: pointer; transition: all 0.15s;
 }
-.user-assign-item:hover { border-color: var(--primary); }
-.user-assign-item.selected { border-color: var(--primary); background: var(--primary-light); }
-.ua-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--primary); color: #fff;
-  font-size: 13px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+/* ── Assign Users Modal ── */
+.am-box {
+  background: #fff;
+  width: 100%;
+  max-width: 640px;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
 }
-.ua-info { flex: 1; min-width: 0; }
-.ua-name { font-size: 14px; font-weight: 500; color: var(--text); }
-.ua-email { font-size: 12px; color: var(--text-secondary); }
-.ua-check { color: var(--primary); font-weight: 700; font-size: 16px; }
 
-.assign-modal-body p { margin-bottom: 12px; font-size: 14px; text-align: center; }
-.search-input-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; position: relative; }
-.search-input-wrap input { flex: 1; padding-left: 32px; }
-.search-input-wrap svg { position: absolute; left: 10px; color: var(--text-secondary); pointer-events: none; }
-.search-loading { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-style: italic; }
-.search-error { color: var(--error); font-size: 13px; margin-bottom: 8px; background: #fff2f0; padding: 6px 12px; border-radius: 4px; }
+.am-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--outline-variant);
+  flex-shrink: 0;
+}
+.am-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--on-surface);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+.am-subtitle {
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  margin: 0;
+}
+.am-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.am-close:hover { background: var(--surface-container-high); }
 
-.user-list { border: 1px solid var(--border); border-radius: 6px; max-height: 250px; overflow-y: auto; background: #fff; margin-bottom: 16px; }
-.user-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
-.user-item:last-child { border-bottom: none; }
-.user-item:hover { background: #fdfdfd; }
-.user-info { display: flex; align-items: center; gap: 10px; }
-.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
-.user-details { display: flex; flex-direction: column; }
-.user-name { font-size: 14px; font-weight: 500; color: var(--text); }
-.user-email { font-size: 12px; color: var(--text-secondary); }
+.am-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.am-instruction {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Search */
+.am-search-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.am-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.am-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--outline);
+  pointer-events: none;
+}
+.am-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid var(--outline-variant);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--on-surface);
+  background: var(--surface-container-lowest);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+.am-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 88, 190, 0.12);
+}
+.am-kc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 88, 190, 0.05);
+  color: var(--primary);
+  border: 1px solid rgba(0, 88, 190, 0.2);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.am-kc-btn:hover:not(:disabled) { background: rgba(0, 88, 190, 0.1); }
+.am-kc-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Error */
+.am-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--error);
+  background: var(--error-container);
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+/* Section */
+.am-section { display: flex; flex-direction: column; gap: 10px; }
+.am-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+.am-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.am-section-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--secondary);
+  background: var(--secondary-container);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* User list */
+.am-user-list { display: flex; flex-direction: column; gap: 8px; }
+.am-user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid rgba(194, 198, 214, 0.4);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.am-user-item:hover { box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08); }
+.am-user-item--selected { border-color: rgba(0, 88, 190, 0.3); background: rgba(0, 88, 190, 0.03); }
+
+.am-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-container);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.am-user-info { flex: 1; min-width: 0; }
+.am-user-name { font-size: 14px; font-weight: 500; color: var(--on-surface); }
+.am-user-email { font-size: 12px; color: var(--outline); margin-top: 1px; }
+.am-user-action { flex-shrink: 0; }
+
+.am-remove-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--outline);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.am-remove-btn:hover { color: var(--error); background: rgba(186, 26, 26, 0.1); }
+
+/* Empty assigned */
+.am-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 32px 20px;
+  border: 2px dashed var(--outline-variant);
+  border-radius: 16px;
+  background: var(--surface-container-low);
+  text-align: center;
+}
+.am-empty p { font-size: 14px; font-weight: 500; color: var(--on-surface-variant); margin: 4px 0 0; }
+.am-empty span { font-size: 13px; color: var(--outline); }
+
+/* Footer */
+.am-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--outline-variant);
+  background: var(--surface-container-low);
+  flex-shrink: 0;
+}
+.am-btn-cancel {
+  padding: 10px 24px;
+  background: transparent;
+  color: var(--on-surface-variant);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.am-btn-cancel:hover { background: var(--surface-container-high); }
+.am-btn-save {
+  padding: 10px 24px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 88, 190, 0.25);
+  transition: background 0.15s, transform 0.1s;
+}
+.am-btn-save:hover { background: var(--primary-dark); }
+.am-btn-save:active { transform: scale(0.98); }
 
 /* AI Assist Modal */
 .ai-assist-modal { width: 90%; max-width: 600px; display: flex; flex-direction: column; }
