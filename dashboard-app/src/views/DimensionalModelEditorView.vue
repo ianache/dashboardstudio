@@ -124,11 +124,26 @@
       <!-- Left panel -->
       <div class="left-panel" :class="{ collapsed: !leftPanelOpen }">
         <button class="panel-toggle-btn" :title="leftPanelOpen ? 'Ocultar panel' : 'Mostrar tablas'" @click="leftPanelOpen = !leftPanelOpen">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline :points="leftPanelOpen ? '15 18 9 12 15 6' : '9 18 15 12 9 6'"/>
-          </svg>
+          <MIcon :icon="leftPanelOpen ? 'chevron_left' : 'chevron_right'" :size="15" />
         </button>
-        <div class="panel-content">
+
+        <!-- Collapsed icon strip -->
+        <div v-if="!leftPanelOpen" class="panel-collapsed-strip">
+          <div
+            v-for="node in model?.nodes"
+            :key="node.id"
+            class="panel-pip"
+            :class="node.type"
+            :title="node.name"
+            @click="onNodeClick(node); leftPanelOpen = true"
+          >
+            <MIcon v-if="node.icon" :icon="node.icon" :size="14" />
+            <span v-else class="panel-pip-badge">{{ node.type === 'fact' ? 'H' : 'D' }}</span>
+          </div>
+        </div>
+
+        <!-- Expanded content -->
+        <div v-else class="panel-content">
           <div class="panel-search-wrap">
             <input v-model="tableSearch" class="panel-search" placeholder="Buscar tabla..." />
           </div>
@@ -136,9 +151,7 @@
           <!-- Hechos group -->
           <div class="panel-group">
             <div class="panel-group-header" @click="factsExpanded = !factsExpanded">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline :points="factsExpanded ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
-              </svg>
+              <MIcon :icon="factsExpanded ? 'expand_less' : 'expand_more'" :size="14" />
               <span>Hechos</span>
               <span class="panel-group-count">{{ filteredFacts.length }}</span>
             </div>
@@ -151,7 +164,8 @@
                 @dragstart="onPanelDragStart(node, $event)"
                 @dragend="panelDragNodeId = null"
               >
-                <span class="panel-node-badge">H</span>
+                <MIcon v-if="node.icon" :icon="node.icon" :size="13" class="panel-node-icon fact-icon" />
+                <span v-else class="panel-node-badge">H</span>
                 <span class="panel-node-name">{{ node.name }}</span>
               </div>
               <div v-if="!filteredFacts.length" class="panel-empty">Sin coincidencias</div>
@@ -161,9 +175,7 @@
           <!-- Dimensiones group -->
           <div class="panel-group">
             <div class="panel-group-header" @click="dimsExpanded = !dimsExpanded">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline :points="dimsExpanded ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
-              </svg>
+              <MIcon :icon="dimsExpanded ? 'expand_less' : 'expand_more'" :size="14" />
               <span>Dimensiones</span>
               <span class="panel-group-count">{{ filteredDims.length }}</span>
             </div>
@@ -176,7 +188,8 @@
                 @dragstart="onPanelDragStart(node, $event)"
                 @dragend="panelDragNodeId = null"
               >
-                <span class="panel-node-badge">D</span>
+                <MIcon v-if="node.icon" :icon="node.icon" :size="13" class="panel-node-icon dim-icon" />
+                <span v-else class="panel-node-badge">D</span>
                 <span class="panel-node-name">{{ node.name }}</span>
               </div>
               <div v-if="!filteredDims.length" class="panel-empty">Sin coincidencias</div>
@@ -285,6 +298,7 @@
               >
                 <div class="node-header" :class="node.type">
                   <span class="node-badge">{{ node.type === 'fact' ? 'HECHO' : 'DIM' }}</span>
+                  <MIcon v-if="node.icon" :icon="node.icon" :size="13" style="opacity:0.9;flex-shrink:0" />
                   <span class="node-name">{{ node.name }}</span>
                   <svg v-if="node.globalRef" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;flex-shrink:0">
                     <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
@@ -436,6 +450,7 @@
 
           <!-- Editable panel for local nodes -->
           <div v-else class="props-body">
+            <!-- Name -->
             <div class="form-group">
               <label class="form-label">Nombre</label>
               <input
@@ -446,27 +461,54 @@
               />
             </div>
 
-            <div class="props-section-title">
-              Campos
+            <!-- Icon picker -->
+            <div class="form-group">
+              <label class="form-label">Ícono representativo</label>
+              <div class="icon-picker-row">
+                <div class="icon-preview" :class="{ empty: !selectedNode.icon }">
+                  <MIcon v-if="selectedNode.icon" :icon="selectedNode.icon" :size="20" />
+                  <MIcon v-else icon="category" :size="20" style="opacity:0.3" />
+                </div>
+                <input
+                  :value="selectedNode.icon"
+                  type="text"
+                  class="form-input"
+                  placeholder="Ej: directions_car, analytics…"
+                  @change="modelStore.updateNode(modelId, selectedNode.id, { icon: $event.target.value.trim() }); hasUnsavedChanges = true"
+                />
+              </div>
+              <span class="form-hint">Nombre de un Material Symbol (sin espacios)</span>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label">Descripción</label>
+              <textarea
+                :value="selectedNode.description"
+                class="form-input props-desc-textarea"
+                rows="2"
+                placeholder="Describe el propósito de esta tabla…"
+                @change="modelStore.updateNode(modelId, selectedNode.id, { description: $event.target.value }); hasUnsavedChanges = true"
+              />
+            </div>
+
+            <!-- Collapsible fields section -->
+            <div class="props-section-collapsible" @click="fieldsExpanded = !fieldsExpanded">
+              <MIcon :icon="fieldsExpanded ? 'expand_less' : 'expand_more'" :size="14" />
+              <span>Campos</span>
+              <span class="props-fields-count">{{ selectedNode.fields.length }}</span>
               <button
                 class="btn-icon desc-toggle"
                 :class="{ active: showFieldDesc }"
                 :title="showFieldDesc ? 'Ocultar descripciones' : 'Mostrar descripciones'"
-                @click="showFieldDesc = !showFieldDesc"
+                @click.stop="showFieldDesc = !showFieldDesc"
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="8" y1="6" x2="21" y2="6"/>
-                  <line x1="8" y1="12" x2="21" y2="12"/>
-                  <line x1="8" y1="18" x2="21" y2="18"/>
-                  <line x1="3" y1="6" x2="3.01" y2="6"/>
-                  <line x1="3" y1="12" x2="3.01" y2="12"/>
-                  <line x1="3" y1="18" x2="3.01" y2="18"/>
-                </svg>
+                <MIcon icon="notes" :size="13" />
               </button>
             </div>
-            <div class="fields-list">
+
+            <div v-show="fieldsExpanded" class="fields-list">
               <div v-for="f in selectedNode.fields" :key="f.id" class="field-item">
-                <!-- Row 1: key toggle · fk badge · name · type · delete -->
                 <div class="field-row1">
                   <button
                     class="key-toggle"
@@ -474,11 +516,7 @@
                     :title="f.isKey ? 'Llave primaria' : 'Marcar como llave'"
                     @click="setKeyField(f.id)"
                   >🔑</button>
-                  <span
-                    v-if="f.isFk"
-                    class="fk-badge"
-                    title="Llave foránea (FK) — generada por relación"
-                  >
+                  <span v-if="f.isFk" class="fk-badge" title="Llave foránea (FK) — generada por relación">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
@@ -496,36 +534,31 @@
                     class="form-input form-select field-type-select"
                     @change="updateField(f.id, 'dataType', $event.target.value)"
                   >
-                    <option v-for="dt in dtStore.allTypes" :key="dt.id" :value="dt.id">
-                      {{ dt.name }}
-                    </option>
+                    <option v-for="dt in dtStore.allTypes" :key="dt.id" :value="dt.id">{{ dt.name }}</option>
                   </select>
                   <button class="btn-icon field-del-btn" @click="deleteField(f.id)">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
+                    <MIcon icon="close" :size="13" />
                   </button>
                 </div>
-                <!-- Row 2: description (toggled) -->
                 <div v-show="showFieldDesc" class="field-row2">
                   <input
                     :value="f.description"
                     type="text"
                     class="form-input field-desc-input"
-                    placeholder="Descripción (opcional)"
+                    placeholder="Descripción del campo (opcional)"
                     @change="updateField(f.id, 'description', $event.target.value)"
                   />
                 </div>
               </div>
-            </div>
 
-            <div v-if="selectedNode.type === 'dimension' && !selectedNode.fields.some(f => f.isKey)" class="props-warn">
-              ⚠ Marca un campo como llave (🔑) para poder arrastrar relaciones
-            </div>
+              <div v-if="selectedNode.type === 'dimension' && !selectedNode.fields.some(f => f.isKey)" class="props-warn">
+                ⚠ Marca un campo como llave (🔑) para poder arrastrar relaciones
+              </div>
 
-            <button class="btn btn-secondary btn-sm add-field-btn" @click="addField">
-              + Añadir campo
-            </button>
+              <button class="btn btn-secondary btn-sm add-field-btn" @click="addField">
+                + Añadir campo
+              </button>
+            </div>
 
             <div class="props-divider"></div>
             <button class="btn btn-sm btn-danger-outline" @click="deleteNodeConfirm">
