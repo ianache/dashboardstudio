@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AIAnalyticsPlatform Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script
+        id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-secondary-fixed": "#131b2e", "on-primary-fixed-variant": "#004395", "surface-tint": "#005ac2", "primary-fixed": "#d8e2ff", "surface-container-lowest": "#ffffff", "on-tertiary-fixed-variant": "#2f2ebe", "surface-container-highest": "#e0e3e5", "surface-variant": "#e0e3e5", "secondary-fixed": "#dae2fd", "on-secondary": "#ffffff", "surface-container-high": "#e6e8ea", "on-tertiary-container": "#fffbff", "surface-dim": "#d8dadc", "tertiary-container": "#6063ee", "on-error": "#ffffff", surface: "#f7f9fb", background: "#f7f9fb", "secondary-container": "#dae2fd", "inverse-primary": "#adc6ff", "on-background": "#191c1e", "tertiary-fixed-dim": "#c0c1ff", "surface-container-low": "#f2f4f6", "on-secondary-fixed-variant": "#3f465c", "inverse-on-surface": "#eff1f3", "error-container": "#ffdad6", primary: "#0058be", "on-primary-fixed": "#001a42", "secondary-fixed-dim": "#bec6e0", "on-tertiary": "#ffffff", "primary-container": "#2170e4", "inverse-surface": "#2d3133", outline: "#727785", "on-secondary-container": "#5c647a", "surface-container": "#eceef0", "on-surface-variant": "#424754", tertiary: "#4648d4", "surface-bright": "#f7f9fb", "on-surface": "#191c1e", "outline-variant": "#c2c6d6", "on-primary-container": "#fefcff", "primary-fixed-dim": "#adc6ff", secondary: "#565e74", "on-primary": "#ffffff", error: "#ba1a1a", "on-tertiary-fixed": "#07006c", "on-error-container": "#93000a", "tertiary-fixed": "#e1e0ff" }, borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" }, spacing: { "stack-lg": "32px", "stack-md": "16px", unit: "4px", "section-gap": "48px", "stack-sm": "8px", gutter: "16px", "container-padding": "24px" }, fontFamily: { h3: ["Plus Jakarta Sans"], h2: ["Plus Jakarta Sans"], "body-sm": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], h1: ["Plus Jakarta Sans"], "label-md": ["Inter"], "label-sm": ["Inter"], headline: ["Plus Jakarta Sans"], display: ["Plus Jakarta Sans"], body: ["Inter"], label: ["Inter"] }, fontSize: { h3: ["20px", { lineHeight: "1.4", fontWeight: "600" }], h2: ["24px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" }], "body-sm": ["14px", { lineHeight: "1.5", fontWeight: "400" }], "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }], "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }], h1: ["36px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }], "label-md": ["14px", { lineHeight: "1", letterSpacing: "0.01em", fontWeight: "600" }], "label-sm": ["12px", { lineHeight: "1", fontWeight: "500" }] } } } };</script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            background-color: #f7f9fb;
+            color: #191c1e;
+        }
+    </style>
+</head>
+
+<body class="font-body-md">
+    <!-- SideNavBar -->
+    <aside
+        class="fixed left-0 top-0 h-full flex flex-col z-50 bg-slate-950 h-screen w-[280px] border-r border-slate-800 shadow-xl font-['Plus_Jakarta_Sans'] text-sm font-medium tracking-tight">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white" data-icon="analytics">analytics</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">AIAnalytics</h1>
+                    <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Enterprise Control</p>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <a class="flex items-center gap-3 px-4 py-3 bg-blue-600/10 text-white rounded-lg border-l-4 border-blue-500 scale-95 active:scale-90 transition-all duration-200"
+                    href="#">
+                    <span class="material-symbols-outlined text-blue-500" data-icon="home">home</span>
+                    <span>Home</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-all duration-200 scale-95 active:scale-90"
+                    href="#">
+                    <span class="material-symbols-outlined" data-icon="folder">folder</span>
+                    <span>Projects</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-all duration-200 scale-95 active:scale-90"
+                    href="#">
+                    <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                    <span>Analytics</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-slate-900 transition-all duration-200 scale-95 active:scale-90"
+                    href="#">
+                    <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+        <div class="mt-auto p-6 border-t border-slate-800">
+            <div class="flex items-center gap-3">
+                <img alt="Organization Logo" class="w-8 h-8 rounded-full border border-slate-700"
+                    data-alt="professional company logo with abstract blue geometric shapes on white background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAHofENysC_jOtbLEbWe6IIQ83MB5VikuPTINh_NmmAs3miFnRB09G-voBKAcwn8KZPk-ZYdhk4huZNW8onVN8C4vy_SNeCYQBDPAkyLB6YMnhz0juJq0_32z7ih8hENL6ifSIVOcccDm2WuiBvCgzrFLAAnXWct90s32dwuO7bxPWJGkNSmnidaTXuxqVoObmja6meKAnRwB1qjlUoSJgkhcPRMqRCGJ76gnvuVtVPkLVXYpII4WMr2sNoilqVzsPwZPpXgECmmM" />
+                <div class="overflow-hidden">
+                    <p class="text-white text-xs font-bold truncate">Enterprise Workspace</p>
+                    <p class="text-slate-500 text-[10px] truncate">Admin Account</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <!-- TopNavBar -->
+    <header
+        class="fixed top-0 right-0 h-16 flex justify-between items-center px-6 ml-[280px] w-[calc(100%-280px)] bg-white/80 backdrop-blur-md z-40 border-b border-slate-200 shadow-sm font-['Plus_Jakarta_Sans'] text-sm">
+        <div class="flex items-center flex-1">
+            <div class="relative w-full max-w-md">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+                    data-icon="search">search</span>
+                <input
+                    class="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-blue-600 transition-all duration-200"
+                    placeholder="Search analytics, reports, tasks..." type="text" />
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button
+                class="hover:bg-slate-50 rounded-full p-2 text-slate-500 hover:text-slate-900 transition-all duration-200">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <button
+                class="hover:bg-slate-50 rounded-full p-2 text-slate-500 hover:text-slate-900 transition-all duration-200">
+                <span class="material-symbols-outlined" data-icon="help">help</span>
+            </button>
+            <div class="h-6 w-px bg-slate-200 mx-2"></div>
+            <button class="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-all duration-200">
+                <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                <span class="font-semibold">Settings</span>
+            </button>
+            <img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-slate-200"
+                data-alt="professional headshot of a business executive with friendly expression and modern office background"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwh7_Z7X2vm0of-CXIQ24wZVbsQH3VxVmAk07lyjrPGoZcH9ZxiQScw2xRvdpyP-RQNrGQCoh8QCOY3ybLYotlKsOKPxUesCbCl6mLrlBWPUHKuHQvH7ed9sq5GxrVvnBAhfHCIc5IIMHeDG2Xe2Go1JSgfWoNZFwwfsOPy105BEjX_zO_OTuNpaA5zh_GrxFZtKAVgGCMbMosxo02K-M_tUBdWhgFHN4IP2EZxBNJm92mgF5Epl9pohzWtw20HNW_ScWcmPSyiDE" />
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="ml-[280px] pt-16 min-h-screen bg-surface">
+        <div class="max-w-[1600px] mx-auto p-container-padding space-y-section-gap">
+            <!-- Greeting -->
+            <section class="space-y-unit">
+                <h2 class="font-h1 text-h1 text-on-background">Welcome back, Alex</h2>
+                <p class="font-body-lg text-body-lg text-on-surface-variant">Here is an overview of your workspace
+                    performance today.</p>
+            </section>
+            <!-- KPI Row -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+                <div
+                    class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-lg transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-primary-container/10 rounded-lg">
+                            <span class="material-symbols-outlined text-primary" data-icon="dashboard">dashboard</span>
+                        </div>
+                        <span class="text-xs font-label-sm text-on-surface-variant">+5% vs last month</span>
+                    </div>
+                    <p class="text-label-md font-label-md text-on-surface-variant mb-1">Total Dashboards</p>
+                    <p class="text-h2 font-h2 text-on-surface">2</p>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-lg transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-tertiary-container/10 rounded-lg">
+                            <span class="material-symbols-outlined text-tertiary" data-icon="widgets">widgets</span>
+                        </div>
+                        <span class="text-xs font-label-sm text-on-surface-variant">Active now</span>
+                    </div>
+                    <p class="text-label-md font-label-md text-on-surface-variant mb-1">Active Widgets</p>
+                    <p class="text-h2 font-h2 text-on-surface">15</p>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-lg transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-secondary-container/10 rounded-lg">
+                            <span class="material-symbols-outlined text-secondary" data-icon="public">public</span>
+                        </div>
+                        <span class="text-xs font-label-sm text-on-surface-variant">Status: Private</span>
+                    </div>
+                    <p class="text-label-md font-label-md text-on-surface-variant mb-1">Public Reports</p>
+                    <p class="text-h2 font-h2 text-on-surface">0</p>
+                </div>
+                <div
+                    class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-lg transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-2 bg-error-container/10 rounded-lg">
+                            <span class="material-symbols-outlined text-error" data-icon="task">task</span>
+                        </div>
+                        <span class="text-xs font-label-sm text-on-surface-variant">All clear</span>
+                    </div>
+                    <p class="text-label-md font-label-md text-on-surface-variant mb-1">Assigned Tasks</p>
+                    <p class="text-h2 font-h2 text-on-surface">0</p>
+                </div>
+            </section>
+            <!-- Quick Actions -->
+            <section class="space-y-stack-md">
+                <h3 class="font-h3 text-h3 text-on-surface">Quick Actions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                    <button
+                        class="group flex flex-col items-center justify-center p-stack-lg bg-primary-container text-on-primary-container rounded-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-center">
+                        <div
+                            class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
+                            <span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+                        </div>
+                        <span class="font-h3 text-h3">Create New Dashboard</span>
+                    </button>
+                    <button
+                        class="group flex flex-col items-center justify-center p-stack-lg bg-surface-container-high text-on-surface rounded-xl border border-outline-variant hover:border-primary/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-center">
+                        <div
+                            class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                            <span class="material-symbols-outlined text-primary text-3xl"
+                                data-icon="grid_view">grid_view</span>
+                        </div>
+                        <span class="font-h3 text-h3">Explore Templates</span>
+                    </button>
+                    <button
+                        class="group flex flex-col items-center justify-center p-stack-lg bg-surface-container-high text-on-surface rounded-xl border border-outline-variant hover:border-primary/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-center">
+                        <div
+                            class="w-14 h-14 bg-secondary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
+                            <span class="material-symbols-outlined text-secondary text-3xl"
+                                data-icon="settings">settings</span>
+                        </div>
+                        <span class="font-h3 text-h3">Platform Settings</span>
+                    </button>
+                </div>
+            </section>
+            <!-- Your Dashboards (Bento-style Cards) -->
+            <section class="space-y-stack-md">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-h3 text-h3 text-on-surface">Your Dashboards</h3>
+                    <button class="text-primary font-label-md flex items-center gap-1 hover:underline">View All <span
+                            class="material-symbols-outlined text-sm"
+                            data-icon="chevron_right">chevron_right</span></button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+                    <!-- Project Card 1 -->
+                    <div
+                        class="group bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-xl transition-all duration-300">
+                        <div class="h-48 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
+                            <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                data-alt="modern data analytics visualization with glowing line charts and dark abstract interface patterns"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPqiFM2g-2gSMfakGO1AALQGMklVn6PHVK1QlF771mKvgBEWwO7ZmmhctJBfHkywk3v5L-JHczQwzEYV4kUsatEGZKQyZ66CB8-tRn-5q-r7h8_4jeCRz9FL8x3iuJPYUpQ9hEOts1KF-6mjzuyBS5D9yI43_c4mjYr-97-qxmgFeVn4MwtqqRdiLRs7JdxvrOx8KZPS3EDgcNBx2foQAOLsQdUmhaizzmFrnEzullk5kdfdImuoUfpCS5HV9udNsHWdj17XdBk5U" />
+                            <div class="absolute bottom-4 left-4 z-20">
+                                <span
+                                    class="px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded uppercase tracking-wider">Active</span>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-h2 text-h2 text-on-surface">Concesionaria</h4>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant">Automotive sales and
+                                        inventory tracking</p>
+                                </div>
+                                <button class="p-2 hover:bg-surface-container rounded-full">
+                                    <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-lg"
+                                        data-icon="widgets">widgets</span>
+                                    <span class="text-label-md font-label-md text-on-surface">5 Widgets</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-lg"
+                                        data-icon="update">update</span>
+                                    <span class="text-label-md font-label-md text-on-surface-variant">Updated
+                                        recently</span>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-outline-variant flex gap-2">
+                                <button
+                                    class="flex-1 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary-container transition-colors">Open
+                                    Dashboard</button>
+                                <button
+                                    class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+                                    <span class="material-symbols-outlined text-on-surface"
+                                        data-icon="share">share</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Project Card 2 -->
+                    <div
+                        class="group bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-xl transition-all duration-300">
+                        <div class="h-48 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
+                            <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                data-alt="collaborative office workspace with professional digital project management boards and blurred team in background"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9uez5w3p9_xe0W_8VFPvMM0jzQpsKqyIJIWiTj9Z-_7ZVnyc1M3Zv6pE0BeivQXJIulw7z01XIo3B9Y7lrCQoT8oBrPB2APXX8PXyEpFUH1KmLgz4-usFd5GOdiCqTNfm5o3q4o2kwI9RUSvMvfIfIZjXUFNHd6-f_4VRFn7Yo3BhEIKRuirBZ7SYqqap-diihxQhjvFr0aPWGvGa0dmYCkymCDlKtxPfRo9MsnOKLqePamAZpcjrZnj_AGbq89svu_JdYoTvijQ" />
+                            <div class="absolute bottom-4 left-4 z-20">
+                                <span
+                                    class="px-2 py-1 bg-tertiary text-on-tertiary text-[10px] font-bold rounded uppercase tracking-wider">Priority</span>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-h2 text-h2 text-on-surface">Project Management</h4>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant">Internal team workflows
+                                        and resource allocation</p>
+                                </div>
+                                <button class="p-2 hover:bg-surface-container rounded-full">
+                                    <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-lg"
+                                        data-icon="widgets">widgets</span>
+                                    <span class="text-label-md font-label-md text-on-surface">10 Widgets</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-lg"
+                                        data-icon="history">history</span>
+                                    <span class="text-label-md font-label-md text-on-surface-variant">Updated
+                                        today</span>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-outline-variant flex gap-2">
+                                <button
+                                    class="flex-1 py-2 bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary-container transition-colors">Open
+                                    Dashboard</button>
+                                <button
+                                    class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+                                    <span class="material-symbols-outlined text-on-surface"
+                                        data-icon="share">share</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>

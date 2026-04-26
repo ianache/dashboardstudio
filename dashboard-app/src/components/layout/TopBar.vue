@@ -2,19 +2,13 @@
   <header class="top-bar">
     <!-- Hamburger -->
     <button class="hamburger-btn" @click.stop="uiStore.toggleSidebar()" data-tooltip="Colapsar menú">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="5" x2="17" y2="5"/>
-        <line x1="3" y1="10" x2="17" y2="10"/>
-        <line x1="3" y1="15" x2="17" y2="15"/>
-      </svg>
+      <MIcon icon="menu" :size="22" />
     </button>
 
     <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="breadcrumb">
       <router-link to="/" class="bread-home">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        </svg>
+        <MIcon icon="home" :size="16" />
       </router-link>
       <template v-for="(crumb, i) in breadcrumbs" :key="i">
         <span class="bread-sep">/</span>
@@ -34,10 +28,7 @@
           @click.stop="uiStore.toggleAlerts()"
           data-tooltip="Alertas"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
+          <MIcon icon="notifications" :size="20" />
           <span v-if="uiStore.unreadAlerts > 0" class="action-badge">{{ uiStore.unreadAlerts }}</span>
         </button>
 
@@ -83,9 +74,7 @@
             <span class="user-name">{{ authStore.user?.name }}</span>
             <span class="user-role">{{ authStore.isDesigner ? 'Diseñador' : 'Visualizador' }}</span>
           </div>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" class="user-caret">
-            <path d="M2 4l4 4 4-4"/>
-          </svg>
+          <MIcon icon="expand_more" :size="18" class="user-caret" />
         </button>
 
         <transition name="dropdown">
@@ -102,18 +91,11 @@
             </div>
             <div class="divider" style="margin: 0"></div>
             <router-link to="/settings" class="dp-item" @click="uiStore.closeDropdowns()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-              </svg>
+              <MIcon icon="settings" :size="18" />
               Configuración
             </router-link>
             <div class="dp-item dp-danger" @click="handleLogout">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
+              <MIcon icon="logout" :size="18" />
               Cerrar sesión
             </div>
           </div>
@@ -127,6 +109,7 @@
 import { computed } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
+import MIcon from '@/components/common/MIcon.vue'
 
 const uiStore = useUIStore()
 const authStore = useAuthStore()

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Mis Dashboards - AIAnalyticsPlatform</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary-container": "#fefcff",
+                        "surface-tint": "#005ac2",
+                        "surface-dim": "#d8dadc",
+                        "surface": "#f7f9fb",
+                        "secondary-fixed": "#dae2fd",
+                        "primary-container": "#2170e4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#dae2fd",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#424754",
+                        "outline-variant": "#c2c6d6",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-surface": "#191c1e",
+                        "inverse-primary": "#adc6ff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary-container": "#5c647a",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary-fixed": "#e1e0ff",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-fixed": "#131b2e",
+                        "inverse-surface": "#2d3133",
+                        "background": "#f7f9fb",
+                        "secondary": "#565e74",
+                        "surface-container": "#eceef0",
+                        "on-primary": "#ffffff",
+                        "outline": "#727785",
+                        "tertiary": "#4648d4",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "surface-container-high": "#e6e8ea",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "tertiary-container": "#6063ee",
+                        "surface-bright": "#f7f9fb",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "primary": "#0058be",
+                        "on-background": "#191c1e",
+                        "surface-variant": "#e0e3e5",
+                        "primary-fixed-dim": "#adc6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h3": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "h3": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "fontWeight": "500" }],
+                        "h1": ["36px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h2": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .sidebar-active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: #ffffff;
+            border-right: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+    <!-- SideNavBar Component -->
+    <aside
+        class="fixed left-0 top-0 h-screen w-[280px] bg-[#0F172A] border-r border-slate-800 shadow-2xl z-50 flex flex-col py-8 font-plus-jakarta-sans text-sm">
+        <div class="px-6 mb-10">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg" style="">analytics</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black text-white leading-none" style="">AIAnalytics</h1>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-1" style="">Command Center</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 flex flex-col gap-1 px-2">
+            <a class="text-slate-400 flex items-center gap-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer rounded-lg"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">home</span>
+                <span class="" style="">Home</span>
+            </a>
+            <a class="bg-blue-600/10 text-white border-r-4 border-blue-500 flex items-center gap-3 px-4 py-3 cursor-pointer"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">dashboard</span>
+                <span class="" style="">My Dashboards</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer rounded-lg"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">share</span>
+                <span class="" style="">Shared</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer rounded-lg"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">insights</span>
+                <span class="" style="">Analytics</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer rounded-lg"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">settings</span>
+                <span class="" style="">Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <button
+                class="w-full bg-primary hover:bg-primary-container text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
+                style="">
+                <span class="material-symbols-outlined text-sm" style="">add</span>
+                New Analysis
+            </button>
+        </div>
+        <div class="mt-8 pt-8 border-t border-slate-800 flex flex-col gap-1 px-2">
+            <a class="text-slate-400 flex items-center gap-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer rounded-lg"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">help</span>
+                <span class="" style="">Support</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer rounded-lg"
+                href="#" style="">
+                <span class="material-symbols-outlined" style="">logout</span>
+                <span class="" style="">Sign Out</span>
+            </a>
+        </div>
+    </aside>
+    <!-- Main Content Area -->
+    <div class="flex-1 ml-[280px]">
+        <!-- TopNavBar Component -->
+        <header
+            class="docked full-width top-0 sticky z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center h-16 px-6 w-full">
+            <div class="flex items-center gap-8">
+                <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white font-plus-jakarta-sans"
+                    style="">AIAnalyticsPlatform</span>
+                <nav class="hidden md:flex items-center gap-6">
+                    <a class="text-blue-600 dark:text-blue-400 font-semibold border-b-2 border-blue-600 font-plus-jakarta-sans text-sm"
+                        href="#" style="">Dashboard</a>
+                    <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-plus-jakarta-sans text-sm px-2 py-1 rounded"
+                        href="#" style="">Data</a>
+                    <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-plus-jakarta-sans text-sm px-2 py-1 rounded"
+                        href="#" style="">Reports</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+                        style="">search</span>
+                    <input
+                        class="pl-10 pr-4 py-1.5 bg-slate-100 border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary focus:bg-white transition-all"
+                        placeholder="Buscar..." type="text">
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-95 duration-150"
+                        style="">
+                        <span class="material-symbols-outlined" style="">notifications</span>
+                    </button>
+                    <button
+                        class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-95 duration-150"
+                        style="">
+                        <span class="material-symbols-outlined" style="">settings</span>
+                    </button>
+                    <div class="h-8 w-px bg-slate-200 mx-2"></div>
+                    <img alt="User profile" class="w-8 h-8 rounded-full ring-2 ring-slate-100"
+                        data-alt="Close-up portrait of a professional businessman in a sharp suit with a clean, blurred office background, soft natural lighting"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVlduXBkI1jIsehmnsOCGKELRLAmt6VSHLdMqTEmpGtUQ-z66h1d3VPsw2iWiCnudkBQ844Pg8I1uXEDyXpEZzcHPKvf2vVNgtS6Vdg427d9Xmd_qvgwJjZpuAhtusje0IutGaevnL0kFNXE1Zv6f6wZQWRluOLB8zyiaVQgDNxrePwA_wwEnjq0Unc-GJtQV1io9IqKS5NnyG-LWTiUhTuvQL-aTvy5bP5J2uGkQTeOQJ68WzGOnVrxbBnkxE0xO1pkJ6VK02Fts"
+                        style="">
+                </div>
+            </div>
+        </header>
+        <!-- Canvas Area -->
+        <main class="p-8 max-w-[1600px] mx-auto">
+            <!-- Page Header -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                <div>
+                    <h2 class="font-h1 text-h1 text-on-surface" style="">Mis Dashboards</h2>
+                    <p class="font-body-lg text-body-lg text-secondary mt-2" style="">Diseña y gestiona tus dashboards
+                        para obtener insights en tiempo real.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button
+                        class="flex items-center gap-2 px-5 py-2.5 bg-surface border border-outline-variant text-on-surface font-label-md rounded-xl hover:bg-surface-container-low transition-all"
+                        style="">
+                        <span class="material-symbols-outlined text-[20px]" style="">upload</span>
+                        Subir
+                    </button>
+                    <button
+                        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary font-label-md rounded-xl hover:shadow-lg hover:bg-primary-container transition-all active:scale-95"
+                        style="">
+                        <span class="material-symbols-outlined text-[20px]" style="">add</span>
+                        Nuevo</button>
+                </div>
+            </div>
+            <!-- Dashboards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Card 1: Concesionaria -->
+                <div
+                    class="group bg-white border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_30px_rgba(15,23,42,0.1)] transition-all flex flex-col">
+                    <div class="h-40 bg-slate-100 relative overflow-hidden">
+                        <img alt="Dashboard Preview"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            data-alt="Futuristic cyber security interface with glowing data nodes and digital matrix elements in neon blue tones"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJwsE3pULyEFRmzdWWjwKo-cPO_3A8qLQ5-EoY2Of-CIjlgA4yuYXlUxSooFaTol5rp7qqx3Km9oeeT83VEq7zxRJLQydz6WPqVOscvh3SncGePsocQthyND3hPphgxYloM-Kgv5jqekJJqFmxMIigg-G1OX5fONmiPfXwGkGekinjXEon3s-03boetTZMYvtbIp92IfiLHJjMp3aYGXXCg722UKPWp1j4tdNNkX_bjhbl9kZzMf487xwJ3w3dAIy24xPfh_x0rvI"
+                            style="">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur shadow-sm p-2 rounded-lg">
+                            <span class="material-symbols-outlined text-primary" data-weight="fill"
+                                style="">directions_car</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-h3 text-h3 text-on-surface" style="">Concesionaria</h3>
+                            <span class="text-label-sm text-secondary bg-surface-container-low px-2 py-1 rounded-md"
+                                style="">8 widgets</span>
+                        </div>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6" style="">
+                            Seguimiento de ventas mensuales, stock de unidades y rendimiento de asesores comerciales.
+                        </p>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center -space-x-2">
+                                <img alt="Team member" class="w-6 h-6 rounded-full border-2 border-white"
+                                    data-alt="Portrait of a creative professional man with a friendly expression in a bright modern studio"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJRizwY3bOTOa9VGgZP3cpE-128hPs2i9vbLrxdTl5EgY1vieEEF4yJ_vvpcU2Pg6dQCTXZ1RVlU1UZW9JKKhgej5p-9BiGmzZUPxvDpjXK93HQWmpBgd2lOn4hF2B744PI2OosLqcIF7LTP7r2VGyFeJ9PMSB2nAk7ocMuJKeKp7jfrxf5n_3q9u5uklDi3saKSCd9U8g_ToOwTc_Pe3EwpEmZc9l4AkE5Ow1UilKbwn8u18x8GPfoFIagwppfQwYyMT7pXIo7vU"
+                                    style="">
+                                <img alt="Team member" class="w-6 h-6 rounded-full border-2 border-white"
+                                    data-alt="Portrait of a smiling confident woman in professional attire with soft natural lighting"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYZ8BluXvjmz04wZ48T1o-lnZnTosgxeT0zKmnLqW7IDVqf-VJUeeDWU78BE0PEYmyw9YpvjVXb7C2V33n_zmcJhz2rZYpP-MsSlLQgTDh6KErvwUI-qlspPpgOG5aTFX4MwYYs0VyCQWhjDxmFo4AW8ezemSqy__uhAYKlx2XrRQBmFzGY29XsAmU-p2mMZ9jOUDnUpPdyTRN2Pcn-vPkGApB1NRZCo8Khh66Hav5fxJaeiFmhRufCn6wIRWHTDTVBiKneFTt2R8"
+                                    style="">
+                                <div class="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500"
+                                    style="">+3</div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">visibility</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">edit</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-error hover:bg-error/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2: Gestión de Proyectos -->
+                <div
+                    class="group bg-white border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_30px_rgba(15,23,42,0.1)] transition-all flex flex-col">
+                    <div class="h-40 bg-slate-100 relative overflow-hidden">
+                        <img alt="Project dashboard"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            data-alt="A sophisticated business analytics dashboard displayed on a high-resolution screen with vibrant blue and teal charts and graphs"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeF5NfTZIbLGQdpOqTGklJ2ArHcv_hpLyYaxm79mUX1rEN0ldzRup_jjYSFTl70aaVYU_i4VneURnyW7a2nyBNLxxJkNImczXXixMXjz2Ea3U6DHRAeDV3f_7yWDg1JwNtq-Oj_C8fSG-0X823o3qAaGli5ERVKk0HBSk8aUTecsyNiuZjhJazAPelVcpvF5G6s8-xyQcB4S-Cx7W1rbWG-NBZfqmwBuEtwNdzQRWm1HabcNafQj0xQK6F7Zg_DTJHlkAvXw2GQUU"
+                            style="">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur shadow-sm p-2 rounded-lg">
+                            <span class="material-symbols-outlined text-primary" data-weight="fill"
+                                style="">account_tree</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-h3 text-h3 text-on-surface" style="">Gestión de Proyectos</h3>
+                            <span class="text-label-sm text-secondary bg-surface-container-low px-2 py-1 rounded-md"
+                                style="">12 widgets</span>
+                        </div>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6" style="">
+                            Monitoreo de hitos, carga de trabajo del equipo y presupuestos devengados vs planeados.</p>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-blue-600 text-[14px]"
+                                        style="">lock</span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 ml-2" style="">Privado</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">visibility</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">edit</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-error hover:bg-error/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3: KPIs de Marketing -->
+                <div
+                    class="group bg-white border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_30px_rgba(15,23,42,0.1)] transition-all flex flex-col">
+                    <div class="h-40 bg-slate-100 relative overflow-hidden">
+                        <img alt="Marketing stats"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            data-alt="Digital marketing strategy concepts visualized with professional data visualization screens and glowing purple accents in a dark workspace"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7S2WGzcH9li1v74OUILaxg9iy--eKW9J5FVJ0RE0UFFVQ-ROZ0qGQN4LZEJwHV00XEv5_JpSpUdnxAv0h4XA9TpPCJ6y3fXi6w5W5TWWjdLrPdXeses2zAFlC7zIsCp5uQdR6WBGmG6qnQPqcqt-u6Qt7he86S-lqRMesQWBua-_Meis2ZD75YYyXCmYTYGvykYuzZEh1MfRy4u0F9pAc00qpI0rYvS8k4CTuHeJ1duK01Sge6eAyIJAs0g813RLK2tPaESAn5No"
+                            style="">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur shadow-sm p-2 rounded-lg">
+                            <span class="material-symbols-outlined text-primary" data-weight="fill"
+                                style="">campaign</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-h3 text-h3 text-on-surface" style="">KPIs de Marketing</h3>
+                            <span class="text-label-sm text-secondary bg-surface-container-low px-2 py-1 rounded-md"
+                                style="">5 widgets</span>
+                        </div>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6" style="">Embudo
+                            de conversión, costo por adquisición y ROI de campañas en redes sociales.</p>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center -space-x-2">
+                                <img alt="User" class="w-6 h-6 rounded-full border-2 border-white"
+                                    data-alt="Portrait of a young tech professional with a warm smile in a brightly lit glass office"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyXC3WK1OGN227VnOAfid9JnisHNapfbv_5JOAMU8oSSHSnb8nntnBhz3-_YLrHLbCS_iTdyTbsKGX1ITqXKHsXn5fVgEuib_57IvGaVu1YrX1ygvysYPhMFK333g1NEXg6SnQ-5wIRRwPx0O-aOcIlBXjxbOjonLIS-TKLsxfcNBaRdaLuZngxUW6Jhz8d0LOBE_Wt7uWhQAtfiVNooSOx_U87xCvdaHiZ2fIpXNEsZyRs7d46-PyPc7PvpABIiKQIoEcrg3txgM"
+                                    style="">
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">visibility</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">edit</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-error hover:bg-error/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 4: Análisis de Riesgo -->
+                <div
+                    class="group bg-white border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] hover:shadow-[0px_8px_30px_rgba(15,23,42,0.1)] transition-all flex flex-col">
+                    <div class="h-40 bg-slate-100 relative overflow-hidden">
+                        <img alt="Risk analysis"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            data-alt="Detailed financial charts and risk assessment graphs on a screen with professional blue and gold accents, technical layout"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9RwCYUkQs1IXPcveDmWpdhkUQDc4iSJQkKvYWBe2gIrh3MIOPKmd3pFbzbxlZCgFXkUE6lXIXDVxgfVfiWrVO_7cOFCDQGrdyAFgp0q2G96EWZcnEXzXBv0HUi3OJTJ0mNK66EdssCmJ9CasNhI2C5ifMT7g1rT3_Xrqw21M-GW4uA1CtUXP7sX1Lb4XH35flnaz80BmHug7vrm6KF8eGrjy3DvBH3VsFi9V7pAgOOHGEfCi10iFNR7YxfrGYtN1B-ry3D3qgocs"
+                            style="">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur shadow-sm p-2 rounded-lg">
+                            <span class="material-symbols-outlined text-primary" data-weight="fill"
+                                style="">security</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-h3 text-h3 text-on-surface" style="">Análisis de Riesgo</h3>
+                            <span class="text-label-sm text-secondary bg-surface-container-low px-2 py-1 rounded-md"
+                                style="">10 widgets</span>
+                        </div>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6" style="">
+                            Detección de anomalías en transacciones y predicción de churn con modelos de IA.</p>
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-error mr-2 animate-pulse"></span>
+                                <span class="text-[11px] text-error font-semibold" style="">Alerta activa</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">visibility</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">edit</span>
+                                </button>
+                                <button
+                                    class="p-1.5 text-slate-400 hover:text-error hover:bg-error/5 rounded-lg transition-colors"
+                                    style="">
+                                    <span class="material-symbols-outlined text-[20px]" style="">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Create New Empty State Card -->
+                <button
+                    class="border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-primary hover:bg-primary/5 transition-all group"
+                    style="">
+                    <div
+                        class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary"
+                            style="">add</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block font-label-md text-on-surface group-hover:text-primary" style="">Nuevo
+                            Dashboard</span>
+                        <span class="block font-body-sm text-secondary" style="">Comienza un diseño desde cero</span>
+                    </div>
+                </button>
+            </div>
+            <!-- Dashboard Stats Summary (Bento-style section) -->
+            <div class="mt-16">
+                <h3 class="font-h2 text-h2 text-on-surface mb-6" style="">Resumen de Actividad</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 bg-white p-6 border border-outline-variant rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-label-md text-on-surface" style="">Uso Semanal de Dashboards</h4>
+                            <select class="text-xs bg-slate-50 border-none rounded-lg focus:ring-1 focus:ring-primary">
+                                <option>Últimos 7 días</option>
+                                <option>Últimos 30 días</option>
+                            </select>
+                        </div>
+                        <div class="h-48 w-full flex items-end justify-between gap-2">
+                            <div
+                                class="flex-1 bg-slate-100 rounded-t-lg h-[40%] hover:bg-primary/30 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">1.2k</div>
+                            </div>
+                            <div
+                                class="flex-1 bg-slate-100 rounded-t-lg h-[65%] hover:bg-primary/30 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">2.4k</div>
+                            </div>
+                            <div
+                                class="flex-1 bg-slate-100 rounded-t-lg h-[55%] hover:bg-primary/30 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">1.8k</div>
+                            </div>
+                            <div
+                                class="flex-1 bg-primary rounded-t-lg h-[90%] hover:opacity-80 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">3.2k</div>
+                            </div>
+                            <div
+                                class="flex-1 bg-slate-100 rounded-t-lg h-[75%] hover:bg-primary/30 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">2.8k</div>
+                            </div>
+                            <div
+                                class="flex-1 bg-slate-100 rounded-t-lg h-[45%] hover:bg-primary/30 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">1.5k</div>
+                            </div>
+                            <div
+                                class="flex-1 bg-slate-100 rounded-t-lg h-[60%] hover:bg-primary/30 transition-all cursor-pointer relative group">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style="">2.1k</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-4 px-1">
+                            <span class="text-[10px] text-slate-400 font-medium" style="">LUN</span>
+                            <span class="text-[10px] text-slate-400 font-medium" style="">MAR</span>
+                            <span class="text-[10px] text-slate-400 font-medium" style="">MIE</span>
+                            <span class="text-[10px] text-slate-400 font-medium" style="">JUE</span>
+                            <span class="text-[10px] text-slate-400 font-medium" style="">VIE</span>
+                            <span class="text-[10px] text-slate-400 font-medium" style="">SAB</span>
+                            <span class="text-[10px] text-slate-400 font-medium" style="">DOM</span>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-primary-container/10 p-6 border border-primary/10 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <span class="material-symbols-outlined text-primary mb-4 p-2 bg-white rounded-lg shadow-sm"
+                                style="">auto_awesome</span>
+                            <h4 class="font-h3 text-h3 text-on-surface leading-tight" style="">Insight de IA</h4>
+                            <p class="font-body-sm text-on-surface-variant mt-2" style="">El dashboard "Concesionaria"
+                                ha tenido un 25% más de visualizaciones esta semana. Recomendamos actualizar los filtros
+                                de fecha.</p>
+                        </div>
+                        <button
+                            class="w-full mt-6 py-2.5 bg-white border border-primary/20 text-primary font-label-md rounded-lg hover:bg-primary hover:text-white transition-all"
+                            style="">
+                            Optimizar Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

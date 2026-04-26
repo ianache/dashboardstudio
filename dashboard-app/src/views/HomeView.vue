@@ -1,98 +1,94 @@
 <template>
   <div class="home-view">
-    <!-- Welcome header -->
-    <div class="welcome-card card">
-      <div class="welcome-content">
-        <div class="welcome-text">
-          <h2>Bienvenido, {{ authStore.user?.name }} 👋</h2>
-          <p>
-            <span v-if="authStore.isDesigner">
-              Tienes acceso como <strong>Diseñador</strong>. Puedes crear y editar dashboards.
-            </span>
-            <span v-else>
-              Tienes acceso como <strong>Visualizador</strong>. Puedes ver los dashboards asignados.
-            </span>
-          </p>
-        </div>
-        <div class="welcome-role-badge" :class="authStore.isDesigner ? 'designer' : 'viewer'">
-          <span v-if="authStore.isDesigner">🎨 Diseñador</span>
-          <span v-else>👁️ Visualizador</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- Stats row -->
-    <div class="stats-row">
-      <div class="stat-card card" v-for="stat in stats" :key="stat.label">
-        <div class="stat-icon" :style="{ background: stat.color + '20', color: stat.color }">
-          <span>{{ stat.icon }}</span>
-        </div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </div>
-      </div>
-    </div>
+    <!-- Greeting -->
+    <section class="greeting">
+      <h2 class="greeting-title">Bienvenido, {{ authStore.user?.name }}</h2>
+      <p class="greeting-sub">Aquí tienes un resumen del rendimiento de tu workspace hoy.</p>
+    </section>
 
-    <!-- Quick access -->
-    <div class="section-title">Acceso rápido</div>
-    <div class="quick-access">
-      <div v-if="authStore.isDesigner" class="quick-card card" @click="router.push('/designer?new=1')">
-        <div class="qc-icon">➕</div>
-        <div class="qc-title">Nuevo Dashboard</div>
-        <div class="qc-desc">Crea un dashboard desde cero</div>
-      </div>
-      <div v-if="authStore.isDesigner" class="quick-card card" @click="router.push('/designer')">
-        <div class="qc-icon">📋</div>
-        <div class="qc-title">Mis Dashboards</div>
-        <div class="qc-desc">Ver y gestionar todos los dashboards</div>
-      </div>
-      <div class="quick-card card" @click="router.push('/settings')">
-        <div class="qc-icon">⚙️</div>
-        <div class="qc-title">Configuración</div>
-        <div class="qc-desc">Configura la conexión a CubeJS</div>
-      </div>
-    </div>
+    <!-- KPI Row -->
+    <section class="kpi-row">
+      <KpiCard
+        v-for="stat in stats"
+        :key="stat.label"
+        :icon="stat.icon"
+        :icon-fill="stat.iconFill ?? 0"
+        :label="stat.label"
+        :value="stat.value"
+        :trend="stat.trend"
+        :icon-color="stat.iconColor"
+        :icon-bg="stat.iconBg"
+      />
+    </section>
 
-    <!-- Recent dashboards -->
-    <div class="section-title" style="margin-top: 24px">Dashboards disponibles</div>
-    <div v-if="myDashboards.length === 0" class="empty-state card">
-      <div class="empty-icon">📊</div>
-      <h3>Sin dashboards</h3>
-      <p v-if="authStore.isDesigner">Crea tu primer dashboard desde el menú lateral.</p>
-      <p v-else>No tienes dashboards asignados aún. Contacta con tu administrador.</p>
-    </div>
-    <div v-else class="dashboard-list">
-      <div
-        v-for="db in myDashboards"
-        :key="db.id"
-        class="db-card card"
-        @click="openDashboard(db)"
-      >
-        <div class="db-card-top">
-          <div class="db-icon">📊</div>
-          <div class="db-actions" v-if="authStore.isDesigner">
-            <button
-              class="btn-icon"
-              data-tooltip="Editar"
-              @click.stop="router.push(`/designer/${db.id}`)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="db-name">{{ db.name }}</div>
-        <div class="db-desc">{{ db.description || 'Sin descripción' }}</div>
-        <div class="db-meta">
-          <span class="badge badge-blue">{{ db.widgets.length }} widgets</span>
-          <span v-if="db.isPublic" class="badge badge-green">Público</span>
-          <span class="db-date">{{ formatDate(db.updatedAt) }}</span>
-        </div>
+    <!-- Quick Actions -->
+    <section class="home-section">
+      <h3 class="section-heading">Acceso rápido</h3>
+      <div class="quick-actions-grid">
+        <QuickActionCard
+          v-if="authStore.isDesigner"
+          icon="add_circle"
+          title="Nuevo Dashboard"
+          description="Crea un dashboard desde cero"
+          variant="primary"
+          @click="router.push('/designer?new=1')"
+        />
+
+        <QuickActionCard
+          v-if="authStore.isDesigner"
+          icon="grid_view"
+          title="Mis Dashboards"
+          description="Ver y gestionar todos los dashboards"
+          variant="default"
+          @click="router.push('/designer')"
+        />
+
+        <QuickActionCard
+          icon="settings"
+          title="Configuración"
+          description="Configura la conexión a CubeJS"
+          variant="secondary"
+          @click="router.push('/settings')"
+        />
       </div>
-    </div>
+    </section>
+
+    <!-- Dashboards -->
+    <section class="home-section">
+      <div class="section-header">
+        <h3 class="section-heading">Dashboards disponibles</h3>
+        <button v-if="authStore.isDesigner" class="view-all-btn" @click="router.push('/designer')">
+          Ver todos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+
+      <div v-if="myDashboards.length === 0" class="empty-state card">
+        <div class="empty-icon">📊</div>
+        <h3>Sin dashboards</h3>
+        <p v-if="authStore.isDesigner">Crea tu primer dashboard desde el menú lateral.</p>
+        <p v-else>No tienes dashboards asignados aún. Contacta con tu administrador.</p>
+      </div>
+
+      <div v-else class="db-grid">
+        <DashboardCard
+          v-for="(db, idx) in myDashboards"
+          :key="db.id"
+          :name="db.name"
+          :description="db.description"
+          :widget-count="db.widgets.length"
+          :updated-label="formatDate(db.updatedAt)"
+          :color-index="idx"
+          :badge="getBadge(db)"
+          @open="openDashboard(db)"
+          @share="() => {}"
+          @menu="authStore.isDesigner ? router.push(`/designer/${db.id}`) : undefined"
+        />
+      </div>
+    </section>
   </div>
 </template>
 
@@ -102,13 +98,15 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
+import KpiCard from '@/components/common/KpiCard.vue'
+import QuickActionCard from '@/components/common/QuickActionCard.vue'
+import DashboardCard from '@/components/common/DashboardCard.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 
-// Load data from backend on mount
 onMounted(async () => {
   await dashboardStore.loadFromBackend()
 })
@@ -126,17 +124,71 @@ const stats = computed(() => {
 
   if (authStore.isDesigner) {
     return [
-      { label: 'Total Dashboards', value: dashboards.length, icon: '📊', color: '#1890ff' },
-      { label: 'Total Widgets', value: totalWidgets, icon: '📦', color: '#52c41a' },
-      { label: 'Públicos', value: dashboards.filter(d => d.isPublic).length, icon: '🌐', color: '#faad14' },
-      { label: 'Con asignación', value: dashboards.filter(d => d.assignedUsers.length > 0).length, icon: '👥', color: '#722ed1' }
+      {
+        label: 'Total Dashboards',
+        value: dashboards.length,
+        trend: '+5% vs mes anterior',
+        icon: 'dashboard',
+        iconFill: 0,
+        iconColor: 'var(--primary)',
+        iconBg: 'rgba(0, 88, 190, 0.1)',
+      },
+      {
+        label: 'Widgets activos',
+        value: totalWidgets,
+        trend: 'Activos ahora',
+        icon: 'widgets',
+        iconFill: 0,
+        iconColor: 'var(--tertiary)',
+        iconBg: 'rgba(70, 72, 212, 0.1)',
+      },
+      {
+        label: 'Reportes públicos',
+        value: dashboards.filter(d => d.isPublic).length,
+        trend: dashboards.filter(d => d.isPublic).length === 0 ? 'Estado: Privado' : 'Públicos',
+        icon: 'public',
+        iconFill: 0,
+        iconColor: 'var(--secondary)',
+        iconBg: 'rgba(86, 94, 116, 0.1)',
+      },
+      {
+        label: 'Con asignación',
+        value: dashboards.filter(d => d.assignedUsers?.length > 0).length,
+        trend: dashboards.filter(d => d.assignedUsers?.length > 0).length === 0 ? 'Sin asignaciones' : 'Asignados',
+        icon: 'assignment_ind',
+        iconFill: 0,
+        iconColor: 'var(--error)',
+        iconBg: 'rgba(186, 26, 26, 0.1)',
+      },
     ]
   }
   return [
-    { label: 'Mis Dashboards', value: dashboards.length, icon: '📊', color: '#1890ff' },
-    { label: 'Gráficos totales', value: totalWidgets, icon: '📈', color: '#52c41a' }
+    {
+      label: 'Mis Dashboards',
+      value: dashboards.length,
+      trend: 'Asignados a mí',
+      icon: 'dashboard',
+      iconFill: 0,
+      iconColor: 'var(--primary)',
+      iconBg: 'rgba(0, 88, 190, 0.1)',
+    },
+    {
+      label: 'Gráficos totales',
+      value: totalWidgets,
+      trend: 'En todos mis dashboards',
+      icon: 'monitoring',
+      iconFill: 0,
+      iconColor: 'var(--tertiary)',
+      iconBg: 'rgba(70, 72, 212, 0.1)',
+    },
   ]
 })
+
+function getBadge(db) {
+  if (db.isPublic) return { text: 'Público', variant: 'public' }
+  if (db.assignedUsers?.length > 0) return { text: 'Activo', variant: 'active' }
+  return null
+}
 
 function openDashboard(db) {
   if (authStore.isDesigner) {
@@ -147,63 +199,88 @@ function openDashboard(db) {
 }
 
 function formatDate(iso) {
-  if (!iso) return ''
-  return new Date(iso).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
+  if (!iso) return 'Sin fecha'
+  const d = new Date(iso)
+  const now = new Date()
+  const diffMs = now - d
+  const diffDays = Math.floor(diffMs / 86400000)
+  if (diffDays === 0) return 'Actualizado hoy'
+  if (diffDays === 1) return 'Actualizado ayer'
+  if (diffDays < 7) return `Hace ${diffDays} días`
+  return d.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 </script>
 
 <style scoped>
-.home-view { display: flex; flex-direction: column; gap: 16px; max-width: 1200px; }
-
-/* Welcome */
-.welcome-card { padding: 24px; }
-.welcome-content { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.welcome-text h2 { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-.welcome-text p { font-size: 14px; color: var(--text-secondary); margin: 0; }
-.welcome-role-badge {
-  padding: 10px 20px;
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.welcome-role-badge.designer { background: var(--primary-light); color: var(--primary); }
-.welcome-role-badge.viewer { background: #f6ffed; color: var(--success); }
-
-/* Stats */
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-.stat-card { padding: 16px; display: flex; align-items: center; gap: 14px; }
-.stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.stat-value { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
-.stat-label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-
-/* Section title */
-.section-title { font-size: 15px; font-weight: 600; color: var(--text); margin-top: 8px; }
-
-/* Quick access */
-.quick-access { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.quick-card {
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.2s;
+.home-view {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--section-gap);
+  max-width: 1400px;
 }
-.quick-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
-.qc-icon { font-size: 28px; }
-.qc-title { font-size: 14px; font-weight: 600; color: var(--text); }
-.qc-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 
-/* Dashboard list */
-.dashboard-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.db-card { padding: 16px; cursor: pointer; transition: all 0.2s; }
-.db-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
-.db-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
-.db-icon { font-size: 24px; }
-.db-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.db-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px; }
-.db-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.db-date { font-size: 12px; color: var(--text-secondary); margin-left: auto; }
+/* Greeting */
+.greeting { display: flex; flex-direction: column; gap: 6px; }
+.greeting-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--on-surface);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.greeting-sub {
+  font-size: 16px;
+  color: var(--on-surface-variant);
+  line-height: 1.6;
+}
+
+/* KPI row */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--gutter);
+}
+
+/* Sections */
+.home-section { display: flex; flex-direction: column; gap: var(--stack-md); }
+.section-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--on-surface);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.view-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  padding: 4px 0;
+  transition: opacity 0.2s;
+}
+.view-all-btn:hover { opacity: 0.75; }
+
+/* Quick actions */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--gutter);
+}
+
+/* Dashboard grid */
+.db-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--stack-lg);
+}
 </style>

@@ -1,25 +1,77 @@
 /* CSS Custom Properties */
 :root {
-  --primary: #1890ff;
-  --primary-dark: #096dd9;
-  --primary-light: #e6f7ff;
-  --sidebar-bg: #001529;
-  --sidebar-width: 240px;
-  --sidebar-collapsed-width: 56px;
-  --topbar-height: 56px;
-  --bg: #f0f2f5;
-  --card-bg: #ffffff;
-  --text: #262626;
-  --text-secondary: #8c8c8c;
-  --border: #e8e8e8;
-  --border-radius: 8px;
-  --shadow: 0 1px 4px rgba(0,21,41,0.08);
-  --shadow-md: 0 4px 12px rgba(0,21,41,0.12);
+  /* Primary */
+  --primary: #0058be;
+  --primary-dark: #004395;
+  --primary-light: #d8e2ff;
+  --primary-container: #2170e4;
+  --on-primary: #ffffff;
+  --on-primary-container: #fefcff;
+
+  /* Tertiary (accent) */
+  --tertiary: #4648d4;
+  --tertiary-container: #6063ee;
+  --on-tertiary: #ffffff;
+
+  /* Secondary */
+  --secondary: #565e74;
+  --secondary-container: #dae2fd;
+  --on-secondary: #ffffff;
+
+  /* Error */
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error: #ffffff;
+
+  /* Success / Warning (kept for compat) */
   --success: #52c41a;
   --warning: #faad14;
-  --error: #ff4d4f;
+
+  /* Surface */
+  --bg: #f7f9fb;
+  --card-bg: #ffffff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f4f6;
+  --surface-container: #eceef0;
+  --surface-container-high: #e6e8ea;
+  --surface-container-highest: #e0e3e5;
+
+  /* Text */
+  --text: #191c1e;
+  --text-secondary: #424754;
+  --on-surface: #191c1e;
+  --on-surface-variant: #424754;
+
+  /* Borders / Outline */
+  --border: #c2c6d6;
+  --border-radius: 8px;
+  --outline: #727785;
+  --outline-variant: #c2c6d6;
+
+  /* Sidebar */
+  --sidebar-bg: #020617;
+  --sidebar-border: #1e293b;
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 56px;
+
+  /* Topbar */
+  --topbar-height: 64px;
+
+  /* Shadows */
+  --shadow: 0 1px 4px rgba(15,23,42,0.06);
+  --shadow-md: 0 4px 20px rgba(15,23,42,0.08);
+  --shadow-lg: 0 8px 32px rgba(15,23,42,0.12);
+
+  /* Spacing */
+  --section-gap: 48px;
+  --stack-lg: 32px;
+  --stack-md: 16px;
+  --stack-sm: 8px;
+  --gutter: 16px;
+  --container-padding: 24px;
+
   --transition: all 0.25s ease;
-  --designer-blue: #1890ff;
+  --designer-blue: #0058be;
   --viewer-green: #52c41a;
 }
 
@@ -224,6 +276,16 @@ html, body, #app {
 
 /* Icon helper */
 .icon { width: 18px; height: 18px; display: inline-block; flex-shrink: 0; }
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-flex;
+  user-select: none;
+  vertical-align: middle;
+}
 
 /* Transition animations */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
