@@ -202,6 +202,8 @@ class DimensionalModelNode(BaseModel):
     id: str
     type: str
     name: str
+    icon: Optional[str] = ""
+    description: Optional[str] = ""
     x: float = 100
     y: float = 100
     global_ref: Optional[dict] = None

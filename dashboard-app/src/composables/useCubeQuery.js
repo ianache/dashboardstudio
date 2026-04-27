@@ -32,6 +32,12 @@ function generateMockData(widget) {
         value: Math.floor(Math.random() * 80) + 20
       }))
 
+    case 'kpi': {
+      const current = Math.floor(Math.random() * 900_000) + 100_000
+      const prev    = Math.floor(Math.random() * 900_000) + 100_000
+      return [{ label: widget.title || 'KPI', value: current, value2: prev }]
+    }
+
     case 'table': {
       const statuses  = ['Completado', 'Pendiente', 'En proceso', 'Cancelado']
       const products  = ['Laptop Pro', 'Monitor 4K', 'Teclado Inalámbrico', 'Mouse Ergonómico', 'Webcam HD', 'Auriculares', 'Tablet', 'Impresora']

@@ -428,6 +428,15 @@
                   <p>Sin datos para mostrar.</p>
                 </div>
               </div>
+              <!-- KPI preview -->
+              <KpiWidget
+                v-else-if="store.chartType === 'kpi'"
+                :data="data"
+                :loading="loading"
+                :error="error"
+                :widget="currentWidget"
+                style="height:100%"
+              />
               <!-- Chart preview -->
               <EChartWrapper
                 v-else
@@ -630,6 +639,7 @@ import { useCubeStore } from '@/stores/cubejs'
 import { useCurrencyStore } from '@/stores/currencies'
 import { useCubeQuery } from '@/composables/useCubeQuery'
 import EChartWrapper from '@/components/charts/EChartWrapper.vue'
+import KpiWidget from '@/components/charts/KpiWidget.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -701,6 +711,7 @@ const chartTypes = [
   { value: 'radar',    label: 'Radar',     icon: '🕸️' },
   { value: 'combined', label: 'Combinado', icon: '📉' },
   { value: 'table',    label: 'Tabla',     icon: '🗒️' },
+  { value: 'kpi',      label: 'KPI',       icon: '🔢' },
 ]
 
 const toggleConfig = () => {
@@ -743,6 +754,7 @@ const currentWidget = computed(() => ({
   chartOptions: store.chartOptions,
   pieOptions: store.pieOptions,
   combinedOptions: store.combinedOptions,
+  kpiOptions: store.kpiOptions || { icon: '', accentColor: '', invertTrend: false, showComparison: true, comparisonLabel: 'vs período anterior' },
   useMockData: false
 }))
 

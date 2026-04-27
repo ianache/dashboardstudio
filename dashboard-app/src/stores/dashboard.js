@@ -61,7 +61,9 @@ export const useDashboardStore = defineStore('dashboard', {
     _transformWidgetBackendToFrontend(w) {
       const chartOptions = { ...(w.chart_options || {}) }
       const pieOptions = chartOptions._pie || null
+      const kpiOptions = chartOptions._kpi || null
       delete chartOptions._pie
+      delete chartOptions._kpi
       return {
         id: w.id,
         title: w.title,
@@ -70,6 +72,7 @@ export const useDashboardStore = defineStore('dashboard', {
         cubeQuery: w.cube_query || { measures: [], dimensions: [], timeDimension: null, filters: [], limit: 100 },
         chartOptions,
         pieOptions: pieOptions || { showValue: false, showPercent: true, showTotal: false },
+        kpiOptions: kpiOptions || { icon: '', accentColor: '', invertTrend: false, showComparison: true, comparisonLabel: 'vs período anterior' },
         useMockData: w.use_mock_data
       }
     },
@@ -96,6 +99,7 @@ export const useDashboardStore = defineStore('dashboard', {
       try {
         const chart_options = { ...(widgetData.chartOptions || {}) }
         if (widgetData.pieOptions) chart_options._pie = widgetData.pieOptions
+        if (widgetData.kpiOptions) chart_options._kpi = widgetData.kpiOptions
         const backendWidget = {
           title: widgetData.title,
           chart_type: widgetData.chartType,
@@ -127,9 +131,15 @@ export const useDashboardStore = defineStore('dashboard', {
         if (updates.chartType !== undefined) backendUpdates.chart_type = updates.chartType
         if (updates.position !== undefined) backendUpdates.position = updates.position
         if (updates.cubeQuery !== undefined) backendUpdates.cube_query = updates.cubeQuery
-        if (updates.chartOptions !== undefined || updates.pieOptions !== undefined) {
-          const chart_options = { ...(updates.chartOptions || {}) }
-          if (updates.pieOptions) chart_options._pie = updates.pieOptions
+        if (updates.chartOptions !== undefined || updates.pieOptions !== undefined || updates.kpiOptions !== undefined) {
+          // Merge with existing chart_options to avoid overwriting unrelated stored keys
+          const dashboard = this.dashboards.find(d => d.id === dashboardId)
+          const existing = dashboard?.widgets.find(w => w.id === widgetId)
+          const chart_options = { ...(updates.chartOptions ?? existing?.chartOptions ?? {}) }
+          const pieOpts  = updates.pieOptions  ?? existing?.pieOptions
+          const kpiOpts  = updates.kpiOptions  ?? existing?.kpiOptions
+          if (pieOpts) chart_options._pie = pieOpts
+          if (kpiOpts) chart_options._kpi = kpiOpts
           backendUpdates.chart_options = chart_options
         }
         if (updates.useMockData !== undefined) backendUpdates.use_mock_data = updates.useMockData

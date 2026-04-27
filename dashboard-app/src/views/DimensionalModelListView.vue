@@ -53,7 +53,8 @@
           :dim-count="dimCount(model)"
           :rel-count="model.relationships.length"
           :color-index="idx"
-          @edit="openEditor(model.id)"
+          @design="openEditor(model.id)"
+          @edit="openEditModal(model)"
           @export="exportModel(model.id)"
           @delete="confirmDelete(model)"
           @update:name="val => modelStore.updateModel(model.id, { name: val })"
@@ -81,7 +82,7 @@
         <div class="model-new-header">
           <div class="model-new-header-content">
             <div>
-              <h2 class="model-new-title">Nuevo Modelo Dimensional</h2>
+              <h2 class="model-new-title">{{ isEditMode ? 'Editar Modelo Dimensional' : 'Nuevo Modelo Dimensional' }}</h2>
               <p class="model-new-subtitle">Defina los parámetros para su nuevo esquema de datos inteligente.</p>
             </div>
             <button class="model-new-close" @click="cancelNew">
@@ -152,9 +153,9 @@
         <!-- Footer -->
         <div class="model-new-footer">
           <button class="model-new-btn-cancel" @click="cancelNew">Cancelar</button>
-          <button class="model-new-btn-create" :disabled="!newName.trim() || !selectedKnowledgeSpace" @click="createModel">
-            <span>Crear</span>
-            <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span>
+          <button class="model-new-btn-create" :disabled="!newName.trim() || !selectedKnowledgeSpace" @click="saveModel">
+            <span>{{ isEditMode ? 'Guardar' : 'Crear' }}</span>
+            <span class="material-symbols-outlined" style="font-size: 16px;">{{ isEditMode ? 'save' : 'add_circle' }}</span>
           </button>
         </div>
       </div>
@@ -209,6 +210,10 @@ const newDescription = ref('')
 const deleteTarget = ref(null)
 const importInput = ref(null)
 
+// Edit mode
+const editModelId = ref(null)
+const isEditMode = computed(() => !!editModelId.value)
+
 // Knowledge Space Combobox
 const showKnowledgeSpaceDropdown = ref(false)
 const knowledgeSpaceSearch = ref('')
@@ -250,31 +255,70 @@ function cancelNew() {
   selectedKnowledgeSpace.value = ''
   showKnowledgeSpaceDropdown.value = false
   knowledgeSpaceSearch.value = ''
+  editModelId.value = null
 }
 
-async function createModel() {
+function openEditModal(model) {
+  editModelId.value = model.id
+  newName.value = model.name
+  newDescription.value = model.description || ''
+  // Try to find and set the knowledge space
+  const spaceId = model.knowledgeSpaceId
+  if (spaceId) {
+    const space = knowledgeSpacesStore.getSpaceById(spaceId)
+    if (space) {
+      selectedKnowledgeSpace.value = space.name
+    }
+  }
+  showNewModal.value = true
+}
+
+async function saveModel() {
   if (!newName.value.trim() || !selectedKnowledgeSpace.value) return
   
   // Find the selected knowledge space to get its ID
   const selectedSpace = knowledgeSpacesStore.getSpaceByName(selectedKnowledgeSpace.value)
   
-  try {
-    const model = await modelStore.createModel({
-      name: newName.value.trim(),
-      description: newDescription.value.trim(),
-      knowledgeSpaceId: selectedSpace?.id || null,
-      knowledgeSpaceName: selectedKnowledgeSpace.value,
-      createdBy: authStore.user?.id || ''
-    })
-    cancelNew()
-    router.push(`/models/${model.id}`)
-  } catch (err) {
-    console.error('Failed to create model:', err)
-    // Show error to user
-    uiStore.addAlert({
-      type: 'error',
-      message: 'Error al crear el modelo: ' + (err.message || 'Error desconocido')
-    })
+  if (isEditMode.value) {
+    // Update existing model
+    try {
+      await modelStore.updateModel(editModelId.value, {
+        name: newName.value.trim(),
+        description: newDescription.value.trim(),
+        knowledgeSpaceId: selectedSpace?.id || null,
+        knowledgeSpaceName: selectedKnowledgeSpace.value
+      })
+      cancelNew()
+      uiStore.addAlert({
+        type: 'success',
+        message: 'Modelo actualizado correctamente'
+      })
+    } catch (err) {
+      console.error('Failed to update model:', err)
+      uiStore.addAlert({
+        type: 'error',
+        message: 'Error al actualizar el modelo: ' + (err.message || 'Error desconocido')
+      })
+    }
+  } else {
+    // Create new model
+    try {
+      const model = await modelStore.createModel({
+        name: newName.value.trim(),
+        description: newDescription.value.trim(),
+        knowledgeSpaceId: selectedSpace?.id || null,
+        knowledgeSpaceName: selectedKnowledgeSpace.value,
+        createdBy: authStore.user?.id || ''
+      })
+      cancelNew()
+      router.push(`/models/${model.id}`)
+    } catch (err) {
+      console.error('Failed to create model:', err)
+      uiStore.addAlert({
+        type: 'error',
+        message: 'Error al crear el modelo: ' + (err.message || 'Error desconocido')
+      })
+    }
   }
 }
 

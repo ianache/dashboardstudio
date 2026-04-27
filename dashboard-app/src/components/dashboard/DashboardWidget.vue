@@ -103,9 +103,16 @@
     </div>
 
     <!-- Chart Body -->
-    <div class="widget-body" :class="{ 'widget-body--table': widget.chartType === 'table' }">
+    <div class="widget-body" :class="{ 'widget-body--table': widget.chartType === 'table', 'widget-body--kpi': widget.chartType === 'kpi' }">
       <DataTableWidget
         v-if="widget.chartType === 'table'"
+        :data="data"
+        :loading="loading"
+        :error="errorMsg"
+        :widget="widget"
+      />
+      <KpiWidget
+        v-else-if="widget.chartType === 'kpi'"
         :data="data"
         :loading="loading"
         :error="errorMsg"
@@ -140,6 +147,7 @@
 import { computed, onMounted, watch, ref } from 'vue'
 import EChartWrapper from '../charts/EChartWrapper.vue'
 import DataTableWidget from '../charts/DataTableWidget.vue'
+import KpiWidget from '../charts/KpiWidget.vue'
 import { useCubeQuery, downloadCSV } from '@/composables/useCubeQuery'
 import { useCubeStore } from '@/stores/cubejs'
 import html2canvas from 'html2canvas'
@@ -160,7 +168,7 @@ const dashboardFiltersRef = computed(() => props.dashboardFilters)
 const { data, loading, error: errorMsg, lastUpdated, fetchData } = useCubeQuery(props.widget, dashboardFiltersRef)
 
 const CHART_ICONS = {
-  bar: '📊', line: '📈', pie: '🥧', gauge: '🎯', radar: '🕸️', combined: '📉', table: '🗒️'
+  bar: '📊', line: '📈', pie: '🥧', gauge: '🎯', radar: '🕸️', combined: '📉', table: '🗒️', kpi: '🔢'
 }
 
 const chartTypeIcon = computed(() => CHART_ICONS[props.widget.chartType] || '📊')
@@ -320,6 +328,7 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
   overflow: hidden;
 }
 .widget-body--table { padding: 0; }
+.widget-body--kpi { padding: 0; }
 
 /* Footer */
 .widget-footer {

@@ -1,5 +1,5 @@
 <template>
-  <div class="mcard" @click="$emit('edit')">
+  <div class="mcard" @click="$emit('design')">
     <!-- Gradient header -->
     <div class="mcard-header" :style="{ background: gradients[colorIndex % gradients.length] }">
       <div class="mcard-header-overlay" />
@@ -82,7 +82,10 @@
 
         <!-- Actions -->
         <div class="mcard-actions" @click.stop>
-          <button class="mcard-action" title="Editar" @click.stop="$emit('edit')">
+          <button class="mcard-action" title="Diseñar modelo" @click.stop="$emit('design')">
+            <span class="material-symbols-outlined text-lg">account_tree</span>
+          </button>
+          <button class="mcard-action" title="Editar atributos" @click.stop="$emit('edit')">
             <span class="material-symbols-outlined text-lg">edit</span>
           </button>
           <button class="mcard-action" title="Exportar YAML" @click.stop="$emit('export')">
@@ -114,7 +117,7 @@ const props = defineProps({
   relCount: { type: Number, default: 0 },
   colorIndex: { type: Number, default: 0 },
 })
-const emit = defineEmits(['edit', 'export', 'delete', 'update:name', 'update:description'])
+const emit = defineEmits(['design', 'edit', 'export', 'delete', 'update:name', 'update:description'])
 
 const gradients = [
   'linear-gradient(135deg, #1e3a5f 0%, #2170e4 100%)',

@@ -348,6 +348,44 @@
               </div>
             </div>
 
+            <!-- KPI-specific options -->
+            <div v-if="form.chartType === 'kpi'" class="form-group kpi-options-group">
+              <label class="form-label">Opciones del KPI</label>
+              <div class="kpi-options-grid">
+                <div class="kpi-opt-field">
+                  <label class="kpi-opt-label">Ícono (Material Symbol o emoji)</label>
+                  <input v-model="form.kpiOptions.icon" type="text" class="form-input" placeholder="Ej: trending_up, 💰, paid" />
+                </div>
+                <div class="kpi-opt-field">
+                  <label class="kpi-opt-label">Color de acento</label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <input v-model="form.kpiOptions.accentColor" type="color" class="color-picker" title="Color de acento del KPI" />
+                    <input v-model="form.kpiOptions.accentColor" type="text" class="form-input" placeholder="#1890ff" style="flex:1" />
+                    <button class="btn-icon" title="Restablecer" @click="form.kpiOptions.accentColor = ''">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="kpi-opt-field">
+                  <label class="kpi-opt-label">Etiqueta comparación</label>
+                  <input v-model="form.kpiOptions.comparisonLabel" type="text" class="form-input" placeholder="vs período anterior" />
+                </div>
+                <div class="kpi-opt-toggles">
+                  <label class="pie-opt-toggle" :class="{ active: form.kpiOptions.showComparison }" @click="form.kpiOptions.showComparison = !form.kpiOptions.showComparison">
+                    <span class="pie-opt-icon">{{ form.kpiOptions.showComparison ? '✓' : '' }}</span>
+                    Mostrar tendencia
+                  </label>
+                  <label class="pie-opt-toggle" :class="{ active: form.kpiOptions.invertTrend }" @click="form.kpiOptions.invertTrend = !form.kpiOptions.invertTrend">
+                    <span class="pie-opt-icon">{{ form.kpiOptions.invertTrend ? '✓' : '' }}</span>
+                    Invertir sentido (↑ = malo)
+                  </label>
+                </div>
+              </div>
+              <span class="form-hint">Medida 1 = valor actual · Medida 2 = valor de comparación (para calcular tendencia)</span>
+            </div>
+
             <div class="form-group">
               <div class="visual-label-row">
                 <label class="form-label">Opciones ECharts (JSON)</label>
@@ -577,7 +615,8 @@ const chartTypes = [
   { value: 'gauge',    label: 'Gauge',     icon: '🎯' },
   { value: 'radar',    label: 'Radar',     icon: '🕸️' },
   { value: 'combined', label: 'Combinado', icon: '📉' },
-  { value: 'table',    label: 'Tabla',     icon: '🗒️' }
+  { value: 'table',    label: 'Tabla',     icon: '🗒️' },
+  { value: 'kpi',      label: 'KPI',       icon: '🔢' }
 ]
 
 const seriesTypes = [
@@ -621,6 +660,11 @@ if (!form.value.pieOptions) {
 // Ensure combinedOptions exists with defaults
 if (!form.value.combinedOptions) {
   form.value.combinedOptions = { showSecondaryYAxis: false }
+}
+
+// Ensure kpiOptions exists with defaults
+if (!form.value.kpiOptions) {
+  form.value.kpiOptions = { icon: '', accentColor: '', invertTrend: false, showComparison: true, comparisonLabel: 'vs período anterior' }
 }
 
 // colorPalette: null = inherit dashboard, 'none' = no palette, <id> = specific palette
@@ -1085,6 +1129,13 @@ if (cubeStore.token && !cubeStore.meta) {
 .pie-opt-toggle:hover { border-color: var(--primary); color: var(--primary); }
 .pie-opt-toggle.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
 .pie-opt-icon { font-size: 11px; width: 12px; text-align: center; }
+
+/* KPI options */
+.kpi-options-group { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: #fafafa; }
+.kpi-options-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.kpi-opt-field { display: flex; flex-direction: column; gap: 4px; }
+.kpi-opt-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.kpi-opt-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .measure-format-select {
   flex: 0 0 110px;
