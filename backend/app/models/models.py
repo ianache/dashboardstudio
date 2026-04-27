@@ -160,3 +160,33 @@ class LlmConfig(Base):
     created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class DataSource(Base):
+    __tablename__ = "data_sources"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(100), nullable=False)
+    type = Column(String(50), nullable=False)  # qdrant, neo4j, postgresql, mysql, etc.
+    connection_url = Column(String(500), nullable=False)
+    username = Column(String(100), nullable=True)
+    password = Column(String(500), nullable=True)  # Encrypted
+    description = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class KnowledgeSpace(Base):
+    __tablename__ = "knowledge_spaces"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=True)
+    config = Column(JSON, default={})
+    created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

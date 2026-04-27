@@ -1,108 +1,177 @@
 <template>
-  <div class="model-list-view">
-    <!-- Page header -->
-    <div class="ds-page-header">
-      <div>
-        <h2 class="ds-page-title">Modelos Dimensionales</h2>
-        <p class="ds-page-subtitle">Diseña y gestiona tus modelos de datos dimensionales</p>
+  <div class="min-h-[calc(100vh-64px)] p-8">
+    <!-- Page Header -->
+    <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
+      <div class="space-y-1">
+        <h1 class="font-h1 text-h1 text-slate-900">Modelos Dimensionales</h1>
+        <p class="font-body-md text-slate-500 max-w-2xl">Diseña y gestiona tus modelos de datos dimensionales para documentar la estructura de tus datos.</p>
       </div>
-      <div class="ds-header-actions">
+      <div class="flex items-center gap-3">
         <input ref="importInput" type="file" accept=".yaml,.yml" style="display:none" @change="handleImport" />
-        <button class="ds-btn-secondary" @click="importInput.click()">
-          <MIcon icon="upload" :size="18" />
+        <button
+          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
+          @click="importInput.click()">
+          <span class="material-symbols-outlined text-lg">download</span>
           Importar
         </button>
-        <button class="ds-btn-primary" @click="showNewModal = true">
-          <MIcon icon="add" :size="18" />
+        <button
+          class="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+          @click="showNewModal = true">
+          <span class="material-symbols-outlined text-lg">add</span>
           Nuevo
         </button>
       </div>
     </div>
 
     <!-- Empty state -->
-    <div v-if="modelStore.allModels.length === 0" class="empty-state card">
-      <MIcon icon="account_tree" :size="48" style="color: var(--outline-variant)" />
-      <h3>Sin modelos dimensionales</h3>
-      <p>Crea tu primer modelo dimensional para documentar la estructura de tus datos.</p>
-      <button class="ds-btn-primary" @click="showNewModal = true">Crear modelo</button>
+    <div v-if="modelStore.allModels.length === 0" class="max-w-[1600px] mx-auto">
+      <div class="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center justify-center gap-4 text-center">
+        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-3xl text-slate-400">account_tree</span>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-900">Sin modelos dimensionales</h3>
+        <p class="text-sm text-slate-500 max-w-md">Crea tu primer modelo dimensional para documentar la estructura de tus datos.</p>
+        <button
+          class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md"
+          @click="showNewModal = true">
+          <span class="material-symbols-outlined text-lg">add</span>
+          Crear modelo
+        </button>
+      </div>
     </div>
 
     <!-- Models grid -->
-    <div v-else class="designer-grid">
-      <ModelCard
-        v-for="(model, idx) in modelStore.allModels"
-        :key="model.id"
-        :name="model.name"
-        :description="model.description"
-        :is-global="model.isGlobal"
-        :fact-count="factCount(model)"
-        :dim-count="dimCount(model)"
-        :rel-count="model.relationships.length"
-        :color-index="idx"
-        @edit="openEditor(model.id)"
-        @export="exportModel(model.id)"
-        @delete="confirmDelete(model)"
-        @update:name="val => modelStore.updateModel(model.id, { name: val })"
-        @update:description="val => modelStore.updateModel(model.id, { description: val })"
-      />
-      <!-- New model card -->
-      <button class="designer-new-card" @click="showNewModal = true">
-        <MIcon icon="add_circle" :size="32" style="color: var(--outline)" />
-        <span>Nuevo modelo</span>
-      </button>
+    <div v-else class="max-w-[1600px] mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <ModelCard
+          v-for="(model, idx) in modelStore.allModels"
+          :key="model.id"
+          :name="model.name"
+          :description="model.description"
+          :is-global="model.isGlobal"
+          :fact-count="factCount(model)"
+          :dim-count="dimCount(model)"
+          :rel-count="model.relationships.length"
+          :color-index="idx"
+          @edit="openEditor(model.id)"
+          @export="exportModel(model.id)"
+          @delete="confirmDelete(model)"
+          @update:name="val => modelStore.updateModel(model.id, { name: val })"
+          @update:description="val => modelStore.updateModel(model.id, { description: val })"
+        />
+        <!-- New model card -->
+        <button
+          class="group border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-blue-500 hover:bg-blue-50/30 transition-all min-h-[280px]"
+          @click="showNewModal = true">
+          <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined text-2xl text-slate-400 group-hover:text-blue-600 transition-colors">add</span>
+          </div>
+          <div class="text-center">
+            <span class="block text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">Nuevo modelo</span>
+            <span class="block text-xs text-slate-500">Comienza un modelo desde cero</span>
+          </div>
+        </button>
+      </div>
     </div>
 
     <!-- Modal: Nuevo Modelo -->
-    <div v-if="showNewModal" class="modal-overlay" @click.self="cancelNew">
-      <div class="modal card">
-        <div class="modal-header">
-          <h3>Nuevo Modelo Dimensional</h3>
-          <button class="btn-icon" @click="cancelNew">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+    <div v-if="showNewModal" class="model-new-overlay" @click.self="cancelNew">
+      <div class="model-new-container">
+        <!-- Header -->
+        <div class="model-new-header">
+          <div class="model-new-header-content">
+            <div>
+              <h2 class="model-new-title">Nuevo Modelo Dimensional</h2>
+              <p class="model-new-subtitle">Defina los parámetros para su nuevo esquema de datos inteligente.</p>
+            </div>
+            <button class="model-new-close" @click="cancelNew">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Body -->
+        <div class="model-new-body">
+          <!-- Nombre -->
+          <div class="model-new-field">
+            <label class="model-new-label">Nombre</label>
+            <input 
+              v-model="newName" 
+              type="text" 
+              class="model-new-input" 
+              placeholder="Ej: Analítica de Ventas Trimestral"
+              autofocus />
+          </div>
+          
+          <!-- Knowledge Space -->
+          <div class="model-new-field" style="position: relative;">
+            <label class="model-new-label">Knowledge Space</label>
+            <div class="model-new-select" @click="showKnowledgeSpaceDropdown = !showKnowledgeSpaceDropdown">
+              <span class="material-symbols-outlined" style="color: #2563eb; font-size: 20px;">hub</span>
+              <span v-if="selectedKnowledgeSpace" style="color: #0f172a; font-size: 14px;">{{ selectedKnowledgeSpace }}</span>
+              <span v-else style="color: #94a3b8; font-size: 14px;">Seleccionar Knowledge Space...</span>
+              <span class="material-symbols-outlined" style="color: #94a3b8; margin-left: auto; font-size: 20px;">expand_more</span>
+            </div>
+            
+            <!-- Dropdown -->
+            <div v-if="showKnowledgeSpaceDropdown" class="model-new-dropdown">
+              <div class="model-new-dropdown-search">
+                <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 16px;">search</span>
+                <input 
+                  v-model="knowledgeSpaceSearch" 
+                  type="text" 
+                  placeholder="Buscar space..." 
+                  @click.stop />
+              </div>
+              <ul class="model-new-dropdown-list">
+                <li 
+                  v-for="space in filteredKnowledgeSpaces" 
+                  :key="space.id"
+                  class="model-new-dropdown-item"
+                  :class="{ 'model-new-dropdown-item--selected': selectedKnowledgeSpace === space.name }"
+                  @click.stop="selectKnowledgeSpace(space)">
+                  <span class="material-symbols-outlined" style="color: #2563eb; font-size: 18px;">hub</span>
+                  <span style="font-size: 14px; color: #0f172a;">{{ space.name }}</span>
+                  <span v-if="selectedKnowledgeSpace === space.name" class="material-symbols-outlined" style="color: #2563eb; margin-left: auto; font-size: 16px;">check</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Descripción -->
+          <div class="model-new-field">
+            <label class="model-new-label">Descripción</label>
+            <textarea 
+              v-model="newDescription" 
+              class="model-new-textarea" 
+              rows="3" 
+              placeholder="Proporcione contexto sobre el propósito de este modelo..."></textarea>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="model-new-footer">
+          <button class="model-new-btn-cancel" @click="cancelNew">Cancelar</button>
+          <button class="model-new-btn-create" :disabled="!newName.trim() || !selectedKnowledgeSpace" @click="createModel">
+            <span>Crear</span>
+            <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span>
           </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Nombre *</label>
-            <input
-              v-model="newName"
-              type="text"
-              class="form-input"
-              placeholder="Ej: Modelo de Ventas"
-              @keyup.enter="createModel"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Descripción</label>
-            <textarea
-              v-model="newDescription"
-              class="form-input"
-              rows="3"
-              placeholder="Describe el propósito de este modelo..."
-            />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="cancelNew">Cancelar</button>
-          <button class="btn btn-primary" :disabled="!newName.trim()" @click="createModel">Crear</button>
         </div>
       </div>
     </div>
 
     <!-- Modal: Confirmar eliminar -->
-    <div v-if="deleteTarget" class="modal-overlay" @click.self="deleteTarget = null">
-      <div class="modal card">
-        <div class="modal-header">
-          <h3>Eliminar modelo</h3>
+    <div v-if="deleteTarget" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="deleteTarget = null">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h3 class="text-base font-semibold text-slate-900">Eliminar modelo</h3>
         </div>
-        <div class="modal-body">
-          <p>¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
+        <div class="px-6 py-5">
+          <p class="text-sm text-slate-700">¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="deleteTarget = null">Cancelar</button>
-          <button class="btn btn-danger" @click="doDelete">Eliminar</button>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="deleteTarget = null">Cancelar</button>
+          <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700" @click="doDelete">Eliminar</button>
         </div>
       </div>
     </div>
@@ -110,24 +179,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDimensionalModelStore } from '@/stores/dimensionalModel'
 import { useUIStore } from '@/stores/ui'
+import { useKnowledgeSpacesStore } from '@/stores/knowledgeSpaces'
 import yaml from 'js-yaml'
 import ModelCard from '@/components/dimensional-model/ModelCard.vue'
-import MIcon from '@/components/common/MIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const modelStore = useDimensionalModelStore()
 const uiStore = useUIStore()
+const knowledgeSpacesStore = useKnowledgeSpacesStore()
 
 // Load data from backend on mount
 onMounted(async () => {
-  await modelStore.loadFromBackend()
+  await Promise.all([
+    modelStore.loadFromBackend(),
+    knowledgeSpacesStore.loadFromBackend()
+  ])
 })
 
 const showNewModal = ref(false)
@@ -135,6 +208,22 @@ const newName = ref('')
 const newDescription = ref('')
 const deleteTarget = ref(null)
 const importInput = ref(null)
+
+// Knowledge Space Combobox
+const showKnowledgeSpaceDropdown = ref(false)
+const knowledgeSpaceSearch = ref('')
+const selectedKnowledgeSpace = ref('')
+
+const filteredKnowledgeSpaces = computed(() => {
+  return knowledgeSpacesStore.filteredSpaces(knowledgeSpaceSearch.value)
+})
+
+function selectKnowledgeSpace(space) {
+  selectedKnowledgeSpace.value = space.name
+  knowledgeSpacesStore.setSelectedSpace(space)
+  showKnowledgeSpaceDropdown.value = false
+  knowledgeSpaceSearch.value = ''
+}
 
 onMounted(() => {
   modelStore.ensureGlobalModel()
@@ -158,17 +247,35 @@ function cancelNew() {
   showNewModal.value = false
   newName.value = ''
   newDescription.value = ''
+  selectedKnowledgeSpace.value = ''
+  showKnowledgeSpaceDropdown.value = false
+  knowledgeSpaceSearch.value = ''
 }
 
-function createModel() {
-  if (!newName.value.trim()) return
-  const model = modelStore.createModel({
-    name: newName.value.trim(),
-    description: newDescription.value.trim(),
-    createdBy: authStore.user?.id || ''
-  })
-  cancelNew()
-  router.push(`/models/${model.id}`)
+async function createModel() {
+  if (!newName.value.trim() || !selectedKnowledgeSpace.value) return
+  
+  // Find the selected knowledge space to get its ID
+  const selectedSpace = knowledgeSpacesStore.getSpaceByName(selectedKnowledgeSpace.value)
+  
+  try {
+    const model = await modelStore.createModel({
+      name: newName.value.trim(),
+      description: newDescription.value.trim(),
+      knowledgeSpaceId: selectedSpace?.id || null,
+      knowledgeSpaceName: selectedKnowledgeSpace.value,
+      createdBy: authStore.user?.id || ''
+    })
+    cancelNew()
+    router.push(`/models/${model.id}`)
+  } catch (err) {
+    console.error('Failed to create model:', err)
+    // Show error to user
+    uiStore.addAlert({
+      type: 'error',
+      message: 'Error al crear el modelo: ' + (err.message || 'Error desconocido')
+    })
+  }
 }
 
 function exportModel(modelId) {
@@ -241,156 +348,279 @@ function doDelete() {
 </script>
 
 <style scoped>
-.model-list-view { display: flex; flex-direction: column; gap: 24px; }
+/* Material Symbols font */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
 
-/* ── Page header ── */
-.ds-page-header {
+/* Custom font classes matching the design system */
+.font-h1 {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.font-body-md {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.text-h1 {
+  font-size: 36px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+/* Nuevo Modelo Modal Styles */
+.model-new-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 16px;
+}
+
+.model-new-container {
+  background: white;
+  width: 100%;
+  max-width: 512px;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+.model-new-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: white;
+  flex-shrink: 0;
+}
+
+.model-new-header-content {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
 }
-.ds-page-title {
-  font-size: 32px;
+
+.model-new-title {
+  font-size: 20px;
   font-weight: 700;
-  color: var(--on-surface);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  line-height: 1.2;
-  margin: 0 0 6px;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
-.ds-page-subtitle {
+
+.model-new-subtitle {
   font-size: 14px;
-  color: var(--on-surface-variant);
+  color: #64748b;
   margin: 0;
 }
-.ds-header-actions {
+
+.model-new-close {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
   flex-shrink: 0;
 }
-.ds-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
+
+.model-new-close:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.model-new-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.model-new-field {
+  margin-bottom: 20px;
+}
+
+.model-new-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.model-new-input,
+.model-new-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
+  background: white;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
 }
-.ds-btn-primary:hover { background: var(--primary-dark); }
-.ds-btn-secondary {
-  display: inline-flex;
+
+.model-new-input::placeholder,
+.model-new-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.model-new-input:focus,
+.model-new-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.model-new-textarea {
+  resize: none;
+  min-height: 80px;
+}
+
+.model-new-select {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  background: var(--surface-container-low);
-  color: var(--on-surface);
-  border: 1px solid var(--outline-variant);
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  background: white;
   cursor: pointer;
-  transition: background 0.15s;
-}
-.ds-btn-secondary:hover { background: var(--surface-container); }
-
-/* ── Grid ── */
-.designer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  transition: all 0.2s;
 }
 
-/* ── New model dashed card ── */
-.designer-new-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 340px;
-  background: transparent;
-  border: 2px dashed var(--outline-variant);
-  border-radius: 12px;
-  cursor: pointer;
-  color: var(--on-surface-variant);
-  font-size: 14px;
-  font-weight: 500;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
-}
-.designer-new-card:hover {
-  border-color: var(--primary);
-  background: rgba(0, 88, 190, 0.04);
-  color: var(--primary);
+.model-new-select:hover {
+  border-color: #94a3b8;
 }
 
-/* ── Empty state ── */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  gap: 12px;
-  text-align: center;
-}
-.empty-state h3 { font-size: 18px; font-weight: 600; color: var(--on-surface); margin: 0; }
-.empty-state p { font-size: 14px; color: var(--on-surface-variant); margin: 0; }
-
-/* ── Modals ── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
-}
-.modal {
-  width: 440px;
-  max-width: 95vw;
-  padding: 0;
+.model-new-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
   overflow: hidden;
 }
-.modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-header h3 { font-size: 16px; font-weight: 600; color: var(--text); margin: 0; }
-.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-.modal-footer {
-  display: flex; justify-content: flex-end; gap: 8px;
-  padding: 12px 20px;
-  border-top: 1px solid var(--border);
-  background: #fafafa;
+
+.model-new-dropdown-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 13px; font-weight: 500; color: var(--text); }
-
-.btn-danger {
-  background: var(--error);
-  color: #fff;
+.model-new-dropdown-search input {
+  flex: 1;
   border: none;
-  padding: 6px 16px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  padding: 0;
 }
-.btn-danger:hover { background: #cf1322; }
 
-.empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 60px 20px; gap: 12px; text-align: center;
+.model-new-dropdown-list {
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.empty-icon { font-size: 48px; }
-.empty-state h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 0; }
-.empty-state p { font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+.model-new-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.model-new-dropdown-item:hover {
+  background: #eff6ff;
+}
+
+.model-new-dropdown-item--selected {
+  background: #eff6ff;
+}
+
+.model-new-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.model-new-btn-cancel {
+  padding: 10px 20px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.model-new-btn-cancel:hover {
+  background: #f1f5f9;
+}
+
+.model-new-btn-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.model-new-btn-create:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.model-new-btn-create:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>

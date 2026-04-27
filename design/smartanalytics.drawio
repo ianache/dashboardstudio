@@ -233,7 +233,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="qiC_sMmeLD8b0YSA0IAo" name="Página-3">
-    <mxGraphModel dx="911" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1738" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -344,29 +344,43 @@
           <mxGeometry height="40" width="40" x="340" y="50" as="geometry" />
         </mxCell>
         <mxCell id="-gMzdXs6vhkswVLPFYr1-25" parent="1" style="ellipse;shape=umlEntity;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;aspect=fixed;labelBackgroundColor=default;" value="&lt;b&gt;Dimensional Model&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ id&lt;br&gt;+ name&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ description&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ state&lt;/span&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="40" width="40" x="340" y="564" as="geometry" />
+          <mxGeometry height="40" width="40" x="190" y="600" as="geometry" />
         </mxCell>
-        <mxCell id="-gMzdXs6vhkswVLPFYr1-26" parent="1" style="ellipse;shape=umlEntity;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;aspect=fixed;labelBackgroundColor=default;" value="&lt;b&gt;Dimensional Model Version&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ id&lt;br&gt;+ tag&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ description&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ state&lt;/span&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="40" width="40" x="520" y="564" as="geometry" />
+        <mxCell id="-gMzdXs6vhkswVLPFYr1-26" parent="1" style="ellipse;shape=umlEntity;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;aspect=fixed;labelBackgroundColor=default;" value="&lt;b&gt;Dimensional Model Version&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ id&lt;br&gt;+ tag&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ description&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ state (draft -[approve]-&amp;gt; approved -[publish]-&amp;gt; published)&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="40" x="370" y="600" as="geometry" />
         </mxCell>
         <mxCell id="-gMzdXs6vhkswVLPFYr1-27" edge="1" parent="1" source="-gMzdXs6vhkswVLPFYr1-26" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="-gMzdXs6vhkswVLPFYr1-25" value="">
           <mxGeometry relative="1" width="160" as="geometry">
-            <mxPoint x="380" y="470" as="sourcePoint" />
-            <mxPoint x="540" y="470" as="targetPoint" />
+            <mxPoint x="230" y="506" as="sourcePoint" />
+            <mxPoint x="390" y="506" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="-gMzdXs6vhkswVLPFYr1-28" parent="1" style="ellipse;shape=umlEntity;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;aspect=fixed;labelBackgroundColor=default;" value="&lt;b&gt;Knowledge Space&lt;/b&gt;&lt;div&gt;+ id (guid)&lt;/div&gt;&lt;div&gt;+ name&lt;/div&gt;&lt;div&gt;+ description&lt;/div&gt;&lt;div&gt;+ state (active / inactive)&lt;/div&gt;" vertex="1">
-          <mxGeometry height="40" width="40" x="130" y="564" as="geometry" />
+          <mxGeometry height="40" width="40" x="40" y="600" as="geometry" />
         </mxCell>
         <mxCell id="-gMzdXs6vhkswVLPFYr1-29" edge="1" parent="1" source="-gMzdXs6vhkswVLPFYr1-25" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="-gMzdXs6vhkswVLPFYr1-28" value="">
           <mxGeometry relative="1" width="160" as="geometry">
-            <mxPoint x="380" y="470" as="sourcePoint" />
-            <mxPoint x="540" y="470" as="targetPoint" />
+            <mxPoint x="230" y="506" as="sourcePoint" />
+            <mxPoint x="390" y="506" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="-gMzdXs6vhkswVLPFYr1-30" connectable="0" parent="-gMzdXs6vhkswVLPFYr1-29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="space [ 1 ]" vertex="1">
           <mxGeometry relative="1" x="0.6473" y="-1" as="geometry">
             <mxPoint x="10" y="-13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-gMzdXs6vhkswVLPFYr1-31" parent="1" style="ellipse;shape=umlEntity;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;aspect=fixed;labelBackgroundColor=default;" value="&lt;b&gt;Diagrama&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ id&lt;br&gt;+ diagram (json structure)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ type (1 main (default) or additional)&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="40" x="640" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="-gMzdXs6vhkswVLPFYr1-32" edge="1" parent="1" source="-gMzdXs6vhkswVLPFYr1-31" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="-gMzdXs6vhkswVLPFYr1-26" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="630" y="696" as="sourcePoint" />
+            <mxPoint x="490" y="696" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-gMzdXs6vhkswVLPFYr1-33" connectable="0" parent="-gMzdXs6vhkswVLPFYr1-32" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];strokeColor=default;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=default;fillColor=default;" value="diagramas&lt;br&gt;[ one or many ]" vertex="1">
+          <mxGeometry relative="1" x="-0.7409" as="geometry">
+            <mxPoint x="-23" y="-20" as="offset" />
           </mxGeometry>
         </mxCell>
       </root>

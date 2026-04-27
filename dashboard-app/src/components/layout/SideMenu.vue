@@ -56,6 +56,9 @@
             <router-link to="/models/data-types" class="nav-sub-item" :class="{ active: $route.name === 'DataTypes' }">
               <span class="sub-dot" />Tipos de datos
             </router-link>
+            <router-link to="/models/knowledge-spaces" class="nav-sub-item" :class="{ active: $route.name === 'KnowledgeSpaces' }">
+              <span class="sub-dot" />Knowledge Spaces
+            </router-link>
           </div>
         </transition>
       </div>
@@ -128,7 +131,7 @@ const isDesignerRoute = computed(() =>
   ['DesignerList', 'DesignerEdit'].includes(router.currentRoute.value.name)
 )
 const isModelRoute = computed(() =>
-  ['ModelList', 'ModelEditor', 'DataTypes'].includes(router.currentRoute.value.name)
+  ['ModelList', 'ModelEditor', 'DataTypes', 'KnowledgeSpaces'].includes(router.currentRoute.value.name)
 )
 const isDashboardRoute = computed(() =>
   router.currentRoute.value.name === 'DashboardView'

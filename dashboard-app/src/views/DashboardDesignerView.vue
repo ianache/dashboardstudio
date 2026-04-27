@@ -1,59 +1,80 @@
 <template>
   <div class="designer-view">
     <!-- Dashboard list mode -->
-    <div v-if="!activeDashboard">
-      <!-- Page header -->
-      <div class="ds-page-header">
-        <div>
-          <h2 class="ds-page-title">Mis Dashboards</h2>
-          <p class="ds-page-subtitle">Diseña y gestiona tus dashboards para obtener insights en tiempo real.</p>
+    <div v-if="!activeDashboard" class="min-h-[calc(100vh-64px)] p-8">
+      <!-- Page Header -->
+      <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
+        <div class="space-y-1">
+          <h1 class="font-h1 text-h1 text-slate-900">Mis Dashboards</h1>
+          <p class="font-body-md text-slate-500 max-w-2xl">Diseña y gestiona tus dashboards para obtener insights en tiempo real.</p>
         </div>
-        <div class="ds-header-actions">
+        <div class="flex items-center gap-3">
           <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
-          <button class="ds-btn-secondary" @click="importFileInput.click()">
-            <MIcon icon="upload" :size="18" /> Importar
+          <button
+            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
+            @click="importFileInput.click()">
+            <span class="material-symbols-outlined text-lg">download</span>
+            Importar
           </button>
-          <button class="ds-btn-primary" @click="showNewModal = true">
-            <MIcon icon="add" :size="18" /> Nuevo
+          <button
+            class="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+            @click="showNewModal = true">
+            <span class="material-symbols-outlined text-lg">add</span>
+            Nuevo
           </button>
         </div>
       </div>
 
       <!-- Empty state -->
-      <div v-if="dashboardStore.allDashboards.length === 0" class="empty-state card">
-        <div class="empty-icon">🎨</div>
-        <h3>Sin dashboards</h3>
-        <p>Crea tu primer dashboard para comenzar a visualizar tus datos.</p>
-        <button class="btn btn-primary" @click="showNewModal = true">Crear dashboard</button>
+      <div v-if="dashboardStore.allDashboards.length === 0" class="max-w-[1600px] mx-auto">
+        <div class="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center justify-center gap-4 text-center">
+          <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl text-slate-400">dashboard</span>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900">Sin dashboards</h3>
+          <p class="text-sm text-slate-500 max-w-md">Crea tu primer dashboard para comenzar a visualizar tus datos.</p>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md"
+            @click="showNewModal = true">
+            <span class="material-symbols-outlined text-lg">add</span>
+            Crear dashboard
+          </button>
+        </div>
       </div>
 
       <!-- Designer grid -->
-      <div v-else class="designer-grid">
-        <DesignerCard
-          v-for="(db, idx) in dashboardStore.allDashboards"
-          :key="db.id"
-          :name="db.name"
-          :description="db.description"
-          :widget-count="db.widgets.length"
-          :is-public="db.isPublic"
-          :assigned-users-count="db.assignedUsers.length"
-          :color-index="idx"
-          :category-icon="categoryIcons[idx % categoryIcons.length]"
-          @design="openDesigner(db.id)"
-          @assign="openAssignModal(db)"
-          @view="viewDashboard(db.id)"
-          @export="handleExportDashboard(db)"
-          @delete="confirmDelete(db)"
-        />
+      <div v-else class="max-w-[1600px] mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <DesignerCard
+            v-for="(db, idx) in dashboardStore.allDashboards"
+            :key="db.id"
+            :name="db.name"
+            :description="db.description"
+            :widget-count="db.widgets.length"
+            :is-public="db.isPublic"
+            :assigned-users-count="db.assignedUsers.length"
+            :color-index="idx"
+            :category-icon="categoryIcons[idx % categoryIcons.length]"
+            @design="openDesigner(db.id)"
+            @assign="openAssignModal(db)"
+            @view="viewDashboard(db.id)"
+            @export="handleExportDashboard(db)"
+            @delete="confirmDelete(db)"
+          />
 
-        <!-- Create new card -->
-        <button class="designer-new-card" @click="showNewModal = true">
-          <div class="new-card-icon-wrap">
-            <MIcon icon="add" :size="28" />
-          </div>
-          <span class="new-card-title">Nuevo Dashboard</span>
-          <span class="new-card-sub">Comienza un diseño desde cero</span>
-        </button>
+          <!-- Create new card -->
+          <button
+            class="group border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-blue-500 hover:bg-blue-50/30 transition-all min-h-[280px]"
+            @click="showNewModal = true">
+            <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+              <span class="material-symbols-outlined text-2xl text-slate-400 group-hover:text-blue-600 transition-colors">add</span>
+            </div>
+            <div class="text-center">
+              <span class="block text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">Nuevo Dashboard</span>
+              <span class="block text-xs text-slate-500">Comienza un diseño desde cero</span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -158,12 +179,18 @@
             class="mode-btn"
             :class="{ active: isDesignMode }"
             @click="isDesignMode = true"
-          >🎨 Diseñar</button>
+          >
+            <span class="material-symbols-outlined text-sm mr-1">brush</span>
+            Diseñar
+          </button>
           <button
             class="mode-btn"
             :class="{ active: !isDesignMode }"
             @click="isDesignMode = false"
-          >👁️ Vista previa</button>
+          >
+            <span class="material-symbols-outlined text-sm mr-1">visibility</span>
+            Vista previa
+          </button>
         </div>
 
         <button
@@ -171,9 +198,7 @@
           class="btn btn-primary btn-sm"
           @click="addWidget"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <span class="material-symbols-outlined text-sm">add</span>
           Añadir widget
         </button>
         <button
@@ -182,9 +207,7 @@
           style="margin-left:8px"
           @click="aiAssistOpen = true"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
-          </svg>
+          <span class="material-symbols-outlined text-sm">auto_awesome</span>
           IA Assist
         </button>
       </div>
@@ -229,173 +252,187 @@
     <!-- ======= MODALS ======= -->
 
     <!-- New Dashboard Modal -->
-    <div v-if="showNewModal" class="modal-overlay" @click.self="showNewModal = false">
-      <div class="modal-box" style="max-width: 460px;">
-        <div class="modal-header">
-          <h3>Nuevo Dashboard</h3>
-          <button class="btn-icon" @click="showNewModal = false">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div v-if="showNewModal" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="showNewModal = false">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[460px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h3 class="text-base font-semibold text-slate-900">Nuevo Dashboard</h3>
+          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="showNewModal = false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Nombre *</label>
-            <input v-model="newName" class="form-input" placeholder="Ej: Dashboard de Ventas" autofocus />
+        <div class="px-6 py-5 flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-slate-700">Nombre *</label>
+            <input 
+              v-model="newName" 
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" 
+              placeholder="Ej: Dashboard de Ventas" 
+              autofocus />
           </div>
-          <div class="form-group">
-            <label class="form-label">Descripción</label>
-            <input v-model="newDescription" class="form-input" placeholder="Descripción breve..." />
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-slate-700">Descripción</label>
+            <input 
+              v-model="newDescription" 
+              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" 
+              placeholder="Descripción breve..." />
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showNewModal = false">Cancelar</button>
-          <button class="btn btn-primary" @click="createDashboard" :disabled="!newName.trim()">Crear</button>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="showNewModal = false">Cancelar</button>
+          <button 
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+            @click="createDashboard" 
+            :disabled="!newName.trim()">Crear</button>
         </div>
       </div>
     </div>
 
     <!-- Assign Users Modal -->
-    <div v-if="assigningDashboard" class="modal-overlay" @click.self="assigningDashboard = null">
-      <div class="am-box">
+    <div v-if="assigningDashboard" class="modal-overlay-assign" @click.self="assigningDashboard = null">
+      <div class="assign-modal-box">
         <!-- Header -->
-        <div class="am-header">
-          <div>
-            <h2 class="am-title">Asignar usuarios</h2>
-            <p class="am-subtitle">{{ assigningDashboard.name }}</p>
-          </div>
-          <button class="am-close" @click="assigningDashboard = null">
-            <MIcon icon="close" :size="22" />
+        <div class="assign-modal-header">
+          <h2>Asignar usuarios — {{ assigningDashboard.name }}</h2>
+          <button @click="assigningDashboard = null">
+            <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-
-        <!-- Body -->
-        <div class="am-body">
-          <!-- Instruction -->
-          <p class="am-instruction">Busca y selecciona los usuarios que tendrán acceso a este dashboard.</p>
-
-          <!-- Search row -->
-          <div class="am-search-row">
-            <div class="am-search-wrap">
-              <MIcon icon="search" :size="20" class="am-search-icon" />
-              <input
-                v-model="userSearchQuery"
-                class="am-search-input"
-                placeholder="Buscar por nombre o correo..."
-                @keyup.enter="searchUsers"
-              />
+        
+        <!-- Content Area -->
+        <div class="assign-modal-body">
+          <!-- Instruction & Search -->
+          <div class="assign-search-section">
+            <p class="assign-instruction">Busca y selecciona los usuarios que tendrán acceso a este dashboard.</p>
+            <div class="assign-search-row">
+              <div class="assign-input-wrapper">
+                <span class="material-symbols-outlined assign-search-icon">search</span>
+                <input
+                  v-model="userSearchQuery"
+                  type="text"
+                  placeholder="Buscar por nombre o correo..."
+                  @keyup.enter="searchUsers"
+                />
+              </div>
+              <button 
+                class="assign-search-btn"
+                @click="searchUsers"
+                :disabled="isSearchingUsers">
+                <span class="material-symbols-outlined">hub</span>
+                <span>{{ isSearchingUsers ? 'Buscando...' : 'Buscar en Keycloak' }}</span>
+              </button>
             </div>
-            <button class="am-kc-btn" @click="searchUsers" :disabled="isSearchingUsers">
-              <MIcon icon="hub" :size="20" />
-              <span>{{ isSearchingUsers ? 'Buscando...' : 'Buscar en Keycloak' }}</span>
-            </button>
           </div>
 
           <!-- Search error -->
-          <div v-if="searchError" class="am-error">
-            <MIcon icon="error" :size="16" />
+          <div v-if="searchError" class="assign-error">
+            <span class="material-symbols-outlined">error</span>
             {{ searchError }}
           </div>
 
           <!-- Search results -->
-          <div v-if="userSearchResults.length > 0" class="am-section">
-            <div class="am-section-header">
-              <span class="am-section-label">Resultados</span>
-              <span class="am-section-count">{{ userSearchResults.length }}</span>
+          <div v-if="userSearchResults.length > 0" class="assign-results-section">
+            <div class="assign-section-header">
+              <h3>RESULTADOS</h3>
+              <span class="assign-count-badge">{{ userSearchResults.length }}</span>
             </div>
-            <div class="am-user-list">
-              <div
-                v-for="user in userSearchResults"
-                :key="'s-'+user.id"
-                class="am-user-item"
-                :class="{ 'am-user-item--selected': selectedUsers.includes(user.id) }"
-                @click="toggleUserFromSearch(user)"
-              >
-                <div class="am-avatar">{{ user.avatar }}</div>
-                <div class="am-user-info">
-                  <div class="am-user-name">{{ user.name }}</div>
-                  <div class="am-user-email">{{ user.email || user.username }}</div>
+            <div class="assign-users-list">
+              <div 
+                v-for="user in userSearchResults" 
+                :key="'s'+user.id"
+                class="assign-user-item"
+                @click="toggleUserFromSearch(user)">
+                <div class="assign-user-info">
+                  <div class="assign-avatar">{{ user.avatar }}</div>
+                  <div class="assign-user-details">
+                    <p class="assign-user-name">{{ user.name }}</p>
+                    <p class="assign-user-email">{{ user.email || user.username }}</p>
+                  </div>
                 </div>
-                <div class="am-user-action">
-                  <MIcon v-if="selectedUsers.includes(user.id)" icon="check_circle" :size="20" :fill="1" style="color: var(--primary)" />
-                  <MIcon v-else icon="add_circle" :size="20" style="color: var(--outline)" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Assigned users -->
-          <div class="am-section">
-            <div class="am-section-header">
-              <span class="am-section-label">Usuarios asignados</span>
-              <span class="am-section-count" v-if="assignedUsersFull.length">{{ assignedUsersFull.length }} asignado{{ assignedUsersFull.length !== 1 ? 's' : '' }}</span>
-            </div>
-
-            <!-- Empty assigned state -->
-            <div v-if="assignedUsersFull.length === 0" class="am-empty">
-              <MIcon icon="person_search" :size="36" style="color: var(--outline-variant)" />
-              <p>No hay usuarios asignados</p>
-              <span>Comienza buscando un usuario arriba.</span>
-            </div>
-
-            <div v-else class="am-user-list">
-              <div
-                v-for="user in assignedUsersFull"
-                :key="'a-'+user.id"
-                class="am-user-item"
-              >
-                <div class="am-avatar">{{ user.avatar }}</div>
-                <div class="am-user-info">
-                  <div class="am-user-name">{{ user.name }}</div>
-                  <div class="am-user-email">{{ user.email || user.username }}</div>
-                </div>
-                <button class="am-remove-btn" @click.stop="toggleUserFromSearch(user)" data-tooltip="Quitar acceso">
-                  <MIcon icon="delete" :size="20" />
+                <button 
+                  class="assign-add-btn"
+                  @click.stop="toggleUserFromSearch(user)">
+                  <span class="material-symbols-outlined">add</span>
                 </button>
               </div>
             </div>
           </div>
-        </div>
 
+          <!-- Assigned Users -->
+          <div class="assign-assigned-section">
+            <div class="assign-section-header">
+              <h3>USUARIOS ASIGNADOS</h3>
+              <span v-if="assignedUsersFull.length" class="assign-count-badge">
+                {{ assignedUsersFull.length }} ASIGNADO{{ assignedUsersFull.length !== 1 ? 'S' : '' }}
+              </span>
+            </div>
+            
+            <div v-if="assignedUsersFull.length > 0" class="assign-users-list">
+              <div 
+                v-for="user in assignedUsersFull" 
+                :key="'a'+user.id"
+                class="assign-user-item">
+                <div class="assign-user-info">
+                  <div class="assign-avatar">{{ user.avatar }}</div>
+                  <div class="assign-user-details">
+                    <p class="assign-user-name">{{ user.name }}</p>
+                    <p class="assign-user-email">{{ user.email || user.username }}</p>
+                  </div>
+                </div>
+                <button 
+                  class="assign-delete-btn"
+                  @click.stop="toggleUserFromSearch(user)">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="assign-empty-state">
+              <span class="material-symbols-outlined">person_search</span>
+              <p>No hay usuarios asignados</p>
+              <span>Comienza buscando un usuario arriba.</span>
+            </div>
+          </div>
+        </div>
+        
         <!-- Footer -->
-        <div class="am-footer">
-          <button class="am-btn-cancel" @click="assigningDashboard = null">Cancelar</button>
-          <button class="am-btn-save" @click="saveAssignment">Guardar asignación</button>
+        <div class="assign-modal-footer">
+          <button class="assign-btn-cancel" @click="assigningDashboard = null">Cancelar</button>
+          <button class="assign-btn-save" @click="saveAssignment">Guardar asignación</button>
         </div>
       </div>
     </div>
 
     <!-- Import Dashboard Modal -->
-    <div v-if="importPreview" class="modal-overlay" @click.self="importPreview = null">
-      <div class="modal-box" style="max-width: 440px;">
-        <div class="modal-header">
-          <h3>Importar Dashboard</h3>
-          <button class="btn-icon" @click="importPreview = null">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div v-if="importPreview" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="importPreview = null">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[440px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h3 class="text-base font-semibold text-slate-900">Importar Dashboard</h3>
+          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="importPreview = null">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
-        <div class="modal-body">
-          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px">
-            Se creará una copia nueva del siguiente dashboard:
-          </p>
-          <div class="import-preview-card">
-            <div class="import-preview-name">{{ importPreview.name }}</div>
-            <p v-if="importPreview.description" class="import-preview-desc">{{ importPreview.description }}</p>
-            <div class="import-preview-meta">
-              <span class="badge badge-blue">{{ importPreview.widgets.length }} widgets</span>
-              <span v-if="importPreview.filters?.length" class="badge" style="background:#f6ffed;color:#52c41a">
+        <div class="px-6 py-5">
+          <p class="text-sm text-slate-500 mb-4">Se creará una copia nueva del siguiente dashboard:</p>
+          <div class="p-4 border border-slate-200 rounded-lg bg-slate-50">
+            <div class="text-base font-semibold text-slate-900 mb-1">{{ importPreview.name }}</div>
+            <p v-if="importPreview.description" class="text-sm text-slate-500 mb-3">{{ importPreview.description }}</p>
+            <div class="flex gap-2 flex-wrap">
+              <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded">{{ importPreview.widgets.length }} widgets</span>
+              <span v-if="importPreview.filters?.length" class="inline-flex items-center px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-600 rounded">
                 {{ importPreview.filters.length }} filtros
               </span>
             </div>
           </div>
-          <p class="form-hint" style="margin-top:12px">Los identificadores internos serán regenerados.</p>
+          <p class="text-xs text-slate-400 mt-3">Los identificadores internos serán regenerados.</p>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="importPreview = null">Cancelar</button>
-          <button class="btn btn-primary" @click="confirmImport">Importar</button>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="importPreview = null">Cancelar</button>
+          <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700" @click="confirmImport">Importar</button>
         </div>
       </div>
     </div>
@@ -418,85 +455,84 @@
     />
 
     <!-- Delete confirm -->
-    <div v-if="deletingDashboard" class="modal-overlay" @click.self="deletingDashboard = null">
-      <div class="modal-box" style="max-width: 380px;">
-        <div class="modal-header">
-          <h3>Eliminar Dashboard</h3>
-          <button class="btn-icon" @click="deletingDashboard = null">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div v-if="deletingDashboard" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="deletingDashboard = null">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[380px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h3 class="text-base font-semibold text-slate-900">Eliminar Dashboard</h3>
+          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="deletingDashboard = null">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
-        <div class="modal-body">
-          <p>¿Estás seguro de eliminar <strong>{{ deletingDashboard.name }}</strong>? Esta acción no se puede deshacer.</p>
+        <div class="px-6 py-5">
+          <p class="text-sm text-slate-700">¿Estás seguro de eliminar <strong>{{ deletingDashboard.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="deletingDashboard = null">Cancelar</button>
-          <button class="btn btn-danger btn-primary" @click="deleteDashboard" style="background:var(--error);color:#fff;border-color:var(--error)">Eliminar</button>
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="deletingDashboard = null">Cancelar</button>
+          <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700" @click="deleteDashboard">Eliminar</button>
         </div>
       </div>
     </div>
 
     <!-- Modal: AI Assist -->
-    <div v-if="aiAssistOpen" class="modal-overlay" @click.self="aiAssistOpen = false">
-      <div class="modal card ai-assist-modal">
-        <div class="modal-header ai-assist-header">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
-          </svg>
-          <span>IA Assist — Generador de Widgets</span>
-          <span v-if="llmStore.isConfigured" class="ai-model-label">
+    <div v-if="aiAssistOpen" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="aiAssistOpen = false">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[600px] max-w-[95vw] overflow-hidden flex flex-col">
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <span class="material-symbols-outlined text-indigo-600">auto_awesome</span>
+          <span class="text-base font-semibold text-slate-900">IA Assist — Generador de Widgets</span>
+          <span v-if="llmStore.isConfigured" class="ml-auto text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-600">
             {{ llmStore.configFor('modelAssist').providerLabel }} · {{ llmStore.configFor('modelAssist').modelLabel }}
           </span>
-          <button class="btn-icon" style="margin-left:auto" @click="aiAssistOpen = false">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="aiAssistOpen = false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
 
-        <div class="modal-body ai-assist-body">
-          <div v-if="!llmStore.isConfigured" class="alert alert-error">
+        <div class="px-6 py-5 flex flex-col gap-4">
+          <div v-if="!llmStore.isConfigured" class="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-lg">
             Sin clave API configurada.
-            <router-link to="/settings" @click="aiAssistOpen = false" style="color:inherit;font-weight:600;margin-left:4px">
+            <router-link to="/settings" @click="aiAssistOpen = false" class="font-semibold underline">
               Ir a Configuración →
             </router-link>
           </div>
           
-          <div class="ai-context-row">
-            <span class="ai-ctx-label">Contexto del Cubo:</span>
-            <span class="badge badge-blue">{{ cubeStore.allMeasures.length }} métricas</span>
-            <span class="badge badge-purple">{{ cubeStore.allDimensions.length }} dimensiones</span>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="font-semibold text-slate-600">Contexto del Cubo:</span>
+            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded">{{ cubeStore.allMeasures.length }} métricas</span>
+            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-50 text-purple-600 rounded">{{ cubeStore.allDimensions.length }} dimensiones</span>
           </div>
 
           <textarea
             v-model="aiAssistPrompt"
-            class="form-input ai-prompt-input"
             rows="5"
+            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
             placeholder="Ej: Muéstrame un gráfico de barras comparando el total de ventas por región..."
             :disabled="aiAssistLoading || !llmStore.isConfigured"
             @keydown.enter.prevent="runAIAssist"
           ></textarea>
         </div>
 
-        <div class="modal-footer ai-assist-footer">
-          <span class="ai-hint">Usa Enter para enviar</span>
-          <button class="btn btn-secondary" @click="aiAssistOpen = false" :disabled="aiAssistLoading">Cancelar</button>
-          <button
-            class="btn-ai-assist"
-            style="margin-left:auto"
-            :disabled="!aiAssistPrompt.trim() || aiAssistLoading || !llmStore.isConfigured"
-            @click="runAIAssist"
-          >
-            <svg v-if="aiAssistLoading" class="spinner-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32" />
-            </svg>
-            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-            </svg>
-            {{ aiAssistLoading ? 'Generando...' : 'Generar Widget' }}
-          </button>
+        <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+          <span class="text-xs text-slate-400 italic">Usa Enter para enviar</span>
+          <div class="flex items-center gap-3">
+            <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="aiAssistOpen = false" :disabled="aiAssistLoading">Cancelar</button>
+            <button
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg shadow-md transition-all"
+              :class="[!aiAssistPrompt.trim() || aiAssistLoading || !llmStore.isConfigured ? 'opacity-60 cursor-not-allowed grayscale' : 'hover:opacity-90 hover:-translate-y-0.5']"
+              :disabled="!aiAssistPrompt.trim() || aiAssistLoading || !llmStore.isConfigured"
+              @click="runAIAssist"
+              style="background: linear-gradient(135deg, #6366f1, #a855f7);"
+            >
+              <svg v-if="aiAssistLoading" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32" />
+              </svg>
+              <span v-else class="material-symbols-outlined text-sm">send</span>
+              {{ aiAssistLoading ? 'Generando...' : 'Generar Widget' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -511,7 +547,6 @@ import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
 import DesignerCard from '@/components/dashboard/DesignerCard.vue'
-import MIcon from '@/components/common/MIcon.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import ChartLayoutModal from '@/components/dashboard/ChartLayoutModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
@@ -970,83 +1005,29 @@ function confirmImport() {
 <style scoped>
 .designer-view { display: flex; flex-direction: column; height: 100%; }
 
-/* ── Page header ── */
-.ds-page-header {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  margin-bottom: 32px; gap: 16px; flex-wrap: wrap;
-}
-.ds-page-title {
-  font-size: 32px; font-weight: 700; color: var(--on-surface);
-  letter-spacing: -0.02em; line-height: 1.2;
-  font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 6px;
-}
-.ds-page-subtitle { font-size: 16px; color: var(--secondary); line-height: 1.5; }
-.ds-header-actions { display: flex; align-items: center; gap: 10px; }
-.ds-btn-secondary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 18px; background: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant); color: var(--on-surface);
-  font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer;
-  transition: background 0.2s;
-}
-.ds-btn-secondary:hover { background: var(--surface-container-low); }
-.ds-btn-primary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 18px; background: var(--primary); color: #fff;
-  border: none; font-size: 13px; font-weight: 600; border-radius: 10px;
-  cursor: pointer; transition: background 0.2s, box-shadow 0.2s;
-}
-.ds-btn-primary:hover { background: var(--primary-container); box-shadow: var(--shadow-md); }
-.ds-btn-primary:active { transform: scale(0.98); }
-
-/* ── Designer grid ── */
-.designer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+/* Material Symbols font */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Create new card */
-.designer-new-card {
-  border: 2px dashed var(--outline-variant);
-  border-radius: 12px;
-  padding: 32px 24px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 12px; cursor: pointer; background: transparent;
-  transition: border-color 0.2s, background 0.2s;
-  min-height: 300px;
-}
-.designer-new-card:hover {
-  border-color: var(--primary);
-  background: rgba(0, 88, 190, 0.04);
-}
-.designer-new-card:hover .new-card-icon-wrap { background: rgba(0, 88, 190, 0.1); color: var(--primary); }
-.designer-new-card:hover .new-card-title { color: var(--primary); }
-.new-card-icon-wrap {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--surface-container); color: var(--on-surface-variant);
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s, color 0.2s;
-}
-.new-card-title {
-  font-size: 14px; font-weight: 600; color: var(--on-surface);
-  transition: color 0.2s;
-}
-.new-card-sub { font-size: 13px; color: var(--secondary); }
-
-/* Import preview */
-.import-preview-card {
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg);
-}
-.import-preview-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.import-preview-desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 10px; }
-.import-preview-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+.text-sm { font-size: 14px; }
 
 /* Editor */
-.designer-editor { display: flex; flex-direction: column; height: 100%; }
+.designer-editor { display: flex; flex-direction: column; height: 100%; padding: 20px; }
 
 .editor-toolbar {
   display: flex;
@@ -1172,6 +1153,7 @@ function confirmImport() {
   flex-shrink: 0;
 }
 .mode-btn {
+  display: inline-flex; align-items: center;
   padding: 6px 12px; border: none; background: transparent;
   font-size: 13px; cursor: pointer; color: var(--text-secondary);
   transition: all 0.15s; white-space: nowrap;
@@ -1210,294 +1192,384 @@ function confirmImport() {
 .wt-label { font-size: 13px; font-weight: 600; color: var(--text); }
 .wt-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
 
-/* Assign users */
-.user-assign-list { display: flex; flex-direction: column; gap: 8px; }
-.user-assign-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; border: 2px solid var(--border);
-  border-radius: 8px; cursor: pointer; transition: all 0.15s;
-}
-/* ── Assign Users Modal ── */
-.am-box {
-  background: #fff;
-  width: 100%;
-  max-width: 640px;
-  border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh;
-}
-
-.am-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 20px 24px 18px;
-  border-bottom: 1px solid var(--outline-variant);
-  flex-shrink: 0;
-}
-.am-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--on-surface);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  margin: 0 0 2px;
-  line-height: 1.3;
-}
-.am-subtitle {
-  font-size: 13px;
-  color: var(--on-surface-variant);
-  margin: 0;
-}
-.am-close {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--on-surface-variant);
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-.am-close:hover { background: var(--surface-container-high); }
-
-.am-body {
-  padding: 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  flex: 1;
-}
-
-.am-instruction {
-  font-size: 14px;
-  color: var(--on-surface-variant);
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* Search */
-.am-search-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.am-search-wrap {
-  position: relative;
-  flex: 1;
-  min-width: 200px;
-}
-.am-search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--outline);
-  pointer-events: none;
-}
-.am-search-input {
-  width: 100%;
-  padding: 10px 14px 10px 40px;
-  border: 1px solid var(--outline-variant);
-  border-radius: 8px;
-  font-size: 14px;
-  color: var(--on-surface);
-  background: var(--surface-container-lowest);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  box-sizing: border-box;
-}
-.am-search-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 88, 190, 0.12);
-}
-.am-kc-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: rgba(0, 88, 190, 0.05);
-  color: var(--primary);
-  border: 1px solid rgba(0, 88, 190, 0.2);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-}
-.am-kc-btn:hover:not(:disabled) { background: rgba(0, 88, 190, 0.1); }
-.am-kc-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-/* Error */
-.am-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--error);
-  background: var(--error-container);
-  padding: 8px 14px;
-  border-radius: 8px;
-}
-
-/* Section */
-.am-section { display: flex; flex-direction: column; gap: 10px; }
-.am-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2px;
-}
-.am-section-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--on-surface-variant);
-}
-.am-section-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--secondary);
-  background: var(--secondary-container);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-/* User list */
-.am-user-list { display: flex; flex-direction: column; gap: 8px; }
-.am-user-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: #fff;
-  border: 1px solid rgba(194, 198, 214, 0.4);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s;
-}
-.am-user-item:hover { box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08); }
-.am-user-item--selected { border-color: rgba(0, 88, 190, 0.3); background: rgba(0, 88, 190, 0.03); }
-
-.am-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--primary-container);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.am-user-info { flex: 1; min-width: 0; }
-.am-user-name { font-size: 14px; font-weight: 500; color: var(--on-surface); }
-.am-user-email { font-size: 12px; color: var(--outline); margin-top: 1px; }
-.am-user-action { flex-shrink: 0; }
-
-.am-remove-btn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--outline);
-  transition: color 0.15s, background 0.15s;
-  flex-shrink: 0;
-}
-.am-remove-btn:hover { color: var(--error); background: rgba(186, 26, 26, 0.1); }
-
-/* Empty assigned */
-.am-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 32px 20px;
-  border: 2px dashed var(--outline-variant);
-  border-radius: 16px;
-  background: var(--surface-container-low);
-  text-align: center;
-}
-.am-empty p { font-size: 14px; font-weight: 500; color: var(--on-surface-variant); margin: 4px 0 0; }
-.am-empty span { font-size: 13px; color: var(--outline); }
-
-/* Footer */
-.am-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--outline-variant);
-  background: var(--surface-container-low);
-  flex-shrink: 0;
-}
-.am-btn-cancel {
-  padding: 10px 24px;
-  background: transparent;
-  color: var(--on-surface-variant);
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.am-btn-cancel:hover { background: var(--surface-container-high); }
-.am-btn-save {
-  padding: 10px 24px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 88, 190, 0.25);
-  transition: background 0.15s, transform 0.1s;
-}
-.am-btn-save:hover { background: var(--primary-dark); }
-.am-btn-save:active { transform: scale(0.98); }
-
-/* AI Assist Modal */
-.ai-assist-modal { width: 90%; max-width: 600px; display: flex; flex-direction: column; }
-.ai-assist-header { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1)); border-bottom: 1px solid rgba(168,85,247,0.2); color: var(--text); }
-.ai-model-label { margin-left:12px; font-size:11px; font-family:var(--font-mono); background:#fff; padding:2px 6px; border-radius:4px; border:1px solid #e0e0e0; color:#666; }
-.ai-context-row { display: flex; align-items: center; gap:8px; margin-bottom: 16px; font-size: 13px; }
-.ai-ctx-label { font-weight: 600; color: var(--text-secondary); }
-.ai-prompt-input { font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; }
-.ai-prompt-input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
-.ai-hint { margin-right:auto; font-size:12px; color:#aaa; font-style:italic; }
-
+/* AI Assist */
 .btn-ai-assist {
-  display: flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 6px;
   background: linear-gradient(135deg, #6366f1, #a855f7);
   color: white; border: none; padding: 6px 14px;
   border-radius: 8px; font-size: 13px; font-weight: 600;
-  cursor: pointer; box-shadow: 0 4px 12px rgba(168, 247, 0.25);
+  cursor: pointer; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
   transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .btn-ai-assist:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(168, 85, 247, 0.35); }
 .btn-ai-assist:active:not(:disabled) { transform: translateY(0); }
 .btn-ai-assist:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; filter: grayscale(50%); }
 
-.spinner-icon { animation: spin 1s linear infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Custom font classes */
+.font-h1 {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Assign Users Modal Styles */
+.modal-overlay-assign {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 16px;
+}
+
+.assign-modal-box {
+  background: white;
+  width: 100%;
+  max-width: 672px;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.assign-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.assign-modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.assign-modal-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.assign-modal-header button:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.assign-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.assign-search-section {
+  margin-bottom: 24px;
+}
+
+.assign-instruction {
+  font-size: 14px;
+  color: #475569;
+  margin: 0 0 16px 0;
+}
+
+.assign-search-row {
+  display: flex;
+  gap: 12px;
+}
+
+.assign-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.assign-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.assign-input-wrapper input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.assign-input-wrapper input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.assign-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.assign-search-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.assign-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.assign-search-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.assign-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.assign-results-section,
+.assign-assigned-section {
+  margin-bottom: 24px;
+}
+
+.assign-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.assign-section-header h3 {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.assign-count-badge {
+  padding: 2px 8px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.assign-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assign-user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.assign-user-item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.assign-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.assign-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.assign-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assign-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0;
+}
+
+.assign-user-email {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.assign-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.2s;
+}
+
+.assign-delete-btn:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.assign-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #3b82f6;
+  transition: all 0.2s;
+}
+
+.assign-add-btn:hover {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.assign-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.assign-empty-state .material-symbols-outlined {
+  font-size: 48px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.assign-empty-state p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+  margin: 0 0 4px 0;
+}
+
+.assign-empty-state span {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.assign-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.assign-btn-cancel {
+  padding: 10px 24px;
+  background: transparent;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.assign-btn-cancel:hover {
+  background: #f1f5f9;
+}
+
+.assign-btn-save {
+  padding: 10px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.assign-btn-save:hover {
+  background: #2563eb;
+}
+
 </style>

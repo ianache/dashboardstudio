@@ -1,51 +1,94 @@
 <template>
-  <div class="settings-view">
-    <div class="page-header">
-      <h2 class="page-title">Configuración</h2>
-      <p class="page-subtitle">Gestiona las conexiones y preferencias del sistema</p>
+  <div class="min-h-[calc(100vh-64px)] p-8">
+    <!-- Page Header -->
+    <div class="max-w-[1600px] mx-auto mb-8">
+      <div class="space-y-1">
+        <h1 class="font-h1 text-h1 text-slate-900">Configuración</h1>
+        <p class="font-body-md text-slate-500 max-w-2xl">Gestiona las conexiones y preferencias del sistema</p>
+      </div>
     </div>
 
-    <div class="settings-grid">
-      <!-- CubeJS Connection -->
-      <div class="settings-card card">
-        <div class="sc-header">
-          <div class="sc-icon">🔌</div>
-          <div>
-            <h3 class="sc-title">Conexión CubeJS</h3>
-            <p class="sc-desc">Configura el endpoint y el token de autenticación de tu instancia Cube</p>
-          </div>
-        </div>
+    <!-- Single Column Layout -->
+    <div class="max-w-[900px] mx-auto">
+      <div class="flex flex-col gap-6">
+        <!-- Mi Perfil (first, expanded) -->
+        <PanelHeadBodyPieComponent
+          title="Mi perfil"
+          subtitle="Información de tu cuenta"
+          icon="person"
+          :expanded="true"
+          :show-footer="false"
+          @expand="expandedSections.profile = true"
+          @collapse="expandedSections.profile = false"
+          @toggle="expandedSections.profile = $event"
+        >
+          <template #body>
+            <div class="profile-display">
+              <div class="profile-avatar">{{ authStore.user?.avatar }}</div>
+              <div class="profile-info">
+                <div class="pi-name">{{ authStore.user?.name }}</div>
+                <div class="pi-email">{{ authStore.user?.email }}</div>
+                <span class="badge" :class="authStore.isDesigner ? 'badge-blue' : 'badge-green'" style="margin-top:8px">
+                  {{ authStore.isDesigner ? '🎨 Diseñador' : '👁️ Visualizador' }}
+                </span>
+              </div>
+            </div>
 
-        <div class="sc-body">
-          <div v-if="cubeStore.connected" class="alert alert-success" style="margin-bottom: 16px;">
-            ✅ Conectado a CubeJS — {{ cubeStore.cubes.length }} cubos disponibles
-          </div>
-          <div v-else-if="cubeStore.metaError" class="alert alert-error" style="margin-bottom: 16px;">
-            ⚠️ Error de conexión: {{ cubeStore.metaError }}
-          </div>
-          <div v-else-if="cubeStore.error" class="alert alert-warning" style="margin-bottom: 16px;">
-            ⚠️ No se pudo cargar la configuración del servidor
-          </div>
+            <div class="divider"></div>
 
-          <div class="form-group">
-            <label class="form-label">Nombre de configuración</label>
-            <input
-              v-model="configName"
-              type="text"
-              class="form-input"
-              placeholder="Mi conexión CubeJS"
-            />
-            <span class="form-hint">Identificador para esta configuración</span>
-          </div>
+            <h4 style="font-size:14px;font-weight:600;margin-bottom:12px">Dashboards disponibles</h4>
+            <div v-if="myDashboards.length === 0" class="form-hint">Sin dashboards asignados</div>
+            <div v-else class="db-list-small">
+              <div v-for="db in myDashboards" :key="db.id" class="dbs-item">
+                <span>📊 {{ db.name }}</span>
+                <span class="badge badge-blue">{{ db.widgets.length }} w.</span>
+              </div>
+            </div>
+          </template>
+        </PanelHeadBodyPieComponent>
 
-          <div class="form-group">
-            <label class="form-label">API URL</label>
-            <input
-              v-model="apiUrl"
-              type="url"
-              class="form-input"
-              placeholder="http://localhost:4000/cubejs-api/v1"
-            />
+        <!-- CubeJS Connection -->
+        <PanelHeadBodyPieComponent
+          title="Conexión CubeJS"
+          subtitle="Configura el endpoint y el token de autenticación de tu instancia Cube"
+          icon="link"
+          :expanded="expandedSections.cubejs"
+          :show-reset-button="false"
+          :show-apply-button="false"
+          @expand="expandedSections.cubejs = true"
+          @collapse="expandedSections.cubejs = false"
+          @toggle="expandedSections.cubejs = $event"
+        >
+          <template #body>
+              <div v-if="cubeStore.connected" class="alert alert-success" style="margin-bottom: 16px;">
+                ✅ Conectado a CubeJS — {{ cubeStore.cubes.length }} cubos disponibles
+              </div>
+              <div v-else-if="cubeStore.metaError" class="alert alert-error" style="margin-bottom: 16px;">
+                ⚠️ Error de conexión: {{ cubeStore.metaError }}
+              </div>
+              <div v-else-if="cubeStore.error" class="alert alert-warning" style="margin-bottom: 16px;">
+                ⚠️ No se pudo cargar la configuración del servidor
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nombre de configuración</label>
+                <input
+                  v-model="configName"
+                  type="text"
+                  class="form-input"
+                  placeholder="Mi conexión CubeJS"
+                />
+                <span class="form-hint">Identificador para esta configuración</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">API URL</label>
+                <input
+                  v-model="apiUrl"
+                  type="url"
+                  class="form-input"
+                  placeholder="http://localhost:4000/cubejs-api/v1"
+                />
             <span class="form-hint">URL base de la API CubeJS (incluye /cubejs-api/v1)</span>
           </div>
 
@@ -70,25 +113,14 @@
             <span class="form-hint">JWT token de autenticación generado con tu secret de Cube (se almacena encriptado)</span>
           </div>
 
-          <div class="sc-actions">
-            <button class="btn btn-secondary" @click="testConnection" :disabled="testing">
-              <span v-if="testing" class="btn-spin"></span>
-              <span v-else>🔍 Probar conexión</span>
-            </button>
-            <button 
-              class="btn btn-primary" 
-              @click="saveConnection" 
-              :disabled="saving || !authStore.isDesigner"
-            >
-              <span v-if="saving" class="btn-spin"></span>
-              <span v-else>💾 Guardar en servidor</span>
-            </button>
-          </div>
-
           <!-- Schema viewer -->
           <div v-if="cubeStore.cubes.length > 0" class="schema-viewer">
-            <h4 class="schema-title">Cubos disponibles</h4>
-            <div class="cube-list">
+            <div class="schema-header" @click="toggleCubesSection">
+              <h4 class="schema-title">Cubos disponibles</h4>
+              <span class="schema-count">{{ cubeStore.cubes.length }} cubos</span>
+              <span class="schema-toggle">{{ showCubesSection ? '▲' : '▼' }}</span>
+            </div>
+            <div v-if="showCubesSection" class="cube-list">
               <div v-for="cube in cubeStore.cubes" :key="cube.name" class="cube-item">
                 <div class="cube-item-header" @click="toggleCube(cube.name)">
                   <span>📦 {{ cube.name }}</span>
@@ -114,53 +146,38 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </template>
 
-      <!-- User Info -->
-      <div class="settings-card card">
-        <div class="sc-header">
-          <div class="sc-icon">👤</div>
-          <div>
-            <h3 class="sc-title">Mi perfil</h3>
-            <p class="sc-desc">Información de tu cuenta</p>
-          </div>
-        </div>
-        <div class="sc-body">
-          <div class="profile-display">
-            <div class="profile-avatar">{{ authStore.user?.avatar }}</div>
-            <div class="profile-info">
-              <div class="pi-name">{{ authStore.user?.name }}</div>
-              <div class="pi-email">{{ authStore.user?.email }}</div>
-              <span class="badge" :class="authStore.isDesigner ? 'badge-blue' : 'badge-green'" style="margin-top:8px">
-                {{ authStore.isDesigner ? '🎨 Diseñador' : '👁️ Visualizador' }}
-              </span>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <h4 style="font-size:14px;font-weight:600;margin-bottom:12px">Dashboards disponibles</h4>
-          <div v-if="myDashboards.length === 0" class="form-hint">Sin dashboards asignados</div>
-          <div v-else class="db-list-small">
-            <div v-for="db in myDashboards" :key="db.id" class="dbs-item">
-              <span>📊 {{ db.name }}</span>
-              <span class="badge badge-blue">{{ db.widgets.length }} w.</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <template #footer-actions>
+          <button class="btn btn-secondary" @click="testConnection" :disabled="testing">
+            <span v-if="testing" class="btn-spin"></span>
+            <span v-else>🔍 Probar conexión</span>
+          </button>
+          <button 
+            class="btn btn-primary" 
+            @click="saveConnection" 
+            :disabled="saving || !authStore.isDesigner"
+          >
+            <span v-if="saving" class="btn-spin"></span>
+            <span v-else>💾 Guardar en servidor</span>
+          </button>
+        </template>
+      </PanelHeadBodyPieComponent>
 
       <!-- LLM / IA -->
-      <div v-if="authStore.isDesigner" class="settings-card card">
-        <div class="sc-header">
-          <div class="sc-icon">✦</div>
-          <div>
-            <h3 class="sc-title">LLM / Inteligencia Artificial</h3>
-            <p class="sc-desc">Claves API por proveedor y modelo asignado por operación</p>
-          </div>
-        </div>
-        <div class="sc-body">
+      <PanelHeadBodyPieComponent
+        v-if="authStore.isDesigner"
+        title="LLM / Inteligencia Artificial"
+        subtitle="Claves API por proveedor y modelo asignado por operación"
+        icon="auto_awesome"
+        :expanded="expandedSections.llm"
+        :show-reset-button="false"
+        :show-apply-button="false"
+        @expand="expandedSections.llm = true"
+        @collapse="expandedSections.llm = false"
+        @toggle="expandedSections.llm = $event"
+      >
+        <template #body>
           <div v-if="llmStore.isConfigured" class="alert alert-success">
             ✅ Al menos un proveedor configurado
           </div>
@@ -222,54 +239,34 @@
               </div>
             </div>
           </div>
+        </template>
 
-          <div class="sc-actions">
-            <button 
-              class="btn btn-primary" 
-              @click="saveLlm" 
-              :disabled="savingLlm || !authStore.isDesigner"
-            >
-              <span v-if="savingLlm" class="btn-spin"></span>
-              <span v-else>💾 Guardar en servidor</span>
-            </button>
-          </div>
-        </div>
-      </div>
+        <template #footer-actions>
+          <button 
+            class="btn btn-primary" 
+            @click="saveLlm" 
+            :disabled="savingLlm || !authStore.isDesigner"
+          >
+            <span v-if="savingLlm" class="btn-spin"></span>
+            <span v-else>💾 Guardar en servidor</span>
+          </button>
+        </template>
+      </PanelHeadBodyPieComponent>
 
-      <!-- App Info -->
-      <div class="settings-card card">
-        <div class="sc-header">
-          <div class="sc-icon">ℹ️</div>
-          <div>
-            <h3 class="sc-title">Acerca de</h3>
-            <p class="sc-desc">Información del sistema</p>
-          </div>
-        </div>
-        <div class="sc-body">
-          <table class="info-table">
-            <tbody>
-              <tr><td>Aplicación</td><td><strong>Dashboard Studio</strong></td></tr>
-              <tr><td>Versión</td><td>1.0.0</td></tr>
-              <tr><td>Framework</td><td>Vue 3 + Pinia</td></tr>
-              <tr><td>Gráficos</td><td>Apache ECharts v5</td></tr>
-              <tr><td>Modelo semántico</td><td>CubeJS</td></tr>
-              <tr><td>Almacenamiento</td><td>LocalStorage (demo)</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
       <!-- Color Palettes (designers only) -->
-      <div v-if="authStore.isDesigner" class="settings-card card palette-mgr-card">
-        <div class="sc-header">
-          <div class="sc-icon">🎨</div>
-          <div>
-            <h3 class="sc-title">Paletas de colores</h3>
-            <p class="sc-desc">Gestiona las paletas disponibles para dashboards y widgets. La paleta predeterminada se aplica automáticamente a los nuevos dashboards.</p>
-          </div>
-        </div>
-
-        <div class="sc-body">
-
+      <PanelHeadBodyPieComponent
+        v-if="authStore.isDesigner"
+        title="Paletas de colores"
+        subtitle="Gestiona las paletas disponibles para dashboards y widgets. La paleta predeterminada se aplica automáticamente a los nuevos dashboards."
+        icon="palette"
+        :expanded="expandedSections.palettes"
+        :show-reset-button="false"
+        :show-apply-button="false"
+        @expand="expandedSections.palettes = true"
+        @collapse="expandedSections.palettes = false"
+        @toggle="expandedSections.palettes = $event"
+      >
+        <template #body>
           <!-- Palette list -->
           <div class="pal-list">
             <div
@@ -372,28 +369,53 @@
             </div>
           </div>
 
-          <div class="sc-actions" v-else>
-            <button class="btn btn-secondary" @click="openNewPalForm">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Nueva paleta
-            </button>
-            <button class="btn btn-secondary" @click="paletteStore.resetToBuiltIn">
-              Restaurar predefinidas
-            </button>
-          </div>
-
           <!-- Delete confirm -->
           <div v-if="deletingPalette" class="pal-delete-confirm">
             <span>¿Eliminar <strong>{{ deletingPalette.label }}</strong>?</span>
             <button class="btn btn-secondary btn-sm" @click="deletingPalette = null">Cancelar</button>
             <button class="btn btn-sm" style="background:var(--error);color:#fff;border-color:var(--error)" @click="doDeletePalette">Eliminar</button>
           </div>
+        </template>
 
-        </div>
+        <template #footer-actions>
+          <button v-if="!palForm.open" class="btn btn-secondary" @click="openNewPalForm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nueva paleta
+          </button>
+          <button v-if="!palForm.open" class="btn btn-secondary" @click="paletteStore.resetToBuiltIn">
+            Restaurar predefinidas
+          </button>
+        </template>
+      </PanelHeadBodyPieComponent>
+
+      <!-- Acerca de (last, expanded) -->
+      <PanelHeadBodyPieComponent
+        title="Acerca de"
+        subtitle="Información del sistema"
+        icon="info"
+        :expanded="true"
+        :show-footer="false"
+        @expand="expandedSections.about = true"
+        @collapse="expandedSections.about = false"
+        @toggle="expandedSections.about = $event"
+      >
+        <template #body>
+          <table class="info-table">
+            <tbody>
+              <tr><td>Aplicación</td><td><strong>Dashboard Studio</strong></td></tr>
+              <tr><td>Versión</td><td>1.0.0</td></tr>
+              <tr><td>Framework</td><td>Vue 3 + Pinia</td></tr>
+              <tr><td>Gráficos</td><td>Apache ECharts v5</td></tr>
+              <tr><td>Modelo semántico</td><td>CubeJS</td></tr>
+              <tr><td>Almacenamiento</td><td>LocalStorage (demo)</td></tr>
+            </tbody>
+          </table>
+        </template>
+      </PanelHeadBodyPieComponent>
+
       </div>
-
     </div>
   </div>
 </template>
@@ -406,6 +428,7 @@ import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import { useLlmStore, PROVIDERS, LLM_OPERATIONS } from '@/stores/llm'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
+import PanelHeadBodyPieComponent from '@/components/common/PanelHeadBodyPieComponent.vue'
 
 const authStore = useAuthStore()
 const cubeStore = useCubeStore()
@@ -424,6 +447,24 @@ const showToken = ref(false)
 const testing = ref(false)
 const saving = ref(false)
 const openCubes = ref([])
+const showCubesSection = ref(false)
+
+function toggleCubesSection() {
+  showCubesSection.value = !showCubesSection.value
+}
+
+// Estados de expansión para cada sección (Mi Perfil y Acerca de expandidos por defecto)
+const expandedSections = ref({
+  cubejs: false,
+  profile: true,
+  llm: false,
+  about: true,
+  palettes: false
+})
+
+function toggleSection(section) {
+  expandedSections.value[section] = !expandedSections.value[section]
+}
 
 // LLM refs
 const llmKeys = ref({})
@@ -595,6 +636,20 @@ function doDeletePalette() {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
   background: #fafafa;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sc-header:hover {
+  background: #f0f0f0;
+}
+.sc-header-text {
+  flex: 1;
+}
+.sc-toggle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .sc-icon { font-size: 28px; flex-shrink: 0; }
 .sc-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
@@ -614,7 +669,29 @@ function doDeletePalette() {
 
 /* Schema viewer */
 .schema-viewer { margin-top: 8px; }
-.schema-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.schema-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.schema-header:hover { background: var(--primary-light); }
+.schema-title { font-size: 13px; font-weight: 600; color: var(--text); margin: 0; }
+.schema-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 8px;
+}
+.schema-toggle {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
 .cube-list { display: flex; flex-direction: column; gap: 6px; }
 .cube-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .cube-item-header {

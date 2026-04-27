@@ -1632,6 +1632,7 @@ const selectedRel = ref(null)
 const selectedDiagram = ref(null)
 const showAddNodeModal = ref(false)
 const showFieldDesc = ref(false)
+const fieldsExpanded = ref(true)
 
 // ── Node drag state ──────────────────────────────────────────
 const dragging = ref(null)  // { nodeId, startX, startY, origX, origY }
@@ -1670,7 +1671,7 @@ onBeforeUnmount(() => {
 watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) })
 
 // ── Geometry helpers ─────────────────────────────────────────
-const NODE_WIDTH = 200
+const NODE_WIDTH = 240
 
 function nodeHeight(node) {
   const warn = node?.type === 'dimension' && node?.fields?.length > 0 && !node?.fields?.some(f => f.isKey)
@@ -2576,7 +2577,7 @@ function handleAddNodesToDiagram(nodeIds) {
 /* Nodes */
 .model-node {
   position: absolute;
-  width: 200px;
+  width: 240px;
   background: #fff;
   border-radius: 8px;
   border: 2px solid var(--border);
@@ -2666,6 +2667,66 @@ function handleAddNodesToDiagram(nodeIds) {
 .props-type-badge.rel { background: #722ed1; }
 
 .props-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+/* Icon picker */
+.icon-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.icon-preview {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--primary);
+}
+.icon-preview.empty { color: var(--text-secondary); }
+.form-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Node description textarea */
+.props-desc-textarea {
+  resize: none;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Collapsible "Campos" section header */
+.props-section-collapsible {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  transition: background 0.12s;
+  margin-top: 2px;
+}
+.props-section-collapsible:hover { background: var(--bg); }
+.props-fields-count {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 400;
+  color: #999;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 1px 6px;
+}
 
 .props-section-title {
   display: flex; align-items: center; justify-content: space-between;
@@ -2942,13 +3003,13 @@ function handleAddNodesToDiagram(nodeIds) {
   background: #fff;
   border-right: 1px solid var(--border);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   transition: width 0.2s ease;
   overflow: hidden;
   position: relative;
 }
 .left-panel.collapsed {
-  width: 28px;
+  width: 36px;
 }
 .panel-toggle-btn {
   position: absolute;
@@ -2970,15 +3031,55 @@ function handleAddNodesToDiagram(nodeIds) {
   padding: 0;
 }
 .panel-toggle-btn:hover { background: #e8e8e8; color: var(--primary); }
+
+/* Collapsed icon strip */
+.panel-collapsed-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 44px;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.panel-pip {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.panel-pip:hover { background: #f0f7ff; }
+.panel-pip.fact  { color: #cf1322; }
+.panel-pip.dimension { color: #0958d9; }
+.panel-pip-badge {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+.panel-pip.fact .panel-pip-badge { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.panel-pip.dimension .panel-pip-badge { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+
 .panel-content {
-  width: 192px;
+  width: 220px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   padding-top: 8px;
+  padding-right: 28px; /* leave room for toggle btn */
 }
+
+/* Node icon in panel items */
+.panel-node-icon { flex-shrink: 0; }
+.panel-node-icon.fact-icon  { color: #cf1322; }
+.panel-node-icon.dim-icon   { color: #0958d9; }
 .panel-search-wrap {
   padding: 0 10px 8px;
 }

@@ -307,3 +307,69 @@ class LlmConfigResponse(LlmConfigBase):
     created_by: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+
+# DataSource Schemas
+class DataSourceBase(BaseModel):
+    name: str
+    type: str  # qdrant, neo4j, postgresql, mysql, etc.
+    connection_url: str
+    username: Optional[str] = None
+    password: Optional[str] = None
+    description: Optional[str] = None
+    is_active: bool = True
+
+
+class DataSourceCreate(DataSourceBase):
+    pass
+
+
+class DataSourceUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    connection_url: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class DataSourceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    type: str
+    connection_url: str
+    username: Optional[str] = None
+    description: Optional[str] = None
+    is_active: bool
+    created_by: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+# KnowledgeSpace Schemas
+class KnowledgeSpaceBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    config: dict = {}
+
+
+class KnowledgeSpaceCreate(KnowledgeSpaceBase):
+    pass
+
+
+class KnowledgeSpaceUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    config: Optional[dict] = None
+
+
+class KnowledgeSpaceResponse(KnowledgeSpaceBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    created_by: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None

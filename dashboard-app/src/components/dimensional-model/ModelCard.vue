@@ -5,11 +5,11 @@
       <div class="mcard-header-overlay" />
       <!-- Category icon badge -->
       <div class="mcard-category-badge">
-        <MIcon icon="account_tree" :size="22" :fill="1" style="color: var(--primary)" />
+        <span class="material-symbols-outlined text-xl" style="color: var(--primary)">account_tree</span>
       </div>
       <!-- Global badge -->
       <div v-if="isGlobal" class="mcard-global-badge">
-        <MIcon icon="public" :size="12" />
+        <span class="material-symbols-outlined text-xs">public</span>
         GLOBAL
       </div>
     </div>
@@ -21,7 +21,7 @@
         <template v-if="editingField !== 'name'">
           <h3 class="mcard-name editable" @click.stop="startEdit('name')">
             {{ name }}
-            <MIcon icon="edit" :size="13" class="mcard-edit-hint" />
+            <span class="material-symbols-outlined mcard-edit-hint text-sm">edit</span>
           </h3>
         </template>
         <input
@@ -63,18 +63,18 @@
         <!-- Meta stats -->
         <div class="mcard-meta">
           <span class="mcard-meta-item">
-            <MIcon icon="table_chart" :size="13" />
+            <span class="material-symbols-outlined text-xs">table_chart</span>
             {{ factCount }} hechos
           </span>
           <span class="mcard-meta-sep">·</span>
           <span class="mcard-meta-item">
-            <MIcon icon="view_column" :size="13" />
+            <span class="material-symbols-outlined text-xs">view_column</span>
             {{ dimCount }} dims
           </span>
           <template v-if="relCount">
             <span class="mcard-meta-sep">·</span>
             <span class="mcard-meta-item mcard-meta-item--rel">
-              <MIcon icon="share" :size="13" />
+              <span class="material-symbols-outlined text-xs">share</span>
               {{ relCount }}
             </span>
           </template>
@@ -82,19 +82,19 @@
 
         <!-- Actions -->
         <div class="mcard-actions" @click.stop>
-          <button class="mcard-action" data-tooltip="Editar" @click.stop="$emit('edit')">
-            <MIcon icon="edit" :size="19" />
+          <button class="mcard-action" title="Editar" @click.stop="$emit('edit')">
+            <span class="material-symbols-outlined text-lg">edit</span>
           </button>
-          <button class="mcard-action" data-tooltip="Exportar YAML" @click.stop="$emit('export')">
-            <MIcon icon="download" :size="19" />
+          <button class="mcard-action" title="Exportar YAML" @click.stop="$emit('export')">
+            <span class="material-symbols-outlined text-lg">download</span>
           </button>
           <button
             v-if="!isGlobal"
             class="mcard-action mcard-action--danger"
-            data-tooltip="Eliminar"
+            title="Eliminar"
             @click.stop="$emit('delete')"
           >
-            <MIcon icon="delete" :size="19" />
+            <span class="material-symbols-outlined text-lg">delete</span>
           </button>
         </div>
       </div>
@@ -104,7 +104,6 @@
 
 <script setup>
 import { ref, nextTick } from 'vue'
-import MIcon from '@/components/common/MIcon.vue'
 
 const props = defineProps({
   name: { type: String, required: true },
@@ -157,12 +156,36 @@ function cancelEdit() {
 </script>
 
 <style scoped>
+/* Material Symbols font */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+.text-xs { font-size: 12px; }
+.text-sm { font-size: 14px; }
+.text-lg { font-size: 20px; }
+.text-xl { font-size: 22px; }
+
 .mcard {
   background: #fff;
   border: 1px solid var(--outline-variant);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 4px rgba(15,23,42,0.06);
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -295,6 +318,13 @@ function cancelEdit() {
   height: 34px;
   padding: 2px 8px;
   margin-bottom: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+}
+.mcard-inline-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 88, 190, 0.2);
 }
 .mcard-inline-textarea {
   font-size: 13px;
@@ -302,6 +332,13 @@ function cancelEdit() {
   padding: 4px 8px;
   resize: none;
   line-height: 1.5;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+}
+.mcard-inline-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 88, 190, 0.2);
 }
 
 /* ── Footer ── */
@@ -364,8 +401,8 @@ function cancelEdit() {
   background: rgba(186, 26, 26, 0.07);
 }
 
-.mcard-action[data-tooltip]::after {
-  content: attr(data-tooltip);
+.mcard-action[title]:hover::after {
+  content: attr(title);
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
@@ -377,9 +414,7 @@ function cancelEdit() {
   border-radius: 5px;
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
+  opacity: 1;
   z-index: 50;
 }
-.mcard-action[data-tooltip]:hover::after { opacity: 1; }
 </style>

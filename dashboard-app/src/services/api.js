@@ -300,11 +300,97 @@ export const currenciesApi = {
   }
 }
 
+// Data Sources API
+export const dataSourcesApi = {
+  async getAll() {
+    return apiRequest('/api/v1/data-sources/')
+  },
+
+  async getById(id) {
+    return apiRequest(`/api/v1/data-sources/${id}`)
+  },
+
+  async getByName(name) {
+    return apiRequest(`/api/v1/data-sources/by-name/${encodeURIComponent(name)}`)
+  },
+
+  async search(query) {
+    return apiRequest(`/api/v1/data-sources/search?q=${encodeURIComponent(query)}`)
+  },
+
+  async create(dataSource) {
+    return apiRequest('/api/v1/data-sources/', {
+      method: 'POST',
+      body: JSON.stringify(dataSource)
+    })
+  },
+
+  async update(id, dataSource) {
+    return apiRequest(`/api/v1/data-sources/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dataSource)
+    })
+  },
+
+  async delete(id) {
+    return apiRequest(`/api/v1/data-sources/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
+  async testConnection(id) {
+    return apiRequest(`/api/v1/data-sources/${id}/test`, {
+      method: 'POST'
+    })
+  }
+}
+
+// Knowledge Spaces API
+export const knowledgeSpacesApi = {
+  async getAll() {
+    return apiRequest('/api/v1/knowledge-spaces/')
+  },
+
+  async getById(id) {
+    return apiRequest(`/api/v1/knowledge-spaces/${id}`)
+  },
+
+  async getByName(name) {
+    return apiRequest(`/api/v1/knowledge-spaces/by-name/${encodeURIComponent(name)}`)
+  },
+
+  async search(query) {
+    return apiRequest(`/api/v1/knowledge-spaces/search?q=${encodeURIComponent(query)}`)
+  },
+
+  async create(space) {
+    return apiRequest('/api/v1/knowledge-spaces/', {
+      method: 'POST',
+      body: JSON.stringify(space)
+    })
+  },
+
+  async update(id, space) {
+    return apiRequest(`/api/v1/knowledge-spaces/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(space)
+    })
+  },
+
+  async delete(id) {
+    return apiRequest(`/api/v1/knowledge-spaces/${id}`, {
+      method: 'DELETE'
+    })
+  }
+}
+
 export default {
   cubeConfig: cubeConfigApi,
   llmConfig: llmConfigApi,
   palette: paletteApi,
   dashboard: dashboardApi,
   dimensionalModel: dimensionalModelApi,
-  currencies: currenciesApi
+  currencies: currenciesApi,
+  dataSources: dataSourcesApi,
+  knowledgeSpaces: knowledgeSpacesApi
 }

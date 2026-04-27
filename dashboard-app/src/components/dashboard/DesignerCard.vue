@@ -1,83 +1,83 @@
 <template>
-  <div class="dcard" @click="$emit('design')">
+  <div class="mcard" @click="$emit('design')">
     <!-- Gradient header -->
-    <div class="dcard-header" :style="{ background: gradients[colorIndex % gradients.length] }">
-      <div class="dcard-header-overlay" />
-      <div class="dcard-zoom-bg" />
+    <div class="mcard-header" :style="{ background: gradients[colorIndex % gradients.length] }">
+      <div class="mcard-header-overlay" />
+      <div class="mcard-zoom-bg" />
       <!-- Category icon badge -->
-      <div class="dcard-category-badge">
-        <MIcon :icon="categoryIcon" :size="22" :fill="1" style="color: var(--primary)" />
+      <div class="mcard-category-badge">
+        <span class="material-symbols-outlined text-xl" style="color: var(--primary)">{{ categoryIcon }}</span>
       </div>
     </div>
 
     <!-- Body -->
-    <div class="dcard-body">
-      <div class="dcard-title-row">
-        <h3 class="dcard-name">{{ name }}</h3>
-        <span class="dcard-widget-chip">{{ widgetCount }} widgets</span>
+    <div class="mcard-body">
+      <div class="mcard-title-row">
+        <h3 class="mcard-name">{{ name }}</h3>
+        <span class="mcard-widget-chip">{{ widgetCount }} widgets</span>
       </div>
-      <p class="dcard-desc">{{ description || 'Sin descripción' }}</p>
+      <p class="mcard-desc">{{ description || 'Sin descripción' }}</p>
 
       <!-- Footer -->
-      <div class="dcard-footer">
+      <div class="mcard-footer">
         <!-- Status -->
-        <div class="dcard-status">
+        <div class="mcard-status">
           <template v-if="assignedUsersCount > 0">
-            <div class="dcard-users-pill">
-              <MIcon icon="group" :size="14" />
+            <div class="mcard-users-pill">
+              <span class="material-symbols-outlined text-xs">group</span>
               {{ assignedUsersCount }} usuario{{ assignedUsersCount !== 1 ? 's' : '' }}
             </div>
           </template>
           <template v-else-if="isPublic">
-            <div class="dcard-status-pill dcard-status-pill--public">
-              <MIcon icon="public" :size="13" />
+            <div class="mcard-status-pill mcard-status-pill--public">
+              <span class="material-symbols-outlined text-xs">public</span>
               Público
             </div>
           </template>
           <template v-else>
-            <div class="dcard-status-pill dcard-status-pill--private">
-              <MIcon icon="lock" :size="13" />
+            <div class="mcard-status-pill mcard-status-pill--private">
+              <span class="material-symbols-outlined text-xs">lock</span>
               Privado
             </div>
           </template>
         </div>
 
         <!-- 5 action buttons -->
-        <div class="dcard-actions" @click.stop>
+        <div class="mcard-actions" @click.stop>
           <button
-            class="dcard-action"
-            data-tooltip="Diseñar"
+            class="mcard-action"
+            title="Diseñar"
             @click.stop="$emit('design')"
           >
-            <MIcon icon="design_services" :size="19" />
+            <span class="material-symbols-outlined text-lg">design_services</span>
           </button>
           <button
-            class="dcard-action"
-            data-tooltip="Asignar usuarios"
+            class="mcard-action"
+            title="Asignar usuarios"
             @click.stop="$emit('assign')"
           >
-            <MIcon icon="group_add" :size="19" />
+            <span class="material-symbols-outlined text-lg">group_add</span>
           </button>
           <button
-            class="dcard-action"
-            data-tooltip="Ver"
+            class="mcard-action"
+            title="Ver"
             @click.stop="$emit('view')"
           >
-            <MIcon icon="visibility" :size="19" />
+            <span class="material-symbols-outlined text-lg">visibility</span>
           </button>
           <button
-            class="dcard-action"
-            data-tooltip="Exportar"
+            class="mcard-action"
+            title="Exportar"
             @click.stop="$emit('export')"
           >
-            <MIcon icon="download" :size="19" />
+            <span class="material-symbols-outlined text-lg">download</span>
           </button>
           <button
-            class="dcard-action dcard-action--danger"
-            data-tooltip="Eliminar"
+            class="mcard-action mcard-action--danger"
+            title="Eliminar"
             @click.stop="$emit('delete')"
           >
-            <MIcon icon="delete" :size="19" />
+            <span class="material-symbols-outlined text-lg">delete</span>
           </button>
         </div>
       </div>
@@ -86,8 +86,6 @@
 </template>
 
 <script setup>
-import MIcon from '@/components/common/MIcon.vue'
-
 defineProps({
   name: { type: String, required: true },
   description: { type: String, default: '' },
@@ -110,45 +108,68 @@ const gradients = [
 </script>
 
 <style scoped>
-.dcard {
+/* Material Symbols font */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+.text-xs { font-size: 12px; }
+.text-lg { font-size: 20px; }
+.text-xl { font-size: 22px; }
+
+.mcard {
   background: #fff;
   border: 1px solid var(--outline-variant);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 4px rgba(15,23,42,0.06);
   display: flex;
   flex-direction: column;
   cursor: pointer;
   transition: box-shadow 0.25s ease, transform 0.2s ease;
 }
-.dcard:hover {
+.mcard:hover {
   box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1);
   transform: translateY(-2px);
 }
 
 /* ── Header ── */
-.dcard-header {
+.mcard-header {
   height: 160px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
 }
-.dcard-header-overlay {
+.mcard-header-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(to top, rgba(2, 6, 23, 0.55) 0%, transparent 50%);
   z-index: 1;
 }
-.dcard-zoom-bg {
+.mcard-zoom-bg {
   position: absolute;
   inset: 0;
   transition: transform 0.5s ease;
 }
-.dcard:hover .dcard-zoom-bg {
+.mcard:hover .mcard-zoom-bg {
   transform: scale(1.04);
 }
 
-.dcard-category-badge {
+.mcard-category-badge {
   position: absolute;
   top: 12px;
   left: 12px;
@@ -164,7 +185,7 @@ const gradients = [
 }
 
 /* ── Body ── */
-.dcard-body {
+.mcard-body {
   padding: 20px;
   flex: 1;
   display: flex;
@@ -172,13 +193,13 @@ const gradients = [
   gap: 8px;
 }
 
-.dcard-title-row {
+.mcard-title-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
-.dcard-name {
+.mcard-name {
   font-size: 18px;
   font-weight: 600;
   color: var(--on-surface);
@@ -187,7 +208,7 @@ const gradients = [
   flex: 1;
   min-width: 0;
 }
-.dcard-widget-chip {
+.mcard-widget-chip {
   font-size: 12px;
   font-weight: 500;
   color: var(--secondary);
@@ -198,7 +219,7 @@ const gradients = [
   flex-shrink: 0;
 }
 
-.dcard-desc {
+.mcard-desc {
   font-size: 13px;
   color: var(--on-surface-variant);
   line-height: 1.5;
@@ -211,7 +232,7 @@ const gradients = [
 }
 
 /* ── Footer ── */
-.dcard-footer {
+.mcard-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -221,9 +242,9 @@ const gradients = [
   gap: 8px;
 }
 
-.dcard-status { display: flex; align-items: center; }
+.mcard-status { display: flex; align-items: center; }
 
-.dcard-users-pill {
+.mcard-users-pill {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -235,7 +256,7 @@ const gradients = [
   border-radius: 20px;
 }
 
-.dcard-status-pill {
+.mcard-status-pill {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -244,23 +265,23 @@ const gradients = [
   padding: 3px 8px;
   border-radius: 20px;
 }
-.dcard-status-pill--public {
+.mcard-status-pill--public {
   color: #059669;
   background: rgba(5, 150, 105, 0.08);
 }
-.dcard-status-pill--private {
+.mcard-status-pill--private {
   color: #64748b;
   background: rgba(100, 116, 139, 0.08);
 }
 
 /* ── Actions ── */
-.dcard-actions {
+.mcard-actions {
   display: flex;
   align-items: center;
   gap: 2px;
 }
 
-.dcard-action {
+.mcard-action {
   position: relative;
   width: 30px;
   height: 30px;
@@ -274,19 +295,18 @@ const gradients = [
   color: #94a3b8;
   transition: color 0.15s, background 0.15s;
 }
-.dcard-action:hover {
+.mcard-action:hover {
   color: var(--primary);
   background: rgba(0, 88, 190, 0.07);
 }
-.dcard-action--danger:hover {
+.mcard-action--danger:hover {
   color: var(--error);
   background: rgba(186, 26, 26, 0.07);
 }
 
 /* Tooltips — appear above */
-.dcard-action[data-tooltip] { position: relative; }
-.dcard-action[data-tooltip]::after {
-  content: attr(data-tooltip);
+.mcard-action[title]:hover::after {
+  content: attr(title);
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
@@ -298,9 +318,7 @@ const gradients = [
   border-radius: 5px;
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
+  opacity: 1;
   z-index: 50;
 }
-.dcard-action[data-tooltip]:hover::after { opacity: 1; }
 </style>

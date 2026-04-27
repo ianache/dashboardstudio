@@ -61,6 +61,12 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Modelos', 'Tipos de datos'] }
       },
       {
+        path: 'models/knowledge-spaces',
+        name: 'KnowledgeSpaces',
+        component: () => import('@/views/KnowledgeSpacesView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Modelos', 'Knowledge Spaces'] }
+      },
+      {
         path: 'models/:id',
         name: 'ModelEditor',
         component: () => import('@/views/DimensionalModelEditorView.vue'),
