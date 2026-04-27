@@ -667,6 +667,11 @@ if (!form.value.kpiOptions) {
   form.value.kpiOptions = { icon: '', accentColor: '', invertTrend: false, showComparison: true, comparisonLabel: 'vs período anterior' }
 }
 
+// Ensure gaugeOptions exists with defaults
+if (!form.value.gaugeOptions) {
+  form.value.gaugeOptions = { variant: 'semicircle', min: 0, max: 100, unit: '%', showZones: true, zones: [{ threshold: 0.3, color: '#f5222d' }, { threshold: 0.7, color: '#faad14' }, { threshold: 1.0, color: '#52c41a' }], arcWidth: 16, showPointer: true, showTicks: true }
+}
+
 // colorPalette: null = inherit dashboard, 'none' = no palette, <id> = specific palette
 
 // Computed for time dimension

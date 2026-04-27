@@ -239,33 +239,55 @@ function buildGaugeOption() {
   const value = props.data[0]?.value ?? 0
   const measures = props.widget.cubeQuery?.measures || []
   const seriesName = measures[0]?.label || 'Valor'
+  const go = props.widget.gaugeOptions || {}
+
+  const variant     = go.variant     || 'semicircle'
+  const min         = go.min         ?? 0
+  const max         = go.max         ?? 100
+  const unit        = go.unit        ?? '%'
+  const showZones   = go.showZones   !== false
+  const zones       = go.zones       || [{ threshold: 0.3, color: '#f5222d' }, { threshold: 0.7, color: '#faad14' }, { threshold: 1.0, color: '#52c41a' }]
+  const arcWidth    = go.arcWidth    ?? 16
+  const showPointer = go.showPointer !== false
+  const showTicks   = go.showTicks   !== false
+
+  const VARIANTS = {
+    semicircle: { startAngle: 200, endAngle: -20,  center: ['50%', '60%'], radius: '80%' },
+    circle:     { startAngle: 90,  endAngle: -270, center: ['50%', '50%'], radius: '75%' },
+    progress:   { startAngle: 200, endAngle: -20,  center: ['50%', '55%'], radius: '85%' },
+    speed:      { startAngle: 225, endAngle: -45,  center: ['50%', '65%'], radius: '90%' },
+  }
+  const geo = VARIANTS[variant] || VARIANTS.semicircle
+  const isProgress = variant === 'progress'
+
+  const axisLineColor = showZones
+    ? zones.map(z => [z.threshold, z.color])
+    : [[1, '#1890ff']]
+
+  const detailOffset = (variant === 'circle' || isProgress) ? [0, '0%'] : [0, '70%']
+
+  const noTicks = isProgress || !showTicks
 
   return {
-    tooltip: { formatter: '{b}: {c}%' },
+    tooltip: { formatter: (p) => `${p.name}: ${p.value}${unit}` },
     series: [{
       name: seriesName,
       type: 'gauge',
-      center: ['50%', '60%'],
-      radius: '80%',
-      min: 0,
-      max: 100,
-      axisLine: {
-        lineStyle: {
-          width: 16,
-          color: [[0.3, '#f5222d'], [0.7, '#faad14'], [1, '#52c41a']]
-        }
-      },
-      pointer: { itemStyle: { color: 'auto' } },
-      axisTick: { distance: -20, length: 8, lineStyle: { color: '#fff', width: 2 } },
-      splitLine: { distance: -24, length: 16, lineStyle: { color: '#fff', width: 4 } },
-      axisLabel: { color: 'inherit', distance: 28, fontSize: 11 },
+      ...geo,
+      min,
+      max,
+      axisLine: { lineStyle: { width: arcWidth, color: axisLineColor } },
+      pointer: (isProgress || !showPointer) ? { show: false } : { itemStyle: { color: 'auto' } },
+      axisTick:  noTicks ? { show: false } : { distance: -(arcWidth + 4),  length: 8,  lineStyle: { color: '#fff', width: 2 } },
+      splitLine: noTicks ? { show: false } : { distance: -(arcWidth + 8),  length: 16, lineStyle: { color: '#fff', width: 4 } },
+      axisLabel: noTicks ? { show: false } : { color: 'inherit', distance: arcWidth + 20, fontSize: 11 },
       detail: {
         valueAnimation: true,
-        formatter: '{value}%',
+        formatter: `{value}${unit}`,
         color: 'inherit',
         fontSize: 20,
         fontWeight: 'bold',
-        offsetCenter: [0, '70%']
+        offsetCenter: detailOffset
       },
       data: [{ value, name: seriesName }]
     }]

@@ -79,7 +79,76 @@
           </div>
         </template>
 
-        <!-- ── ECharts layout section (hidden for KPI) ────────── -->
+        <!-- ── Gauge section ──────────────────────────────── -->
+        <template v-else-if="isGauge">
+          <hr class="divider" />
+
+          <div class="form-group">
+            <label class="form-label">Variante</label>
+            <div class="gauge-variant-grid">
+              <div v-for="v in gaugeVariants" :key="v.value"
+                   class="gauge-variant-card" :class="{ selected: form.gauge.variant === v.value }"
+                   @click="form.gauge.variant = v.value">
+                <span class="gv-icon">{{ v.icon }}</span>
+                <span class="gv-label">{{ v.label }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Escala</label>
+            <div class="gauge-scale-row">
+              <div class="gauge-scale-field">
+                <label>Mínimo</label>
+                <input v-model.number="form.gauge.min" type="number" class="form-input" />
+              </div>
+              <div class="gauge-scale-field">
+                <label>Máximo</label>
+                <input v-model.number="form.gauge.max" type="number" class="form-input" />
+              </div>
+              <div class="gauge-scale-field">
+                <label>Unidad</label>
+                <input v-model="form.gauge.unit" type="text" class="form-input" placeholder="%" maxlength="10" />
+              </div>
+              <div class="gauge-scale-field">
+                <label>Grosor arco</label>
+                <input v-model.number="form.gauge.arcWidth" type="number" min="4" max="40" class="form-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <input type="checkbox" v-model="form.gauge.showZones" style="margin-right:6px" />
+              Zonas de color
+            </label>
+            <div v-if="form.gauge.showZones" class="zones-list">
+              <div v-for="(zone, i) in form.gauge.zones" :key="i" class="zone-row">
+                <input v-model="form.gauge.zones[i].color" type="color" class="color-swatch-picker" />
+                <label class="zone-label">Hasta {{ Math.round(zone.threshold * form.gauge.max) }} {{ form.gauge.unit }}</label>
+                <input v-model.number="form.gauge.zones[i].threshold" type="range" min="0.01" max="1" step="0.01"
+                       class="zone-slider" />
+                <span class="zone-pct">{{ Math.round(zone.threshold * 100) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Opciones</label>
+            <div class="toggle-list">
+              <label class="toggle-row" @click.prevent="form.gauge.showPointer = !form.gauge.showPointer">
+                <span class="toggle-track" :class="{ on: form.gauge.showPointer }"><span class="toggle-thumb"></span></span>
+                <span class="toggle-label">Mostrar aguja</span>
+              </label>
+              <label class="toggle-row" @click.prevent="form.gauge.showTicks = !form.gauge.showTicks">
+                <span class="toggle-track" :class="{ on: form.gauge.showTicks }"><span class="toggle-thumb"></span></span>
+                <span class="toggle-label">Mostrar marcas y etiquetas de escala</span>
+              </label>
+            </div>
+          </div>
+        </template>
+
+        <!-- ── ECharts layout section (hidden for KPI and gauge) ── -->
         <template v-else>
           <hr class="divider" />
 
@@ -141,7 +210,15 @@ const props = defineProps({
 })
 const emit = defineEmits(['close', 'save'])
 
-const isKpi = computed(() => props.widget.chartType === 'kpi')
+const isKpi   = computed(() => props.widget.chartType === 'kpi')
+const isGauge = computed(() => props.widget.chartType === 'gauge')
+
+const gaugeVariants = [
+  { value: 'semicircle', label: 'Semicírculo', icon: '🌡️' },
+  { value: 'circle',     label: 'Círculo',     icon: '⭕' },
+  { value: 'progress',   label: 'Progreso',    icon: '🔵' },
+  { value: 'speed',      label: 'Velocímetro', icon: '🏎️' },
+]
 
 const legendOptions = [
   { value: 'top',    label: 'Arriba' },
@@ -154,6 +231,7 @@ const co  = props.widget.chartOptions || {}
 const grid = co.grid || {}
 const leg  = co.legend || {}
 const kpi  = props.widget.kpiOptions || {}
+const go   = props.widget.gaugeOptions || {}
 
 function inferPosition(l) {
   if (l.left === 0 || l.left === '0') return 'left'
@@ -182,6 +260,22 @@ const form = reactive({
     comparisonLabel: kpi.comparisonLabel ?? 'vs período anterior',
     showComparison:  kpi.showComparison  !== false,
     invertTrend:     kpi.invertTrend     ?? false
+  },
+  // Gauge fields
+  gauge: {
+    variant:     go.variant     || 'semicircle',
+    min:         go.min         ?? 0,
+    max:         go.max         ?? 100,
+    unit:        go.unit        ?? '%',
+    showZones:   go.showZones   !== false,
+    zones:       JSON.parse(JSON.stringify(go.zones || [
+      { threshold: 0.3, color: '#f5222d' },
+      { threshold: 0.7, color: '#faad14' },
+      { threshold: 1.0, color: '#52c41a' }
+    ])),
+    arcWidth:    go.arcWidth    ?? 16,
+    showPointer: go.showPointer !== false,
+    showTicks:   go.showTicks   !== false,
   }
 })
 
@@ -194,6 +288,10 @@ function legendConfig(pos) {
 }
 
 function save() {
+  if (isGauge.value) {
+    emit('save', { title: form.title, gaugeOptions: { ...form.gauge } })
+    return
+  }
   if (isKpi.value) {
     emit('save', {
       title:      form.title,
@@ -346,4 +444,23 @@ function save() {
 .toggle-row { flex-wrap: wrap; }
 .toggle-label, .toggle-hint { flex-basis: calc(100% - 46px); }
 .toggle-hint { flex-basis: 100%; padding-left: 46px; margin-top: -8px; }
+
+/* Gauge variant picker */
+.gauge-variant-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
+.gauge-variant-card { display: flex; flex-direction: column; align-items: center; padding: 10px 6px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.gauge-variant-card:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, #fff); }
+.gauge-variant-card.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, #fff); }
+.gv-icon { font-size: 22px; margin-bottom: 4px; }
+.gv-label { font-size: 11px; font-weight: 600; color: var(--text); }
+
+/* Gauge scale row */
+.gauge-scale-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
+.gauge-scale-field label { font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 3px; }
+
+/* Zones */
+.zones-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.zone-row { display: flex; align-items: center; gap: 8px; }
+.zone-label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; min-width: 80px; }
+.zone-slider { flex: 1; }
+.zone-pct { font-size: 11px; color: var(--text-secondary); width: 32px; text-align: right; }
 </style>

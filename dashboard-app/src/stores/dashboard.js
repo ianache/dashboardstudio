@@ -60,10 +60,12 @@ export const useDashboardStore = defineStore('dashboard', {
 
     _transformWidgetBackendToFrontend(w) {
       const chartOptions = { ...(w.chart_options || {}) }
-      const pieOptions = chartOptions._pie || null
-      const kpiOptions = chartOptions._kpi || null
+      const pieOptions   = chartOptions._pie   || null
+      const kpiOptions   = chartOptions._kpi   || null
+      const gaugeOptions = chartOptions._gauge || null
       delete chartOptions._pie
       delete chartOptions._kpi
+      delete chartOptions._gauge
       return {
         id: w.id,
         title: w.title,
@@ -71,8 +73,9 @@ export const useDashboardStore = defineStore('dashboard', {
         position: { x: w.position?.x ?? 0, y: w.position?.y ?? 0, w: w.position?.w ?? 6, h: w.position?.h ?? 3 },
         cubeQuery: w.cube_query || { measures: [], dimensions: [], timeDimension: null, filters: [], limit: 100 },
         chartOptions,
-        pieOptions: pieOptions || { showValue: false, showPercent: true, showTotal: false },
-        kpiOptions: kpiOptions || { icon: '', accentColor: '', invertTrend: false, showComparison: true, comparisonLabel: 'vs período anterior' },
+        pieOptions:   pieOptions   || { showValue: false, showPercent: true, showTotal: false },
+        kpiOptions:   kpiOptions   || { icon: '', accentColor: '', invertTrend: false, showComparison: true, comparisonLabel: 'vs período anterior' },
+        gaugeOptions: gaugeOptions || { variant: 'semicircle', min: 0, max: 100, unit: '%', showZones: true, zones: [{ threshold: 0.3, color: '#f5222d' }, { threshold: 0.7, color: '#faad14' }, { threshold: 1.0, color: '#52c41a' }], arcWidth: 16, showPointer: true, showTicks: true },
         useMockData: w.use_mock_data
       }
     },
@@ -98,8 +101,9 @@ export const useDashboardStore = defineStore('dashboard', {
     async addWidget(dashboardId, widgetData) {
       try {
         const chart_options = { ...(widgetData.chartOptions || {}) }
-        if (widgetData.pieOptions) chart_options._pie = widgetData.pieOptions
-        if (widgetData.kpiOptions) chart_options._kpi = widgetData.kpiOptions
+        if (widgetData.pieOptions)   chart_options._pie   = widgetData.pieOptions
+        if (widgetData.kpiOptions)   chart_options._kpi   = widgetData.kpiOptions
+        if (widgetData.gaugeOptions) chart_options._gauge = widgetData.gaugeOptions
         const backendWidget = {
           title: widgetData.title,
           chart_type: widgetData.chartType,
@@ -131,15 +135,17 @@ export const useDashboardStore = defineStore('dashboard', {
         if (updates.chartType !== undefined) backendUpdates.chart_type = updates.chartType
         if (updates.position !== undefined) backendUpdates.position = updates.position
         if (updates.cubeQuery !== undefined) backendUpdates.cube_query = updates.cubeQuery
-        if (updates.chartOptions !== undefined || updates.pieOptions !== undefined || updates.kpiOptions !== undefined) {
+        if (updates.chartOptions !== undefined || updates.pieOptions !== undefined || updates.kpiOptions !== undefined || updates.gaugeOptions !== undefined) {
           // Merge with existing chart_options to avoid overwriting unrelated stored keys
           const dashboard = this.dashboards.find(d => d.id === dashboardId)
           const existing = dashboard?.widgets.find(w => w.id === widgetId)
           const chart_options = { ...(updates.chartOptions ?? existing?.chartOptions ?? {}) }
-          const pieOpts  = updates.pieOptions  ?? existing?.pieOptions
-          const kpiOpts  = updates.kpiOptions  ?? existing?.kpiOptions
-          if (pieOpts) chart_options._pie = pieOpts
-          if (kpiOpts) chart_options._kpi = kpiOpts
+          const pieOpts   = updates.pieOptions   ?? existing?.pieOptions
+          const kpiOpts   = updates.kpiOptions   ?? existing?.kpiOptions
+          const gaugeOpts = updates.gaugeOptions ?? existing?.gaugeOptions
+          if (pieOpts)   chart_options._pie   = pieOpts
+          if (kpiOpts)   chart_options._kpi   = kpiOpts
+          if (gaugeOpts) chart_options._gauge = gaugeOpts
           backendUpdates.chart_options = chart_options
         }
         if (updates.useMockData !== undefined) backendUpdates.use_mock_data = updates.useMockData
