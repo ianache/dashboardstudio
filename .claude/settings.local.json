@@ -29,7 +29,15 @@
       "Bash(.venv/Scripts/python.exe -m alembic upgrade head)",
       "Bash(.venv/Scripts/python.exe -m alembic stamp 004)",
       "Bash(.venv/Scripts/python.exe -m alembic current)",
-      "Bash(.venv/Scripts/python.exe -c ' *)"
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(python -c \"from app.schemas.schemas import DimensionalModelNode; n = DimensionalModelNode\\(id='x', type='fact', name='test', icon='paid', description='desc'\\); print\\(n.model_dump\\(\\)\\)\")",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__get_project",
+      "WebFetch(domain:stitch.withgoogle.com)",
+      "mcp__stitch__list_screens",
+      "mcp__stitch__get_screen",
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "Bash(curl -s \"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2E4ZTA2ZjcxOTkzZjQyMGJhMjBjNmM1ZmQ3MThmOWUxEgsSBxC52prQjRcYAZIBIwoKcHJvamVjdF9pZBIVQhM2MjYxMjI4NDg5MTgzNTE1NDkx&filename=&opi=89354086\")"
     ]
   }
 }

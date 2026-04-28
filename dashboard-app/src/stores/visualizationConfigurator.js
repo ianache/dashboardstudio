@@ -14,7 +14,8 @@ export const useVisualizationConfiguratorStore = defineStore('visualizationConfi
     chartType: 'bar',
     chartOptions: {},
     pieOptions: { showValue: false, showPercent: true, showTotal: false },
-    combinedOptions: { showSecondaryYAxis: false }
+    combinedOptions: { showSecondaryYAxis: false },
+    gaugeOptions: null
   }),
 
   actions: {

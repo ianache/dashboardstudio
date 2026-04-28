@@ -50,9 +50,6 @@
             <router-link to="/models" class="nav-sub-item" :class="{ active: $route.name === 'ModelList' }">
               <span class="sub-dot" />Ver todos
             </router-link>
-            <div class="nav-sub-item nav-sub-action" @click="createNewModel">
-              <span class="sub-plus">+</span>Nuevo modelo
-            </div>
             <router-link to="/models/data-types" class="nav-sub-item" :class="{ active: $route.name === 'DataTypes' }">
               <span class="sub-dot" />Tipos de datos
             </router-link>
@@ -143,7 +140,6 @@ const availableDashboards = computed(() => {
 
 function toggleSection(name) { openSections.value[name] = !openSections.value[name] }
 function createNewDashboard() { router.push('/designer?new=1') }
-function createNewModel() { router.push('/models?new=1') }
 </script>
 
 <style scoped>
