@@ -10,15 +10,11 @@
         </div>
         <div class="flex items-center gap-3">
           <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
-          <button
-            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
-            @click="importFileInput.click()">
+          <button class="btn btn-secondary" @click="importFileInput.click()">
             <span class="material-symbols-outlined text-lg">download</span>
             Importar
           </button>
-          <button
-            class="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95"
-            @click="showNewModal = true">
+          <button class="btn btn-primary" @click="showNewModal = true">
             <span class="material-symbols-outlined text-lg">add</span>
             Nuevo
           </button>
@@ -33,9 +29,7 @@
           </div>
           <h3 class="text-lg font-semibold text-slate-900">Sin dashboards</h3>
           <p class="text-sm text-slate-500 max-w-md">Crea tu primer dashboard para comenzar a visualizar tus datos.</p>
-          <button
-            class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md"
-            @click="showNewModal = true">
+          <button class="btn btn-primary" @click="showNewModal = true">
             <span class="material-symbols-outlined text-lg">add</span>
             Crear dashboard
           </button>
@@ -280,11 +274,8 @@
           </div>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="showNewModal = false">Cancelar</button>
-          <button 
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" 
-            @click="createDashboard" 
-            :disabled="!newName.trim()">Crear</button>
+          <button class="btn btn-ghost" @click="showNewModal = false">Cancelar</button>
+          <button class="btn btn-primary" @click="createDashboard" :disabled="!newName.trim()">Crear</button>
         </div>
       </div>
     </div>
@@ -304,14 +295,15 @@
         <div class="assign-modal-body">
           <!-- Instruction & Search -->
           <div class="assign-search-section">
-            <p class="assign-instruction">Busca y selecciona los usuarios que tendrán acceso a este dashboard.</p>
+            <p class="assign-instruction">Busca usuarios en Keycloak por nombre parcial o correo para asignarlos al dashboard.</p>
             <div class="assign-search-row">
               <div class="assign-input-wrapper">
                 <span class="material-symbols-outlined assign-search-icon">search</span>
                 <input
                   v-model="userSearchQuery"
                   type="text"
-                  placeholder="Buscar por nombre o correo..."
+                  placeholder="Ingrese más de 3 caracteres y espere 2 segundos..."
+                  @input="onSearchInput"
                   @keyup.enter="searchUsers"
                 />
               </div>
@@ -399,8 +391,8 @@
         
         <!-- Footer -->
         <div class="assign-modal-footer">
-          <button class="assign-btn-cancel" @click="assigningDashboard = null">Cancelar</button>
-          <button class="assign-btn-save" @click="saveAssignment">Guardar asignación</button>
+          <button class="btn btn-ghost" @click="assigningDashboard = null">Cancelar</button>
+          <button class="btn btn-primary" @click="saveAssignment">Guardar asignación</button>
         </div>
       </div>
     </div>
@@ -431,8 +423,8 @@
           <p class="text-xs text-slate-400 mt-3">Los identificadores internos serán regenerados.</p>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="importPreview = null">Cancelar</button>
-          <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700" @click="confirmImport">Importar</button>
+          <button class="btn btn-ghost" @click="importPreview = null">Cancelar</button>
+          <button class="btn btn-primary" @click="confirmImport">Importar</button>
         </div>
       </div>
     </div>
@@ -469,8 +461,8 @@
           <p class="text-sm text-slate-700">¿Estás seguro de eliminar <strong>{{ deletingDashboard.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="deletingDashboard = null">Cancelar</button>
-          <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700" @click="deleteDashboard">Eliminar</button>
+          <button class="btn btn-ghost" @click="deletingDashboard = null">Cancelar</button>
+          <button class="btn btn-danger" @click="deleteDashboard">Eliminar</button>
         </div>
       </div>
     </div>
@@ -518,7 +510,7 @@
         <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
           <span class="text-xs text-slate-400 italic">Usa Enter para enviar</span>
           <div class="flex items-center gap-3">
-            <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="aiAssistOpen = false" :disabled="aiAssistLoading">Cancelar</button>
+            <button class="btn btn-ghost" @click="aiAssistOpen = false" :disabled="aiAssistLoading">Cancelar</button>
             <button
               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg shadow-md transition-all"
               :class="[!aiAssistPrompt.trim() || aiAssistLoading || !llmStore.isConfigured ? 'opacity-60 cursor-not-allowed grayscale' : 'hover:opacity-90 hover:-translate-y-0.5']"
@@ -552,14 +544,16 @@ import ChartLayoutModal from '@/components/dashboard/ChartLayoutModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
+import { usersApi } from '@/services/api'
 import keycloak from '@/services/keycloak'
 import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 
 const categoryIcons = ['dashboard', 'directions_car', 'account_tree', 'campaign', 'security', 'monitoring', 'bar_chart', 'pie_chart']
-const kcUrl = ''
-const kcRealm = import.meta.env.VITE_KEYCLOAK_REALM || 'dashboard'
+// All registered backend users (loaded once per modal open)
+const allBackendUsers = ref([])
+const kcRealm = import.meta.env.VITE_KEYCLOAK_REALM || 'Apps'
 
 const route = useRoute()
 const router = useRouter()
@@ -593,6 +587,7 @@ const userSearchResults = ref([])
 const isSearchingUsers = ref(false)
 const searchError = ref(null)
 const assignedUsersFull = ref([])
+const searchDebounceTimer = ref(null)
 
 const newName = ref('')
 const newDescription = ref('')
@@ -751,38 +746,87 @@ function viewDashboard(id) {
   router.push(`/dashboard/${id}`)
 }
 
+function _mapKcUser(u) {
+  return {
+    id: u.id,
+    name: (u.firstName && u.lastName) ? `${u.firstName} ${u.lastName}` : (u.firstName || u.lastName || u.username || u.email || u.id),
+    email: u.email || '',
+    username: u.username || '',
+    first_name: u.firstName || null,
+    last_name: u.lastName || null,
+    avatar: (u.firstName ? u.firstName[0] : (u.username?.[0] || '?')).toUpperCase()
+  }
+}
+
+function _mapBackendUser(u) {
+  return {
+    id: u.id,
+    name: u.full_name || u.username || u.email || u.id,
+    email: u.email || '',
+    username: u.username || '',
+    first_name: u.first_name || null,
+    last_name: u.last_name || null,
+    avatar: u.avatar || (u.full_name ? u.full_name[0] : (u.username?.[0] || '?')).toUpperCase()
+  }
+}
+
 async function openAssignModal(db) {
   assigningDashboard.value = db
   selectedUsers.value = [...db.assignedUsers]
-  
+
   assignedUsersFull.value = []
   userSearchQuery.value = ''
   userSearchResults.value = []
   searchError.value = null
+  allBackendUsers.value = []
 
+  // Load full profiles for already-assigned users from Keycloak
   if (selectedUsers.value.length > 0) {
     try {
-        const userPromises = selectedUsers.value.map(id => 
-          fetch(`/keycloak/admin/realms/${kcRealm}/users/${id}`, {
-           headers: { Authorization: `Bearer ${keycloak.token}` }
-         }).then(r => r.ok ? r.json() : null)
-       )
-       const results = await Promise.all(userPromises)
-       assignedUsersFull.value = results.filter(u => u).map(u => ({
-          id: u.id,
-          name: (u.firstName && u.lastName) ? `${u.firstName} ${u.lastName}` : (u.firstName || u.lastName || u.username),
-          email: u.email || '',
-          username: u.username || '',
-          avatar: (u.firstName ? u.firstName[0] : (u.username?.[0] || '?')).toUpperCase()
-       }))
-    } catch(err) {
-       console.error("No se pudieron cargar perfiles de los usuarios asignados", err)
+      try { await keycloak.updateToken(30) } catch (e) { console.warn('Token refresh failed:', e) }
+      const userPromises = selectedUsers.value.map(id =>
+        fetch(`/keycloak/admin/realms/${kcRealm}/users/${id}`, {
+          headers: { Authorization: `Bearer ${keycloak.token}` }
+        }).then(r => r.ok ? r.json() : null)
+      )
+      const results = await Promise.all(userPromises)
+      assignedUsersFull.value = results.filter(Boolean).map(_mapKcUser)
+    } catch (err) {
+      console.error('No se pudieron cargar perfiles de los usuarios asignados', err)
     }
   }
 }
 
+function _applyUserFilter(q) {
+  const query = (q || '').trim().toLowerCase()
+  // Show all unassigned users if no query, otherwise filter
+  userSearchResults.value = allBackendUsers.value.filter(u =>
+    !selectedUsers.value.includes(u.id) && (
+      !query ||
+      u.name.toLowerCase().includes(query) ||
+      u.email.toLowerCase().includes(query) ||
+      u.username.toLowerCase().includes(query)
+    )
+  )
+  searchError.value = null
+}
+
+/** Debounce handler: waits 2s after last keystroke and requires >3 chars */
+function onSearchInput() {
+  clearTimeout(searchDebounceTimer.value)
+  userSearchResults.value = []
+  searchError.value = null
+
+  const q = userSearchQuery.value.trim()
+  if (q.length <= 3) return  // need more than 3 chars
+
+  searchDebounceTimer.value = setTimeout(() => {
+    searchUsers()
+  }, 2000)
+}
+
 async function searchUsers() {
-  if (!userSearchQuery.value || userSearchQuery.value.trim().length < 2) {
+  if (!userSearchQuery.value || userSearchQuery.value.trim().length <= 3) {
     userSearchResults.value = []
     searchError.value = null
     return
@@ -790,22 +834,21 @@ async function searchUsers() {
   isSearchingUsers.value = true
   searchError.value = null
   try {
-    const url = `/keycloak/admin/realms/${kcRealm}/users?search=${encodeURIComponent(userSearchQuery.value.trim())}`
+    try { await keycloak.updateToken(30) } catch (e) { console.warn('Token refresh failed:', e) }
+    const url = `/keycloak/admin/realms/${kcRealm}/users?search=${encodeURIComponent(userSearchQuery.value.trim())}&max=20`
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${keycloak.token}` }
     })
     if (!response.ok) {
-      if (response.status === 403) throw new Error('Sin permiso (requiere rol view-users o realm-management en Keycloak)')
-      throw new Error(`Error al conectar con el servidor (HTTP ${response.status})`)
+      if (response.status === 401) throw new Error('Sesión expirada o no autorizada (401)')
+      if (response.status === 403) throw new Error('Sin permiso de búsqueda en Keycloak (requiere rol view-users)')
+      throw new Error(`Error al conectar con Keycloak (HTTP ${response.status})`)
     }
     const json = await response.json()
-    userSearchResults.value = json.map(u => ({
-      id: u.id,
-      name: (u.firstName && u.lastName) ? `${u.firstName} ${u.lastName}` : (u.firstName || u.lastName || u.username),
-      email: u.email || '',
-      username: u.username || '',
-      avatar: (u.firstName ? u.firstName[0] : (u.username?.[0] || '?')).toUpperCase()
-    }))
+    // Exclude already-assigned users from results
+    userSearchResults.value = json
+      .filter(u => !selectedUsers.value.includes(u.id))
+      .map(_mapKcUser)
   } catch (err) {
     searchError.value = err.message
     userSearchResults.value = []
@@ -825,11 +868,32 @@ function toggleUserFromSearch(user) {
     selectedUsers.value = selectedUsers.value.filter(id => id !== user.id)
     assignedUsersFull.value = assignedUsersFull.value.filter(u => u.id !== user.id)
   }
+  // Keep search results in sync after selection change
+  _applyUserFilter(userSearchQuery.value)
 }
 
-function saveAssignment() {
+async function saveAssignment() {
   if (!assigningDashboard.value) return
-  dashboardStore.assignDashboardToUsers(assigningDashboard.value.id, selectedUsers.value)
+
+  // Provision any selected users who may not yet exist in the DB
+  if (assignedUsersFull.value.length > 0) {
+    try {
+      await usersApi.provisionBatch(assignedUsersFull.value.map(u => ({
+        id: u.id,
+        email: u.email || null,
+        full_name: u.name || null,
+        first_name: u.first_name || null,
+        last_name: u.last_name || null,
+        username: u.username || null
+      })))
+    } catch (err) {
+      console.error('Error provisionando usuarios:', err)
+      uiStore.addAlert({ type: 'error', message: 'Error al registrar usuarios antes de asignar.' })
+      return
+    }
+  }
+
+  await dashboardStore.assignDashboardToUsers(assigningDashboard.value.id, selectedUsers.value)
   uiStore.addAlert({
     type: 'success',
     message: `Dashboard "${assigningDashboard.value.name}" asignado a ${selectedUsers.value.length} usuario(s)`
@@ -1539,37 +1603,5 @@ function confirmImport() {
   border-top: 1px solid #e2e8f0;
 }
 
-.assign-btn-cancel {
-  padding: 10px 24px;
-  background: transparent;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.assign-btn-cancel:hover {
-  background: #f1f5f9;
-}
-
-.assign-btn-save {
-  padding: 10px 24px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
-}
-
-.assign-btn-save:hover {
-  background: #2563eb;
-}
 
 </style>

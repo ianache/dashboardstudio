@@ -358,7 +358,7 @@
               </div>
             </div>
             <div class="sc-actions">
-              <button class="btn btn-secondary" @click="closePalForm">Cancelar</button>
+              <button class="btn btn-ghost" @click="closePalForm">Cancelar</button>
               <button
                 class="btn btn-primary"
                 :disabled="!palForm.label.trim() || palForm.colors.length < 6"
@@ -372,8 +372,8 @@
           <!-- Delete confirm -->
           <div v-if="deletingPalette" class="pal-delete-confirm">
             <span>¿Eliminar <strong>{{ deletingPalette.label }}</strong>?</span>
-            <button class="btn btn-secondary btn-sm" @click="deletingPalette = null">Cancelar</button>
-            <button class="btn btn-sm" style="background:var(--error);color:#fff;border-color:var(--error)" @click="doDeletePalette">Eliminar</button>
+            <button class="btn btn-ghost btn-sm" @click="deletingPalette = null">Cancelar</button>
+            <button class="btn btn-danger btn-sm" @click="doDeletePalette">Eliminar</button>
           </div>
         </template>
 

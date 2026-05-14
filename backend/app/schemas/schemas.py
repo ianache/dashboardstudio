@@ -15,6 +15,16 @@ class UserCreate(UserBase):
     pass
 
 
+class UserProvision(BaseModel):
+    """Upsert a user record from an external source (e.g. Keycloak)"""
+    id: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+
+
 class UserUpdate(BaseModel):
     email: Optional[str] = None
     username: Optional[str] = None
@@ -372,6 +382,107 @@ class KnowledgeSpaceResponse(KnowledgeSpaceBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    created_by: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+# ── DiagramType ────────────────────────────────────────────────────────────────
+
+class DiagramTypeBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    icon: str = "schema"
+    color: str = "#2563eb"
+    ai_assist_prompt: Optional[str] = None
+
+class DiagramTypeCreate(DiagramTypeBase):
+    id: str
+
+class DiagramTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+    ai_assist_prompt: Optional[str] = None
+
+class DiagramTypeResponse(DiagramTypeBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+# ── EditorTool ─────────────────────────────────────────────────────────────────
+
+class EditorToolBase(BaseModel):
+    type: str
+    name: str
+    description: Optional[str] = None
+    subtitle: Optional[str] = None
+    icon: str = "storage"
+    category: str = "source"
+    applicable_diagram_types: List[str] = []
+    prop_defs: dict = {}
+    default_props: dict = {}
+
+class EditorToolCreate(EditorToolBase):
+    pass
+
+class EditorToolUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    subtitle: Optional[str] = None
+    icon: Optional[str] = None
+    category: Optional[str] = None
+    applicable_diagram_types: Optional[List[str]] = None
+    prop_defs: Optional[dict] = None
+    default_props: Optional[dict] = None
+
+class EditorToolResponse(EditorToolBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+# ── IntegrationFlow ────────────────────────────────────────────────────────────
+
+class IntegrationFlowBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    diagram_type: str = "data-integration"
+    status: str = "draft"
+    flow_type: Optional[str] = None
+    schedule: Optional[str] = None
+    source_system: Optional[str] = None
+    target_system: Optional[str] = None
+
+class IntegrationFlowCreate(IntegrationFlowBase):
+    flow_nodes: List[dict] = []
+    flow_connections: List[dict] = []
+    flow_metadata: dict = {}
+
+class IntegrationFlowUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    flow_type: Optional[str] = None
+    schedule: Optional[str] = None
+    source_system: Optional[str] = None
+    target_system: Optional[str] = None
+    flow_nodes: Optional[List[dict]] = None
+    flow_connections: Optional[List[dict]] = None
+    flow_metadata: Optional[dict] = None
+    last_run_success: Optional[bool] = None
+
+class IntegrationFlowResponse(IntegrationFlowBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    flow_nodes: List[dict] = []
+    flow_connections: List[dict] = []
+    flow_metadata: dict = {}
+    last_run: Optional[datetime] = None
+    last_run_success: Optional[bool] = None
     created_by: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

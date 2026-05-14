@@ -190,3 +190,58 @@ class KnowledgeSpace(Base):
     created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class DiagramType(Base):
+    __tablename__ = "diagram_types"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    icon = Column(String(50), nullable=False, default="schema")
+    color = Column(String(20), nullable=False, default="#2563eb")
+    ai_assist_prompt = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class EditorTool(Base):
+    __tablename__ = "editor_tools"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    type = Column(String(50), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    subtitle = Column(String(200), nullable=True)
+    icon = Column(String(50), nullable=False, default="storage")
+    category = Column(String(50), nullable=False, default="source")
+    applicable_diagram_types = Column(JSON, default=list)
+    prop_defs = Column(JSON, default=dict)
+    default_props = Column(JSON, default=dict)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class IntegrationFlow(Base):
+    __tablename__ = "integration_flows"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    diagram_type = Column(String(50), nullable=False, default="data-integration")
+    status = Column(String(20), nullable=False, default="draft")
+    flow_type = Column(String(50), nullable=True)
+    schedule = Column(String(100), nullable=True)
+    source_system = Column(String(100), nullable=True)
+    target_system = Column(String(100), nullable=True)
+    flow_nodes = Column(JSON, default=list)
+    flow_connections = Column(JSON, default=list)
+    flow_metadata = Column(JSON, default=dict)
+    last_run = Column(DateTime, nullable=True)
+    last_run_success = Column(Boolean, nullable=True)
+    created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

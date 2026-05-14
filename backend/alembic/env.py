@@ -1,5 +1,5 @@
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool, text
+from sqlalchemy import engine_from_config, pool, text, event
 from alembic import context
 import sys
 import os
@@ -44,11 +44,20 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
 
+    # Set search_path at the psycopg2 level (before autobegin) so it doesn't
+    # interfere with SQLAlchemy 2.0 autobegin / context.begin_transaction().
+    @event.listens_for(connectable, "connect")
+    def set_search_path(dbapi_conn, _rec):
+        existing = dbapi_conn.autocommit
+        dbapi_conn.autocommit = True
+        cur = dbapi_conn.cursor()
+        cur.execute(f"SET SESSION search_path TO {settings.postgres_schema}")
+        cur.close()
+        dbapi_conn.autocommit = existing
+
     with connectable.connect() as connection:
-        connection.execute(text(f"SET search_path TO {settings.postgres_schema}"))
-        
         context.configure(
-            connection=connection, 
+            connection=connection,
             target_metadata=target_metadata,
             version_table_schema=settings.postgres_schema,
             include_schemas=True,

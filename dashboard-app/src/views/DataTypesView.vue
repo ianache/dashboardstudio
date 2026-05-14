@@ -8,29 +8,23 @@
           los campos de tus modelos dimensionales.</p>
       </div>
       <div class="flex items-center gap-3">
-        <button
-          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
-          @click="confirmReset">
-          <span class="material-symbols-outlined text-lg" style="">history</span>
-          Defaults</button>
+        <button class="btn btn-secondary" @click="confirmReset">
+          <span class="material-symbols-outlined text-lg">history</span>
+          Defaults
+        </button>
         <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
-        <button
-          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
-          @click="importFileInput.click()">
-          <span class="material-symbols-outlined text-lg" style="">download</span>
+        <button class="btn btn-secondary" @click="importFileInput.click()">
+          <span class="material-symbols-outlined text-lg">download</span>
           Import
         </button>
-        <button
-          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
-          @click="exportTypes">
-          <span class="material-symbols-outlined text-lg" style="">upload</span>
+        <button class="btn btn-secondary" @click="exportTypes">
+          <span class="material-symbols-outlined text-lg">upload</span>
           Export
         </button>
-        <button
-          class="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95"
-          @click="startAdd">
-          <span class="material-symbols-outlined text-lg" style="">add</span>
-          Nuevo</button>
+        <button class="btn btn-primary" @click="startAdd">
+          <span class="material-symbols-outlined text-lg">add</span>
+          Nuevo
+        </button>
       </div>
     </div>
 
@@ -94,8 +88,8 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
-                  <button class="px-3 py-1.5 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!form.name.trim()" @click="saveAdd">Añadir</button>
-                  <button class="px-3 py-1.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50" @click="cancelAdd">Cancelar</button>
+                  <button class="btn btn-primary btn-sm" :disabled="!form.name.trim()" @click="saveAdd">Añadir</button>
+                  <button class="btn btn-ghost btn-sm" @click="cancelAdd">Cancelar</button>
                 </div>
               </td>
             </tr>
@@ -176,8 +170,8 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
-                    <button class="px-3 py-1.5 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!form.name.trim()" @click="saveEditRow(dt.id)">Guardar</button>
-                    <button class="px-3 py-1.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50" @click="cancelEdit">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" :disabled="!form.name.trim()" @click="saveEditRow(dt.id)">Guardar</button>
+                    <button class="btn btn-ghost btn-sm" @click="cancelEdit">Cancelar</button>
                   </div>
                 </td>
               </template>
@@ -243,8 +237,8 @@
           <p class="text-xs text-amber-700 bg-amber-50 p-3 rounded-lg">Los campos que usen este tipo conservarán su referencia pero no se podrán resolver.</p>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="deleteTarget = null">Cancelar</button>
-          <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700" @click="doDelete">Eliminar</button>
+          <button class="btn btn-ghost" @click="deleteTarget = null">Cancelar</button>
+          <button class="btn btn-danger" @click="doDelete">Eliminar</button>
         </div>
       </div>
     </div>
@@ -288,9 +282,9 @@
           </p>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="importPreview = null">Cancelar</button>
+          <button class="btn btn-ghost" @click="importPreview = null">Cancelar</button>
           <button
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-primary"
             :disabled="!importPreview.toAdd.length && !importPreview.toReplace.length"
             @click="doImport"
           >Importar</button>
@@ -308,8 +302,8 @@
           <p class="text-sm text-slate-700">Se reemplazarán todos los tipos actuales por los predeterminados. ¿Continuar?</p>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="showResetConfirm = false">Cancelar</button>
-          <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700" @click="doReset">Restaurar</button>
+          <button class="btn btn-ghost" @click="showResetConfirm = false">Cancelar</button>
+          <button class="btn btn-danger" @click="doReset">Restaurar</button>
         </div>
       </div>
     </div>

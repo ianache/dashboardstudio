@@ -7,9 +7,7 @@
         <h1 class="font-h1 text-h1 text-slate-900">Knowledge Spaces</h1>
         <p class="font-body-md text-slate-500 max-w-2xl">Gestiona tus espacios de conocimiento para organizar y documentar la estructura de tus datos.</p>
       </div>
-      <button
-        class="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95"
-        @click="showNewModal = true">
+      <button class="btn btn-primary" @click="showNewModal = true">
         <span class="material-symbols-outlined text-lg">add</span>
         Nuevo Knowledge Space
       </button>
@@ -24,7 +22,7 @@
         <h3 class="text-lg font-semibold text-slate-900">Sin Knowledge Spaces</h3>
         <p class="text-sm text-slate-500 max-w-md">Crea tu primer Knowledge Space para comenzar a organizar tus datos.</p>
         <button
-          class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md"
+          class="btn btn-primary"
           @click="showNewModal = true">
           <span class="material-symbols-outlined text-lg">add</span>
           Crear Knowledge Space
@@ -180,8 +178,8 @@
         
         <!-- Footer -->
         <div class="kspace-modal-footer">
-          <button class="kspace-modal-btn-cancel" @click="cancelNew">Cancelar</button>
-          <button class="kspace-modal-btn-create" :disabled="!newName.trim()" @click="createSpace">
+          <button class="btn btn-ghost" @click="cancelNew">Cancelar</button>
+          <button class="btn btn-primary" :disabled="!newName.trim()" @click="createSpace">
             <span>Crear</span>
             <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span>
           </button>
@@ -246,8 +244,8 @@
         
         <!-- Footer -->
         <div class="kspace-modal-footer">
-          <button class="kspace-modal-btn-cancel" @click="cancelEdit">Cancelar</button>
-          <button class="kspace-modal-btn-create" :disabled="!editName.trim()" @click="doUpdate">
+          <button class="btn btn-ghost" @click="cancelEdit">Cancelar</button>
+          <button class="btn btn-primary" :disabled="!editName.trim()" @click="doUpdate">
             <span>Guardar</span>
             <span class="material-symbols-outlined" style="font-size: 16px;">save</span>
           </button>
@@ -265,8 +263,8 @@
           <p class="text-sm text-slate-700">¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
         <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50" @click="deleteTarget = null">Cancelar</button>
-          <button class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700" @click="doDelete">Eliminar</button>
+          <button class="btn btn-ghost" @click="deleteTarget = null">Cancelar</button>
+          <button class="btn btn-danger" @click="doDelete">Eliminar</button>
         </div>
       </div>
     </div>
@@ -834,44 +832,4 @@ async function doDelete() {
   flex-shrink: 0;
 }
 
-.kspace-modal-btn-cancel {
-  padding: 10px 20px;
-  border: 1px solid #cbd5e1;
-  background: white;
-  color: #334155;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.kspace-modal-btn-cancel:hover {
-  background: #f1f5f9;
-}
-
-.kspace-modal-btn-create {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-}
-
-.kspace-modal-btn-create:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
-.kspace-modal-btn-create:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 </style>

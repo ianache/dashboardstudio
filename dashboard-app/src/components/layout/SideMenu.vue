@@ -60,6 +60,30 @@
         </transition>
       </div>
 
+      <!-- Data Integration section -->
+      <div v-if="authStore.isDesigner" class="nav-section">
+        <div class="nav-section-title">DATA INTEGRATION</div>
+
+        <div class="nav-item" :class="{ active: isIntegrationRoute }" @click="toggleSection('integration')">
+          <MIcon icon="sync_alt" :size="20" class="nav-icon" />
+          <span class="nav-label">Data Integration</span>
+          <MIcon icon="expand_more" :size="18" class="nav-arrow" :class="{ open: openSections.integration }" />
+        </div>
+        <transition name="expand">
+          <div v-show="openSections.integration" class="nav-sub">
+            <router-link to="/integrations" class="nav-sub-item" :class="{ active: $route.name === 'Integrations' }">
+              <span class="sub-dot" />Integrations
+            </router-link>
+            <router-link to="/integrations/diagram-types" class="nav-sub-item" :class="{ active: $route.name === 'DiagramTypes' }">
+              <span class="sub-dot" />Tipos de Diagrama
+            </router-link>
+            <router-link to="/integrations/tool-catalog" class="nav-sub-item" :class="{ active: $route.name === 'ToolCatalog' }">
+              <span class="sub-dot" />Catálogo de Herramientas
+            </router-link>
+          </div>
+        </transition>
+      </div>
+
       <!-- Dashboards section -->
       <div class="nav-section">
         <div class="nav-section-title">DASHBOARDS</div>
@@ -122,13 +146,16 @@ const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 
-const openSections = ref({ design: true, models: true, dashboards: true })
+const openSections = ref({ design: true, models: true, integration: true, dashboards: true })
 
 const isDesignerRoute = computed(() =>
   ['DesignerList', 'DesignerEdit'].includes(router.currentRoute.value.name)
 )
 const isModelRoute = computed(() =>
   ['ModelList', 'ModelEditor', 'DataTypes', 'KnowledgeSpaces'].includes(router.currentRoute.value.name)
+)
+const isIntegrationRoute = computed(() =>
+  ['Integrations', 'DiagramTypes', 'ToolCatalog'].includes(router.currentRoute.value.name)
 )
 const isDashboardRoute = computed(() =>
   router.currentRoute.value.name === 'DashboardView'

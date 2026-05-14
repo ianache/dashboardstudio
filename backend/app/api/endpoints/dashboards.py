@@ -128,7 +128,7 @@ async def delete_dashboard(
 @router.post("/{dashboard_id}/assign", response_model=schemas.MessageResponse)
 async def assign_dashboard(
     dashboard_id: str,
-    assignment: schemas.DashboardAssignmentRequest,
+    assignment_data: schemas.DashboardAssignmentRequest,
     db: Session = Depends(get_db),
     current_user: TokenData = Depends(require_role(["admin", "designer"]))
 ):
@@ -137,16 +137,30 @@ async def assign_dashboard(
     if not dashboard:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dashboard not found")
     
+    # Validate that all target users exist in the database
+    if assignment_data.user_ids:
+        existing_users = db.query(models.User.id).filter(
+            models.User.id.in_(assignment_data.user_ids)
+        ).all()
+        existing_ids = {row.id for row in existing_users}
+        missing_ids = [uid for uid in assignment_data.user_ids if uid not in existing_ids]
+        if missing_ids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"The following user IDs are not registered in the system: {missing_ids}. "
+                       "Users must log in at least once before being assigned to a dashboard."
+            )
+
     # Remove existing assignments
     db.query(models.DashboardAssignment).filter(models.DashboardAssignment.dashboard_id == dashboard_id).delete()
     
     # Add new assignments
-    for user_id in assignment.user_ids:
-        assignment = models.DashboardAssignment(dashboard_id=dashboard_id, user_id=user_id)
-        db.add(assignment)
+    for user_id in assignment_data.user_ids:
+        new_assignment = models.DashboardAssignment(dashboard_id=dashboard_id, user_id=user_id)
+        db.add(new_assignment)
     
     db.commit()
-    return schemas.MessageResponse(message=f"Dashboard assigned to {len(assignment.user_ids)} users")
+    return schemas.MessageResponse(message=f"Dashboard assigned to {len(assignment_data.user_ids)} users")
 
 
 @router.delete("/{dashboard_id}/assign/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

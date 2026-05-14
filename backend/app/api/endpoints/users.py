@@ -9,6 +9,45 @@ from app.schemas import schemas
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+@router.post("/provision-batch", response_model=List[schemas.UserResponse])
+async def provision_users(
+    users_data: List[schemas.UserProvision],
+    db: Session = Depends(get_db),
+    current_user: TokenData = Depends(require_role(["admin", "designer"]))
+):
+    """Upsert user records from Keycloak data (admin/designer only).
+    Creates a stub user record for any Keycloak user not yet in the DB.
+    This is called before dashboard assignment to satisfy FK constraints."""
+    provisioned = []
+    for u in users_data:
+        user = db.query(models.User).filter(models.User.id == u.id).first()
+        if not user:
+            avatar = None
+            if u.first_name:
+                avatar = u.first_name[0].upper()
+            elif u.username:
+                avatar = u.username[0].upper()
+            elif u.email:
+                avatar = u.email[0].upper()
+            user = models.User(
+                id=u.id,
+                email=u.email,
+                username=u.username or u.email or u.id,
+                full_name=u.full_name,
+                first_name=u.first_name,
+                last_name=u.last_name,
+                role="viewer",
+                avatar=avatar,
+                is_active=True
+            )
+            db.add(user)
+        provisioned.append(user)
+    db.commit()
+    for user in provisioned:
+        db.refresh(user)
+    return provisioned
+
+
 @router.get("/me", response_model=schemas.UserResponse)
 async def get_current_user_info(
     current_user: TokenData = Depends(get_current_user),

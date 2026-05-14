@@ -4,8 +4,8 @@
  */
 import keycloak from '@/services/keycloak'
 
-// Use the backend URL from env or default to port 9001 (matching backend .env)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9001'
+// Use the backend URL from env or default to port 8000 (matching backend .env)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 class ApiError extends Error {
   constructor(message, status, data) {
@@ -384,6 +384,67 @@ export const knowledgeSpacesApi = {
   }
 }
 
+// Diagram Types API
+export const diagramTypesApi = {
+  async getAll() { return apiRequest('/api/v1/diagram-types/') },
+  async getById(id) { return apiRequest(`/api/v1/diagram-types/${id}`) },
+  async create(dt) { return apiRequest('/api/v1/diagram-types/', { method: 'POST', body: JSON.stringify(dt) }) },
+  async update(id, dt) { return apiRequest(`/api/v1/diagram-types/${id}`, { method: 'PUT', body: JSON.stringify(dt) }) },
+  async delete(id) { return apiRequest(`/api/v1/diagram-types/${id}`, { method: 'DELETE' }) },
+}
+
+// Editor Tools API
+export const editorToolsApi = {
+  async getAll(params = {}) {
+    const q = new URLSearchParams(params).toString()
+    return apiRequest(`/api/v1/editor-tools/${q ? '?' + q : ''}`)
+  },
+  async getById(id) { return apiRequest(`/api/v1/editor-tools/${id}`) },
+  async getForDiagram(diagramType) { return apiRequest(`/api/v1/editor-tools/?diagram_type=${encodeURIComponent(diagramType)}`) },
+  async create(tool) { return apiRequest('/api/v1/editor-tools/', { method: 'POST', body: JSON.stringify(tool) }) },
+  async update(id, tool) { return apiRequest(`/api/v1/editor-tools/${id}`, { method: 'PUT', body: JSON.stringify(tool) }) },
+  async delete(id) { return apiRequest(`/api/v1/editor-tools/${id}`, { method: 'DELETE' }) },
+}
+
+// Integration Flows API
+export const integrationFlowsApi = {
+  async getAll(params = {}) {
+    const q = new URLSearchParams(params).toString()
+    return apiRequest(`/api/v1/integration-flows/${q ? '?' + q : ''}`)
+  },
+  async getById(id) { return apiRequest(`/api/v1/integration-flows/${id}`) },
+  async create(flow) { return apiRequest('/api/v1/integration-flows/', { method: 'POST', body: JSON.stringify(flow) }) },
+  async update(id, flow) { return apiRequest(`/api/v1/integration-flows/${id}`, { method: 'PUT', body: JSON.stringify(flow) }) },
+  async saveDiagram(id, diagramData) { return apiRequest(`/api/v1/integration-flows/${id}/diagram`, { method: 'PUT', body: JSON.stringify(diagramData) }) },
+  async delete(id) { return apiRequest(`/api/v1/integration-flows/${id}`, { method: 'DELETE' }) },
+}
+
+// Users API
+export const usersApi = {
+  async getAll() {
+    return apiRequest('/api/v1/users/')
+  },
+
+  async getById(id) {
+    return apiRequest(`/api/v1/users/${id}`)
+  },
+
+  async getMe() {
+    return apiRequest('/api/v1/users/me')
+  },
+
+  /**
+   * Upsert user records from Keycloak data before dashboard assignment.
+   * @param {Array<{id, email, full_name, first_name, last_name, username}>} users
+   */
+  async provisionBatch(users) {
+    return apiRequest('/api/v1/users/provision-batch', {
+      method: 'POST',
+      body: JSON.stringify(users)
+    })
+  }
+}
+
 export default {
   cubeConfig: cubeConfigApi,
   llmConfig: llmConfigApi,
@@ -392,5 +453,9 @@ export default {
   dimensionalModel: dimensionalModelApi,
   currencies: currenciesApi,
   dataSources: dataSourcesApi,
-  knowledgeSpaces: knowledgeSpacesApi
+  knowledgeSpaces: knowledgeSpacesApi,
+  diagramTypes: diagramTypesApi,
+  editorTools: editorToolsApi,
+  integrationFlows: integrationFlowsApi,
+  users: usersApi,
 }

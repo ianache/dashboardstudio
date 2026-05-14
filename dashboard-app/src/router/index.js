@@ -73,6 +73,24 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Modelos', 'Editor'] }
       },
       {
+        path: 'integrations',
+        name: 'Integrations',
+        component: () => import('@/views/IntegrationsView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Integrations'] }
+      },
+      {
+        path: 'integrations/diagram-types',
+        name: 'DiagramTypes',
+        component: () => import('@/views/DiagramTypesView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Tipos de Diagrama'] }
+      },
+      {
+        path: 'integrations/tool-catalog',
+        name: 'ToolCatalog',
+        component: () => import('@/views/ToolCatalogView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Catálogo de Herramientas'] }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/SettingsView.vue'),
@@ -80,6 +98,12 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Configuración'] }
       }
     ]
+  },
+  {
+    path: '/integrations/:id/editor',
+    name: 'IntegrationEditor',
+    component: () => import('@/views/FlowEditorView.vue'),
+    meta: { requiresAuth: true, requiresDesigner: true }
   },
   {
     path: '/:pathMatch(.*)*',
