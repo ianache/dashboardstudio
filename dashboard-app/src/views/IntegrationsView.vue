@@ -167,7 +167,10 @@
                   </p>
                 </td>
                 <td>
-                  <div class="intg-row-actions">
+                <div class="intg-row-actions">
+                    <button class="intg-action" title="Historial de ejecuciones" @click="openHistory(flow)">
+                      <span class="material-symbols-outlined" style="font-size:18px">history</span>
+                    </button>
                     <button class="intg-action intg-action--diagram" title="Abrir editor de diagrama" @click="openDiagramEditor(flow)">
                       <span class="material-symbols-outlined" style="font-size:18px">schema</span>
                     </button>
@@ -289,6 +292,13 @@
       </div>
     </div>
 
+    <ExecutionHistoryModal
+      v-if="showHistoryModal"
+      :flow-id="historyTarget?.id"
+      :flow-name="historyTarget?.name"
+      @close="showHistoryModal = false"
+    />
+
     <!-- Modal: Confirmar eliminar -->
     <div v-if="deleteTarget" class="intg-overlay" @click.self="deleteTarget = null">
       <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
@@ -345,8 +355,15 @@ const viewMode = ref('table')
 const currentPage = ref(1)
 const PAGE_SIZE = 10
 const showModal = ref(false)
+const showHistoryModal = ref(false)
+const historyTarget = ref(null)
 const editTarget = ref(null)
 const deleteTarget = ref(null)
+
+const openHistory = (flow) => {
+  historyTarget.value = flow
+  showHistoryModal.value = true
+}
 
 const emptyForm = () => ({
   name: '', description: '',
