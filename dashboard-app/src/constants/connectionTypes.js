@@ -19,6 +19,8 @@ export const CONN_TYPES = [
   { value: 'http',       label: 'HTTP (Basic Auth)' },
   { value: 'jwt',        label: 'JWT Token' },
   { value: 'database',   label: 'Base de Datos (Genérica)' },
+  { value: 'sql_source', label: 'SQL Source' },
+  { value: 'sql_destination', label: 'SQL Destination' },
 ]
 
 /** Default connection_config shape per type */
