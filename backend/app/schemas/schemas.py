@@ -453,7 +453,8 @@ class IntegrationFlowBase(BaseModel):
     diagram_type: str = "data-integration"
     status: str = "draft"
     flow_type: Optional[str] = None
-    schedule: Optional[str] = None
+    cron_expression: Optional[str] = None
+    log_level: Optional[str] = "summary"
     source_system: Optional[str] = None
     target_system: Optional[str] = None
 
@@ -467,7 +468,8 @@ class IntegrationFlowUpdate(BaseModel):
     description: Optional[str] = None
     status: Optional[str] = None
     flow_type: Optional[str] = None
-    schedule: Optional[str] = None
+    cron_expression: Optional[str] = None
+    log_level: Optional[str] = None
     source_system: Optional[str] = None
     target_system: Optional[str] = None
     flow_nodes: Optional[List[dict]] = None
