@@ -23,10 +23,10 @@ def _get_fernet() -> Fernet:
 
 def encrypt_value(value: str) -> str:
     """Encrypt a string value.
-    
+
     Args:
         value: The string to encrypt
-        
+
     Returns:
         Encrypted string (base64 encoded)
     """
@@ -34,6 +34,27 @@ def encrypt_value(value: str) -> str:
         return value
     f = _get_fernet()
     return f.encrypt(value.encode()).decode()
+
+
+def decrypt_value(value: str) -> str:
+    """Decrypt a string value that was encrypted with encrypt_value.
+
+    Args:
+        value: The encrypted string (base64 encoded)
+
+    Returns:
+        Decrypted plain-text string
+
+    Raises:
+        ValueError: If the value cannot be decrypted (wrong key or corrupted data)
+    """
+    if not value:
+        return value
+    try:
+        f = _get_fernet()
+        return f.decrypt(value.encode()).decode()
+    except Exception as e:
+        raise ValueError(f"Failed to decrypt value: {e}") from e
 
 
 from typing import Any
