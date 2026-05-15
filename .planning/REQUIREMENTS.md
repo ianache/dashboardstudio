@@ -83,4 +83,44 @@
 - [ ] El usuario puede crear una conexión SMTP y verificar que los datos son correctos mediante un test.
 - [ ] Las contraseñas se almacenan encriptadas en la base de datos (incluso dentro del JSON).
 - [ ] El SideMenu muestra el nuevo acceso a "Conexiones".
-- [ ] La UI se adapta dinámicamente según el tipo de conexión seleccionado.
+- [x] La UI se adapta dinámicamente según el tipo de conexión seleccionado.
+
+# Requirements: Background Scheduler & Detailed Execution History
+
+## 1. Functional Requirements
+
+### FR-11: Integration Flow Scheduling
+- Configurar cronjobs para flujos de integración desde la interfaz (ej: `0 0 * * *`).
+- Ejecución automática en background utilizando un worker independiente (APScheduler).
+
+### FR-12: Persistent Execution History
+- Registrar cada ejecución de flujo: `id`, `flow_id`, `status`, `start_time`, `end_time`, `duration`.
+- Registrar cada ejecución de nodo: `flow_execution_id`, `node_id`, `status`, `start_time`, `end_time`, `duration`, `input_data`, `output_data`.
+
+### FR-13: Execution History UI
+- Nueva pantalla accesible desde el icono de "Log" en la vista `Integrations`.
+- Tabla paginable para listar ejecuciones (default: últimas 10, configurable).
+- Filtros por estado y fecha.
+
+### FR-14: Detailed Node Log View
+- Al seleccionar una ejecución, mostrar un panel lateral (o modal) con el detalle técnico de cada nodo ejecutado.
+- Soporte para mostrar inputs/outputs detallados si el nivel de detalle está configurado.
+
+## 2. Technical Requirements
+
+### TR-07: Background Worker Integration
+- Instanciar `APScheduler` al inicio de la aplicación FastAPI.
+- Persistir las tareas programadas (o recargarlas desde DB al iniciar).
+
+### TR-08: Log Level Configuration
+- Campo `log_level` en la entidad `IntegrationFlow` para permitir configurar entre ejecución "Resumida" o "Detallada".
+
+### TR-09: WebSocket/Polling for History
+- Endpoint API para consulta paginable de historial.
+- Refresco automático de la tabla si el flujo está en ejecución activa.
+
+## 3. Success Criteria
+- [ ] Se puede programar una integración y ver cómo se ejecuta sola en background.
+- [ ] Al ver los logs, puedo filtrar por ejecuciones fallidas.
+- [ ] Puedo inspeccionar qué datos exactos procesó un nodo específico en una ejecución pasada.
+

@@ -40,9 +40,19 @@ Implementar un configurador de visualizaciones dinámico con:
 **Objective:** Administrar de forma centralizada y reutilizable las conexiones a fuentes externas bajo el submenu "Data Integration".
 
 ### Success Criteria
-- [ ] Gestión de conexiones (Email, DB, FTP, HTTP, JWT) con configuración JSON detallada.
-- [ ] Centralización de credenciales con encriptación recursiva en el backend.
-- [ ] Interfaz de administración (Listado, Creación, Edición, Eliminación, Test de conexión).
-- [ ] Soporte para tipos de conexión: SMTP, SQL, FTP/SFTP, HTTP Basic y JWT Token.
-- [ ] Integración en el SideMenu bajo el submenu "Data Integration".
+- [x] Gestión de conexiones (Email, DB, FTP, HTTP, JWT) con configuración JSON detallada.
+- [x] Centralización de credenciales con encriptación recursiva en el backend.
+- [x] Interfaz de administración (Listado, Creación, Edición, Eliminación, Test de conexión).
+- [x] Soporte para tipos de conexión: SMTP, SQL, FTP/SFTP, HTTP Basic y JWT Token.
+- [x] Integración en el SideMenu bajo el submenu "Data Integration".
+
+## Milestone: Background Scheduler & Detailed Execution History
+**Objective:** Automatizar la ejecución de flujos de integración mediante cronjobs y mantener un historial detallado de ejecuciones por flujo y nodo.
+
+### Success Criteria
+- [ ] Implementación de `APScheduler` para la gestión de cronjobs en background.
+- [ ] Esquema de base de datos para almacenar `ExecutionHistory` (Flow level) y `NodeExecutionLogs` (Node level).
+- [ ] Interfaz de historial de ejecución (tabla paginable) accesible desde un nuevo icono "Log" en la vista de Integraciones.
+- [ ] Visualización de detalles (inputs/outputs, estado, duración) por nodo en un panel lateral.
+- [ ] Configuración configurable de nivel de detalle de logs (resumen vs detallado).
 

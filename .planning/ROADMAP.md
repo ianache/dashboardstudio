@@ -66,6 +66,20 @@
 - [ ] Create `/api/v1/data-sources/{id}/test` endpoint.
 
 ### Phase 17: Frontend - Connections UI & Navigation
-- [ ] Add "Conexiones" to `SideMenu.vue`.
-- [ ] Create `ConnectionsView.vue` with list and search.
-- [ ] Implement `ConnectionEditModal.vue` with dynamic forms for each type.
+- [x] Add "Conexiones" to `SideMenu.vue`.
+- [x] Create `ConnectionsView.vue` with list and search.
+- [x] Implement `ConnectionEditModal.vue` with dynamic forms for each type.
+
+---
+
+## Milestone: Background Scheduler & Detailed Execution History
+
+### Phase 19: Backend - Scheduler & Logging Models
+**Goal**: Implement cronjob scheduling and persistent logs.
+**Requirements**: FR-11, FR-12, TR-07, TR-08
+**Plans**: 19-01-PLAN.md
+
+### Phase 20: Frontend - Execution Dashboard
+**Goal**: Implement history UI and detailed log inspector.
+**Requirements**: FR-13, FR-14, TR-09
+**Plans**: 20-01-PLAN.md
