@@ -488,17 +488,26 @@ class IntegrationFlowResponse(IntegrationFlowBase):
     updated_at: Optional[datetime] = None
 
 
-# ── IntegrationFlowExecution ──────────────────────────────────────────────────
+# ── ExecutionHistory ──────────────────────────────────────────────────────────
 
-class IntegrationFlowExecutionBase(BaseModel):
-    flow_id: str
+class NodeExecutionLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    node_id: str
     status: str
-    logs: List[dict] = []
-    result_data: Optional[dict] = None
-    duration_ms: Optional[int] = None
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration: Optional[int] = None
+    input_data: Optional[dict] = None
+    output_data: Optional[dict] = None
 
-class IntegrationFlowExecutionResponse(IntegrationFlowExecutionBase):
+class ExecutionHistoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
-    executed_by: Optional[str] = None
-    created_at: Optional[datetime] = None
+    flow_id: str
+    status: str
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration: Optional[int] = None
+
+class ExecutionDetailResponse(ExecutionHistoryResponse):
+    node_logs: List[NodeExecutionLogResponse] = []
