@@ -146,19 +146,19 @@ class DenoService:
                 parts = line.split(":")
                 if len(parts) >= 3:
                     yield {"type": "node_status", "node_id": parts[1], "status": parts[2]}
-            elif line.startswith("NODE_LOG:"):
-                # NODE_LOG:node_id:status:input:output:duration
-                parts = line.split(":")
-                if len(parts) >= 6:
-                    node_id, status, inp, outp, dur = parts[1], parts[2], parts[3], parts[4], parts[5]
+            elif line.startswith("NODE_LOG_JSON:"):
+                try:
+                    data = json.loads(line[len("NODE_LOG_JSON:"):])
                     yield {
                         "type": "node_log", 
-                        "node_id": node_id, 
-                        "status": status,
-                        "input": json.loads(inp),
-                        "output": json.loads(outp),
-                        "duration": int(dur)
+                        "node_id": data.get("node_id"), 
+                        "status": data.get("status"),
+                        "input": data.get("input"),
+                        "output": data.get("output"),
+                        "duration": data.get("duration", 0)
                     }
+                except Exception:
+                    pass
             elif line.startswith("FINAL_RESULT:"):
                 try:
                     res = json.loads(line[len("FINAL_RESULT:"):])

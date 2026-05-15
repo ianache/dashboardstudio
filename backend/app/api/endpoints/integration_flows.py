@@ -137,6 +137,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
         logger.info(f"WebSocket flow {flow_id}: Starting Deno stream")
         start_time = datetime.utcnow()
         all_logs = []
+        node_logs = []
         final_result = None
         success = False
 
@@ -149,6 +150,8 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
                 success = log["success"]
             elif log["type"] == "result":
                 final_result = log["data"]
+            elif log["type"] == "node_log":
+                node_logs.append(log)
             elif log["type"] in ["info", "error"]:
                 all_logs.append(log)
 
@@ -170,6 +173,17 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
                 duration=duration_ms
             )
             db.add(execution)
+            
+            for nl in node_logs:
+                db_nl = models.NodeExecutionLogs(
+                    execution_id=exec_id,
+                    node_id=nl["node_id"],
+                    status=nl["status"],
+                    input_data=nl["input"],
+                    output_data=nl["output"],
+                    duration=nl["duration"]
+                )
+                db.add(db_nl)
             
             # Update flow status
             flow.last_run = start_time
@@ -228,10 +242,23 @@ async def get_execution_logs(
     execution = db.query(models.ExecutionHistory).filter(models.ExecutionHistory.id == exec_id).first()
     if not execution:
         raise HTTPException(status_code=404, detail="Execution not found")
+        
+    node_logs = db.query(models.NodeExecutionLogs).filter(models.NodeExecutionLogs.execution_id == exec_id).all()
+    nl_dicts = [
+        {
+            "node_id": nl.node_id,
+            "status": nl.status,
+            "input": nl.input_data,
+            "output": nl.output_data,
+            "duration": nl.duration
+        }
+        for nl in node_logs
+    ]
+    
     return {
         "status": execution.status,
-        "logs": [], # TODO: Implement node_logs fetching
-        "result_data": None, # TODO: Implement result_data
+        "logs": nl_dicts,
+        "result_data": None, 
         "duration_ms": execution.duration,
         "created_at": execution.start_time
     }
@@ -281,9 +308,17 @@ async def run_integration_flow(
     
     # Process logs to list of dicts
     all_logs = []
+    node_logs = []
     if result.get("logs"):
         for line in result["logs"].split("\n"):
-            if not line.startswith("FINAL_RESULT:"):
+            line = line.strip()
+            if line.startswith("NODE_LOG_JSON:"):
+                try:
+                    nl = json.loads(line[len("NODE_LOG_JSON:"):])
+                    node_logs.append(nl)
+                except:
+                    pass
+            elif not line.startswith("FINAL_RESULT:") and not line.startswith("NODE_STATUS:"):
                 all_logs.append({"type": "info", "message": line})
     if result.get("errors"):
         for line in result["errors"].split("\n"):
@@ -298,6 +333,17 @@ async def run_integration_flow(
         duration=duration_ms
     )
     db.add(execution)
+    
+    for nl in node_logs:
+        db_nl = models.NodeExecutionLogs(
+            execution_id=exec_id,
+            node_id=nl.get("node_id"),
+            status=nl.get("status"),
+            input_data=nl.get("input"),
+            output_data=nl.get("output"),
+            duration=nl.get("duration", 0)
+        )
+        db.add(db_nl)
     
     # Update flow status in DB
     flow.last_run = start_time

@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 
@@ -499,8 +499,8 @@ class NodeExecutionLogResponse(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     duration: Optional[int] = None
-    input_data: Optional[dict] = None
-    output_data: Optional[dict] = None
+    input_data: Optional[Any] = None
+    output_data: Optional[Any] = None
 
 class ExecutionHistoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -233,15 +233,14 @@ async function main() {
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }
-      if (node.toolType === 'js_script' && node.props?.code) {
+      } else if (node.toolType === 'js_script' && node.props?.code) {
         try {
-          const input = JSON.stringify(context.payload);
+          const inputPayload = context.payload;
           context.payload = await executeScriptNode(node.props.code, context);
-          const output = JSON.stringify(context.payload);
-          console.log(`NODE_LOG:${node.id}:success:${input}:${output}:0`);
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: inputPayload, output: context.payload, duration: 0})}`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
-          console.log(`NODE_LOG:${node.id}:error:${JSON.stringify(context.payload)}:{}:0`);
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: context.payload, output: {}, duration: 0})}`);
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }

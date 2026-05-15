@@ -172,8 +172,8 @@
     "hash": "5eb0c4d4236008718031fc1a684f12ee"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\runtime\\runner.ts": {
-    "mtime": 1778862836.8545706,
-    "hash": "57c5f4a34f44dc16b8fedf33d321b935"
+    "mtime": 1778870610.5092044,
+    "hash": "9625051d8a19f9acd0744e827fa9db1c"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\schemas\\connection_schemas.py": {
     "mtime": 1778826035.4139836,
@@ -188,12 +188,12 @@
     "hash": "cd8c62ee540b6349bcc27b1e0bddb5ca"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\deno_service.py": {
-    "mtime": 1778862657.526704,
-    "hash": "9932f3275f7270323ed09faf4593d230"
+    "mtime": 1778870619.1311724,
+    "hash": "bc30004da464d9800d636a411fef74a1"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\scheduler.py": {
-    "mtime": 1778865165.0741038,
-    "hash": "da492eee03adb3cc961d56b4735feda6"
+    "mtime": 1778870625.6592305,
+    "hash": "f158ab668909b182c96f7b9dca99f740"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\source_executor.py": {
     "mtime": 1778860939.4037323,

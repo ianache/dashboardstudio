@@ -58,5 +58,31 @@ async def run_integration_flow(flow_id: str):
 
 def init_scheduler():
     scheduler.start()
-    # Logic to load/re-add scheduled flows from DB would go here
+    
+    from app.core.database import SessionLocal
+    db = SessionLocal()
+    try:
+        scheduled_flows = db.query(IntegrationFlow).filter(IntegrationFlow.cron_expression.isnot(None)).all()
+        for flow in scheduled_flows:
+            try:
+                # Assuming standard cron format: min hour day month dow
+                parts = flow.cron_expression.split()
+                if len(parts) == 5:
+                    scheduler.add_job(
+                        run_integration_flow,
+                        'cron',
+                        args=[flow.id],
+                        minute=parts[0],
+                        hour=parts[1],
+                        day=parts[2],
+                        month=parts[3],
+                        day_of_week=parts[4],
+                        id=f"flow-{flow.id}",
+                        replace_existing=True
+                    )
+                    print(f"Scheduled flow {flow.id} ({flow.name}) with cron: {flow.cron_expression}")
+            except Exception as e:
+                print(f"Error scheduling flow {flow.id}: {e}")
+    finally:
+        db.close()
     print("Scheduler initialized")
