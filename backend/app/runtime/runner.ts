@@ -297,11 +297,29 @@ async function main() {
           console.error(`[Email Error] Failed to send: ${err.message}`);
           emitStatus(node.id, 'error');
         }
+      } else if (node.toolType === 'sql_source' || node.toolType === 'sql_destination') {
+        try {
+          const connectionId = node.props?.connection_id;
+          const query = node.props?.query;
+
+          if (!connectionId || !query) {
+             throw new Error("Conexión o Query no especificada");
+          }
+
+          console.log(`[SQL] Executing query on connection: ${connectionId}`);
+          
+          // Emit a custom event that the backend runner (Python) can catch
+          console.log(`EXEC_SQL:${connectionId}:${query}`);
+
+          // Placeholder: in real integration the Python service handles the result
+          emitStatus(node.id, 'success');
+          context.payload = { status: 'executed' };
+        } catch (err: any) {
+          console.error(`[SQL Error]: ${err.message}`);
+          emitStatus(node.id, 'error');
+          Deno.exit(1);
+        }
       } else {
-        console.log(`[Flow Info] Node ${node.label} (${node.toolType}) is a system node. Passing through data.`);
-        // Placeholder for future system node logic
-        emitStatus(node.id, 'success');
-      }
 
       // Save output for downstream nodes
       nodeOutputs.set(node.id, context.payload);
