@@ -34,11 +34,20 @@ async def run_integration_flow(flow_id: str):
         db.commit()
 
         # Trigger execution via Deno service
-        # We reuse the logic already implemented in deno_service
-        result = await deno_service.run_flow_internal(flow)
+        async for log in deno_service.run_flow_stream(flow.flow_nodes, flow.flow_connections, flow.flow_metadata, flow.payload):
+            if log["type"] == "node_log":
+                node_log = NodeExecutionLogs(
+                    execution_id=execution_id,
+                    node_id=log["node_id"],
+                    status=log["status"],
+                    input_data=log["input"],
+                    output_data=log["output"],
+                    duration=log["duration"]
+                )
+                db.add(node_log)
+            elif log["type"] == "status":
+                history.status = "success" if log["success"] else "error"
         
-        # Update history
-        history.status = "success" if result["status"] == "success" else "error"
         history.end_time = datetime.utcnow()
         db.commit()
 

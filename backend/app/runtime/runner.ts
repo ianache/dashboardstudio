@@ -233,15 +233,19 @@ async function main() {
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }
-      } else if (node.toolType === 'js_script' && node.props?.code) {
+      if (node.toolType === 'js_script' && node.props?.code) {
         try {
+          const input = JSON.stringify(context.payload);
           context.payload = await executeScriptNode(node.props.code, context);
+          const output = JSON.stringify(context.payload);
+          console.log(`NODE_LOG:${node.id}:success:${input}:${output}:0`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
-          console.error(`[Flow Error] Node ${node.label} failed: ${err.message}`);
+          console.log(`NODE_LOG:${node.id}:error:${JSON.stringify(context.payload)}:{}:0`);
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }
+
       } else if (node.toolType === 'csv_file' && node.props?.path) {
         try {
           const path = node.props.path;

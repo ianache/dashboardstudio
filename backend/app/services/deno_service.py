@@ -133,6 +133,11 @@ class DenoService:
             logger.error(f"Deno stderr:\n{stderr_text.strip()}")
 
         # Stream stdout lines
+        execution_id = None # Should be passed from the scheduler
+        
+        # Helper to extract execution_id from scope if possible
+        # For now, let's assume we pass execution_id to the runner or it's provided by context
+        
         for line in stdout_text.splitlines():
             line = line.strip()
             if not line:
@@ -141,6 +146,19 @@ class DenoService:
                 parts = line.split(":")
                 if len(parts) >= 3:
                     yield {"type": "node_status", "node_id": parts[1], "status": parts[2]}
+            elif line.startswith("NODE_LOG:"):
+                # NODE_LOG:node_id:status:input:output:duration
+                parts = line.split(":")
+                if len(parts) >= 6:
+                    node_id, status, inp, outp, dur = parts[1], parts[2], parts[3], parts[4], parts[5]
+                    yield {
+                        "type": "node_log", 
+                        "node_id": node_id, 
+                        "status": status,
+                        "input": json.loads(inp),
+                        "output": json.loads(outp),
+                        "duration": int(dur)
+                    }
             elif line.startswith("FINAL_RESULT:"):
                 try:
                     res = json.loads(line[len("FINAL_RESULT:"):])
