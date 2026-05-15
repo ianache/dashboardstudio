@@ -83,8 +83,18 @@ class DenoService:
             yield {"type": "error", "message": f"Runner script not found at {self.full_runner_path}"}
             return
 
+        import decimal
+        import datetime
+        
+        def json_serial(obj):
+            if isinstance(obj, (datetime.datetime, datetime.date)):
+                return obj.isoformat()
+            if isinstance(obj, decimal.Decimal):
+                return float(obj)
+            raise TypeError(f"Type {type(obj)} not serializable")
+
         flow_payload = {**flow_data, "payload": payload or {}}
-        input_json = json.dumps(flow_payload)
+        input_json = json.dumps(flow_payload, default=json_serial)
 
         logger.info(f"Launching Deno runner: {self.full_runner_path}")
 

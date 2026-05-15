@@ -320,6 +320,9 @@ async function main() {
           Deno.exit(1);
         }
       } else {
+        console.log(`[Flow Info] Node ${node.label} (${node.toolType}) is a system node. Passing through data.`);
+        emitStatus(node.id, 'success');
+      }
 
       // Save output for downstream nodes
       nodeOutputs.set(node.id, context.payload);

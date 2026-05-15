@@ -234,7 +234,8 @@ class IntegrationFlow(Base):
     diagram_type = Column(String(50), nullable=False, default="data-integration")
     status = Column(String(20), nullable=False, default="draft")
     flow_type = Column(String(50), nullable=True)
-    schedule = Column(String(100), nullable=True)
+    cron_expression = Column(String(100), nullable=True)
+    log_level = Column(String(20), default='summary')
     source_system = Column(String(100), nullable=True)
     target_system = Column(String(100), nullable=True)
     flow_nodes = Column(JSON, nullable=False, default=list)
@@ -247,22 +248,35 @@ class IntegrationFlow(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    executions = relationship("IntegrationFlowExecution", back_populates="flow", cascade="all, delete-orphan")
+    executions = relationship("ExecutionHistory", back_populates="flow", cascade="all, delete-orphan")
 
 
-class IntegrationFlowExecution(Base):
-    __tablename__ = "integration_flow_executions"
+class ExecutionHistory(Base):
+    __tablename__ = "execution_history"
     __table_args__ = {"schema": "biportal"}
-
     id = Column(String(50), primary_key=True)
     flow_id = Column(String(50), ForeignKey("biportal.integration_flows.id"), nullable=False)
-    status = Column(String(20), nullable=False)  # success, error, timeout
-    logs = Column(JSON, nullable=False, default=list)
-    result_data = Column(JSON, nullable=True)
-    duration_ms = Column(Integer, nullable=True)
-    executed_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
+    status = Column(String(20), nullable=False)
+    start_time = Column(DateTime, default=datetime.utcnow)
+    end_time = Column(DateTime, nullable=True)
+    duration = Column(Integer, nullable=True)
+    
     flow = relationship("IntegrationFlow", back_populates="executions")
+    node_logs = relationship("NodeExecutionLogs", back_populates="execution", cascade="all, delete-orphan")
+
+
+class NodeExecutionLogs(Base):
+    __tablename__ = "node_execution_logs"
+    __table_args__ = {"schema": "biportal"}
+    id = Column(Integer, primary_key=True)
+    execution_id = Column(String(50), ForeignKey("biportal.execution_history.id"), nullable=False)
+    node_id = Column(String(50), nullable=False)
+    status = Column(String(20), nullable=False)
+    start_time = Column(DateTime, default=datetime.utcnow)
+    end_time = Column(DateTime, nullable=True)
+    duration = Column(Integer, nullable=True)
+    input_data = Column(JSON, nullable=True)
+    output_data = Column(JSON, nullable=True)
+    
+    execution = relationship("ExecutionHistory", back_populates="node_logs")
 
