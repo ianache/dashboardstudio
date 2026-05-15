@@ -1,43 +1,71 @@
 # Project Roadmap: Visualizacion Design Improvements
 
-## Phase 1: Setup & UI Scaffolding
-**Goal:** Establish the foundation and layout for the new visualization configuration interface.
-- [x] phase01-01-PLAN.md — Store & Routing setup
-- [x] phase01-02-PLAN.md — Base UI Scaffolding (3-column layout)
+## Progress Table
 
-## Phase 2: Drag-and-Drop Core
-**Goal:** Implement the drag-and-drop interface for configuring visualizations.
-- [x] phase02-01-PLAN.md — Source Panel & Draggable Items
-- [x] phase02-02-PLAN.md — Drop Zones & Validation
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1-6. Core Viz & Multi-Diagram | 16/17 | Completed | 2026-05-13 |
+| 7-11. Integration Flows (Deno) | 5/5 | Completed | 2026-05-14 |
+| 12. Backend Status Reporting | 1/1 | Completed | 2026-05-14 |
+| 13. UI Execution State & Nodos | 1/1 | Completed | 2026-05-14 |
+| 14. UI Connection Highlighting | 1/1 | Completed | 2026-05-14 |
+| 15. Backend - Connection Data Model | 0/1 | Planned | |
+| 16. Backend - Connection Testing | 0/1 | Planned | |
+| 17. Frontend - Connections UI | 0/2 | Planned | |
 
-## Phase 3: Real-time Preview & Charting
-**Goal:** Integrate live data and dynamic preview.
-- [x] phase03-01 — Integrate `useCubeQuery` for dynamic data fetching.
-- [x] phase03-02 — Connect state to `vue-echarts` Preview component.
-- [x] phase03-03 — Implement Chart Type Selector.
-- [x] phase03-04 — Add "Loading" and "No Data" states for the preview.
+## Milestone: Flow Execution Visualization
 
-## Phase 4: Refinement & Integration
-**Goal:** Finalize the user experience and ensure persistence.
-- [x] phase04-01-PLAN.md — Save to Dashboard & UI Polish
-- [x] phase04-02-PLAN.md — Advanced Metric Configuration (aliases, formatting)
-- [x] phase04-03-PLAN.md — Final Polish & Quick Filters
+### Phase 12: Backend Status Reporting
+**Goal**: Update the runner and backend service to emit structured node-level status events.
+**Requirements**: FR-01, TR-01
+**Plans**: 12-01-PLAN.md
 
-## Phase 5: Testing & Deployment
-- [ ] phase05-01-PLAN.md — End-to-end testing & Validation
-- [ ] phase05-02-PLAN.md — Cross-browser & Final Review
+### Phase 13: UI Execution State & Nodos
+**Goal**: Implement the execution state in the frontend and show visual feedback on nodes (borders and badges).
+**Requirements**: FR-02, FR-03, FR-05, TR-02, TR-03
+**Plans**: 13-01-PLAN.md
 
-### Phase 6: Multi-diagram Dimensional Model
+### Phase 14: UI Connection Highlighting
+**Goal**: Visualize the execution sequence by coloring connections as they are activated.
+**Requirements**: FR-04, TR-02
+**Plans**: 14-01-PLAN.md
 
-**Goal:** Extend the Dimensional Model editor so each model can have one permanent main diagram plus N user-managed sub-diagrams showing node subsets, with shared canonical node data and Markdown-enabled diagram descriptions.
-**Requirements**: MD-01, MD-02, MD-03, MD-04, MD-05, MD-06, MD-07
-**Depends on:** Phase 5
-**Plans:** 5/6 plans executed
+---
 
-Plans:
-- [x] 06-01-PLAN.md — Backend diagrams column + Pydantic schemas
-- [x] 06-02-PLAN.md — Store diagram CRUD actions + migration logic
-- [x] 06-03-PLAN.md — DiagramTabBar + EditorView canvas refactor
-- [x] 06-04-PLAN.md — Install marked/DOMPurify + DiagramPropsPanel component
-- [x] 06-05-PLAN.md — Wire DiagramPropsPanel + AddNodeToDiagramModal into EditorView
-- [ ] 06-06-PLAN.md — Automated smoke checks + end-to-end human verification
+## Phase Details
+
+### Phase 12: Backend Status Reporting
+- [ ] Update `runner.ts` to emit `NODE_STATUS:<id>:<status>`.
+- [ ] Update `deno_service.py` to parse these tokens and yield `type: node_status` events.
+- [ ] Verify using the diagnostic scripts.
+
+### Phase 13: UI Execution State & Nodos
+- [ ] Add `nodeExecutionStatus` reactive map to `FlowEditorCanvas.vue`.
+- [ ] Update WebSocket listener to populate this map.
+- [ ] Add dynamic classes to node elements for `executing`, `success`, `error`.
+- [ ] Implement badge elements in node header/body.
+
+### Phase 14: UI Connection Highlighting
+- [ ] Calculate which connections are "active" based on source node status.
+- [ ] Add `is-active` class to connection SVG paths.
+- [ ] Final polish of animations and transitions.
+
+---
+
+## Milestone: Connection Management & Centralized Credentials
+
+### Phase 15: Backend - Connection Data Model
+- [ ] Add `connection_config` JSON column to `DataSource` model.
+- [ ] Implement Pydantic Discriminated Unions for connection types.
+- [ ] Create recursive encryption/decryption helper for sensitive fields.
+- [ ] Update `DataSource` API endpoints to handle `connection_config`.
+
+### Phase 16: Backend - Connection Testing Logic
+- [ ] Implement `ConnectionStrategy` base class.
+- [ ] Implement concrete strategies for SMTP, SQL (Postgres/MySQL), FTP/SFTP, HTTP.
+- [ ] Create `/api/v1/data-sources/{id}/test` endpoint.
+
+### Phase 17: Frontend - Connections UI & Navigation
+- [ ] Add "Conexiones" to `SideMenu.vue`.
+- [ ] Create `ConnectionsView.vue` with list and search.
+- [ ] Implement `ConnectionEditModal.vue` with dynamic forms for each type.
