@@ -331,6 +331,57 @@
             <input v-model="selectedNode.label" class="fec-prop-i" />
           </div>
 
+          <!-- ── Connection binding (source & destination nodes only) ── -->
+          <template v-if="isConnectable(selectedNode.category)">
+            <div class="fec-divider"><span>Conexión de Datos</span></div>
+
+            <!-- Connection Type -->
+            <div class="fec-prop-g">
+              <label class="fec-prop-l">Tipo de Conexión</label>
+              <div class="fec-sel-wrap">
+                <select
+                  v-model="selectedNode.props.connection_type"
+                  class="fec-prop-sel"
+                  @change="onConnectionTypeChange"
+                >
+                  <option value="">— Seleccionar tipo —</option>
+                  <option v-for="ct in CONN_TYPES" :key="ct.value" :value="ct.value">{{ ct.label }}</option>
+                </select>
+                <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
+              </div>
+            </div>
+
+            <!-- Connection -->
+            <div class="fec-prop-g">
+              <label class="fec-prop-l">
+                Conexión
+                <span v-if="dataSrcLoading" class="fec-conn-spin">
+                  <span class="msi spin" style="font-size:12px">sync</span>
+                </span>
+              </label>
+              <div class="fec-sel-wrap">
+                <select
+                  v-model="selectedNode.props.connection_id"
+                  class="fec-prop-sel"
+                  :disabled="!selectedNode.props.connection_type || dataSrcLoading"
+                  @change="onConnectionSelect"
+                >
+                  <option value="">— Seleccionar conexión —</option>
+                  <option v-for="ds in filteredDataSources" :key="ds.id" :value="ds.id">{{ ds.name }}</option>
+                </select>
+                <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
+              </div>
+              <p v-if="selectedNode.props.connection_type && !dataSrcLoading && filteredDataSources.length === 0"
+                 class="fec-conn-hint">
+                Sin conexiones de tipo "{{ connTypeLabel(selectedNode.props.connection_type) }}"
+              </p>
+              <p v-if="selectedNode.props.connection_id" class="fec-conn-filled">
+                <span class="msi" style="font-size:12px">check_circle</span>
+                Propiedades completadas
+              </p>
+            </div>
+          </template>
+
           <div class="fec-divider"><span>Propiedades del componente</span></div>
 
           <template v-for="(def, key) in getNodePropDefs(selectedNode.toolType)" :key="key">
@@ -390,6 +441,8 @@ import { CAT_META } from '@/stores/toolCatalog'
 import { useAuthStore } from '@/stores/auth'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
+import { dataSourcesApi } from '@/services/api'
+import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 const props = defineProps({
@@ -453,6 +506,64 @@ function hasCodeProp(toolType) {
 function getCatColor(cat) { return CAT_META[cat]?.color || '#64748b' }
 function getCatBg(cat)    { return CAT_META[cat]?.bg    || '#f8fafc' }
 
+// ─── Data-source connection binding ──────────────────────────────────────────
+// CONN_TYPES imported from @/constants/connectionTypes
+
+const dataSources    = ref([])
+const dataSrcLoading = ref(false)
+const dataSrcLoaded  = ref(false)
+
+async function loadDataSources() {
+  if (dataSrcLoaded.value) return
+  dataSrcLoading.value = true
+  try {
+    dataSources.value = await dataSourcesApi.getAll()
+    dataSrcLoaded.value = true
+  } catch (e) {
+    console.error('[FlowEditor] Failed to load data sources:', e)
+  } finally {
+    dataSrcLoading.value = false
+  }
+}
+
+function isConnectable(cat) { return cat === 'source' || cat === 'destination' }
+function connTypeLabel(v)   { return _connTypeLabel(v) }
+
+const filteredDataSources = computed(() => {
+  const type = selectedNode.value?.props?.connection_type
+  if (!type) return []
+  return dataSources.value.filter(ds => ds.type === type)
+})
+
+function onConnectionTypeChange() {
+  if (!selectedNode.value) return
+  selectedNode.value.props.connection_id = ''
+  _clearConnFields()
+}
+
+function onConnectionSelect() {
+  const node = selectedNode.value
+  if (!node) return
+  const ds = dataSources.value.find(d => d.id === node.props.connection_id)
+  if (!ds) return
+  const cfg = ds.connection_config || {}
+  const FILL = ['host', 'port', 'username', 'password', 'database', 'schema', 'url', 'email', 'api_key', 'token']
+  for (const key of FILL) {
+    if (cfg[key] !== undefined && key in (node.props || {})) {
+      node.props[key] = cfg[key]
+    }
+  }
+}
+
+function _clearConnFields() {
+  const node = selectedNode.value
+  if (!node) return
+  const FILL = ['host', 'port', 'username', 'password', 'database', 'schema', 'url', 'email', 'api_key', 'token']
+  for (const key of FILL) {
+    if (key in (node.props || {})) node.props[key] = ''
+  }
+}
+
 // Group tools by category for left panel
 const toolsByCategory = computed(() => {
   const map = {}
@@ -509,6 +620,15 @@ const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k,
 const selectedNode   = ref(null)
 const selectedConn   = ref(null)
 const hoveredConn    = ref(null)
+
+// Lazy-load data sources + ensure connection props exist when a connectable node is selected
+watch(selectedNode, (node) => {
+  if (!node || !isConnectable(node.category)) return
+  loadDataSources()
+  if (!node.props) node.props = {}
+  if (!('connection_type' in node.props)) node.props.connection_type = ''
+  if (!('connection_id'   in node.props)) node.props.connection_id   = ''
+})
 const snapToGrid     = ref(true)
 const isDragOver     = ref(false)
 const zoom           = ref(1)
@@ -1149,4 +1269,9 @@ onMounted(() => { setTimeout(fitView, 80) })
   border-top: 1px solid #e2e8f0;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
 }
+
+/* Connection binding helpers */
+.fec-conn-hint   { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.fec-conn-spin   { margin-left: 6px; vertical-align: middle; }
+.fec-conn-filled { font-size: 11px; color: #16a34a; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 </style>

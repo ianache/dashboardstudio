@@ -25,6 +25,7 @@ interface FlowData {
   connections: FlowConnection[];
   test_mode?: boolean;
   payload?: any;
+  prefetched_outputs?: Record<string, any[]>;
 }
 
 async function readStdin(): Promise<string> {
@@ -122,14 +123,117 @@ async function main() {
     console.log(`Starting flow execution. Nodes: ${flow.nodes.length}`);
     
     const sortedNodes = getTopologicalOrder(flow.nodes, flow.connections);
+    const prefetchedOutputs = flow.prefetched_outputs || {};
     let currentPayload = flow.payload || {};
+    const nodeOutputs = new Map<string, any>();
     const context = { payload: currentPayload, variables: {} };
 
     for (const node of sortedNodes) {
+      // Source nodes resolved by Python before Deno – skip but keep success status
+      if ((node as any).__pre_executed) {
+        console.log(`[Flow] Nodo pre-ejecutado: ${node.label} (${node.toolType}) — omitiendo`);
+        const p = prefetchedOutputs[node.id] || [];
+        nodeOutputs.set(node.id, p);
+        currentPayload = p;
+        emitStatus(node.id, 'success');
+        continue;
+      }
+
+      // Gather inputs from incoming connections
+      const incoming = flow.connections.filter(c => c.to === node.id);
+      if (incoming.length === 1) {
+        currentPayload = nodeOutputs.get(incoming[0].from) || [];
+      } else if (incoming.length > 1 && node.toolType !== 'join') {
+        currentPayload = incoming.map(c => nodeOutputs.get(c.from) || []);
+      }
+      context.payload = currentPayload;
+
       emitStatus(node.id, 'running');
       console.log(`[Flow] Executing Node: ${node.label} (${node.toolType})`);
       
-      if (node.toolType === 'js_script' && node.props?.code) {
+      if (node.toolType === 'join') {
+        try {
+          const joinType = node.props?.join_type || 'inner';
+          const joinKey = node.props?.join_key;
+
+          if (!joinKey) {
+            throw new Error("Clave de unión (join_key) no especificada");
+          }
+          if (incoming.length < 2) {
+            throw new Error("Un nodo Join requiere al menos 2 conexiones de entrada");
+          }
+
+          const left = nodeOutputs.get(incoming[0].from) || [];
+          const right = nodeOutputs.get(incoming[1].from) || [];
+          const result = [];
+
+          if (joinType === 'inner') {
+             for (const l of left) {
+                for (const r of right) {
+                   if (l[joinKey] === r[joinKey]) {
+                       result.push({ ...l, ...r });
+                   }
+                }
+             }
+          } else if (joinType === 'left') {
+             for (const l of left) {
+                let matched = false;
+                for (const r of right) {
+                   if (l[joinKey] === r[joinKey]) {
+                       result.push({ ...l, ...r });
+                       matched = true;
+                   }
+                }
+                if (!matched) {
+                   result.push({ ...l });
+                }
+             }
+          } else if (joinType === 'right') {
+             for (const r of right) {
+                let matched = false;
+                for (const l of left) {
+                   if (l[joinKey] === r[joinKey]) {
+                       result.push({ ...l, ...r });
+                       matched = true;
+                   }
+                }
+                if (!matched) {
+                   result.push({ ...r });
+                }
+             }
+          } else if (joinType === 'full') {
+             const rightMatched = new Set();
+             for (const l of left) {
+                let matched = false;
+                for (let i = 0; i < right.length; i++) {
+                   const r = right[i];
+                   if (l[joinKey] === r[joinKey]) {
+                       result.push({ ...l, ...r });
+                       matched = true;
+                       rightMatched.add(i);
+                   }
+                }
+                if (!matched) {
+                   result.push({ ...l });
+                }
+             }
+             for (let i = 0; i < right.length; i++) {
+                if (!rightMatched.has(i)) {
+                   result.push({ ...right[i] });
+                }
+             }
+          } else {
+             throw new Error(`Tipo de join no soportado: ${joinType}`);
+          }
+          
+          context.payload = result;
+          emitStatus(node.id, 'success');
+        } catch (err: any) {
+          console.error(`[Join Error] Failed to join: ${err.message}`);
+          emitStatus(node.id, 'error');
+          Deno.exit(1);
+        }
+      } else if (node.toolType === 'js_script' && node.props?.code) {
         try {
           context.payload = await executeScriptNode(node.props.code, context);
           emitStatus(node.id, 'success');
@@ -198,6 +302,10 @@ async function main() {
         // Placeholder for future system node logic
         emitStatus(node.id, 'success');
       }
+
+      // Save output for downstream nodes
+      nodeOutputs.set(node.id, context.payload);
+      currentPayload = context.payload;
     }
 
     console.log("Flow completed successfully.");

@@ -136,8 +136,8 @@
     "hash": "5e2157cd0b73cb84a473eb1f22a6576f"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\core\\encryption.py": {
-    "mtime": 1778819675.8823817,
-    "hash": "dd9b486305a9cff4c9631e144305ec7a"
+    "mtime": 1778820488.8177562,
+    "hash": "4dd6ddc5d6f83bc1d80321fdfcbb4692"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\core\\security.py": {
     "mtime": 1777350391.2636497,
@@ -234,6 +234,10 @@
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\common\\QuickActionCard.vue": {
     "mtime": 1777350392.517602,
     "hash": "8c77bdca5b44aa2cc964abb1dbecd1f7"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\connections\\ConnectionEditModal.vue": {
+    "mtime": 1778820557.547533,
+    "hash": "85bb03d50e98e31a4f31c9f78326e31a"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\dashboard\\ChartConfigModal.vue": {
     "mtime": 1778806982.4950106,
@@ -390,6 +394,10 @@
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\stores\\visualizationConfigurator.js": {
     "mtime": 1777350393.1976876,
     "hash": "5acde2a79084d5f931f08a84a1d90ac8"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\views\\ConnectionsView.vue": {
+    "mtime": 1778820533.112244,
+    "hash": "3b6bfd6dc109f4a87ecf6db8d2d08c14"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\views\\DashboardDesignerView.vue": {
     "mtime": 1778731487.388,

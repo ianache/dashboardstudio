@@ -57,15 +57,26 @@ class HttpStrategy(BaseConnectionStrategy):
 class ConnectionTestingService:
     def __init__(self):
         self.strategies = {
-            'smtp': SmtpStrategy(),
-            'database': DbStrategy(),
-            'http': HttpStrategy()
+            # Generic keys
+            'smtp':       SmtpStrategy(),
+            'database':   DbStrategy(),
+            'http':       HttpStrategy(),
+            'jwt':        HttpStrategy(),
+            # Specific DB engines
+            'postgresql': DbStrategy(),
+            'postgres':   DbStrategy(),
+            'mysql':      DbStrategy(),
+            'mariadb':    DbStrategy(),
+            'mssql':      DbStrategy(),
+            'sqlserver':  DbStrategy(),
+            'oracle':     DbStrategy(),
         }
 
     async def test_connection(self, config: Dict[str, Any]) -> bool:
-        strategy = self.strategies.get(config.get('type'))
+        conn_type = config.get('type')
+        strategy = self.strategies.get(conn_type)
         if not strategy:
-            raise ValueError(f"No test strategy for {config.get('type')}")
+            raise ValueError(f"No test strategy for type '{conn_type}'. Supported: {list(self.strategies.keys())}")
         return await strategy.test(config)
 
 connection_testing_service = ConnectionTestingService()

@@ -13,6 +13,8 @@ from app.models import models
 from app.schemas import schemas
 
 from app.services.deno_service import deno_service
+from app.services.source_executor import execute_source_node, POSTGRES_TYPES, MYSQL_TYPES, HTTP_TYPES
+from app.api.endpoints.data_sources import _decode_config
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +59,81 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
             "connections": flow.flow_connections,
             "metadata": flow.flow_metadata
         }
-        
+
+        # ── Pre-execute source nodes in Python (before Deno) ──────────────────
+        # Deno runs with --no-remote (no network), so Python resolves source nodes
+        # (DB queries, REST calls) first and injects results as initial payload.
+        import json as _json
+        from copy import deepcopy
+
+        RESOLVABLE = POSTGRES_TYPES | MYSQL_TYPES | HTTP_TYPES
+        nodes_copy  = deepcopy(flow.flow_nodes or [])
+        initial_payload = payload or {}
+        prefetched_outputs = {}
+        pre_exec_ok = True
+
+        for node in nodes_copy:
+            if node.get("category") != "source":
+                continue
+            conn_type = (node.get("props") or {}).get("connection_type", "").lower()
+            if conn_type not in RESOLVABLE:
+                continue  # let Deno handle unknown source types
+
+            # Emit running status immediately
+            await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "running"})
+            await websocket.send_json({"type": "info",
+                "message": f"[Fuente] Ejecutando '{node.get('label', node['id'])}' ..."})
+
+            # ── Enrich node props with credentials from DB (decrypted) ──────────────
+            # The frontend auto-fill only copies keys that already exist in prop_defs,
+            # so username/password may be missing. We resolve them server-side from
+            # the DataSource record to guarantee correct credentials.
+            connection_id = (node.get("props") or {}).get("connection_id", "")
+            if connection_id:
+                ds = db.query(models.DataSource).filter(models.DataSource.id == connection_id).first()
+                if ds:
+                    resolved_cfg = _decode_config(ds.connection_url or "")
+                    if not node.get("props"):
+                        node["props"] = {}
+                    # Merge: DB credentials always take precedence over node.props values
+                    for cfg_key in ["host", "port", "username", "password", "database",
+                                    "schema", "url", "email", "api_key", "token",
+                                    "token_url", "client_id", "client_secret"]:
+                        if cfg_key in resolved_cfg:
+                            node["props"][cfg_key] = resolved_cfg[cfg_key]
+                    # Also ensure connection_type matches what's stored in the DataSource
+                    if ds.type:
+                        node["props"]["connection_type"] = ds.type
+                    logger.info(f"[SourceExec] Credenciales resueltas desde DataSource '{ds.name}' "
+                                f"(user={resolved_cfg.get('username', '<vacío>')})")
+                else:
+                    logger.warning(f"[SourceExec] DataSource '{connection_id}' no encontrado en DB")
+            # ───────────────────────────────────────────────────────────────────────
+
+            result = await execute_source_node(node)
+
+            if result["success"]:
+                prefetched_outputs[node["id"]] = result["rows"]
+                node["__pre_executed"] = True
+                await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "success"})
+                await websocket.send_json({"type": "info",
+                    "message": f"[Fuente] {result['count']} registros cargados desde '{node.get('label', '')}'"})
+            else:
+                node["__pre_executed"] = True  # skip in Deno so error is the final state
+                await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "error"})
+                await websocket.send_json({"type": "error",
+                    "message": f"[Fuente Error] {result['error']}"})
+                pre_exec_ok = False
+                break  # abort further execution on source failure
+
+        if not pre_exec_ok:
+            await websocket.send_json({"type": "status", "success": False, "exit_code": 1})
+            return
+
+        # Replace nodes list with annotated copy so runner.ts can skip pre-executed nodes
+        flow_data["nodes"] = nodes_copy
+        flow_data["prefetched_outputs"] = prefetched_outputs
+
         logger.info(f"WebSocket flow {flow_id}: Starting Deno stream")
         start_time = datetime.utcnow()
         all_logs = []
@@ -65,7 +141,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
         success = False
 
         log_count = 0
-        async for log in deno_service.run_flow_stream(flow_data, payload):
+        async for log in deno_service.run_flow_stream(flow_data, initial_payload):
             log_count += 1
             await websocket.send_json(log)
             

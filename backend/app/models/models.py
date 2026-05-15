@@ -169,10 +169,9 @@ class DataSource(Base):
     id = Column(String(50), primary_key=True)
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)  # qdrant, neo4j, postgresql, mysql, etc.
-    connection_url = Column(String(500), nullable=True) # Kept for backward compatibility
-    connection_config = Column(JSON, nullable=True)
+    connection_url = Column(String(500), nullable=True)  # stores JSON config blob
     username = Column(String(100), nullable=True)
-    password = Column(String(500), nullable=True)  # Encrypted
+    password = Column(String(500), nullable=True)  # Encrypted (legacy)
     description = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
