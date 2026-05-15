@@ -9,7 +9,7 @@
       "source_file": "backend/check_user_exists.py",
       "source_location": "L1",
       "id": "backend_check_user_exists_py",
-      "community": 104,
+      "community": 105,
       "norm_label": "check_user_exists.py"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "backend/check_user_exists.py",
       "source_location": "L12",
       "id": "backend_check_user_exists_check_user",
-      "community": 104,
+      "community": 105,
       "norm_label": "check_user()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "backend/test_order.py",
       "source_location": "L1",
       "id": "backend_test_order_py",
-      "community": 105,
+      "community": 106,
       "norm_label": "test_order.py"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "backend/test_order.py",
       "source_location": "L10",
       "id": "backend_test_order_test_topological_sort",
-      "community": 105,
+      "community": 106,
       "norm_label": "test_topological_sort()"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "backend/alembic/env.py",
       "source_location": "L1",
       "id": "backend_alembic_env_py",
-      "community": 94,
+      "community": 95,
       "norm_label": "env.py"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "backend/alembic/env.py",
       "source_location": "L25",
       "id": "alembic_env_run_migrations_offline",
-      "community": 94,
+      "community": 95,
       "norm_label": "run_migrations_offline()"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "backend/alembic/env.py",
       "source_location": "L40",
       "id": "alembic_env_run_migrations_online",
-      "community": 94,
+      "community": 95,
       "norm_label": "run_migrations_online()"
     },
     {
@@ -463,6 +463,42 @@
       "norm_label": "add integration_flow_executions table  revision id: 011 revises: 010 create"
     },
     {
+      "label": "caa1490c201a_add_connection_config_to_data_sources.py",
+      "file_type": "code",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L1",
+      "id": "backend_alembic_versions_caa1490c201a_add_connection_config_to_data_sources_py",
+      "community": 89,
+      "norm_label": "caa1490c201a_add_connection_config_to_data_sources.py"
+    },
+    {
+      "label": "upgrade()",
+      "file_type": "code",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L21",
+      "id": "versions_caa1490c201a_add_connection_config_to_data_sources_upgrade",
+      "community": 89,
+      "norm_label": "upgrade()"
+    },
+    {
+      "label": "downgrade()",
+      "file_type": "code",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L163",
+      "id": "versions_caa1490c201a_add_connection_config_to_data_sources_downgrade",
+      "community": 89,
+      "norm_label": "downgrade()"
+    },
+    {
+      "label": "add connection_config to data_sources  Revision ID: caa1490c201a Revises: 011 Cr",
+      "file_type": "rationale",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L1",
+      "id": "versions_caa1490c201a_add_connection_config_to_data_sources_rationale_1",
+      "community": 89,
+      "norm_label": "add connection_config to data_sources  revision id: caa1490c201a revises: 011 cr"
+    },
+    {
       "label": "main.py",
       "file_type": "code",
       "source_file": "backend/app/main.py",
@@ -522,7 +558,7 @@
       "source_file": "backend/app/api/router.py",
       "source_location": "L1",
       "id": "backend_app_api_router_py",
-      "community": 117,
+      "community": 118,
       "norm_label": "router.py"
     },
     {
@@ -531,7 +567,7 @@
       "source_file": "backend/app/api/__init__.py",
       "source_location": "L1",
       "id": "backend_app_api_init_py",
-      "community": 118,
+      "community": 119,
       "norm_label": "__init__.py"
     },
     {
@@ -540,7 +576,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L1",
       "id": "backend_app_api_endpoints_cube_config_py",
-      "community": 2,
+      "community": 1,
       "norm_label": "cube_config.py"
     },
     {
@@ -549,7 +585,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L13",
       "id": "endpoints_cube_config_generate_id",
-      "community": 2,
+      "community": 1,
       "norm_label": "_generate_id()"
     },
     {
@@ -558,7 +594,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L18",
       "id": "endpoints_cube_config_encrypt_config_token",
-      "community": 2,
+      "community": 1,
       "norm_label": "_encrypt_config_token()"
     },
     {
@@ -567,7 +603,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L24",
       "id": "endpoints_cube_config_decrypt_config_token",
-      "community": 2,
+      "community": 1,
       "norm_label": "_decrypt_config_token()"
     },
     {
@@ -576,7 +612,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L35",
       "id": "endpoints_cube_config_create_cube_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "create_cube_config()"
     },
     {
@@ -585,7 +621,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L86",
       "id": "endpoints_cube_config_list_cube_configs",
-      "community": 2,
+      "community": 1,
       "norm_label": "list_cube_configs()"
     },
     {
@@ -594,7 +630,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L102",
       "id": "endpoints_cube_config_get_active_cube_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "get_active_cube_config()"
     },
     {
@@ -603,7 +639,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L125",
       "id": "endpoints_cube_config_get_cube_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "get_cube_config()"
     },
     {
@@ -612,7 +648,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L150",
       "id": "endpoints_cube_config_update_cube_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "update_cube_config()"
     },
     {
@@ -621,7 +657,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L177",
       "id": "endpoints_cube_config_delete_cube_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "delete_cube_config()"
     },
     {
@@ -630,7 +666,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L193",
       "id": "endpoints_cube_config_activate_cube_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "activate_cube_config()"
     },
     {
@@ -639,7 +675,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L19",
       "id": "endpoints_cube_config_rationale_19",
-      "community": 2,
+      "community": 1,
       "norm_label": "encrypt api token before saving to database."
     },
     {
@@ -648,7 +684,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L25",
       "id": "endpoints_cube_config_rationale_25",
-      "community": 2,
+      "community": 1,
       "norm_label": "decrypt api token when returning to client."
     },
     {
@@ -657,7 +693,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L40",
       "id": "endpoints_cube_config_rationale_40",
-      "community": 2,
+      "community": 1,
       "norm_label": "create cubejs configuration (admin/designer only)"
     },
     {
@@ -666,7 +702,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L67",
       "id": "endpoints_cube_config_rationale_67",
-      "community": 2,
+      "community": 1,
       "norm_label": "create cubejs configuration (admin/designer only)"
     },
     {
@@ -675,7 +711,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L90",
       "id": "endpoints_cube_config_rationale_90",
-      "community": 2,
+      "community": 1,
       "norm_label": "list all cubejs configurations"
     },
     {
@@ -684,7 +720,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L106",
       "id": "endpoints_cube_config_rationale_106",
-      "community": 2,
+      "community": 1,
       "norm_label": "get active cubejs configuration"
     },
     {
@@ -693,7 +729,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L130",
       "id": "endpoints_cube_config_rationale_130",
-      "community": 2,
+      "community": 1,
       "norm_label": "get cubejs configuration by id"
     },
     {
@@ -702,7 +738,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L156",
       "id": "endpoints_cube_config_rationale_156",
-      "community": 2,
+      "community": 1,
       "norm_label": "update cubejs configuration (admin/designer only)"
     },
     {
@@ -711,7 +747,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L182",
       "id": "endpoints_cube_config_rationale_182",
-      "community": 2,
+      "community": 1,
       "norm_label": "delete cubejs configuration (admin/designer only)"
     },
     {
@@ -720,7 +756,7 @@
       "source_file": "backend/app/api/endpoints/cube_config.py",
       "source_location": "L198",
       "id": "endpoints_cube_config_rationale_198",
-      "community": 2,
+      "community": 1,
       "norm_label": "activate a cubejs configuration (admin/designer only)"
     },
     {
@@ -729,7 +765,7 @@
       "source_file": "backend/app/api/endpoints/currencies.py",
       "source_location": "L1",
       "id": "backend_app_api_endpoints_currencies_py",
-      "community": 95,
+      "community": 96,
       "norm_label": "currencies.py"
     },
     {
@@ -738,7 +774,7 @@
       "source_file": "backend/app/api/endpoints/currencies.py",
       "source_location": "L18",
       "id": "endpoints_currencies_list_currencies",
-      "community": 95,
+      "community": 96,
       "norm_label": "list_currencies()"
     },
     {
@@ -747,7 +783,7 @@
       "source_file": "backend/app/api/endpoints/currencies.py",
       "source_location": "L22",
       "id": "endpoints_currencies_rationale_22",
-      "community": 95,
+      "community": 96,
       "norm_label": "list all active currencies. seeds defaults if table is empty."
     },
     {
@@ -1224,7 +1260,7 @@
       "source_file": "backend/app/api/endpoints/diagram_types.py",
       "source_location": "L1",
       "id": "backend_app_api_endpoints_diagram_types_py",
-      "community": 43,
+      "community": 44,
       "norm_label": "diagram_types.py"
     },
     {
@@ -1233,7 +1269,7 @@
       "source_file": "backend/app/api/endpoints/diagram_types.py",
       "source_location": "L13",
       "id": "endpoints_diagram_types_list_diagram_types",
-      "community": 43,
+      "community": 44,
       "norm_label": "list_diagram_types()"
     },
     {
@@ -1242,7 +1278,7 @@
       "source_file": "backend/app/api/endpoints/diagram_types.py",
       "source_location": "L22",
       "id": "endpoints_diagram_types_get_diagram_type",
-      "community": 43,
+      "community": 44,
       "norm_label": "get_diagram_type()"
     },
     {
@@ -1251,7 +1287,7 @@
       "source_file": "backend/app/api/endpoints/diagram_types.py",
       "source_location": "L34",
       "id": "endpoints_diagram_types_create_diagram_type",
-      "community": 43,
+      "community": 44,
       "norm_label": "create_diagram_type()"
     },
     {
@@ -1260,7 +1296,7 @@
       "source_file": "backend/app/api/endpoints/diagram_types.py",
       "source_location": "L50",
       "id": "endpoints_diagram_types_update_diagram_type",
-      "community": 43,
+      "community": 44,
       "norm_label": "update_diagram_type()"
     },
     {
@@ -1269,7 +1305,7 @@
       "source_file": "backend/app/api/endpoints/diagram_types.py",
       "source_location": "L67",
       "id": "endpoints_diagram_types_delete_diagram_type",
-      "community": 43,
+      "community": 44,
       "norm_label": "delete_diagram_type()"
     },
     {
@@ -1467,7 +1503,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L1",
       "id": "backend_app_api_endpoints_integration_flows_py",
-      "community": 24,
+      "community": 23,
       "norm_label": "integration_flows.py"
     },
     {
@@ -1476,7 +1512,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L23",
       "id": "endpoints_integration_flows_flow_logs_websocket",
-      "community": 24,
+      "community": 23,
       "norm_label": "flow_logs_websocket()"
     },
     {
@@ -1485,7 +1521,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L132",
       "id": "endpoints_integration_flows_list_flow_executions",
-      "community": 43,
+      "community": 23,
       "norm_label": "list_flow_executions()"
     },
     {
@@ -1494,7 +1530,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L147",
       "id": "endpoints_integration_flows_get_execution_logs",
-      "community": 43,
+      "community": 44,
       "norm_label": "get_execution_logs()"
     },
     {
@@ -1503,7 +1539,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L167",
       "id": "endpoints_integration_flows_check_deno_runtime",
-      "community": 24,
+      "community": 23,
       "norm_label": "check_deno_runtime()"
     },
     {
@@ -1512,7 +1548,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L183",
       "id": "endpoints_integration_flows_run_integration_flow",
-      "community": 24,
+      "community": 23,
       "norm_label": "run_integration_flow()"
     },
     {
@@ -1521,7 +1557,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L238",
       "id": "endpoints_integration_flows_gen_id",
-      "community": 24,
+      "community": 23,
       "norm_label": "_gen_id()"
     },
     {
@@ -1530,7 +1566,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L243",
       "id": "endpoints_integration_flows_list_integration_flows",
-      "community": 24,
+      "community": 44,
       "norm_label": "list_integration_flows()"
     },
     {
@@ -1539,7 +1575,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L259",
       "id": "endpoints_integration_flows_get_integration_flow",
-      "community": 24,
+      "community": 23,
       "norm_label": "get_integration_flow()"
     },
     {
@@ -1548,7 +1584,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L271",
       "id": "endpoints_integration_flows_create_integration_flow",
-      "community": 24,
+      "community": 23,
       "norm_label": "create_integration_flow()"
     },
     {
@@ -1557,7 +1593,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L289",
       "id": "endpoints_integration_flows_update_integration_flow",
-      "community": 24,
+      "community": 23,
       "norm_label": "update_integration_flow()"
     },
     {
@@ -1566,7 +1602,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L306",
       "id": "endpoints_integration_flows_save_flow_diagram",
-      "community": 24,
+      "community": 23,
       "norm_label": "save_flow_diagram()"
     },
     {
@@ -1575,7 +1611,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L333",
       "id": "endpoints_integration_flows_delete_integration_flow",
-      "community": 24,
+      "community": 23,
       "norm_label": "delete_integration_flow()"
     },
     {
@@ -1584,7 +1620,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L24",
       "id": "endpoints_integration_flows_rationale_24",
-      "community": 24,
+      "community": 23,
       "norm_label": "streaming de logs de ejecucion via websocket."
     },
     {
@@ -1593,7 +1629,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L138",
       "id": "endpoints_integration_flows_rationale_138",
-      "community": 43,
+      "community": 23,
       "norm_label": "lista las ultimas ejecuciones de un flujo."
     },
     {
@@ -1602,7 +1638,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L152",
       "id": "endpoints_integration_flows_rationale_152",
-      "community": 43,
+      "community": 44,
       "norm_label": "obtiene los logs y resultados de una ejecucion especifica."
     },
     {
@@ -1611,7 +1647,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L170",
       "id": "endpoints_integration_flows_rationale_170",
-      "community": 24,
+      "community": 23,
       "norm_label": "verifica el estado del runtime de deno y realiza una ejecucion de prueba."
     },
     {
@@ -1620,7 +1656,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L189",
       "id": "endpoints_integration_flows_rationale_189",
-      "community": 24,
+      "community": 23,
       "norm_label": "ejecuta un flujo de integracion en el runtime de deno."
     },
     {
@@ -1629,7 +1665,7 @@
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L312",
       "id": "endpoints_integration_flows_rationale_312",
-      "community": 24,
+      "community": 23,
       "norm_label": "save diagram data (nodes + connections + metadata) for a flow."
     },
     {
@@ -1782,7 +1818,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L1",
       "id": "backend_app_api_endpoints_llm_config_py",
-      "community": 2,
+      "community": 1,
       "norm_label": "llm_config.py"
     },
     {
@@ -1791,7 +1827,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L13",
       "id": "endpoints_llm_config_generate_id",
-      "community": 2,
+      "community": 1,
       "norm_label": "_generate_id()"
     },
     {
@@ -1800,7 +1836,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L19",
       "id": "endpoints_llm_config_list_llm_configs",
-      "community": 2,
+      "community": 1,
       "norm_label": "list_llm_configs()"
     },
     {
@@ -1809,7 +1845,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L43",
       "id": "endpoints_llm_config_get_llm_providers",
-      "community": 2,
+      "community": 1,
       "norm_label": "get_llm_providers()"
     },
     {
@@ -1818,7 +1854,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L84",
       "id": "endpoints_llm_config_create_or_update_llm_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "create_or_update_llm_config()"
     },
     {
@@ -1827,7 +1863,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L127",
       "id": "endpoints_llm_config_delete_llm_config",
-      "community": 2,
+      "community": 1,
       "norm_label": "delete_llm_config()"
     },
     {
@@ -1836,7 +1872,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L147",
       "id": "endpoints_llm_config_delete_all_llm_configs",
-      "community": 2,
+      "community": 1,
       "norm_label": "delete_all_llm_configs()"
     },
     {
@@ -1845,7 +1881,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L23",
       "id": "endpoints_llm_config_rationale_23",
-      "community": 2,
+      "community": 1,
       "norm_label": "list all llm configurations for current user with decrypted api keys."
     },
     {
@@ -1854,7 +1890,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L46",
       "id": "endpoints_llm_config_rationale_46",
-      "community": 2,
+      "community": 1,
       "norm_label": "get list of supported llm providers with their metadata."
     },
     {
@@ -1863,7 +1899,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L89",
       "id": "endpoints_llm_config_rationale_89",
-      "community": 2,
+      "community": 1,
       "norm_label": "create or update llm configuration for a provider (admin/designer only)."
     },
     {
@@ -1872,7 +1908,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L132",
       "id": "endpoints_llm_config_rationale_132",
-      "community": 2,
+      "community": 1,
       "norm_label": "delete llm configuration for a provider (admin/designer only)."
     },
     {
@@ -1881,7 +1917,7 @@
       "source_file": "backend/app/api/endpoints/llm_config.py",
       "source_location": "L151",
       "id": "endpoints_llm_config_rationale_151",
-      "community": 2,
+      "community": 1,
       "norm_label": "delete all llm configurations for current user (admin/designer only)."
     },
     {
@@ -2295,7 +2331,7 @@
       "source_file": "backend/app/core/config.py",
       "source_location": "L57",
       "id": "core_config_rationale_57",
-      "community": 119,
+      "community": 120,
       "norm_label": "convert a raw cors_origins string to a list of origins."
     },
     {
@@ -2340,7 +2376,7 @@
       "source_file": "backend/app/core/encryption.py",
       "source_location": "L1",
       "id": "backend_app_core_encryption_py",
-      "community": 2,
+      "community": 1,
       "norm_label": "encryption.py"
     },
     {
@@ -2349,7 +2385,7 @@
       "source_file": "backend/app/core/encryption.py",
       "source_location": "L10",
       "id": "core_encryption_get_fernet",
-      "community": 2,
+      "community": 1,
       "norm_label": "_get_fernet()"
     },
     {
@@ -2358,17 +2394,17 @@
       "source_file": "backend/app/core/encryption.py",
       "source_location": "L24",
       "id": "core_encryption_encrypt_value",
-      "community": 2,
+      "community": 1,
       "norm_label": "encrypt_value()"
     },
     {
-      "label": "decrypt_value()",
+      "label": "process_sensitive_fields()",
       "file_type": "code",
       "source_file": "backend/app/core/encryption.py",
-      "source_location": "L39",
-      "id": "core_encryption_decrypt_value",
-      "community": 2,
-      "norm_label": "decrypt_value()"
+      "source_location": "L44",
+      "id": "core_encryption_process_sensitive_fields",
+      "community": 1,
+      "norm_label": "process_sensitive_fields()"
     },
     {
       "label": "Encryption utilities for sensitive data like API tokens.",
@@ -2376,7 +2412,7 @@
       "source_file": "backend/app/core/encryption.py",
       "source_location": "L1",
       "id": "core_encryption_rationale_1",
-      "community": 2,
+      "community": 1,
       "norm_label": "encryption utilities for sensitive data like api tokens."
     },
     {
@@ -2385,7 +2421,7 @@
       "source_file": "backend/app/core/encryption.py",
       "source_location": "L11",
       "id": "core_encryption_rationale_11",
-      "community": 2,
+      "community": 1,
       "norm_label": "get fernet instance with key derived from settings."
     },
     {
@@ -2394,17 +2430,17 @@
       "source_file": "backend/app/core/encryption.py",
       "source_location": "L25",
       "id": "core_encryption_rationale_25",
-      "community": 2,
+      "community": 1,
       "norm_label": "encrypt a string value.          args:         value: the string to encrypt"
     },
     {
-      "label": "Decrypt an encrypted string value.          Args:         encrypted_value: Th",
+      "label": "Recursively encrypt/decrypt sensitive fields in a JSON-compatible structure.",
       "file_type": "rationale",
       "source_file": "backend/app/core/encryption.py",
-      "source_location": "L40",
-      "id": "core_encryption_rationale_40",
-      "community": 2,
-      "norm_label": "decrypt an encrypted string value.          args:         encrypted_value: th"
+      "source_location": "L45",
+      "id": "core_encryption_rationale_45",
+      "community": 1,
+      "norm_label": "recursively encrypt/decrypt sensitive fields in a json-compatible structure."
     },
     {
       "label": "security.py",
@@ -2439,7 +2475,7 @@
       "source_file": "backend/app/core/security.py",
       "source_location": "L25",
       "id": "core_security_ensure_user_exists",
-      "community": 43,
+      "community": 44,
       "norm_label": "ensure_user_exists()"
     },
     {
@@ -2484,7 +2520,7 @@
       "source_file": "backend/app/core/security.py",
       "source_location": "L26",
       "id": "core_security_rationale_26",
-      "community": 43,
+      "community": 44,
       "norm_label": "ensure user exists in database, create if not"
     },
     {
@@ -2493,7 +2529,7 @@
       "source_file": "backend/app/core/__init__.py",
       "source_location": "L1",
       "id": "backend_app_core_init_py",
-      "community": 120,
+      "community": 121,
       "norm_label": "__init__.py"
     },
     {
@@ -2626,7 +2662,7 @@
       "label": "KnowledgeSpace",
       "file_type": "code",
       "source_file": "backend/app/models/models.py",
-      "source_location": "L182",
+      "source_location": "L183",
       "id": "models_models_knowledgespace",
       "community": 18,
       "norm_label": "knowledgespace"
@@ -2635,7 +2671,7 @@
       "label": "DiagramType",
       "file_type": "code",
       "source_file": "backend/app/models/models.py",
-      "source_location": "L195",
+      "source_location": "L196",
       "id": "models_models_diagramtype",
       "community": 18,
       "norm_label": "diagramtype"
@@ -2644,7 +2680,7 @@
       "label": "EditorTool",
       "file_type": "code",
       "source_file": "backend/app/models/models.py",
-      "source_location": "L209",
+      "source_location": "L210",
       "id": "models_models_editortool",
       "community": 18,
       "norm_label": "editortool"
@@ -2653,7 +2689,7 @@
       "label": "IntegrationFlow",
       "file_type": "code",
       "source_file": "backend/app/models/models.py",
-      "source_location": "L227",
+      "source_location": "L228",
       "id": "models_models_integrationflow",
       "community": 18,
       "norm_label": "integrationflow"
@@ -2662,7 +2698,7 @@
       "label": "IntegrationFlowExecution",
       "file_type": "code",
       "source_file": "backend/app/models/models.py",
-      "source_location": "L253",
+      "source_location": "L254",
       "id": "models_models_integrationflowexecution",
       "community": 18,
       "norm_label": "integrationflowexecution"
@@ -2673,7 +2709,7 @@
       "source_file": "backend/app/models/__init__.py",
       "source_location": "L1",
       "id": "backend_app_models_init_py",
-      "community": 121,
+      "community": 122,
       "norm_label": "__init__.py"
     },
     {
@@ -2758,6 +2794,69 @@
       "norm_label": "main()"
     },
     {
+      "label": "connection_schemas.py",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L1",
+      "id": "backend_app_schemas_connection_schemas_py",
+      "community": 0,
+      "norm_label": "connection_schemas.py"
+    },
+    {
+      "label": "SmtpConfig",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L4",
+      "id": "schemas_connection_schemas_smtpconfig",
+      "community": 0,
+      "norm_label": "smtpconfig"
+    },
+    {
+      "label": "BaseModel",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "basemodel",
+      "community": 0,
+      "norm_label": "basemodel"
+    },
+    {
+      "label": "DbConfig",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L12",
+      "id": "schemas_connection_schemas_dbconfig",
+      "community": 0,
+      "norm_label": "dbconfig"
+    },
+    {
+      "label": "FtpConfig",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L22",
+      "id": "schemas_connection_schemas_ftpconfig",
+      "community": 0,
+      "norm_label": "ftpconfig"
+    },
+    {
+      "label": "HttpConfig",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L32",
+      "id": "schemas_connection_schemas_httpconfig",
+      "community": 0,
+      "norm_label": "httpconfig"
+    },
+    {
+      "label": "JwtConfig",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L39",
+      "id": "schemas_connection_schemas_jwtconfig",
+      "community": 0,
+      "norm_label": "jwtconfig"
+    },
+    {
       "label": "schemas.py",
       "file_type": "code",
       "source_file": "backend/app/schemas/schemas.py",
@@ -2774,15 +2873,6 @@
       "id": "schemas_schemas_userbase",
       "community": 0,
       "norm_label": "userbase"
-    },
-    {
-      "label": "BaseModel",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "id": "basemodel",
-      "community": 0,
-      "norm_label": "basemodel"
     },
     {
       "label": "UserCreate",
@@ -3546,7 +3636,7 @@
       "source_file": "dashboard-app/vite.config.js",
       "source_location": "L1",
       "id": "dashboard_app_vite_config_js",
-      "community": 122,
+      "community": 123,
       "norm_label": "vite.config.js"
     },
     {
@@ -3555,7 +3645,7 @@
       "source_file": "dashboard-app/vite.config.js.timestamp-1777237994332-e74d0fea637b4.mjs",
       "source_location": "L1",
       "id": "dashboard_app_vite_config_js_timestamp_1777237994332_e74d0fea637b4_mjs",
-      "community": 123,
+      "community": 124,
       "norm_label": "vite.config.js.timestamp-1777237994332-e74d0fea637b4.mjs"
     },
     {
@@ -4095,7 +4185,7 @@
       "source_file": "dashboard-app/src/components/common/ConfirmModal.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_common_confirmmodal_vue",
-      "community": 124,
+      "community": 125,
       "norm_label": "confirmmodal.vue"
     },
     {
@@ -4104,7 +4194,7 @@
       "source_file": "dashboard-app/src/components/common/DashboardCard.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_common_dashboardcard_vue",
-      "community": 125,
+      "community": 126,
       "norm_label": "dashboardcard.vue"
     },
     {
@@ -4113,7 +4203,7 @@
       "source_file": "dashboard-app/src/components/common/KpiCard.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_common_kpicard_vue",
-      "community": 126,
+      "community": 127,
       "norm_label": "kpicard.vue"
     },
     {
@@ -4122,7 +4212,7 @@
       "source_file": "dashboard-app/src/components/common/MIcon.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_common_micon_vue",
-      "community": 96,
+      "community": 97,
       "norm_label": "micon.vue"
     },
     {
@@ -4131,7 +4221,7 @@
       "source_file": "dashboard-app/src/components/common/MIcon.vue",
       "source_location": "L13",
       "id": "common_micon_props",
-      "community": 96,
+      "community": 97,
       "norm_label": "props"
     },
     {
@@ -4140,7 +4230,7 @@
       "source_file": "dashboard-app/src/components/common/MIcon.vue",
       "source_location": "L25",
       "id": "common_micon_varstyle",
-      "community": 96,
+      "community": 97,
       "norm_label": "varstyle"
     },
     {
@@ -4149,7 +4239,7 @@
       "source_file": "dashboard-app/src/components/common/PageHeader.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_common_pageheader_vue",
-      "community": 127,
+      "community": 128,
       "norm_label": "pageheader.vue"
     },
     {
@@ -4203,7 +4293,7 @@
       "source_file": "dashboard-app/src/components/common/QuickActionCard.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_common_quickactioncard_vue",
-      "community": 128,
+      "community": 129,
       "norm_label": "quickactioncard.vue"
     },
     {
@@ -4401,7 +4491,7 @@
       "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue",
       "source_location": "L715",
       "id": "dashboard_chartconfigmodal_buildaiprompt",
-      "community": 89,
+      "community": 90,
       "norm_label": "buildaiprompt()"
     },
     {
@@ -4410,7 +4500,7 @@
       "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue",
       "source_location": "L741",
       "id": "dashboard_chartconfigmodal_generatewithai",
-      "community": 89,
+      "community": 90,
       "norm_label": "generatewithai()"
     },
     {
@@ -4419,7 +4509,7 @@
       "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue",
       "source_location": "L780",
       "id": "dashboard_chartconfigmodal_applyairesult",
-      "community": 106,
+      "community": 108,
       "norm_label": "applyairesult()"
     },
     {
@@ -4428,7 +4518,7 @@
       "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue",
       "source_location": "L798",
       "id": "dashboard_chartconfigmodal_deepmerge",
-      "community": 106,
+      "community": 108,
       "norm_label": "deepmerge()"
     },
     {
@@ -4554,7 +4644,7 @@
       "source_file": "dashboard-app/src/components/dashboard/ChartLayoutModal.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dashboard_chartlayoutmodal_vue",
-      "community": 129,
+      "community": 130,
       "norm_label": "chartlayoutmodal.vue"
     },
     {
@@ -4626,7 +4716,7 @@
       "source_file": "dashboard-app/src/components/dashboard/DashboardWidget.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dashboard_dashboardwidget_vue",
-      "community": 130,
+      "community": 131,
       "norm_label": "dashboardwidget.vue"
     },
     {
@@ -4635,7 +4725,7 @@
       "source_file": "dashboard-app/src/components/dashboard/DesignerCard.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dashboard_designercard_vue",
-      "community": 131,
+      "community": 132,
       "norm_label": "designercard.vue"
     },
     {
@@ -4644,7 +4734,7 @@
       "source_file": "dashboard-app/src/components/dimensional-model/AddNodeToDiagramModal.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dimensional_model_addnodetodiagrammodal_vue",
-      "community": 132,
+      "community": 133,
       "norm_label": "addnodetodiagrammodal.vue"
     },
     {
@@ -4653,7 +4743,7 @@
       "source_file": "dashboard-app/src/components/dimensional-model/DiagramPropsPanel.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dimensional_model_diagrampropspanel_vue",
-      "community": 133,
+      "community": 134,
       "norm_label": "diagrampropspanel.vue"
     },
     {
@@ -4662,7 +4752,7 @@
       "source_file": "dashboard-app/src/components/dimensional-model/DiagramTabBar.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dimensional_model_diagramtabbar_vue",
-      "community": 134,
+      "community": 135,
       "norm_label": "diagramtabbar.vue"
     },
     {
@@ -4671,7 +4761,7 @@
       "source_file": "dashboard-app/src/components/dimensional-model/ModelCard.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_dimensional_model_modelcard_vue",
-      "community": 135,
+      "community": 136,
       "norm_label": "modelcard.vue"
     },
     {
@@ -4887,7 +4977,7 @@
       "source_file": "dashboard-app/src/components/editor/ExecutionConsole.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_editor_executionconsole_vue",
-      "community": 136,
+      "community": 137,
       "norm_label": "executionconsole.vue"
     },
     {
@@ -5022,7 +5112,7 @@
       "source_file": "dashboard-app/src/components/editor/PropDefsTable.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_editor_propdefstable_vue",
-      "community": 108,
+      "community": 109,
       "norm_label": "propdefstable.vue"
     },
     {
@@ -5031,7 +5121,7 @@
       "source_file": "dashboard-app/src/components/editor/PropDefsTable.vue",
       "source_location": "L219",
       "id": "editor_propdefstable_newitem",
-      "community": 108,
+      "community": 109,
       "norm_label": "newitem"
     },
     {
@@ -5040,7 +5130,7 @@
       "source_file": "dashboard-app/src/components/layout/AppLayout.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_layout_applayout_vue",
-      "community": 109,
+      "community": 110,
       "norm_label": "applayout.vue"
     },
     {
@@ -5049,7 +5139,7 @@
       "source_file": "dashboard-app/src/components/layout/SideMenu.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_layout_sidemenu_vue",
-      "community": 137,
+      "community": 138,
       "norm_label": "sidemenu.vue"
     },
     {
@@ -5058,7 +5148,7 @@
       "source_file": "dashboard-app/src/components/layout/TopBar.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_components_layout_topbar_vue",
-      "community": 109,
+      "community": 110,
       "norm_label": "topbar.vue"
     },
     {
@@ -5139,7 +5229,7 @@
       "source_file": "dashboard-app/src/composables/useLlmCall.js",
       "source_location": "L1",
       "id": "dashboard_app_src_composables_usellmcall_js",
-      "community": 89,
+      "community": 90,
       "norm_label": "usellmcall.js"
     },
     {
@@ -5148,7 +5238,7 @@
       "source_file": "dashboard-app/src/composables/useLlmCall.js",
       "source_location": "L13",
       "id": "composables_usellmcall_callllm",
-      "community": 89,
+      "community": 90,
       "norm_label": "callllm()"
     },
     {
@@ -5193,7 +5283,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L1",
       "id": "dashboard_app_src_services_api_js",
-      "community": 23,
+      "community": 24,
       "norm_label": "api.js"
     },
     {
@@ -5202,7 +5292,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L10",
       "id": "services_api_apierror",
-      "community": 23,
+      "community": 24,
       "norm_label": "apierror"
     },
     {
@@ -5211,7 +5301,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L11",
       "id": "services_api_apierror_constructor",
-      "community": 23,
+      "community": 24,
       "norm_label": ".constructor()"
     },
     {
@@ -5220,7 +5310,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L18",
       "id": "services_api_getauthheaders",
-      "community": 23,
+      "community": 24,
       "norm_label": "getauthheaders()"
     },
     {
@@ -5229,7 +5319,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L45",
       "id": "services_api_apirequest",
-      "community": 23,
+      "community": 24,
       "norm_label": "apirequest()"
     },
     {
@@ -5238,7 +5328,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L80",
       "id": "services_api_cubeconfigapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "cubeconfigapi"
     },
     {
@@ -5247,7 +5337,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L121",
       "id": "services_api_llmconfigapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "llmconfigapi"
     },
     {
@@ -5256,7 +5346,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L151",
       "id": "services_api_paletteapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "paletteapi"
     },
     {
@@ -5265,7 +5355,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L188",
       "id": "services_api_dashboardapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "dashboardapi"
     },
     {
@@ -5274,7 +5364,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L260",
       "id": "services_api_dimensionalmodelapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "dimensionalmodelapi"
     },
     {
@@ -5283,7 +5373,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L297",
       "id": "services_api_currenciesapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "currenciesapi"
     },
     {
@@ -5292,7 +5382,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L304",
       "id": "services_api_datasourcesapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "datasourcesapi"
     },
     {
@@ -5301,7 +5391,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L349",
       "id": "services_api_knowledgespacesapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "knowledgespacesapi"
     },
     {
@@ -5310,7 +5400,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L388",
       "id": "services_api_diagramtypesapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "diagramtypesapi"
     },
     {
@@ -5319,7 +5409,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L397",
       "id": "services_api_editortoolsapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "editortoolsapi"
     },
     {
@@ -5328,7 +5418,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L410",
       "id": "services_api_integrationflowsapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "integrationflowsapi"
     },
     {
@@ -5337,7 +5427,7 @@
       "source_file": "dashboard-app/src/services/api.js",
       "source_location": "L423",
       "id": "services_api_usersapi",
-      "community": 23,
+      "community": 24,
       "norm_label": "usersapi"
     },
     {
@@ -5409,7 +5499,7 @@
       "source_file": "dashboard-app/src/stores/colorPalettes.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_colorpalettes_js",
-      "community": 90,
+      "community": 91,
       "norm_label": "colorpalettes.js"
     },
     {
@@ -5418,7 +5508,7 @@
       "source_file": "dashboard-app/src/stores/colorPalettes.js",
       "source_location": "L4",
       "id": "stores_colorpalettes_built_in_palettes",
-      "community": 90,
+      "community": 91,
       "norm_label": "built_in_palettes"
     },
     {
@@ -5427,7 +5517,7 @@
       "source_file": "dashboard-app/src/stores/colorPalettes.js",
       "source_location": "L47",
       "id": "stores_colorpalettes_usecolorpalettestore",
-      "community": 90,
+      "community": 91,
       "norm_label": "usecolorpalettestore"
     },
     {
@@ -5436,7 +5526,7 @@
       "source_file": "dashboard-app/src/stores/colorPalettes.js",
       "source_location": "L161",
       "id": "stores_colorpalettes_getpalettecolors",
-      "community": 90,
+      "community": 91,
       "norm_label": "getpalettecolors()"
     },
     {
@@ -5481,7 +5571,7 @@
       "source_file": "dashboard-app/src/stores/currencies.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_currencies_js",
-      "community": 110,
+      "community": 111,
       "norm_label": "currencies.js"
     },
     {
@@ -5490,7 +5580,7 @@
       "source_file": "dashboard-app/src/stores/currencies.js",
       "source_location": "L4",
       "id": "stores_currencies_usecurrencystore",
-      "community": 110,
+      "community": 111,
       "norm_label": "usecurrencystore"
     },
     {
@@ -5499,7 +5589,7 @@
       "source_file": "dashboard-app/src/stores/dashboard.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_dashboard_js",
-      "community": 111,
+      "community": 112,
       "norm_label": "dashboard.js"
     },
     {
@@ -5508,7 +5598,7 @@
       "source_file": "dashboard-app/src/stores/dashboard.js",
       "source_location": "L4",
       "id": "stores_dashboard_usedashboardstore",
-      "community": 111,
+      "community": 112,
       "norm_label": "usedashboardstore"
     },
     {
@@ -5517,7 +5607,7 @@
       "source_file": "dashboard-app/src/stores/dataSources.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_datasources_js",
-      "community": 112,
+      "community": 113,
       "norm_label": "datasources.js"
     },
     {
@@ -5526,7 +5616,7 @@
       "source_file": "dashboard-app/src/stores/dataSources.js",
       "source_location": "L4",
       "id": "stores_datasources_usedatasourcesstore",
-      "community": 112,
+      "community": 113,
       "norm_label": "usedatasourcesstore"
     },
     {
@@ -5598,7 +5688,7 @@
       "source_file": "dashboard-app/src/stores/dimensionalModel.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_dimensionalmodel_js",
-      "community": 97,
+      "community": 98,
       "norm_label": "dimensionalmodel.js"
     },
     {
@@ -5607,7 +5697,7 @@
       "source_file": "dashboard-app/src/stores/dimensionalModel.js",
       "source_location": "L4",
       "id": "stores_dimensionalmodel_generateid",
-      "community": 97,
+      "community": 98,
       "norm_label": "generateid()"
     },
     {
@@ -5616,7 +5706,7 @@
       "source_file": "dashboard-app/src/stores/dimensionalModel.js",
       "source_location": "L8",
       "id": "stores_dimensionalmodel_usedimensionalmodelstore",
-      "community": 97,
+      "community": 98,
       "norm_label": "usedimensionalmodelstore"
     },
     {
@@ -5625,7 +5715,7 @@
       "source_file": "dashboard-app/src/stores/integrations.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_integrations_js",
-      "community": 113,
+      "community": 114,
       "norm_label": "integrations.js"
     },
     {
@@ -5634,7 +5724,7 @@
       "source_file": "dashboard-app/src/stores/integrations.js",
       "source_location": "L4",
       "id": "stores_integrations_useintegrationsstore",
-      "community": 113,
+      "community": 114,
       "norm_label": "useintegrationsstore"
     },
     {
@@ -5643,7 +5733,7 @@
       "source_file": "dashboard-app/src/stores/knowledgeSpaces.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_knowledgespaces_js",
-      "community": 114,
+      "community": 115,
       "norm_label": "knowledgespaces.js"
     },
     {
@@ -5652,7 +5742,7 @@
       "source_file": "dashboard-app/src/stores/knowledgeSpaces.js",
       "source_location": "L4",
       "id": "stores_knowledgespaces_useknowledgespacesstore",
-      "community": 114,
+      "community": 115,
       "norm_label": "useknowledgespacesstore"
     },
     {
@@ -5733,7 +5823,7 @@
       "source_file": "dashboard-app/src/stores/toolCatalog.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_toolcatalog_js",
-      "community": 98,
+      "community": 99,
       "norm_label": "toolcatalog.js"
     },
     {
@@ -5742,7 +5832,7 @@
       "source_file": "dashboard-app/src/stores/toolCatalog.js",
       "source_location": "L5",
       "id": "stores_toolcatalog_cat_meta",
-      "community": 98,
+      "community": 99,
       "norm_label": "cat_meta"
     },
     {
@@ -5751,7 +5841,7 @@
       "source_file": "dashboard-app/src/stores/toolCatalog.js",
       "source_location": "L14",
       "id": "stores_toolcatalog_usetoolcatalogstore",
-      "community": 98,
+      "community": 99,
       "norm_label": "usetoolcatalogstore"
     },
     {
@@ -5760,7 +5850,7 @@
       "source_file": "dashboard-app/src/stores/ui.js",
       "source_location": "L1",
       "id": "dashboard_app_src_stores_ui_js",
-      "community": 115,
+      "community": 116,
       "norm_label": "ui.js"
     },
     {
@@ -5769,7 +5859,7 @@
       "source_file": "dashboard-app/src/stores/ui.js",
       "source_location": "L3",
       "id": "stores_ui_useuistore",
-      "community": 115,
+      "community": 116,
       "norm_label": "useuistore"
     },
     {
@@ -6012,7 +6102,7 @@
       "source_file": "dashboard-app/src/views/DashboardViewerView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_dashboardviewerview_vue",
-      "community": 138,
+      "community": 139,
       "norm_label": "dashboardviewerview.vue"
     },
     {
@@ -6066,7 +6156,7 @@
       "source_file": "dashboard-app/src/views/DiagramTypesView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_diagramtypesview_vue",
-      "community": 139,
+      "community": 140,
       "norm_label": "diagramtypesview.vue"
     },
     {
@@ -6282,7 +6372,7 @@
       "source_file": "dashboard-app/src/views/DimensionalModelListView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_dimensionalmodellistview_vue",
-      "community": 91,
+      "community": 92,
       "norm_label": "dimensionalmodellistview.vue"
     },
     {
@@ -6291,7 +6381,7 @@
       "source_file": "dashboard-app/src/views/DimensionalModelListView.vue",
       "source_location": "L355",
       "id": "views_dimensionalmodellistview_doc",
-      "community": 91,
+      "community": 92,
       "norm_label": "doc"
     },
     {
@@ -6300,7 +6390,7 @@
       "source_file": "dashboard-app/src/views/DimensionalModelListView.vue",
       "source_location": "L359",
       "id": "views_dimensionalmodellistview_newmodel",
-      "community": 91,
+      "community": 92,
       "norm_label": "newmodel"
     },
     {
@@ -6309,7 +6399,7 @@
       "source_file": "dashboard-app/src/views/DimensionalModelListView.vue",
       "source_location": "L365",
       "id": "views_dimensionalmodellistview_m",
-      "community": 91,
+      "community": 92,
       "norm_label": "m"
     },
     {
@@ -6372,7 +6462,7 @@
       "source_file": "dashboard-app/src/views/HomeView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_homeview_vue",
-      "community": 140,
+      "community": 141,
       "norm_label": "homeview.vue"
     },
     {
@@ -6381,7 +6471,7 @@
       "source_file": "dashboard-app/src/views/IntegrationsView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_integrationsview_vue",
-      "community": 116,
+      "community": 117,
       "norm_label": "integrationsview.vue"
     },
     {
@@ -6390,7 +6480,7 @@
       "source_file": "dashboard-app/src/views/IntegrationsView.vue",
       "source_location": "L479",
       "id": "views_integrationsview_togglepause",
-      "community": 116,
+      "community": 117,
       "norm_label": "togglepause()"
     },
     {
@@ -6399,7 +6489,7 @@
       "source_file": "dashboard-app/src/views/KnowledgeSpacesView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_knowledgespacesview_vue",
-      "community": 141,
+      "community": 142,
       "norm_label": "knowledgespacesview.vue"
     },
     {
@@ -6408,7 +6498,7 @@
       "source_file": "dashboard-app/src/views/LoginView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_loginview_vue",
-      "community": 142,
+      "community": 143,
       "norm_label": "loginview.vue"
     },
     {
@@ -6723,7 +6813,7 @@
       "source_file": "dashboard-app/src/views/ToolCatalogView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_toolcatalogview_vue",
-      "community": 143,
+      "community": 144,
       "norm_label": "toolcatalogview.vue"
     },
     {
@@ -6732,7 +6822,7 @@
       "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue",
       "source_location": "L1",
       "id": "dashboard_app_src_views_visualizationconfiguratorview_vue",
-      "community": 144,
+      "community": 145,
       "norm_label": "visualizationconfiguratorview.vue"
     },
     {
@@ -6741,7 +6831,7 @@
       "source_file": "environment/cube-data/Concesionarias.js",
       "source_location": "L1",
       "id": "environment_cube_data_concesionarias_js",
-      "community": 145,
+      "community": 146,
       "norm_label": "concesionarias.js"
     },
     {
@@ -6822,7 +6912,7 @@
       "source_file": "environment/cube-data/Date.js",
       "source_location": "L1",
       "id": "environment_cube_data_date_js",
-      "community": 146,
+      "community": 147,
       "norm_label": "date.js"
     },
     {
@@ -6831,7 +6921,7 @@
       "source_file": "environment/cube-data/Orders.js",
       "source_location": "L1",
       "id": "environment_cube_data_orders_js",
-      "community": 147,
+      "community": 148,
       "norm_label": "orders.js"
     },
     {
@@ -6840,7 +6930,7 @@
       "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_asignaciontareas_js",
-      "community": 148,
+      "community": 149,
       "norm_label": "asignaciontareas.js"
     },
     {
@@ -6849,7 +6939,7 @@
       "source_file": "environment/cube-data/model/cubes/Colaborador.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_colaborador_js",
-      "community": 149,
+      "community": 150,
       "norm_label": "colaborador.js"
     },
     {
@@ -6858,7 +6948,7 @@
       "source_file": "environment/cube-data/model/cubes/concesionarias.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_concesionarias_js",
-      "community": 150,
+      "community": 151,
       "norm_label": "concesionarias.js"
     },
     {
@@ -6867,7 +6957,7 @@
       "source_file": "environment/cube-data/model/cubes/dim_tiempo.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_dim_tiempo_js",
-      "community": 151,
+      "community": 152,
       "norm_label": "dim_tiempo.js"
     },
     {
@@ -6876,7 +6966,7 @@
       "source_file": "environment/cube-data/model/cubes/Horasreportadas.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_horasreportadas_js",
-      "community": 152,
+      "community": 153,
       "norm_label": "horasreportadas.js"
     },
     {
@@ -6885,7 +6975,7 @@
       "source_file": "environment/cube-data/model/cubes/orders.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_orders_js",
-      "community": 153,
+      "community": 154,
       "norm_label": "orders.js"
     },
     {
@@ -6894,7 +6984,7 @@
       "source_file": "environment/cube-data/model/cubes/Producto.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_producto_js",
-      "community": 154,
+      "community": 155,
       "norm_label": "producto.js"
     },
     {
@@ -6903,7 +6993,7 @@
       "source_file": "environment/cube-data/model/cubes/Proyecto.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_proyecto_js",
-      "community": 155,
+      "community": 156,
       "norm_label": "proyecto.js"
     },
     {
@@ -6912,7 +7002,7 @@
       "source_file": "environment/cube-data/model/cubes/Tarea.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_tarea_js",
-      "community": 156,
+      "community": 157,
       "norm_label": "tarea.js"
     },
     {
@@ -6921,7 +7011,7 @@
       "source_file": "environment/cube-data/model/cubes/Tiempo.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_tiempo_js",
-      "community": 157,
+      "community": 158,
       "norm_label": "tiempo.js"
     },
     {
@@ -6930,7 +7020,7 @@
       "source_file": "environment/cube-data/model/cubes/Userstory.js",
       "source_location": "L1",
       "id": "environment_cube_data_model_cubes_userstory_js",
-      "community": 158,
+      "community": 159,
       "norm_label": "userstory.js"
     },
     {
@@ -7038,7 +7128,7 @@
       "source_file": "README.md",
       "source_location": "L1",
       "id": "readme_md",
-      "community": 99,
+      "community": 100,
       "norm_label": "readme.md"
     },
     {
@@ -7047,7 +7137,7 @@
       "source_file": "README.md",
       "source_location": "L2",
       "id": "dashboardstudio_readme_iniciar",
-      "community": 99,
+      "community": 100,
       "norm_label": "iniciar"
     },
     {
@@ -7056,7 +7146,7 @@
       "source_file": "README.md",
       "source_location": "L4",
       "id": "dashboardstudio_readme_codeblock_1",
-      "community": 99,
+      "community": 100,
       "norm_label": "code:block1 (npm run dev   # \u2192 http://localhost:3000)"
     },
     {
@@ -7209,7 +7299,7 @@
       "source_file": "chart/README.md",
       "source_location": "L1",
       "id": "chart_readme_md",
-      "community": 100,
+      "community": 101,
       "norm_label": "readme.md"
     },
     {
@@ -7218,7 +7308,7 @@
       "source_file": "chart/README.md",
       "source_location": "L1",
       "id": "chart_readme_codeblock_1",
-      "community": 100,
+      "community": 101,
       "norm_label": "code:block1 (export username=)"
     },
     {
@@ -7227,7 +7317,7 @@
       "source_file": "chart/README.md",
       "source_location": "L7",
       "id": "chart_readme_codeblock_2",
-      "community": 100,
+      "community": 101,
       "norm_label": "code:block2 (kubectl create secret generic git-creds --from-literal=usern)"
     },
     {
@@ -7713,7 +7803,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L1",
       "id": "dashboard_app_docs_hr_dimensional_model_md",
-      "community": 44,
+      "community": 43,
       "norm_label": "hr_dimensional_model.md"
     },
     {
@@ -7722,7 +7812,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L1",
       "id": "docs_hr_dimensional_model_modelo_dimensional_recursos_humanos_hr",
-      "community": 44,
+      "community": 43,
       "norm_label": "modelo dimensional: recursos humanos (hr)"
     },
     {
@@ -7731,7 +7821,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L5",
       "id": "docs_hr_dimensional_model_contexto_del_modelo",
-      "community": 44,
+      "community": 43,
       "norm_label": "contexto del modelo"
     },
     {
@@ -7740,7 +7830,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L11",
       "id": "docs_hr_dimensional_model_dimensiones_dimensions",
-      "community": 44,
+      "community": 43,
       "norm_label": "\ud83d\udcc5 dimensiones (dimensions)"
     },
     {
@@ -7749,7 +7839,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L15",
       "id": "docs_hr_dimensional_model_1_dim_empleado",
-      "community": 44,
+      "community": 43,
       "norm_label": "1. `dim_empleado`"
     },
     {
@@ -7758,7 +7848,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L25",
       "id": "docs_hr_dimensional_model_2_dim_departamento",
-      "community": 44,
+      "community": 43,
       "norm_label": "2. `dim_departamento`"
     },
     {
@@ -7767,7 +7857,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L32",
       "id": "docs_hr_dimensional_model_3_dim_rol",
-      "community": 44,
+      "community": 43,
       "norm_label": "3. `dim_rol`"
     },
     {
@@ -7776,7 +7866,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L39",
       "id": "docs_hr_dimensional_model_4_dim_tiempo",
-      "community": 44,
+      "community": 43,
       "norm_label": "4. `dim_tiempo`"
     },
     {
@@ -7785,7 +7875,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L50",
       "id": "docs_hr_dimensional_model_tablas_de_hechos_facts",
-      "community": 44,
+      "community": 43,
       "norm_label": "\ud83d\udcca tablas de hechos (facts)"
     },
     {
@@ -7794,7 +7884,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L54",
       "id": "docs_hr_dimensional_model_1_fact_headcount_mensual_snapshot_mensual",
-      "community": 44,
+      "community": 43,
       "norm_label": "1. `fact_headcount_mensual` (snapshot mensual)"
     },
     {
@@ -7803,7 +7893,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L66",
       "id": "docs_hr_dimensional_model_2_fact_ausentismo",
-      "community": 44,
+      "community": 43,
       "norm_label": "2. `fact_ausentismo`"
     },
     {
@@ -7812,7 +7902,7 @@
       "source_file": "dashboard-app/docs/hr_dimensional_model.md",
       "source_location": "L77",
       "id": "docs_hr_dimensional_model_3_fact_reclutamiento",
-      "community": 44,
+      "community": 43,
       "norm_label": "3. `fact_reclutamiento`"
     },
     {
@@ -8127,7 +8217,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L1",
       "id": "dashboard_app_docs_widget_doc_md",
-      "community": 70,
+      "community": 67,
       "norm_label": "widget_doc.md"
     },
     {
@@ -8136,7 +8226,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L1",
       "id": "docs_widget_doc_documentaci_n_t_cnica_de_widgets_dashboard_studio",
-      "community": 70,
+      "community": 67,
       "norm_label": "documentacion tecnica de widgets \u2014 dashboard studio"
     },
     {
@@ -8145,7 +8235,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L8",
       "id": "docs_widget_doc_ndice",
-      "community": 70,
+      "community": 67,
       "norm_label": "indice"
     },
     {
@@ -8307,7 +8397,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L202",
       "id": "docs_widget_doc_4_widget_l_neas_line",
-      "community": 67,
+      "community": 70,
       "norm_label": "4. widget: lineas \u2014 `line`"
     },
     {
@@ -8316,7 +8406,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L208",
       "id": "docs_widget_doc_fuente_de_datos_208",
-      "community": 67,
+      "community": 70,
       "norm_label": "fuente de datos"
     },
     {
@@ -8325,7 +8415,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L217",
       "id": "docs_widget_doc_comportamiento_predeterminado_217",
-      "community": 67,
+      "community": 70,
       "norm_label": "comportamiento predeterminado"
     },
     {
@@ -8334,7 +8424,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L224",
       "id": "docs_widget_doc_par_metros_configurables_224",
-      "community": 67,
+      "community": 70,
       "norm_label": "parametros configurables"
     },
     {
@@ -8343,7 +8433,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L234",
       "id": "docs_widget_doc_para_eliminar_el_rea_rellena",
-      "community": 67,
+      "community": 70,
       "norm_label": "para eliminar el area rellena"
     },
     {
@@ -8352,7 +8442,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L236",
       "id": "docs_widget_doc_codeblock_5",
-      "community": 67,
+      "community": 70,
       "norm_label": "code:json ({ \"series\": [{ \"areastyle\": null }] })"
     },
     {
@@ -8361,7 +8451,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L242",
       "id": "docs_widget_doc_5_widget_pastel_donut_pie",
-      "community": 65,
+      "community": 64,
       "norm_label": "5. widget: pastel / donut \u2014 `pie`"
     },
     {
@@ -8370,7 +8460,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L248",
       "id": "docs_widget_doc_fuente_de_datos_248",
-      "community": 65,
+      "community": 64,
       "norm_label": "fuente de datos"
     },
     {
@@ -8379,7 +8469,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L257",
       "id": "docs_widget_doc_opciones_espec_ficas_pieoptions",
-      "community": 65,
+      "community": 64,
       "norm_label": "opciones especificas \u2014 `pieoptions`"
     },
     {
@@ -8388,7 +8478,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L261",
       "id": "docs_widget_doc_codeblock_6",
-      "community": 65,
+      "community": 64,
       "norm_label": "code:json ({)"
     },
     {
@@ -8397,7 +8487,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L277",
       "id": "docs_widget_doc_comportamiento_predeterminado_277",
-      "community": 65,
+      "community": 64,
       "norm_label": "comportamiento predeterminado"
     },
     {
@@ -8406,7 +8496,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L284",
       "id": "docs_widget_doc_ejemplo_con_total_al_centro",
-      "community": 65,
+      "community": 64,
       "norm_label": "ejemplo con total al centro"
     },
     {
@@ -8415,7 +8505,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L286",
       "id": "docs_widget_doc_codeblock_7",
-      "community": 65,
+      "community": 64,
       "norm_label": "code:json ({)"
     },
     {
@@ -8424,7 +8514,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L300",
       "id": "docs_widget_doc_6_widget_gauge_gauge",
-      "community": 78,
+      "community": 76,
       "norm_label": "6. widget: gauge \u2014 `gauge`"
     },
     {
@@ -8433,7 +8523,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L306",
       "id": "docs_widget_doc_fuente_de_datos_306",
-      "community": 78,
+      "community": 76,
       "norm_label": "fuente de datos"
     },
     {
@@ -8442,7 +8532,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L315",
       "id": "docs_widget_doc_comportamiento_predeterminado_315",
-      "community": 78,
+      "community": 76,
       "norm_label": "comportamiento predeterminado"
     },
     {
@@ -8451,7 +8541,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L325",
       "id": "docs_widget_doc_personalizaci_n_avanzada",
-      "community": 78,
+      "community": 76,
       "norm_label": "personalizacion avanzada"
     },
     {
@@ -8460,7 +8550,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L329",
       "id": "docs_widget_doc_codeblock_8",
-      "community": 78,
+      "community": 76,
       "norm_label": "code:json ({)"
     },
     {
@@ -8469,7 +8559,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L346",
       "id": "docs_widget_doc_7_widget_radar_radar",
-      "community": 75,
+      "community": 78,
       "norm_label": "7. widget: radar \u2014 `radar`"
     },
     {
@@ -8478,7 +8568,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L352",
       "id": "docs_widget_doc_fuente_de_datos_352",
-      "community": 75,
+      "community": 78,
       "norm_label": "fuente de datos"
     },
     {
@@ -8487,7 +8577,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L361",
       "id": "docs_widget_doc_comportamiento_predeterminado_361",
-      "community": 75,
+      "community": 78,
       "norm_label": "comportamiento predeterminado"
     },
     {
@@ -8496,7 +8586,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L369",
       "id": "docs_widget_doc_personalizaci_n_avanzada_369",
-      "community": 75,
+      "community": 78,
       "norm_label": "personalizacion avanzada"
     },
     {
@@ -8505,7 +8595,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L373",
       "id": "docs_widget_doc_codeblock_9",
-      "community": 75,
+      "community": 78,
       "norm_label": "code:json ({)"
     },
     {
@@ -8514,7 +8604,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L389",
       "id": "docs_widget_doc_8_widget_combinado_combined",
-      "community": 64,
+      "community": 65,
       "norm_label": "8. widget: combinado \u2014 `combined`"
     },
     {
@@ -8523,7 +8613,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L395",
       "id": "docs_widget_doc_fuente_de_datos_395",
-      "community": 64,
+      "community": 65,
       "norm_label": "fuente de datos"
     },
     {
@@ -8532,7 +8622,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L405",
       "id": "docs_widget_doc_opciones_espec_ficas_combinedoptions",
-      "community": 64,
+      "community": 65,
       "norm_label": "opciones especificas \u2014 `combinedoptions`"
     },
     {
@@ -8541,7 +8631,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L409",
       "id": "docs_widget_doc_codeblock_10",
-      "community": 64,
+      "community": 65,
       "norm_label": "code:json ({)"
     },
     {
@@ -8550,7 +8640,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L421",
       "id": "docs_widget_doc_par_metros_de_medidas_aplicables",
-      "community": 64,
+      "community": 65,
       "norm_label": "parametros de medidas aplicables"
     },
     {
@@ -8559,7 +8649,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L430",
       "id": "docs_widget_doc_ejemplo_unidades_vendidas_vs_ingresos",
-      "community": 64,
+      "community": 65,
       "norm_label": "ejemplo: unidades vendidas vs. ingresos"
     },
     {
@@ -8568,7 +8658,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L432",
       "id": "docs_widget_doc_codeblock_11",
-      "community": 64,
+      "community": 65,
       "norm_label": "code:json ({)"
     },
     {
@@ -8577,7 +8667,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L449",
       "id": "docs_widget_doc_9_widget_tabla_table",
-      "community": 76,
+      "community": 75,
       "norm_label": "9. widget: tabla \u2014 `table`"
     },
     {
@@ -8586,7 +8676,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L455",
       "id": "docs_widget_doc_fuente_de_datos_455",
-      "community": 76,
+      "community": 75,
       "norm_label": "fuente de datos"
     },
     {
@@ -8595,7 +8685,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L461",
       "id": "docs_widget_doc_construcci_n_de_columnas",
-      "community": 76,
+      "community": 75,
       "norm_label": "construccion de columnas"
     },
     {
@@ -8604,7 +8694,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L470",
       "id": "docs_widget_doc_funciones_interactivas",
-      "community": 76,
+      "community": 75,
       "norm_label": "funciones interactivas"
     },
     {
@@ -8613,7 +8703,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L478",
       "id": "docs_widget_doc_par_metros_configurables_478",
-      "community": 76,
+      "community": 75,
       "norm_label": "parametros configurables"
     },
     {
@@ -8802,7 +8892,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L656",
       "id": "docs_widget_doc_12_paletas_de_colores",
-      "community": 70,
+      "community": 67,
       "norm_label": "12. paletas de colores"
     },
     {
@@ -8811,7 +8901,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L660",
       "id": "docs_widget_doc_codeblock_21",
-      "community": 70,
+      "community": 67,
       "norm_label": "code:block21 (widget.colorpalette  \u2192  dashboardpalette  \u2192  palettestore.de)"
     },
     {
@@ -8820,7 +8910,7 @@
       "source_file": "dashboard-app/docs/widget_doc.md",
       "source_location": "L677",
       "id": "docs_widget_doc_13_datos_de_demostraci_n_usemockdata",
-      "community": 70,
+      "community": 67,
       "norm_label": "13. datos de demostracion (`usemockdata`)"
     },
     {
@@ -10503,7 +10593,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L1",
       "id": "dashboard_app_docs_features_dimensional_models_md",
-      "community": 1,
+      "community": 2,
       "norm_label": "dimensional-models.md"
     },
     {
@@ -10512,7 +10602,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L1",
       "id": "features_dimensional_models_feature_modelos_dimensionales",
-      "community": 1,
+      "community": 2,
       "norm_label": "feature: modelos dimensionales"
     },
     {
@@ -10521,7 +10611,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L3",
       "id": "features_dimensional_models_descripci_n_general",
-      "community": 1,
+      "community": 2,
       "norm_label": "descripcion general"
     },
     {
@@ -10530,7 +10620,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L7",
       "id": "features_dimensional_models_vistas_involucradas",
-      "community": 1,
+      "community": 2,
       "norm_label": "vistas involucradas"
     },
     {
@@ -10539,7 +10629,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L17",
       "id": "features_dimensional_models_lista_de_modelos_models",
-      "community": 1,
+      "community": 2,
       "norm_label": "lista de modelos (`/models`)"
     },
     {
@@ -10548,7 +10638,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L19",
       "id": "features_dimensional_models_modelo_global",
-      "community": 1,
+      "community": 2,
       "norm_label": "modelo global"
     },
     {
@@ -10557,7 +10647,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L27",
       "id": "features_dimensional_models_tarjeta_de_modelo",
-      "community": 1,
+      "community": 2,
       "norm_label": "tarjeta de modelo"
     },
     {
@@ -10566,7 +10656,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L35",
       "id": "features_dimensional_models_edici_n_inline",
-      "community": 1,
+      "community": 2,
       "norm_label": "edicion inline"
     },
     {
@@ -10575,7 +10665,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L41",
       "id": "features_dimensional_models_crear_nuevo_modelo",
-      "community": 1,
+      "community": 2,
       "norm_label": "crear nuevo modelo"
     },
     {
@@ -10584,7 +10674,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L49",
       "id": "features_dimensional_models_editor_de_modelo_models_id",
-      "community": 1,
+      "community": 2,
       "norm_label": "editor de modelo (`/models/:id`)"
     },
     {
@@ -10593,7 +10683,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L51",
       "id": "features_dimensional_models_toolbar",
-      "community": 1,
+      "community": 2,
       "norm_label": "toolbar"
     },
     {
@@ -10602,7 +10692,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L53",
       "id": "features_dimensional_models_codeblock_1",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:block1 ([\u2190 volver]  [nombre \u270f]  [\u25a0 cubejs] [\u2b21 ddl] [\u2b06 import yaml] [)"
     },
     {
@@ -10611,7 +10701,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L69",
       "id": "features_dimensional_models_canvas",
-      "community": 1,
+      "community": 2,
       "norm_label": "canvas"
     },
     {
@@ -10620,7 +10710,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L73",
       "id": "features_dimensional_models_nodo_de_tabla",
-      "community": 1,
+      "community": 2,
       "norm_label": "nodo de tabla"
     },
     {
@@ -10629,7 +10719,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L75",
       "id": "features_dimensional_models_codeblock_2",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:block2 (\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2190 fact: azul / dimension: verde)"
     },
     {
@@ -10638,7 +10728,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L91",
       "id": "features_dimensional_models_crear_relaci_n_con_drag_and_drop",
-      "community": 1,
+      "community": 2,
       "norm_label": "crear relacion con drag-and-drop"
     },
     {
@@ -10647,7 +10737,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L100",
       "id": "features_dimensional_models_selecci_n_de_nodos_y_relaciones",
-      "community": 1,
+      "community": 2,
       "norm_label": "seleccion de nodos y relaciones"
     },
     {
@@ -10656,7 +10746,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L106",
       "id": "features_dimensional_models_panel_de_propiedades_derecha",
-      "community": 1,
+      "community": 2,
       "norm_label": "panel de propiedades (derecha)"
     },
     {
@@ -10665,7 +10755,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L110",
       "id": "features_dimensional_models_panel_de_nodo_fact_dimension",
-      "community": 1,
+      "community": 2,
       "norm_label": "panel de nodo (fact / dimension)"
     },
     {
@@ -10674,7 +10764,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L112",
       "id": "features_dimensional_models_codeblock_3",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:block3 ([tabla de hecho]               [\u25a0 cubejs]  [\u2715])"
     },
     {
@@ -10683,7 +10773,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L134",
       "id": "features_dimensional_models_panel_de_nodo_referencia_global_solo_lectura",
-      "community": 1,
+      "community": 2,
       "norm_label": "panel de nodo (referencia global \u2014 solo lectura)"
     },
     {
@@ -10692,7 +10782,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L136",
       "id": "features_dimensional_models_codeblock_4",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:block4 ([dimension]  [global]       [\u25a0 cubejs]  [\u2715])"
     },
     {
@@ -10701,7 +10791,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L149",
       "id": "features_dimensional_models_panel_de_relaci_n",
-      "community": 1,
+      "community": 2,
       "norm_label": "panel de relacion"
     },
     {
@@ -10710,7 +10800,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L151",
       "id": "features_dimensional_models_codeblock_5",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:block5 ([relacion]                              [\u2715])"
     },
     {
@@ -10719,7 +10809,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L163",
       "id": "features_dimensional_models_modelo_global_dimensiones_compartidas",
-      "community": 1,
+      "community": 2,
       "norm_label": "modelo global \u2014 dimensiones compartidas"
     },
     {
@@ -10728,7 +10818,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L165",
       "id": "features_dimensional_models_concepto",
-      "community": 1,
+      "community": 2,
       "norm_label": "concepto"
     },
     {
@@ -10737,7 +10827,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L169",
       "id": "features_dimensional_models_codeblock_6",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:block6 (modelo global)"
     },
     {
@@ -10746,7 +10836,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L180",
       "id": "features_dimensional_models_a_adir_dimensi_n_global",
-      "community": 1,
+      "community": 2,
       "norm_label": "anadir dimension global"
     },
     {
@@ -10755,7 +10845,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L191",
       "id": "features_dimensional_models_exportaci_n_ddl_sql",
-      "community": 1,
+      "community": 2,
       "norm_label": "exportacion ddl / sql"
     },
     {
@@ -10764,7 +10854,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L195",
       "id": "features_dimensional_models_codeblock_7",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:sql (-- =========================================================)"
     },
     {
@@ -10773,7 +10863,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L218",
       "id": "features_dimensional_models_reglas_de_tipos_para_fk",
-      "community": 1,
+      "community": 2,
       "norm_label": "reglas de tipos para fk"
     },
     {
@@ -10782,7 +10872,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L229",
       "id": "features_dimensional_models_exportaci_n_cubejs",
-      "community": 1,
+      "community": 2,
       "norm_label": "exportacion cubejs"
     },
     {
@@ -10791,7 +10881,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L231",
       "id": "features_dimensional_models_cubo_por_tabla",
-      "community": 1,
+      "community": 2,
       "norm_label": "cubo por tabla"
     },
     {
@@ -10800,7 +10890,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L235",
       "id": "features_dimensional_models_nombre_del_cubo",
-      "community": 1,
+      "community": 2,
       "norm_label": "nombre del cubo"
     },
     {
@@ -10809,7 +10899,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L246",
       "id": "features_dimensional_models_estructura_generada_dimensi_n",
-      "community": 1,
+      "community": 2,
       "norm_label": "estructura generada \u2014 dimension"
     },
     {
@@ -10818,7 +10908,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L248",
       "id": "features_dimensional_models_codeblock_8",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:javascript (cube(`cliente`, {)"
     },
     {
@@ -10827,7 +10917,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L271",
       "id": "features_dimensional_models_estructura_generada_tabla_de_hechos",
-      "community": 1,
+      "community": 2,
       "norm_label": "estructura generada \u2014 tabla de hechos"
     },
     {
@@ -10836,7 +10926,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L273",
       "id": "features_dimensional_models_codeblock_9",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:javascript (cube(`ventas`, {)"
     },
     {
@@ -10845,7 +10935,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L312",
       "id": "features_dimensional_models_import_export_yaml",
-      "community": 1,
+      "community": 2,
       "norm_label": "import / export yaml"
     },
     {
@@ -10854,7 +10944,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L314",
       "id": "features_dimensional_models_exportar",
-      "community": 1,
+      "community": 2,
       "norm_label": "exportar"
     },
     {
@@ -10863,7 +10953,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L318",
       "id": "features_dimensional_models_codeblock_10",
-      "community": 1,
+      "community": 2,
       "norm_label": "code:yaml (name: ventas)"
     },
     {
@@ -10872,7 +10962,7 @@
       "source_file": "dashboard-app/docs/features/dimensional-models.md",
       "source_location": "L341",
       "id": "features_dimensional_models_importar",
-      "community": 1,
+      "community": 2,
       "norm_label": "importar"
     },
     {
@@ -12204,7 +12294,7 @@
       "source_file": "features/FEAT00.md",
       "source_location": "L1",
       "id": "features_feat00_md",
-      "community": 101,
+      "community": 102,
       "norm_label": "feat00.md"
     },
     {
@@ -12213,7 +12303,7 @@
       "source_file": "features/FEAT00.md",
       "source_location": "L1",
       "id": "features_feat00_feature_00_mejoras_al_dise_ador_de_dashboard",
-      "community": 101,
+      "community": 102,
       "norm_label": "feature 00: mejoras al disenador de dashboard"
     },
     {
@@ -12222,7 +12312,7 @@
       "source_file": "features/FEAT00.md",
       "source_location": "L3",
       "id": "features_feat00_requirements",
-      "community": 101,
+      "community": 102,
       "norm_label": "requirements"
     },
     {
@@ -12348,7 +12438,7 @@
       "source_file": "memory/project_currency_task.md",
       "source_location": "L1",
       "id": "memory_project_currency_task_md",
-      "community": 92,
+      "community": 93,
       "norm_label": "project_currency_task.md"
     },
     {
@@ -12357,7 +12447,7 @@
       "source_file": "memory/project_currency_task.md",
       "source_location": "L7",
       "id": "memory_project_currency_task_tarea_monedas_en_configurar_m_trica_completado",
-      "community": 92,
+      "community": 93,
       "norm_label": "tarea: monedas en \"configurar metrica\" - completado \u2705"
     },
     {
@@ -12366,7 +12456,7 @@
       "source_file": "memory/project_currency_task.md",
       "source_location": "L13",
       "id": "memory_project_currency_task_resumen_de_la_implementaci_n",
-      "community": 92,
+      "community": 93,
       "norm_label": "resumen de la implementacion"
     },
     {
@@ -12375,7 +12465,7 @@
       "source_file": "memory/project_currency_task.md",
       "source_location": "L27",
       "id": "memory_project_currency_task_notas_t_cnicas",
-      "community": 92,
+      "community": 93,
       "norm_label": "notas tecnicas"
     },
     {
@@ -12384,7 +12474,7 @@
       "source_file": "plans/FEAT02.md",
       "source_location": "L1",
       "id": "plans_feat02_md",
-      "community": 93,
+      "community": 94,
       "norm_label": "feat02.md"
     },
     {
@@ -12393,7 +12483,7 @@
       "source_file": "plans/FEAT02.md",
       "source_location": "L1",
       "id": "plans_feat02_objetivo",
-      "community": 93,
+      "community": 94,
       "norm_label": "objetivo"
     },
     {
@@ -12402,7 +12492,7 @@
       "source_file": "plans/FEAT02.md",
       "source_location": "L7",
       "id": "plans_feat02_requerimientos",
-      "community": 93,
+      "community": 94,
       "norm_label": "requerimientos"
     },
     {
@@ -12411,7 +12501,7 @@
       "source_file": "plans/FEAT02.md",
       "source_location": "L26",
       "id": "plans_feat02_mejoras",
-      "community": 93,
+      "community": 94,
       "norm_label": "mejoras"
     },
     {
@@ -12420,7 +12510,7 @@
       "source_file": "plans/FEAT03.md",
       "source_location": "L1",
       "id": "plans_feat03_md",
-      "community": 102,
+      "community": 103,
       "norm_label": "feat03.md"
     },
     {
@@ -12429,7 +12519,7 @@
       "source_file": "plans/FEAT03.md",
       "source_location": "L1",
       "id": "plans_feat03_objetivo",
-      "community": 102,
+      "community": 103,
       "norm_label": "objetivo"
     },
     {
@@ -12438,7 +12528,7 @@
       "source_file": "plans/FEAT03.md",
       "source_location": "L5",
       "id": "plans_feat03_requerimientos",
-      "community": 102,
+      "community": 103,
       "norm_label": "requerimientos"
     },
     {
@@ -12447,7 +12537,7 @@
       "source_file": "plans/FEAT04.md",
       "source_location": "L1",
       "id": "plans_feat04_md",
-      "community": 103,
+      "community": 104,
       "norm_label": "feat04.md"
     },
     {
@@ -12456,7 +12546,7 @@
       "source_file": "plans/FEAT04.md",
       "source_location": "L1",
       "id": "plans_feat04_feat_04_panel_lateral_para_a_adir_tablas",
-      "community": 103,
+      "community": 104,
       "norm_label": "feat 04: panel lateral para anadir tablas"
     },
     {
@@ -12465,7 +12555,7 @@
       "source_file": "plans/FEAT04.md",
       "source_location": "L4",
       "id": "plans_feat04_requerimientos",
-      "community": 103,
+      "community": 104,
       "norm_label": "requerimientos"
     },
     {
@@ -12474,7 +12564,7 @@
       "source_file": "plans/plan01.md",
       "source_location": "L1",
       "id": "plans_plan01_md",
-      "community": 159,
+      "community": 160,
       "norm_label": "plan01.md"
     },
     {
@@ -12483,7 +12573,7 @@
       "source_file": "plans/reqspec01.md",
       "source_location": "L1",
       "id": "plans_reqspec01_md",
-      "community": 160,
+      "community": 161,
       "norm_label": "reqspec01.md"
     },
     {
@@ -12492,15 +12582,33 @@
       "source_file": "plans/reqspec02.md",
       "source_location": "L1",
       "id": "plans_reqspec02_md",
-      "community": 161,
+      "community": 162,
       "norm_label": "reqspec02.md"
+    },
+    {
+      "label": "decrypt_value()",
+      "file_type": "code",
+      "source_file": "backend/app/core/encryption.py",
+      "source_location": "L39",
+      "community": 1,
+      "norm_label": "decrypt_value()",
+      "id": "core_encryption_decrypt_value"
+    },
+    {
+      "label": "Decrypt an encrypted string value.          Args:         encrypted_value: Th",
+      "file_type": "rationale",
+      "source_file": "backend/app/core/encryption.py",
+      "source_location": "L40",
+      "community": 1,
+      "norm_label": "decrypt an encrypted string value.          args:         encrypted_value: th",
+      "id": "core_encryption_rationale_40"
     },
     {
       "label": "Save diagram data (nodes + connections + metadata) for a flow.",
       "file_type": "rationale",
       "source_file": "backend/app/api/endpoints/integration_flows.py",
       "source_location": "L89",
-      "community": 24,
+      "community": 23,
       "norm_label": "save diagram data (nodes + connections + metadata) for a flow.",
       "id": "endpoints_integration_flows_rationale_89"
     }
@@ -12886,6 +12994,36 @@
       "confidence_score": 1.0,
       "source": "versions_011_add_execution_history_table_rationale_1",
       "target": "backend_alembic_versions_011_add_execution_history_table_py"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_alembic_versions_caa1490c201a_add_connection_config_to_data_sources_py",
+      "target": "versions_caa1490c201a_add_connection_config_to_data_sources_upgrade"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L163",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_alembic_versions_caa1490c201a_add_connection_config_to_data_sources_py",
+      "target": "versions_caa1490c201a_add_connection_config_to_data_sources_downgrade"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/alembic/versions/caa1490c201a_add_connection_config_to_data_sources.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "versions_caa1490c201a_add_connection_config_to_data_sources_rationale_1",
+      "target": "backend_alembic_versions_caa1490c201a_add_connection_config_to_data_sources_py"
     },
     {
       "relation": "contains",
@@ -15472,11 +15610,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/core/encryption.py",
-      "source_location": "L39",
+      "source_location": "L44",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "backend_app_core_encryption_py",
-      "target": "core_encryption_decrypt_value"
+      "target": "core_encryption_process_sensitive_fields"
     },
     {
       "relation": "rationale_for",
@@ -15489,6 +15627,16 @@
       "target": "backend_app_core_encryption_py"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/core/encryption.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_app_core_encryption_py",
+      "target": "core_encryption_decrypt_value"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -15497,6 +15645,16 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "core_encryption_encrypt_value",
+      "target": "core_encryption_get_fernet"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/core/encryption.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "core_encryption_rationale_11",
       "target": "core_encryption_get_fernet"
     },
     {
@@ -15511,14 +15669,15 @@
       "target": "core_encryption_get_fernet"
     },
     {
-      "relation": "rationale_for",
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/core/encryption.py",
-      "source_location": "L11",
+      "source_location": "L54",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "core_encryption_rationale_11",
-      "target": "core_encryption_get_fernet"
+      "source": "core_encryption_process_sensitive_fields",
+      "target": "core_encryption_encrypt_value"
     },
     {
       "relation": "rationale_for",
@@ -15534,11 +15693,11 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/core/encryption.py",
-      "source_location": "L40",
+      "source_location": "L45",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "core_encryption_rationale_40",
-      "target": "core_encryption_decrypt_value"
+      "source": "core_encryption_rationale_45",
+      "target": "core_encryption_process_sensitive_fields"
     },
     {
       "relation": "contains",
@@ -16106,6 +16265,476 @@
       "confidence_score": 1.0,
       "source": "runtime_runner_main",
       "target": "runtime_runner_gettopologicalorder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_app_schemas_connection_schemas_py",
+      "target": "schemas_connection_schemas_smtpconfig"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_app_schemas_connection_schemas_py",
+      "target": "schemas_connection_schemas_dbconfig"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_app_schemas_connection_schemas_py",
+      "target": "schemas_connection_schemas_ftpconfig"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_app_schemas_connection_schemas_py",
+      "target": "schemas_connection_schemas_httpconfig"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_app_schemas_connection_schemas_py",
+      "target": "schemas_connection_schemas_jwtconfig"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_connection_schemas_smtpconfig",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_connection_schemas_dbconfig",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_connection_schemas_ftpconfig",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_connection_schemas_httpconfig",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/connection_schemas.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_connection_schemas_jwtconfig",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_userbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_userprovision",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_userupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_position",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_cubequery",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L63",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_widgetbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_widgetupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L94",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dashboardbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L105",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dashboardupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L126",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dashboardassignmentrequest",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L130",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_colorpalettebase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_colorpaletteupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L169",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_datatypebase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L182",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_datatypeupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L198",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_currencybase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L211",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dimensionalmodelnode",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L223",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dimensionalmodelrelationship",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L230",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dimensionalmodelbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L243",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_dimensionalmodelupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L261",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_cubeconfigbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L272",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_cubeconfigupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L288",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_messageresponse",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L292",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_errorresponse",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L297",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_llmproviderinfo",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L306",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_llmconfigbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L325",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_datasourcebase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L339",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_datasourceupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L349",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_datasourceresponse",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L365",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_knowledgespacebase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L375",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_knowledgespaceupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L391",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_diagramtypebase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L401",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_diagramtypeupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L417",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_editortoolbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L431",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_editortoolupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L450",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_integrationflowbase",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L465",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_integrationflowupdate",
+      "target": "basemodel"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": "L493",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "schemas_schemas_integrationflowexecutionbase",
+      "target": "basemodel"
     },
     {
       "relation": "contains",
@@ -16771,16 +17400,6 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_userbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
       "source_location": "L14",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -16796,366 +17415,6 @@
       "confidence_score": 1.0,
       "source": "schemas_schemas_userresponse",
       "target": "schemas_schemas_userbase"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L18",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_userprovision",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L28",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_userupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L48",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_position",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L55",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_cubequery",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L63",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_widgetbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L76",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_widgetupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L94",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dashboardbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L105",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dashboardupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L126",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dashboardassignmentrequest",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L130",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_colorpalettebase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L154",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_colorpaletteupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L169",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_datatypebase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L182",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_datatypeupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L198",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_currencybase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L211",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dimensionalmodelnode",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L223",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dimensionalmodelrelationship",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L230",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dimensionalmodelbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L243",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_dimensionalmodelupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L261",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_cubeconfigbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L272",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_cubeconfigupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L288",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_messageresponse",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L292",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_errorresponse",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L297",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_llmproviderinfo",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L306",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_llmconfigbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L325",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_datasourcebase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L339",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_datasourceupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L349",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_datasourceresponse",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L365",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_knowledgespacebase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L375",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_knowledgespaceupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L391",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_diagramtypebase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L401",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_diagramtypeupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L417",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_editortoolbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L431",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_editortoolupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L450",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_integrationflowbase",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L465",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_integrationflowupdate",
-      "target": "basemodel"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/app/schemas/schemas.py",
-      "source_location": "L493",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "schemas_schemas_integrationflowexecutionbase",
-      "target": "basemodel"
     },
     {
       "relation": "rationale_for",
@@ -26819,8 +27078,18 @@
       "confidence_score": 1.0,
       "source": "plans_feat04_md",
       "target": "plans_feat04_requerimientos"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/app/core/encryption.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "core_encryption_rationale_40",
+      "target": "core_encryption_decrypt_value"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "762d9a5520dc0000e9e641fb707e02cde69b406d"
+  "built_at_commit": "c903cb2192e49005c6302f348c2af774a62fb5fd"
 }

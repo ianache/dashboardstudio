@@ -55,6 +55,10 @@
     "mtime": 1778811343.562334,
     "hash": "fa5fb16a7a37ab3c7f4fd5797285cea4"
   },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\alembic\\versions\\caa1490c201a_add_connection_config_to_data_sources.py": {
+    "mtime": 1778819838.4406323,
+    "hash": "c3e08a847c776e6a441d36d86ed5e2d4"
+  },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\main.py": {
     "mtime": 1777350391.294009,
     "hash": "fc94eb5f71a6651ab154a967c7333dee"
@@ -132,8 +136,8 @@
     "hash": "5e2157cd0b73cb84a473eb1f22a6576f"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\core\\encryption.py": {
-    "mtime": 1777350391.2437837,
-    "hash": "aa275489a04308079a1e296d3b251563"
+    "mtime": 1778819675.8823817,
+    "hash": "dd9b486305a9cff4c9631e144305ec7a"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\core\\security.py": {
     "mtime": 1777350391.2636497,
@@ -144,8 +148,8 @@
     "hash": "9d2131897dd140cddefc6b726bc82fb0"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\models\\models.py": {
-    "mtime": 1778811326.9985268,
-    "hash": "19d16b16aabbaefaf4c1eccbd0ee4e9b"
+    "mtime": 1778819692.4675899,
+    "hash": "5311552562162a5daa1abf5940cb58b6"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\models\\__init__.py": {
     "mtime": 1777350391.3358192,
@@ -154,6 +158,10 @@
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\runtime\\runner.ts": {
     "mtime": 1778817787.6377866,
     "hash": "8290d656c012eedbabd1db9872290363"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\schemas\\connection_schemas.py": {
+    "mtime": 1778819657.8583584,
+    "hash": "360343b34c69aa0d1af79ead179435c5"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\schemas\\schemas.py": {
     "mtime": 1778811334.8981073,

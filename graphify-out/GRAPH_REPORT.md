@@ -1,16 +1,16 @@
 # Graph Report - dashboardstudio  (2026-05-14)
 
 ## Corpus Check
-- 166 files · ~153,664 words
+- 168 files · ~154,515 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1389 nodes · 1420 edges · 162 communities (131 shown, 31 thin omitted)
+- 1401 nodes · 1436 edges · 163 communities (131 shown, 32 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 39 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `762d9a55`
+- Built from commit: `c903cb21`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -108,7 +108,7 @@
 - [[_COMMUNITY_Community 91|Community 91]]
 - [[_COMMUNITY_Community 92|Community 92]]
 - [[_COMMUNITY_Community 93|Community 93]]
-- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 94|Community 94]]
 - [[_COMMUNITY_Community 96|Community 96]]
 - [[_COMMUNITY_Community 97|Community 97]]
 - [[_COMMUNITY_Community 98|Community 98]]
@@ -117,16 +117,17 @@
 - [[_COMMUNITY_Community 101|Community 101]]
 - [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
-- [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 104|Community 104]]
 - [[_COMMUNITY_Community 107|Community 107]]
 - [[_COMMUNITY_Community 108|Community 108]]
-- [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
 - [[_COMMUNITY_Community 113|Community 113]]
 - [[_COMMUNITY_Community 114|Community 114]]
 - [[_COMMUNITY_Community 115|Community 115]]
-- [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 116|Community 116]]
+- [[_COMMUNITY_Community 120|Community 120]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `ensure_user_exists()` - 25 edges
@@ -136,35 +137,35 @@
 5. `Guía de inicio` - 10 edges
 6. `Store: dataTypes` - 10 edges
 7. `Store: dimensionalModel` - 10 edges
-8. `Componente: EChartWrapper` - 9 edges
-9. `Feature: Integración CubeJS` - 9 edges
-10. `Feature: Dashboards` - 9 edges
+8. `encrypt_value()` - 9 edges
+9. `Componente: EChartWrapper` - 9 edges
+10. `Feature: Integración CubeJS` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `list_editor_tools()` --calls--> `ensure_user_exists()`  [INFERRED]
   backend/app/api/endpoints/editor_tools.py → backend/app/core/security.py
-- `list_integration_flows()` --calls--> `ensure_user_exists()`  [INFERRED]
-  backend/app/api/endpoints/integration_flows.py → backend/app/core/security.py
 - `lifespan()` --calls--> `get_settings()`  [INFERRED]
   backend/app/main.py → backend/app/core/config.py
 - `create_cube_config()` --calls--> `ensure_user_exists()`  [INFERRED]
   backend/app/api/endpoints/cube_config.py → backend/app/core/security.py
 - `list_cube_configs()` --calls--> `ensure_user_exists()`  [INFERRED]
   backend/app/api/endpoints/cube_config.py → backend/app/core/security.py
+- `create_dashboard()` --calls--> `ensure_user_exists()`  [INFERRED]
+  backend/app/api/endpoints/dashboards.py → backend/app/core/security.py
 
-## Communities (162 total, 31 thin omitted)
+## Communities (163 total, 32 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (67): BaseModel, ColorPaletteBase, ColorPaletteCreate, ColorPaletteResponse, ColorPaletteUpdate, CubeConfigBase, CubeConfigCreate, CubeConfigResponse (+59 more)
+Cohesion: 0.05
+Nodes (72): BaseModel, DbConfig, FtpConfig, HttpConfig, JwtConfig, SmtpConfig, ColorPaletteBase, ColorPaletteCreate (+64 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.05
-Nodes (41): Añadir dimensión global, Canvas, code:block1 ([← Volver]  [Nombre ✏]  [■ CubeJS] [⬡ DDL] [⬆ Import YAML] [), code:yaml (name: Ventas), code:block2 (┌─────────────────────────┐  ← fact: azul / dimension: verde), code:block3 ([Tabla de Hecho]               [■ CubeJS]  [✕]), code:block4 ([Dimensión]  [Global]       [■ CubeJS]  [✕]), code:block5 ([Relación]                              [✕]) (+33 more)
+Cohesion: 0.06
+Nodes (40): decrypt_value(), encrypt_value(), _get_fernet(), process_sensitive_fields(), Encryption utilities for sensitive data like API tokens., Get Fernet instance with key derived from settings., Encrypt a string value.          Args:         value: The string to encrypt, Decrypt an encrypted string value.          Args:         encrypted_value: Th (+32 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (38): decrypt_value(), encrypt_value(), _get_fernet(), Encryption utilities for sensitive data like API tokens., Get Fernet instance with key derived from settings., Encrypt a string value.          Args:         value: The string to encrypt, Decrypt an encrypted string value.          Args:         encrypted_value: Th, activate_cube_config() (+30 more)
+Cohesion: 0.05
+Nodes (41): Añadir dimensión global, Canvas, code:block1 ([← Volver]  [Nombre ✏]  [■ CubeJS] [⬡ DDL] [⬆ Import YAML] [), code:yaml (name: Ventas), code:block2 (┌─────────────────────────┐  ← fact: azul / dimension: verde), code:block3 ([Tabla de Hecho]               [■ CubeJS]  [✕]), code:block4 ([Dimensión]  [Global]       [■ CubeJS]  [✕]), code:block5 ([Relación]                              [✕]) (+33 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
@@ -248,11 +249,11 @@ Nodes (15): data, dx, f, map, minX, minY, nz, pos (+7 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.12
-Nodes (15): ApiError, apiRequest(), cubeConfigApi, currenciesApi, dashboardApi, dataSourcesApi, diagramTypesApi, dimensionalModelApi (+7 more)
+Nodes (13): check_deno_runtime(), create_integration_flow(), flow_logs_websocket(), _gen_id(), list_flow_executions(), Lista las últimas ejecuciones de un flujo., Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Ejecuta un flujo de integración en el runtime de Deno. (+5 more)
 
 ### Community 24 - "Community 24"
-Cohesion: 0.13
-Nodes (12): check_deno_runtime(), create_integration_flow(), flow_logs_websocket(), _gen_id(), list_integration_flows(), Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Ejecuta un flujo de integración en el runtime de Deno., Streaming de logs de ejecución vía WebSocket. (+4 more)
+Cohesion: 0.12
+Nodes (15): ApiError, apiRequest(), cubeConfigApi, currenciesApi, dashboardApi, dataSourcesApi, diagramTypesApi, dimensionalModelApi (+7 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.13
@@ -327,12 +328,12 @@ Cohesion: 0.15
 Nodes (12): 1. Objective, 2. Technical Stack, 3. Functional Requirements, 4. Security & Constraints (Non-Functional), 5. Implementation Tasks (Steps for Gemini), FR1: Secure Embedding (Iframe), FR2: Pop-out Window (Independent View), FR3: Real-time State Sync (Pinia + BroadcastChannel) (+4 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.18
-Nodes (8): ensure_user_exists(), Ensure user exists in database, create if not, create_diagram_type(), list_diagram_types(), get_execution_logs(), list_flow_executions(), Lista las últimas ejecuciones de un flujo., Obtiene los logs y resultados de una ejecución específica.
-
-### Community 44 - "Community 44"
 Cohesion: 0.17
 Nodes (11): 1. `dim_empleado`, 1. `fact_headcount_mensual` (Snapshot Mensual), 2. `dim_departamento`, 2. `fact_ausentismo`, 3. `dim_rol`, 3. `fact_reclutamiento`, 4. `dim_tiempo`, Contexto del Modelo (+3 more)
+
+### Community 44 - "Community 44"
+Cohesion: 0.2
+Nodes (7): ensure_user_exists(), Ensure user exists in database, create if not, create_diagram_type(), list_diagram_types(), get_execution_logs(), list_integration_flows(), Obtiene los logs y resultados de una ejecución específica.
 
 ### Community 45 - "Community 45"
 Cohesion: 0.18
@@ -412,11 +413,11 @@ Nodes (6): code:bash (npm run dev      # Servidor de desarrollo → http://local
 
 ### Community 64 - "Community 64"
 Cohesion: 0.29
-Nodes (7): 8. Widget: Combinado — `combined`, code:json ({), code:json ({), Ejemplo: Unidades vendidas vs. ingresos, Fuente de datos, Opciones específicas — `combinedOptions`, Parámetros de medidas aplicables
+Nodes (7): 5. Widget: Pastel / Donut — `pie`, code:json ({), code:json ({), Comportamiento predeterminado, Ejemplo con total al centro, Fuente de datos, Opciones específicas — `pieOptions`
 
 ### Community 65 - "Community 65"
 Cohesion: 0.29
-Nodes (7): 5. Widget: Pastel / Donut — `pie`, code:json ({), code:json ({), Comportamiento predeterminado, Ejemplo con total al centro, Fuente de datos, Opciones específicas — `pieOptions`
+Nodes (7): 8. Widget: Combinado — `combined`, code:json ({), code:json ({), Ejemplo: Unidades vendidas vs. ingresos, Fuente de datos, Opciones específicas — `combinedOptions`, Parámetros de medidas aplicables
 
 ### Community 66 - "Community 66"
 Cohesion: 0.4
@@ -424,7 +425,7 @@ Nodes (5): diagramData, doSave(), flowName, handleSave(), toolsForDiagram
 
 ### Community 67 - "Community 67"
 Cohesion: 0.33
-Nodes (6): 4. Widget: Líneas — `line`, code:json ({ "series": [{ "areaStyle": null }] }), Comportamiento predeterminado, Fuente de datos, Parámetros configurables, Para eliminar el área rellena
+Nodes (5): 12. Paletas de colores, 13. Datos de demostración (`useMockData`), code:block21 (widget.colorPalette  →  dashboardPalette  →  paletteStore.de), Documentación técnica de Widgets — Dashboard Studio, Índice
 
 ### Community 68 - "Community 68"
 Cohesion: 0.33
@@ -436,7 +437,7 @@ Nodes (6): 2. Configuración de Medidas (Measures), code:json ({), Parámetros d
 
 ### Community 70 - "Community 70"
 Cohesion: 0.33
-Nodes (5): 12. Paletas de colores, 13. Datos de demostración (`useMockData`), code:block21 (widget.colorPalette  →  dashboardPalette  →  paletteStore.de), Documentación técnica de Widgets — Dashboard Studio, Índice
+Nodes (6): 4. Widget: Líneas — `line`, code:json ({ "series": [{ "areaStyle": null }] }), Comportamiento predeterminado, Fuente de datos, Parámetros configurables, Para eliminar el área rellena
 
 ### Community 73 - "Community 73"
 Cohesion: 0.5
@@ -448,11 +449,11 @@ Nodes (4): data, existing, toAdd, toReplace
 
 ### Community 75 - "Community 75"
 Cohesion: 0.4
-Nodes (5): 7. Widget: Radar — `radar`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
+Nodes (5): 9. Widget: Tabla — `table`, Construcción de columnas, Fuente de datos, Funciones interactivas, Parámetros configurables
 
 ### Community 76 - "Community 76"
 Cohesion: 0.4
-Nodes (5): 9. Widget: Tabla — `table`, Construcción de columnas, Fuente de datos, Funciones interactivas, Parámetros configurables
+Nodes (5): 6. Widget: Gauge — `gauge`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
 
 ### Community 77 - "Community 77"
 Cohesion: 0.4
@@ -460,43 +461,43 @@ Nodes (5): 1. Modelo de datos del Widget, Campos raíz, code:json ({), code:json
 
 ### Community 78 - "Community 78"
 Cohesion: 0.4
-Nodes (5): 6. Widget: Gauge — `gauge`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
+Nodes (5): 7. Widget: Radar — `radar`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
 
-### Community 89 - "Community 89"
+### Community 90 - "Community 90"
 Cohesion: 0.5
 Nodes (3): callLlm(), buildAIPrompt(), generateWithAI()
 
-### Community 91 - "Community 91"
+### Community 92 - "Community 92"
 Cohesion: 0.5
 Nodes (3): doc, m, newModel
 
-### Community 92 - "Community 92"
+### Community 93 - "Community 93"
 Cohesion: 0.5
 Nodes (3): Notas técnicas, Resumen de la implementación, Tarea: Monedas en "Configurar Métrica" - COMPLETADO ✅
 
-### Community 93 - "Community 93"
+### Community 94 - "Community 94"
 Cohesion: 0.5
 Nodes (3): Mejoras, Objetivo, Requerimientos
 
 ## Knowledge Gaps
-- **659 isolated node(s):** `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07`, `seed default data  Revision ID: 002 Revises: 001 Create Date: 2025-04-07`, `add llm_config table  Revision ID: 003 Revises: 002 Create Date: 2025-04-07`, `add diagrams column to dimensional_models  Revision ID: 004 Revises: 003 Cre`, `add currencies table  Revision ID: 005 Revises: 004 Create Date: 2026-04-17` (+654 more)
+- **661 isolated node(s):** `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07`, `seed default data  Revision ID: 002 Revises: 001 Create Date: 2025-04-07`, `add llm_config table  Revision ID: 003 Revises: 002 Create Date: 2025-04-07`, `add diagrams column to dimensional_models  Revision ID: 004 Revises: 003 Cre`, `add currencies table  Revision ID: 005 Revises: 004 Create Date: 2026-04-17` (+656 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **32 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ensure_user_exists()` connect `Community 43` to `Community 33`, `Community 2`, `Community 39`, `Community 12`, `Community 46`, `Community 17`, `Community 24`, `Community 25`, `Community 59`, `Community 60`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Why does `get_settings()` connect `Community 52` to `Community 2`, `Community 71`?**
+- **Why does `ensure_user_exists()` connect `Community 44` to `Community 1`, `Community 33`, `Community 39`, `Community 12`, `Community 46`, `Community 17`, `Community 23`, `Community 25`, `Community 59`, `Community 60`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `get_settings()` connect `Community 52` to `Community 1`, `Community 71`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `_get_fernet()` connect `Community 2` to `Community 52`?**
+- **Why does `_get_fernet()` connect `Community 1` to `Community 52`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Are the 22 inferred relationships involving `ensure_user_exists()` (e.g. with `create_cube_config()` and `list_cube_configs()`) actually correct?**
   _`ensure_user_exists()` has 22 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07`, `seed default data  Revision ID: 002 Revises: 001 Create Date: 2025-04-07`, `add llm_config table  Revision ID: 003 Revises: 002 Create Date: 2025-04-07` to the rest of the system?**
-  _659 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _661 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
