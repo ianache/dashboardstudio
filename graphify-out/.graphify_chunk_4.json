@@ -1,0 +1,324 @@
+{
+  "nodes": [
+    {
+      "id": "colorpalettes_usecolorpalettestore",
+      "label": "Color Palette Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/colorPalettes.js"
+    },
+    {
+      "id": "cubejs_usecubestore",
+      "label": "CubeJS Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/cubejs.js"
+    },
+    {
+      "id": "currencies_usecurrencystore",
+      "label": "Currency Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/currencies.js"
+    },
+    {
+      "id": "dashboard_usedashboardstore",
+      "label": "Dashboard Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dashboard.js"
+    },
+    {
+      "id": "datasources_usedatasourcesstore",
+      "label": "Data Sources Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dataSources.js"
+    },
+    {
+      "id": "datatypes_usedatatypestore",
+      "label": "Data Type Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dataTypes.js"
+    },
+    {
+      "id": "dimensionalmodel_usedimensionalmodelstore",
+      "label": "Dimensional Model Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dimensionalModel.js"
+    },
+    {
+      "id": "integrations_useintegrationsstore",
+      "label": "Integrations Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/integrations.js"
+    },
+    {
+      "id": "knowledgespaces_useknowledgespacesstore",
+      "label": "Knowledge Spaces Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/knowledgeSpaces.js"
+    },
+    {
+      "id": "llm_usellmstore",
+      "label": "LLM Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/llm.js"
+    },
+    {
+      "id": "toolcatalog_usetoolcatalogstore",
+      "label": "Tool Catalog Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/toolCatalog.js"
+    },
+    {
+      "id": "ui_useuistore",
+      "label": "UI Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/ui.js"
+    },
+    {
+      "id": "visualizationconfigurator_usevisualizationconfiguratorstore",
+      "label": "Visualization Configurator Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/visualizationConfigurator.js"
+    },
+    {
+      "id": "dashboarddesignerview_component",
+      "label": "Dashboard Designer View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "id": "dashboardviewerview_component",
+      "label": "Dashboard Viewer View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DashboardViewerView.vue"
+    },
+    {
+      "id": "datatypesview_component",
+      "label": "Data Types View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DataTypesView.vue"
+    },
+    {
+      "id": "diagramtypesview_component",
+      "label": "Diagram Types View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DiagramTypesView.vue"
+    },
+    {
+      "id": "dimensionalmodeleditorview_component",
+      "label": "Dimensional Model Editor View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DimensionalModelEditorView.vue"
+    },
+    {
+      "id": "dimensionalmodellistview_component",
+      "label": "Dimensional Model List View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DimensionalModelListView.vue"
+    },
+    {
+      "id": "floweditorview_component",
+      "label": "Flow Editor View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/FlowEditorView.vue"
+    },
+    {
+      "id": "homeview_component",
+      "label": "Home View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/HomeView.vue"
+    },
+    {
+      "id": "integrationsview_component",
+      "label": "Integrations View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/IntegrationsView.vue"
+    },
+    {
+      "id": "knowledgespacesview_component",
+      "label": "Knowledge Spaces View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/KnowledgeSpacesView.vue"
+    },
+    {
+      "id": "loginview_component",
+      "label": "Login View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/LoginView.vue"
+    },
+    {
+      "id": "settingsview_component",
+      "label": "Settings View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    }
+  ],
+  "edges": [
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "dashboard_usedashboardstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "ui_useuistore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "colorpalettes_usecolorpalettestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "cubejs_usecubestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "llm_usellmstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "visualizationconfigurator_usevisualizationconfiguratorstore",
+      "target": "cubejs_usecubestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/stores/visualizationConfigurator.js"
+    },
+    {
+      "source": "homeview_component",
+      "target": "dashboard_usedashboardstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/HomeView.vue"
+    },
+    {
+      "source": "dimensionalmodeleditorview_component",
+      "target": "dimensionalmodel_usedimensionalmodelstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelEditorView.vue"
+    },
+    {
+      "source": "dimensionalmodeleditorview_component",
+      "target": "datatypes_usedatatypestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelEditorView.vue"
+    },
+    {
+      "source": "floweditorview_component",
+      "target": "integrations_useintegrationsstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/FlowEditorView.vue"
+    },
+    {
+      "source": "integrationsview_component",
+      "target": "integrations_useintegrationsstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/IntegrationsView.vue"
+    },
+    {
+      "source": "knowledgespacesview_component",
+      "target": "knowledgespaces_useknowledgespacesstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/KnowledgeSpacesView.vue"
+    },
+    {
+      "source": "settingsview_component",
+      "target": "cubejs_usecubestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "source": "settingsview_component",
+      "target": "llm_usellmstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "source": "settingsview_component",
+      "target": "colorpalettes_usecolorpalettestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "source": "dimensionalmodellistview_component",
+      "target": "dimensionalmodel_usedimensionalmodelstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelListView.vue"
+    },
+    {
+      "source": "dimensionalmodellistview_component",
+      "target": "knowledgespaces_useknowledgespacesstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelListView.vue"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "state_management_layer",
+      "label": "Pinia State Management Layer",
+      "nodes": [
+        "colorpalettes_usecolorpalettestore",
+        "cubejs_usecubestore",
+        "dashboard_usedashboardstore",
+        "dimensionalmodel_usedimensionalmodelstore",
+        "integrations_useintegrationsstore"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/stores/"
+    },
+    {
+      "id": "visual_editor_flow",
+      "label": "Visual Editor Pattern",
+      "nodes": [
+        "dimensionalmodeleditorview_component",
+        "floweditorview_component",
+        "dashboarddesignerview_component"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/views/"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

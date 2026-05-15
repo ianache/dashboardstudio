@@ -73,175 +73,155 @@
     </div>
 
     <!-- Designer mode (dashboard open) -->
-    <div v-else class="designer-editor">
-      <!-- Editor toolbar -->
-      <div class="editor-toolbar">
-        <button class="btn btn-secondary btn-sm" @click="closeDesigner">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
-          Volver
-        </button>
+    <template v-else>
+      <PageHeader
+        :title="activeDashboard.name"
+        :description="activeDashboard.description"
+      >
+        <template #actions>
+          <div class="vh-controls-row">
+            <!-- Settings button -->
+            <button class="btn btn-secondary btn-icon btn-sm" @click="openPropsDrawer" title="Configuración del dashboard">
+              <MIcon icon="settings" :size="20" />
+            </button>
 
-        <div class="toolbar-title">
-          <span v-if="!editingTitle" class="db-title-text" @dblclick="startEditTitle">
-            {{ activeDashboard.name }}
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="edit-hint">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-          </span>
-          <input
-            v-else
-            ref="titleInput"
-            v-model="editTitleValue"
-            class="form-input title-edit-input"
-            @blur="saveTitle"
-            @keyup.enter="saveTitle"
-            @keyup.escape="editingTitle = false"
-          />
-        </div>
+            <div class="divider-v"></div>
 
-        <div class="toolbar-spacer" />
-
-        <!-- Palette picker (design mode only) -->
-        <div v-if="isDesignMode" class="palette-picker" v-click-outside="() => paletteOpen = false">
-          <button class="palette-trigger" @click="paletteOpen = !paletteOpen" :title="'Paleta del dashboard'">
-            <div class="palette-trigger-swatches" v-if="activeDashboardPalette">
-              <span
-                v-for="c in activeDashboardPalette.colors.slice(0, 5)"
-                :key="c"
-                class="palette-trigger-swatch"
-                :style="{ background: c }"
-              />
+            <!-- Design / Preview toggle -->
+            <div class="mode-toggle">
+              <button
+                class="mode-btn"
+                :class="{ active: isDesignMode }"
+                @click="isDesignMode = true"
+                title="Modo diseño"
+              >
+                <MIcon icon="brush" :size="18" />
+              </button>
+              <button
+                class="mode-btn"
+                :class="{ active: !isDesignMode }"
+                @click="isDesignMode = false"
+                title="Vista previa"
+              >
+                <MIcon icon="visibility" :size="18" />
+              </button>
             </div>
-            <div class="palette-trigger-swatches palette-trigger-swatches--default" v-else>
-              <span class="palette-trigger-swatch" style="background:#1890ff"/>
-              <span class="palette-trigger-swatch" style="background:#52c41a"/>
-              <span class="palette-trigger-swatch" style="background:#faad14"/>
-              <span class="palette-trigger-swatch" style="background:#f5222d"/>
-              <span class="palette-trigger-swatch" style="background:#722ed1"/>
-            </div>
-            <span class="palette-trigger-label">{{ activeDashboardPalette?.label ?? 'Por defecto' }}</span>
-            <svg class="palette-trigger-arrow" :class="{ open: paletteOpen }" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="palette-dropdown" v-if="paletteOpen">
-            <div
-              class="palette-option"
-              :class="{ selected: !activeDashboard?.colorPalette }"
-              @click="selectDashboardPalette(null)"
-            >
-              <span class="palette-option-label">Por defecto</span>
-              <div class="palette-option-swatches">
-                <span class="palette-option-swatch" style="background:#1890ff"/>
-                <span class="palette-option-swatch" style="background:#52c41a"/>
-                <span class="palette-option-swatch" style="background:#faad14"/>
-                <span class="palette-option-swatch" style="background:#f5222d"/>
-                <span class="palette-option-swatch" style="background:#722ed1"/>
-                <span class="palette-option-swatch" style="background:#13c2c2"/>
+
+            <template v-if="isDesignMode">
+              <button class="btn btn-primary btn-icon btn-sm" @click="addWidget" title="Añadir Widget">
+                <MIcon icon="add" :size="20" />
+              </button>
+              <button class="btn-ai-assist btn-icon btn-sm" @click="aiAssistOpen = true" title="IA Assist">
+                <MIcon icon="auto_awesome" :size="20" />
+              </button>
+            </template>
+          </div>
+        </template>
+      </PageHeader>
+
+      <DashboardRuntime
+        v-if="activeDashboard"
+        :dashboard-id="activeDashboard.id"
+        :widgets="activeDashboard.widgets"
+        :filters="activeDashboard.filters || []"
+        :palette="activeDashboard.colorPalette"
+        :filter-placement="filterPlacement"
+        :is-design-mode="isDesignMode"
+        v-model:filter-values="activeFilterValues"
+        :resolved-filters="resolvedDashboardFilters"
+        @refresh="refreshDesign"
+        @configure-widget="openConfigModal"
+        @layout-widget="openLayoutModal"
+        @remove-widget="removeWidget"
+      />
+
+      <!-- Properties Side Drawer -->
+      <transition name="slide-right">
+        <div v-if="showPropsDrawer" class="props-drawer-overlay" @click.self="showPropsDrawer = false">
+          <div class="props-drawer">
+            <div class="props-drawer-header">
+              <h3>Edit Dashboard</h3>
+              <div class="props-drawer-actions">
+                <button class="action-btn-save" @click="saveAndCloseProps" title="Guardar cambios">
+                  <MIcon icon="save" :size="20" />
+                </button>
+                <button class="action-btn-close" @click="showPropsDrawer = false" title="Cerrar">
+                  <MIcon icon="close" :size="20" />
+                </button>
               </div>
             </div>
-            <div
-              v-for="palette in paletteStore.allPalettes"
-              :key="palette.id"
-              class="palette-option"
-              :class="{ selected: activeDashboard?.colorPalette === palette.id }"
-              @click="selectDashboardPalette(palette.id)"
-            >
-              <span class="palette-option-label">{{ palette.label }}</span>
-              <div class="palette-option-swatches">
-                <span
-                  v-for="c in palette.colors.slice(0, 6)"
-                  :key="c"
-                  class="palette-option-swatch"
-                  :style="{ background: c }"
-                />
+
+            <div class="props-drawer-body">
+              <div class="form-group">
+                <label class="form-label">Nombre del Dashboard</label>
+                <input v-model="editTitleValue" class="form-input" placeholder="Nombre..." />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descripción</label>
+                <textarea v-model="editDescription" class="form-textarea" rows="3" placeholder="Descripción opcional..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Paleta de colores</label>
+                <div class="palette-picker-grid">
+                  <div
+                    class="palette-option-card"
+                    :class="{ selected: !activeDashboard?.colorPalette }"
+                    @click="selectDashboardPalette(null)"
+                  >
+                    <div class="palette-swatches-row">
+                      <span class="p-swatch" style="background:#1890ff"/><span class="p-swatch" style="background:#52c41a"/><span class="p-swatch" style="background:#faad14"/>
+                    </div>
+                    <span class="p-label">Defecto</span>
+                  </div>
+                  <div
+                    v-for="palette in paletteStore.allPalettes"
+                    :key="palette.id"
+                    class="palette-option-card"
+                    :class="{ selected: activeDashboard?.colorPalette === palette.id }"
+                    @click="selectDashboardPalette(palette.id)"
+                  >
+                    <div class="palette-swatches-row">
+                      <span v-for="c in palette.colors.slice(0, 3)" :key="c" class="p-swatch" :style="{ background: c }"/>
+                    </div>
+                    <span class="p-label">{{ palette.label }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Posición de filtros</label>
+                <div class="placement-selector">
+                  <button 
+                    v-for="pos in [
+                      { id: 'top', icon: 'vertical_align_top', label: 'Arriba' },
+                      { id: 'left', icon: 'format_align_left', label: 'Izquierda' },
+                      { id: 'right', icon: 'format_align_right', label: 'Derecha' }
+                    ]" 
+                    :key="pos.id"
+                    class="placement-btn"
+                    :class="{ active: filterPlacement === pos.id }"
+                    @click="filterPlacement = pos.id"
+                  >
+                    <MIcon :icon="pos.icon" :size="20" />
+                    <span>{{ pos.label }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="toggle-row">
+                  <span class="form-label">Acceso público</span>
+                  <input type="checkbox" v-model="isPublic" @change="togglePublic" />
+                </label>
+                <p class="form-hint">Si está activo, cualquier usuario podrá ver este dashboard sin asignación previa.</p>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Public toggle -->
-        <label class="toggle-label">
-          <input type="checkbox" v-model="isPublic" @change="togglePublic" />
-          <span class="toggle-text">Público</span>
-        </label>
-
-        <!-- Design / Preview toggle -->
-        <div class="mode-toggle">
-          <button
-            class="mode-btn"
-            :class="{ active: isDesignMode }"
-            @click="isDesignMode = true"
-          >
-            <span class="material-symbols-outlined text-sm mr-1">brush</span>
-            Diseñar
-          </button>
-          <button
-            class="mode-btn"
-            :class="{ active: !isDesignMode }"
-            @click="isDesignMode = false"
-          >
-            <span class="material-symbols-outlined text-sm mr-1">visibility</span>
-            Vista previa
-          </button>
-        </div>
-
-        <button
-          v-if="isDesignMode"
-          class="btn btn-primary btn-sm"
-          @click="addWidget"
-        >
-          <span class="material-symbols-outlined text-sm">add</span>
-          Añadir widget
-        </button>
-        <button
-          v-if="isDesignMode"
-          class="btn-ai-assist"
-          style="margin-left:8px"
-          @click="aiAssistOpen = true"
-        >
-          <span class="material-symbols-outlined text-sm">auto_awesome</span>
-          IA Assist
-        </button>
-      </div>
-
-      <!-- Description field (design mode) -->
-      <div v-if="isDesignMode" class="description-bar">
-        <input
-          v-model="editDescription"
-          type="text"
-          class="form-input description-input"
-          placeholder="Descripción del dashboard (opcional)..."
-          @blur="saveDescription"
-        />
-      </div>
-
-      <!-- Filter bar -->
-      <DashboardFilterBar
-        v-if="activeDashboard.filters?.length > 0 || isDesignMode"
-        :dashboard-id="activeDashboard.id"
-        :filters="activeDashboard.filters || []"
-        :is-design-mode="isDesignMode"
-        v-model="activeFilterValues"
-        @refresh="refreshDesign"
-      />
-
-      <!-- Dashboard canvas -->
-      <div class="editor-canvas">
-        <DashboardGrid
-          :widgets="activeDashboard.widgets"
-          :is-design-mode="isDesignMode"
-          :dashboard-id="activeDashboard.id"
-          :dashboard-filters="resolvedDashboardFilters"
-          :dashboard-palette="activeDashboard.colorPalette || null"
-          :key="designRefreshKey"
-          @configure-widget="openConfigModal"
-          @layout-widget="openLayoutModal"
-          @remove-widget="removeWidget"
-        />
-      </div>
-    </div>
+      </transition>
+    </template>
 
     <!-- ======= MODALS ======= -->
 
@@ -538,10 +518,13 @@ import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
+import DashboardRuntime from '@/components/dashboard/DashboardRuntime.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import DesignerCard from '@/components/dashboard/DesignerCard.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import ChartLayoutModal from '@/components/dashboard/ChartLayoutModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
+import MIcon from '@/components/common/MIcon.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
 import { usersApi } from '@/services/api'
@@ -574,6 +557,7 @@ onMounted(async () => {
 
 // State
 const isDesignMode = ref(true)
+const filterPlacement = ref('top')
 const designRefreshKey = ref(0)
 function refreshDesign() { designRefreshKey.value++ }
 const showNewModal = ref(false)
@@ -599,6 +583,7 @@ const isPublic = ref(false)
 const paletteOpen = ref(false)
 const importFileInput = ref(null)
 const importPreview = ref(null)
+const showPropsDrawer = ref(false)
 
 const vClickOutside = {
   mounted(el, binding) {
@@ -619,17 +604,23 @@ const activeDashboard = computed(() => {
 
 const { activeFilterValues, resolvedDashboardFilters, resetFilters } = useDashboardFilters(activeDashboard)
 
-// Watch route changes
-watch(() => route.params.id, (id) => {
-  if (id) {
-    const db = dashboardStore.allDashboards.find(d => d.id === id)
-    if (db) {
-      editDescription.value = db.description || ''
-      isPublic.value = db.isPublic || false
-      uiStore.setBreadcrumbs(['Diseño', db.name])
-    }
-  } else {
-    uiStore.setBreadcrumbs(['Diseño', 'Mis Dashboards'])
+// Watch active dashboard to sync UI and breadcrumbs
+watch(activeDashboard, (db) => {
+  if (db) {
+    // Sync local edit state with active dashboard
+    editTitleValue.value = db.name || ''
+    editDescription.value = db.description || ''
+    isPublic.value = db.isPublic || false
+    
+    uiStore.setBreadcrumbs([
+      { label: 'Diseño', path: '/designer' },
+      { label: db.name, path: `/designer/${db.id}` }
+    ])
+  } else if (!route.params.id) {
+    uiStore.setBreadcrumbs([
+      { label: 'Diseño', path: '/designer' },
+      { label: 'Mis Dashboards', path: '/designer' }
+    ])
   }
 }, { immediate: true })
 
@@ -644,6 +635,15 @@ function openDesigner(id) {
 
 function closeDesigner() {
   router.push('/designer')
+}
+
+function openPropsDrawer() {
+  if (activeDashboard.value) {
+    editTitleValue.value = activeDashboard.value.name || ''
+    editDescription.value = activeDashboard.value.description || ''
+    isPublic.value = activeDashboard.value.isPublic || false
+  }
+  showPropsDrawer.value = true
 }
 
 // ── AI Assist ─────────────────────────────────────────────────
@@ -972,7 +972,10 @@ function startEditTitle() {
 function saveTitle() {
   if (activeDashboard.value && editTitleValue.value.trim()) {
     dashboardStore.updateDashboard(activeDashboard.value.id, { name: editTitleValue.value.trim() })
-    uiStore.setBreadcrumbs(['Diseño', editTitleValue.value.trim()])
+    uiStore.setBreadcrumbs([
+      { label: 'Diseño', path: '/designer' },
+      { label: editTitleValue.value.trim(), path: `/designer/${activeDashboard.value.id}` }
+    ])
   }
   editingTitle.value = false
 }
@@ -993,7 +996,13 @@ function selectDashboardPalette(paletteId) {
   if (activeDashboard.value) {
     dashboardStore.updateDashboard(activeDashboard.value.id, { colorPalette: paletteId })
   }
-  paletteOpen.value = false
+}
+
+function saveAndCloseProps() {
+  saveTitle()
+  saveDescription()
+  showPropsDrawer.value = false
+  uiStore.addAlert({ type: 'success', message: 'Configuración del dashboard guardada' })
 }
 
 const activeDashboardPalette = computed(() =>
@@ -1047,22 +1056,26 @@ function handleImportFile(e) {
   reader.readAsText(file)
 }
 
-function confirmImport() {
+async function confirmImport() {
   if (!importPreview.value) return
   const d = importPreview.value
-  const db = dashboardStore.createDashboard(d.name, d.description, authStore.user.id)
-  dashboardStore.updateDashboard(db.id, {
-    isPublic: d.isPublic || false,
-    filters: d.filters || [],
-    colorPalette: d.colorPalette || null,
-    widgets: d.widgets.map(w => ({
-      ...w,
-      id: Math.random().toString(36).substr(2, 9)
-    }))
-  })
-  uiStore.addAlert({ type: 'success', message: `Dashboard "${d.name}" importado correctamente` })
-  importPreview.value = null
-  router.push(`/designer/${db.id}`)
+  try {
+    const db = await dashboardStore.createDashboard(d.name, d.description, authStore.user.id)
+    await dashboardStore.updateDashboard(db.id, {
+      isPublic: d.isPublic || false,
+      filters: d.filters || [],
+      colorPalette: d.colorPalette || null,
+      widgets: d.widgets.map(w => ({
+        ...w,
+        id: Math.random().toString(36).substr(2, 9)
+      }))
+    })
+    uiStore.addAlert({ type: 'success', message: `Dashboard "${d.name}" importado correctamente` })
+    importPreview.value = null
+    router.push(`/designer/${db.id}`)
+  } catch (err) {
+    uiStore.addAlert({ type: 'error', message: 'Error al importar dashboard' })
+  }
 }
 </script>
 
@@ -1091,31 +1104,66 @@ function confirmImport() {
 .text-sm { font-size: 14px; }
 
 /* Editor */
-.designer-editor { display: flex; flex-direction: column; height: 100%; padding: 20px; }
+.viewer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0;
+  background: transparent;
+  flex-shrink: 0;
+}
 
-.editor-toolbar {
+.vh-info { flex: 1; min-width: 0; }
+.vh-title { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.2; }
+.vh-desc { font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+.vh-actions-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.vh-controls-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow);
-  flex-shrink: 0;
-  flex-wrap: wrap;
+  gap: 8px;
+  height: 32px; /* Aligns with vh-title height approximate */
 }
 
-.toolbar-title { flex: 1; min-width: 0; }
-.db-title-text {
-  font-size: 16px; font-weight: 600; color: var(--text);
-  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+.mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
 }
-.db-title-text:hover { color: var(--primary); }
-.edit-hint { opacity: 0.5; }
-.title-edit-input { max-width: 300px; font-size: 15px; font-weight: 600; }
-.toolbar-spacer { flex: 1; }
+
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.mode-btn:hover { background: var(--bg); }
+.mode-btn.active { background: var(--primary); color: #fff; }
+
+/* Custom AI Assist Icon Button */
+.btn-ai-assist.btn-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px;
+}
+
 
 /* Palette picker */
 .palette-picker {
@@ -1603,5 +1651,133 @@ function confirmImport() {
   border-top: 1px solid #e2e8f0;
 }
 
+/* Properties Drawer */
+.props-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.props-drawer {
+  width: 400px;
+  max-width: 90vw;
+  background: #fff;
+  height: 100%;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.props-drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.props-drawer-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.props-drawer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.props-drawer-actions button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn-save { background: var(--primary); color: #fff; }
+.action-btn-save:hover { background: var(--primary-dark); }
+.action-btn-close { background: #f1f5f9; color: #64748b; }
+.action-btn-close:hover { background: #e2e8f0; color: #0f172a; }
+
+.props-drawer-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.palette-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.palette-option-card {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+
+.palette-option-card:hover { border-color: var(--primary); background: #fff; }
+.palette-option-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+
+.palette-swatches-row { display: flex; gap: 4px; margin-bottom: 6px; }
+.p-swatch { width: 20px; height: 20px; border-radius: 4px; }
+.p-label { font-size: 12px; font-weight: 500; color: #475569; display: block; }
+
+.placement-selector {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.placement-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.placement-btn span { font-size: 11px; font-weight: 500; }
+.placement-btn:hover { background: #f8fafc; }
+.placement-btn.active { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.divider-v { width: 1px; height: 24px; background: #e2e8f0; margin: 0 8px; }
+
+.slide-right-enter-active, .slide-right-leave-active { transition: opacity 0.3s; }
+.slide-right-enter-from, .slide-right-leave-to { opacity: 0; }
+.slide-right-enter-active .props-drawer, .slide-right-leave-active .props-drawer { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); transform: translateX(0); }
+.slide-right-enter-from .props-drawer, .slide-right-leave-to .props-drawer { transform: translateX(100%); }
 
 </style>

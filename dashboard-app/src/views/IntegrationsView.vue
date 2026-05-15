@@ -321,7 +321,10 @@ const flowStore = useIntegrationsStore()
 const catalog = useToolCatalogStore()
 
 onMounted(async () => {
-  uiStore.setBreadcrumbs(['Data Integration', 'Integrations'])
+  uiStore.setBreadcrumbs([
+    { label: 'Data Integration', path: '/integrations' },
+    { label: 'Integrations', path: '/integrations' }
+  ])
   await Promise.all([flowStore.loadFromBackend(), catalog.loadDiagramTypes()])
 })
 

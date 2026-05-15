@@ -206,7 +206,10 @@ const uiStore = useUIStore()
 
 onMounted(async () => {
   await catalog.loadAll()
-  uiStore.setBreadcrumbs(['Data Integration', 'Catálogo de Herramientas'])
+  uiStore.setBreadcrumbs([
+    { label: 'Data Integration', path: '/integrations' },
+    { label: 'Catálogo de Herramientas', path: '/integrations/tool-catalog' }
+  ])
 })
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

@@ -336,7 +336,7 @@
               </div>
 
               <!-- Empty canvas hint -->
-              <div v-if="!model?.nodes.length" class="canvas-hint">
+              <div v-if="!model?.nodes?.length" class="canvas-hint">
                 <p>Usa los botones de la barra para añadir tablas de <strong>Hecho</strong> o <strong>Dimensión</strong></p>
               </div>
 
@@ -678,7 +678,7 @@
           <div class="ai-context-row">
             <span class="ai-ctx-label">Modelo:</span>
             <span class="ai-chip ai-chip-model">{{ model?.name }}</span>
-            <template v-if="model?.nodes.length">
+            <template v-if="model?.nodes?.length">
               <span class="ai-ctx-label" style="margin-left:8px">Tablas existentes:</span>
               <span v-for="n in model.nodes.slice(0, 6)" :key="n.id"
                     class="ai-chip" :class="n.type === 'fact' ? 'ai-chip-fact' : 'ai-chip-dim'">
@@ -867,6 +867,10 @@ const llmStore = useLlmStore()
 // Load data from backend on mount
 onMounted(async () => {
   await modelStore.loadFromBackend()
+  if (!model.value) {
+    router.push('/models')
+    return
+  }
   nextTick(() => {
     setTimeout(() => {
       updateSnapshot()
@@ -1651,8 +1655,6 @@ const panelDragNodeId = ref(null)
 
 // ── Lifecycle ────────────────────────────────────────────────
 onMounted(() => {
-  if (!model.value) { router.push('/models'); return }
-  uiStore.setBreadcrumbs(['Modelos', model.value.name])
   document.addEventListener('mousemove', onGlobalMouseMove)
   document.addEventListener('mouseup', onGlobalMouseUp)
   // Place toolbar near bottom-left of canvas column
@@ -1668,7 +1670,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onToolbarDragMove)
 })
 
-watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) })
+watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) }, { immediate: true })
 
 // ── Geometry helpers ─────────────────────────────────────────
 const NODE_WIDTH = 240

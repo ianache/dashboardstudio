@@ -36,22 +36,29 @@ def encrypt_value(value: str) -> str:
     return f.encrypt(value.encode()).decode()
 
 
-def decrypt_value(encrypted_value: str) -> str:
-    """Decrypt an encrypted string value.
+from typing import Any
+
+# Keys to automatically encrypt/decrypt in configuration dictionaries
+SENSITIVE_KEYS = {"password", "api_key", "client_secret", "token", "api_token"}
+
+def process_sensitive_fields(data: Any, action: str = "encrypt") -> Any:
+    """Recursively encrypt/decrypt sensitive fields in a JSON-compatible structure."""
+    if isinstance(data, list):
+        return [process_sensitive_fields(item, action) for item in data]
     
-    Args:
-        encrypted_value: The encrypted string (base64 encoded)
-        
-    Returns:
-        Decrypted string
-        
-    Raises:
-        ValueError: If decryption fails
-    """
-    if not encrypted_value:
-        return encrypted_value
-    try:
-        f = _get_fernet()
-        return f.decrypt(encrypted_value.encode()).decode()
-    except Exception as e:
-        raise ValueError(f"Failed to decrypt value: {str(e)}")
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key in SENSITIVE_KEYS and isinstance(value, str) and value:
+                if action == "encrypt":
+                    result[key] = encrypt_value(value)
+                else:
+                    try:
+                        result[key] = decrypt_value(value)
+                    except Exception:
+                        result[key] = value # Fallback if decryption fails
+            else:
+                result[key] = process_sensitive_fields(value, action)
+        return result
+    
+    return data

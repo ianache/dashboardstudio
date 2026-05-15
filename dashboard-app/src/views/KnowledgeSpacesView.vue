@@ -284,7 +284,7 @@ const uiStore = useUIStore()
 // Load data from backend on mount
 onMounted(async () => {
   await spacesStore.loadFromBackend()
-  uiStore.setBreadcrumbs(['Knowledge Spaces'])
+  uiStore.setBreadcrumbs([{ label: 'Knowledge Spaces', path: '/models/knowledge-spaces' }])
 })
 
 // New modal state

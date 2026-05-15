@@ -12,7 +12,20 @@
       </router-link>
       <template v-for="(crumb, i) in breadcrumbs" :key="i">
         <span class="bread-sep">/</span>
-        <span class="bread-item" :class="{ last: i === breadcrumbs.length - 1 }">{{ crumb }}</span>
+        <router-link
+          v-if="crumb.path && i < breadcrumbs.length - 1"
+          :to="crumb.path"
+          class="bread-item link"
+        >
+          {{ crumb.label }}
+        </router-link>
+        <span
+          v-else
+          class="bread-item"
+          :class="{ last: i === breadcrumbs.length - 1 }"
+        >
+          {{ crumb.label }}
+        </span>
       </template>
     </nav>
 
@@ -191,6 +204,11 @@ function formatTime(iso) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: none;
+}
+.bread-item.link:hover {
+  color: var(--primary);
+  text-decoration: underline;
 }
 .bread-item.last { color: var(--text); font-weight: 500; }
 

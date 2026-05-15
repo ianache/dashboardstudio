@@ -132,7 +132,10 @@ const uiStore = useUIStore()
 
 onMounted(async () => {
   await catalog.loadAll()
-  uiStore.setBreadcrumbs(['Data Integration', 'Tipos de Diagrama'])
+  uiStore.setBreadcrumbs([
+    { label: 'Data Integration', path: '/integrations' },
+    { label: 'Tipos de Diagrama', path: '/integrations/diagram-types' }
+  ])
 })
 
 function toolCountFor(diagramTypeId) {

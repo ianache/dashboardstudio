@@ -169,7 +169,8 @@ class DataSource(Base):
     id = Column(String(50), primary_key=True)
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)  # qdrant, neo4j, postgresql, mysql, etc.
-    connection_url = Column(String(500), nullable=False)
+    connection_url = Column(String(500), nullable=True) # Kept for backward compatibility
+    connection_config = Column(JSON, nullable=True)
     username = Column(String(100), nullable=True)
     password = Column(String(500), nullable=True)  # Encrypted
     description = Column(Text, nullable=True)
@@ -237,11 +238,32 @@ class IntegrationFlow(Base):
     schedule = Column(String(100), nullable=True)
     source_system = Column(String(100), nullable=True)
     target_system = Column(String(100), nullable=True)
-    flow_nodes = Column(JSON, default=list)
-    flow_connections = Column(JSON, default=list)
-    flow_metadata = Column(JSON, default=dict)
+    flow_nodes = Column(JSON, nullable=False, default=list)
+    flow_connections = Column(JSON, nullable=False, default=list)
+    flow_metadata = Column(JSON, nullable=False, default=dict)
     last_run = Column(DateTime, nullable=True)
     last_run_success = Column(Boolean, nullable=True)
     created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    executions = relationship("IntegrationFlowExecution", back_populates="flow", cascade="all, delete-orphan")
+
+
+class IntegrationFlowExecution(Base):
+    __tablename__ = "integration_flow_executions"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    flow_id = Column(String(50), ForeignKey("biportal.integration_flows.id"), nullable=False)
+    status = Column(String(20), nullable=False)  # success, error, timeout
+    logs = Column(JSON, nullable=False, default=list)
+    result_data = Column(JSON, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    executed_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    flow = relationship("IntegrationFlow", back_populates="executions")
+

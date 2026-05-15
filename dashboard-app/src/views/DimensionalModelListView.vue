@@ -228,7 +228,7 @@ function selectKnowledgeSpace(space) {
 
 onMounted(() => {
   modelStore.ensureGlobalModel()
-  uiStore.setBreadcrumbs(['Modelos'])
+  uiStore.setBreadcrumbs([{ label: 'Modelos', path: '/models' }])
   if (route.query.new === '1') showNewModal.value = true
 })
 

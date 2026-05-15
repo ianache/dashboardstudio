@@ -1,0 +1,318 @@
+{
+  "nodes": [
+    {
+      "id": "toolcatalogview_toolcatalogview",
+      "label": "ToolCatalogView Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/ToolCatalogView.vue"
+    },
+    {
+      "id": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "label": "VisualizationConfiguratorView Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "id": "concesionarias_cube_concesionarias",
+      "label": "Concesionarias Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "concesionarias_cube_tiendas",
+      "label": "Tiendas Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "concesionarias_cube_vendedores",
+      "label": "Vendedores Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "concesionarias_cube_ventas",
+      "label": "Ventas Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "cube_auth_config",
+      "label": "CubeJS Auth Config",
+      "file_type": "code",
+      "source_file": "environment/cube-data/cube.js",
+      "rationale": "Verifies Keycloak JWT tokens and normalizes claims into CubeJS security context for multi-tenant isolation."
+    },
+    {
+      "id": "date_cube_date",
+      "label": "Date Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Date.js"
+    },
+    {
+      "id": "orders_cube_orders",
+      "label": "Orders Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Orders.js"
+    },
+    {
+      "id": "asignaciontareas_cube_asignaciontareas",
+      "label": "Asignaciontareas Fact Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "id": "horasreportadas_cube_horasreportadas",
+      "label": "Horasreportadas Fact Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Horasreportadas.js"
+    },
+    {
+      "id": "colaborador_cube_colaborador",
+      "label": "Colaborador Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Colaborador.js"
+    },
+    {
+      "id": "producto_cube_producto",
+      "label": "Producto Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Producto.js"
+    },
+    {
+      "id": "proyecto_cube_proyecto",
+      "label": "Proyecto Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Proyecto.js"
+    },
+    {
+      "id": "tarea_cube_tarea",
+      "label": "Tarea Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Tarea.js"
+    },
+    {
+      "id": "tiempo_cube_tiempo",
+      "label": "Tiempo Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Tiempo.js"
+    },
+    {
+      "id": "userstory_cube_userstory",
+      "label": "Userstory Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Userstory.js"
+    },
+    {
+      "id": "initdb_01_keycloak",
+      "label": "Keycloak Database Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/01_keycloak.sql"
+    },
+    {
+      "id": "initdb_02_analytics",
+      "label": "Analytics Schema Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/02_analytics.sql"
+    },
+    {
+      "id": "initdb_03_biportal",
+      "label": "BI Portal Database Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/03_biportal.sql"
+    },
+    {
+      "id": "initdb_03_concesionarios",
+      "label": "Concesionarias Schema Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/03_concesionarios.sql"
+    },
+    {
+      "id": "prd_visualizacion_design",
+      "label": "Visualizacion Design Requirements",
+      "file_type": "rationale",
+      "source_file": "PRD.md",
+      "rationale": "Defines the 3-panel architecture (Source, Config, Preview) for the visualization configurator."
+    },
+    {
+      "id": "backend_fastapi_structure",
+      "label": "Backend Architecture",
+      "file_type": "rationale",
+      "source_file": "backend/README.md",
+      "rationale": "FastAPI backend using SQLAlchemy for ORM and Alembic for migrations, with Keycloak integration for auth."
+    }
+  ],
+  "edges": [
+    {
+      "source": "toolcatalogview_toolcatalogview",
+      "target": "useToolCatalogStore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/ToolCatalogView.vue"
+    },
+    {
+      "source": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "target": "useVisualizationConfiguratorStore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "source": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "target": "useCubeStore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "source": "concesionarias_cube_ventas",
+      "target": "concesionarias_cube_concesionarias",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "source": "concesionarias_cube_ventas",
+      "target": "concesionarias_cube_tiendas",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "source": "concesionarias_cube_ventas",
+      "target": "concesionarias_cube_vendedores",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "tarea_cube_tarea",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "producto_cube_producto",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "colaborador_cube_colaborador",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "proyecto_cube_proyecto",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "tiempo_cube_tiempo",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "horasreportadas_cube_horasreportadas",
+      "target": "userstory_cube_userstory",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Horasreportadas.js"
+    },
+    {
+      "source": "cube_auth_config",
+      "target": "initdb_01_keycloak",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/cube-data/cube.js"
+    },
+    {
+      "source": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "target": "prd_visualizacion_design",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "source": "initdb_03_concesionarios",
+      "target": "concesionarias_cube_ventas",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/initdb/03_concesionarios.sql"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "gestion_proyectos_dimensional_model",
+      "label": "Gestion de Proyectos Dimensional Model",
+      "nodes": [
+        "asignaciontareas_cube_asignaciontareas",
+        "horasreportadas_cube_horasreportadas",
+        "tarea_cube_tarea",
+        "producto_cube_producto",
+        "colaborador_cube_colaborador",
+        "proyecto_cube_proyecto",
+        "tiempo_cube_tiempo",
+        "userstory_cube_userstory"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "id": "concesionarias_dimensional_model",
+      "label": "Concesionarias Dimensional Model",
+      "nodes": [
+        "concesionarias_cube_ventas",
+        "concesionarias_cube_concesionarias",
+        "concesionarias_cube_tiendas",
+        "concesionarias_cube_vendedores",
+        "initdb_03_concesionarios"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "visualization_config_flow",
+      "label": "Visualization Configuration Flow",
+      "nodes": [
+        "visualizationconfiguratorview_visualizationconfiguratorview",
+        "prd_visualizacion_design",
+        "useVisualizationConfiguratorStore",
+        "useCubeStore"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

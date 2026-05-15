@@ -1,0 +1,249 @@
+{
+  "nodes": [
+    {
+      "id": "crear_modelo_conceptual_variante1_ui",
+      "label": "Dimensional Model Designer UI",
+      "file_type": "image",
+      "source_file": "design/ux-ui/crear-modelo-conceptual_variante1.html",
+      "rationale": "Provides a canvas-based interface for ER diagrams and a modal for defining new dimensional models within 'Knowledge Spaces'."
+    },
+    {
+      "id": "frontpage_ui",
+      "label": "Platform Home Dashboard",
+      "file_type": "image",
+      "source_file": "design/ux-ui/frontpage.html",
+      "rationale": "Entry point for users, displaying high-level KPIs (Total Dashboards, Active Widgets) and quick actions for creation."
+    },
+    {
+      "id": "mis_dashboards_ui",
+      "label": "My Dashboards View",
+      "file_type": "image",
+      "source_file": "design/ux-ui/mis-dashboards.html",
+      "rationale": "Management interface for existing dashboards like 'Concesionaria' and 'Gestión de Proyectos', including activity summaries."
+    },
+    {
+      "id": "tipos_datos_ui",
+      "label": "Data Type Modeler (DataForge)",
+      "file_type": "image",
+      "source_file": "design/ux-ui/tipos-datos.html",
+      "rationale": "Interface for defining reusable SQL data types (Serial, Money, etc.) to ensure precision and validation across models."
+    },
+    {
+      "id": "docker_compose_services",
+      "label": "Docker Infrastructure",
+      "file_type": "code",
+      "source_file": "environment/docker-compose.yml",
+      "rationale": "Orchestrates Postgres, Keycloak (Auth), Redis (Cache), CubeJS (Analytics API), and the FastAPI backend."
+    },
+    {
+      "id": "concesionarias_model",
+      "label": "Concesionarias Dimensional Model",
+      "file_type": "document",
+      "source_file": "environment/modelos-dimensionales/Concesionarias v2.yaml",
+      "rationale": "Defines automotive sales tracking with facts like fct_ventas and dimensions like dim_tiendas and dim_vendedores."
+    },
+    {
+      "id": "gestion_proyectos_model",
+      "label": "Project Management Dimensional Model",
+      "file_type": "document",
+      "source_file": "environment/modelos-dimensionales/Gestion_de_Proyectos v6.yaml",
+      "rationale": "Tracks project execution metrics through fct_horasreportadas and fct_asignaciontareas across dimensions like dim_colaborador and dim_milestone."
+    },
+    {
+      "id": "global_common_dimensions",
+      "label": "Global Dimensions",
+      "file_type": "document",
+      "source_file": "environment/modelos-dimensionales/Global.yaml",
+      "rationale": "Standardizes cross-model dimensions such as dim_date, dim_person, and dim_company."
+    },
+    {
+      "id": "feat00_designer_improvements",
+      "label": "Dashboard Designer Enhancements",
+      "file_type": "rationale",
+      "source_file": "features/FEAT00.md",
+      "rationale": "Requirements for an 'Edit Dashboard' sidebar, color palettes, and configurable filter panel positions."
+    },
+    {
+      "id": "feat01_secure_embedding",
+      "label": "Secure Embedding & Pop-out Sync",
+      "file_type": "rationale",
+      "source_file": "features/FEAT01.md",
+      "rationale": "Specifies JWT-based secure embedding and real-time state synchronization using Broadcast Channel API."
+    },
+    {
+      "id": "project_currency_task",
+      "label": "Currency Selection Task",
+      "file_type": "rationale",
+      "source_file": "memory/project_currency_task.md",
+      "rationale": "Instructions to implement a currency selector in the chart configuration modal, requiring backend migrations and frontend store updates."
+    },
+    {
+      "id": "feat02_models_management_menu",
+      "label": "Models Management Menu",
+      "file_type": "rationale",
+      "source_file": "plans/FEAT02.md",
+      "rationale": "Design for a new 'Models' menu to manage dimensional schemas with ER diagramming and DDL generation capabilities."
+    },
+    {
+      "id": "feat03_multi_diagram_support",
+      "label": "Multi-Diagram Design",
+      "file_type": "rationale",
+      "source_file": "plans/FEAT03.md",
+      "rationale": "Allows splitting complex dimensional models into multiple sub-diagrams while maintaining data synchronization."
+    },
+    {
+      "id": "feat04_table_sidebar_panel",
+      "label": "Table Selection Sidebar",
+      "file_type": "rationale",
+      "source_file": "plans/FEAT04.md",
+      "rationale": "Replaces the 'Add Table' button with a collapsible sidebar supporting drag-and-drop for fact and dimension entities."
+    },
+    {
+      "id": "plan01_drilldown_roadmap",
+      "label": "Drill-Down Implementation Roadmap",
+      "file_type": "rationale",
+      "source_file": "plans/plan01.md",
+      "rationale": "Phased approach for dynamic chart navigation, prioritizing state management (Pinia) before UI implementation."
+    },
+    {
+      "id": "reqspec01_drilldown_functional",
+      "label": "Drill-Down Functional Spec",
+      "file_type": "rationale",
+      "source_file": "plans/reqspec01.md",
+      "rationale": "Defines hierarchy-based navigation in widgets using Cube.js dimensions and cumulative filters."
+    },
+    {
+      "id": "reqspec02_drilldown_state_logic",
+      "label": "Drill-Down State Logic Spec",
+      "file_type": "rationale",
+      "source_file": "plans/reqspec02.md",
+      "rationale": "Technical details for the Pinia store, including DrillStep and WidgetDrillState models for reversibility."
+    }
+  ],
+  "edges": [
+    {
+      "source": "feat02_models_management_menu",
+      "target": "crear_modelo_conceptual_variante1_ui",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/FEAT02.md"
+    },
+    {
+      "source": "feat04_table_sidebar_panel",
+      "target": "feat02_models_management_menu",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/FEAT04.md"
+    },
+    {
+      "source": "plan01_drilldown_roadmap",
+      "target": "reqspec01_drilldown_functional",
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/plan01.md"
+    },
+    {
+      "source": "reqspec02_drilldown_state_logic",
+      "target": "reqspec01_drilldown_functional",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/reqspec02.md"
+    },
+    {
+      "source": "concesionarias_model",
+      "target": "global_common_dimensions",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/modelos-dimensionales/Concesionarias v2.yaml"
+    },
+    {
+      "source": "gestion_proyectos_model",
+      "target": "global_common_dimensions",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/modelos-dimensionales/Gestion_de_Proyectos v6.yaml"
+    },
+    {
+      "source": "concesionarias_model",
+      "target": "tipos_datos_ui",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "environment/modelos-dimensionales/Concesionarias v2.yaml"
+    },
+    {
+      "source": "project_currency_task",
+      "target": "tipos_datos_ui",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "memory/project_currency_task.md"
+    },
+    {
+      "source": "feat01_secure_embedding",
+      "target": "mis_dashboards_ui",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "features/FEAT01.md"
+    },
+    {
+      "source": "docker_compose_services",
+      "target": "concesionarias_model",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "environment/docker-compose.yml"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "dimensional_modeling_core",
+      "label": "Dimensional Modeling Ecosystem",
+      "nodes": [
+        "feat02_models_management_menu",
+        "feat03_multi_diagram_support",
+        "feat04_table_sidebar_panel",
+        "crear_modelo_conceptual_variante1_ui"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/FEAT02.md"
+    },
+    {
+      "id": "drilldown_implementation_cycle",
+      "label": "Dynamic Drill-Down Development",
+      "nodes": [
+        "plan01_drilldown_roadmap",
+        "reqspec01_drilldown_functional",
+        "reqspec02_drilldown_state_logic"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/plan01.md"
+    },
+    {
+      "id": "data_standardization",
+      "label": "Data Governance and Standardization",
+      "nodes": [
+        "tipos_datos_ui",
+        "global_common_dimensions",
+        "project_currency_task"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "memory/project_currency_task.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

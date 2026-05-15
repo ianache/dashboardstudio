@@ -1,0 +1,40 @@
+- generic [ref=e2]:
+  - generic [ref=e4]: Apps
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - button "languages" [ref=e10] [cursor=pointer]: Español˅
+      - heading "Acceder a tu cuenta" [level=1] [ref=e11]
+    - generic [ref=e13]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Usuario
+          - textbox "Usuario" [active] [ref=e19]
+        - generic [ref=e20]:
+          - generic [ref=e21]: Contraseña
+          - generic [ref=e22]:
+            - textbox "Contraseña" [ref=e23]
+            - button "Mostrar contraseña" [ref=e24] [cursor=pointer]:
+              - generic [ref=e25]: 
+        - generic [ref=e26]:
+          - generic [ref=e29] [cursor=pointer]:
+            - checkbox "Seguir conectado" [ref=e30]
+            - text: Seguir conectado
+          - link "¿Has olvidado tu contraseña?" [ref=e33] [cursor=pointer]:
+            - /url: /realms/Apps/login-actions/reset-credentials?client_id=dashboard-app&tab_id=QtLPOiua9jY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC8iLCJydCI6ImNvZGUiLCJybSI6ImZyYWdtZW50Iiwic3QiOiJhZDA2OWQ1My05NWFkLTRlNzgtODk0NC00MmExNTVmMmQ3ZmYifQ
+        - button "Iniciar sesión" [ref=e35] [cursor=pointer]
+      - generic [ref=e36]:
+        - separator [ref=e37]
+        - heading "O inicie sesión con" [level=2] [ref=e38]
+        - list [ref=e39]:
+          - listitem [ref=e40]:
+            - link "Apple" [ref=e41] [cursor=pointer]:
+              - /url: /realms/Apps/broker/apple/login?client_id=dashboard-app&tab_id=QtLPOiua9jY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC8iLCJydCI6ImNvZGUiLCJybSI6ImZyYWdtZW50Iiwic3QiOiJhZDA2OWQ1My05NWFkLTRlNzgtODk0NC00MmExNTVmMmQ3ZmYifQ&session_code=PIG96ozKed5Xv0wrZPElCP53ncvZ5LeJfJTExd2CTt8
+          - listitem [ref=e42]:
+            - link "Google" [ref=e43] [cursor=pointer]:
+              - /url: /realms/Apps/broker/google/login?client_id=dashboard-app&tab_id=QtLPOiua9jY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC8iLCJydCI6ImNvZGUiLCJybSI6ImZyYWdtZW50Iiwic3QiOiJhZDA2OWQ1My05NWFkLTRlNzgtODk0NC00MmExNTVmMmQ3ZmYifQ&session_code=PIG96ozKed5Xv0wrZPElCP53ncvZ5LeJfJTExd2CTt8
+              - generic [ref=e44]: 
+              - text: Google
+      - generic [ref=e49]:
+        - text: ¿Usuario nuevo?
+        - link "Regístrate" [ref=e50] [cursor=pointer]:
+          - /url: /realms/Apps/login-actions/registration?client_id=dashboard-app&tab_id=QtLPOiua9jY&client_data=eyJydSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC8iLCJydCI6ImNvZGUiLCJybSI6ImZyYWdtZW50Iiwic3QiOiJhZDA2OWQ1My05NWFkLTRlNzgtODk0NC00MmExNTVmMmQ3ZmYifQ

@@ -318,7 +318,10 @@ import { useUIStore } from '@/stores/ui'
 const dtStore = useDataTypeStore()
 const uiStore = useUIStore()
 
-onMounted(() => uiStore.setBreadcrumbs(['Modelos', 'Tipos de datos']))
+onMounted(() => uiStore.setBreadcrumbs([
+  { label: 'Modelos', path: '/models' },
+  { label: 'Tipos de datos', path: '/models/data-types' }
+]))
 
 // ── Helpers ──────────────────────────────────────────────────
 function baseMeta(baseType) {

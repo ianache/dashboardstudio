@@ -486,3 +486,19 @@ class IntegrationFlowResponse(IntegrationFlowBase):
     created_by: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+
+# ── IntegrationFlowExecution ──────────────────────────────────────────────────
+
+class IntegrationFlowExecutionBase(BaseModel):
+    flow_id: str
+    status: str
+    logs: List[dict] = []
+    result_data: Optional[dict] = None
+    duration_ms: Optional[int] = None
+
+class IntegrationFlowExecutionResponse(IntegrationFlowExecutionBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    executed_by: Optional[str] = None
+    created_at: Optional[datetime] = None

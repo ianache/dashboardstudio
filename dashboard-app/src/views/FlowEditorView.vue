@@ -19,6 +19,17 @@
       </div>
       <div class="fe-topbar-r">
         <button
+          class="fe-tbr-btn fe-tbr-btn--run"
+          :disabled="loading || canvasRef?.execStatus === 'running'"
+          @click="canvasRef?.runFlow()"
+          :title="canvasRef?.execStatus === 'running' ? 'Ejecutando...' : 'Ejecutar Flujo'">
+          <span class="msi" :class="{ 'spin': canvasRef?.execStatus === 'running' }">
+            {{ canvasRef?.execStatus === 'running' ? 'sync' : 'play_arrow' }}
+          </span>
+          Ejecutar
+        </button>
+        <div class="fe-topbar-sep"></div>
+        <button
           class="fe-tbr-btn fe-tbr-btn--ai"
           :disabled="loading"
           @click="showAiAssist = true"
@@ -56,6 +67,7 @@
       :diagram-type="diagramTypeId"
       :tools="toolsForDiagram"
       :diagram-data="diagramData"
+      :flow-id="flowId"
       @dirty-change="isDirty = $event"
     />
 
@@ -237,7 +249,25 @@ onMounted(async () => {
 .fe-tbr-btn:hover { background: #f8fafc; }
 .fe-tbr-btn--primary { background: #2563eb; border-color: #2563eb; color: #fff; }
 .fe-tbr-btn--primary:hover { background: #1d4ed8; }
+
+.fe-tbr-btn--run {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+  font-weight: 600;
+}
+.fe-tbr-btn--run:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+.fe-tbr-btn--run:disabled {
+  opacity: 0.6;
+}
+
 .fe-tbr-btn--ai { background: linear-gradient(135deg, #7c3aed18, #2563eb18); border-color: #7c3aed44; color: #7c3aed; font-weight: 600; }
+
+.spin { animation: fe-spin 2s linear infinite; }
+@keyframes fe-spin { 100% { transform: rotate(360deg); } }
 .fe-tbr-btn--ai:hover { background: linear-gradient(135deg, #7c3aed28, #2563eb28); }
 .fe-tbr-btn--save:disabled { opacity: 0.38; cursor: default; }
 .fe-tbr-btn--dirty { border-color: #f59e0b; color: #92400e; background: #fffbeb; }

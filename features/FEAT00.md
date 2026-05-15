@@ -1,0 +1,6 @@
+# Feature 00: Mejoras al diseñador de dashboard
+
+# Requirements
+
+- Necesito que en la barra principal de la pagina "Designer" reemplace el panel de cabecera por uno similar al de la página "Designer" con el nombre del dashboard restalado y debajo la descripcion del dahbard y a la derecha tener icono "Setting" que permita que salga desde la derecha un panel de edicion de las propiedades del Dashboard moviendo hacia dicho panel de edicion un editor del nombre y descripcion del dashboard, el selector de la paleta de colores, el check indicador de "publico" y un selector de donde se desea se coloque el panel de los filtros (arriba, izquierda o derecha. Este panel de edición tiene una cabecera con el titulo "Edit Dashboard" y alineado a la derecha un icono para guardar (disco) y otro para cerrar ("X") el panel de edicion. Sea que se seleccione guardar o cerrar el panel debe ocultarse automaticamente.
+- Podemos aplicar un ajuste al diseño del panel superior del Diseñador tenga el titulo y descripcion alineado a la izquierda y alineado a la derecha una miniseccion alineada al titulo del dashboard que contenga: switch de modo (design/vista previa), "+ Widget" y "AI Assist" usando ícono representativo.
