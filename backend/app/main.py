@@ -12,6 +12,8 @@ from app.api.router import api_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+from app.services.scheduler import scheduler, init_scheduler
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
@@ -20,7 +22,10 @@ async def lifespan(app: FastAPI):
             init_db()
         except Exception as e:
             logger.error(f"Failed to initialize database: {e}")
+    
+    init_scheduler()
     yield
+    scheduler.shutdown()
 
 
 settings = get_settings()
