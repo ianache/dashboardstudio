@@ -314,6 +314,13 @@
         </div>
       </div>
     </div>
+    
+    <ExecutionHistoryModal
+      v-if="showHistoryModal"
+      :flow-id="historyTarget?.id"
+      :flow-name="historyTarget?.name"
+      @close="showHistoryModal = false"
+    />
   </div>
 </template>
 
@@ -324,6 +331,7 @@ import { useUIStore } from '@/stores/ui'
 import { useIntegrationsStore } from '@/stores/integrations'
 import { useToolCatalogStore } from '@/stores/toolCatalog'
 import KpiCard from '@/components/common/KpiCard.vue'
+import ExecutionHistoryModal from '@/components/executions/ExecutionHistoryModal.vue'
 
 const router = useRouter()
 const uiStore = useUIStore()
