@@ -1,0 +1,3174 @@
+{
+  "nodes": [
+    {
+      "id": "check_user_exists_check_user",
+      "label": "check_user",
+      "file_type": "code",
+      "source_file": "backend/check_user_exists.py",
+      "source_location": 11,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "env_run_migrations_offline",
+      "label": "run_migrations_offline",
+      "file_type": "code",
+      "source_file": "backend/alembic/env.py",
+      "source_location": 25,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "env_run_migrations_online",
+      "label": "run_migrations_online",
+      "file_type": "code",
+      "source_file": "backend/alembic/env.py",
+      "source_location": 41,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "001_initial_schema_upgrade",
+      "label": "upgrade",
+      "file_type": "code",
+      "source_file": "backend/alembic/versions/001_initial_schema.py",
+      "source_location": 20,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "table_biportal_users",
+      "label": "biportal.users",
+      "file_type": "code",
+      "source_file": "backend/alembic/versions/001_initial_schema.py",
+      "source_location": 28,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "table_biportal_dashboards",
+      "label": "biportal.dashboards",
+      "file_type": "code",
+      "source_file": "backend/alembic/versions/001_initial_schema.py",
+      "source_location": 44,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "main_app",
+      "label": "FastAPI app",
+      "file_type": "code",
+      "source_file": "backend/app/main.py",
+      "source_location": 30,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "router_api_router",
+      "label": "api_router",
+      "file_type": "code",
+      "source_file": "backend/app/api/router.py",
+      "source_location": 9,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cube_config_create_cube_config",
+      "label": "create_cube_config",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/cube_config.py",
+      "source_location": 40,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "currencies_list_currencies",
+      "label": "list_currencies",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/currencies.py",
+      "source_location": 18,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dashboards_create_dashboard",
+      "label": "create_dashboard",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/dashboards.py",
+      "source_location": 17,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "data_sources_create_data_source",
+      "label": "create_data_source",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/data_sources.py",
+      "source_location": 41,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "data_types_list_data_types",
+      "label": "list_data_types",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/data_types.py",
+      "source_location": 34,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "diagram_types_list_diagram_types",
+      "label": "list_diagram_types",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/diagram_types.py",
+      "source_location": 11,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dimensional_models_create_model",
+      "label": "create_model",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/dimensional_models.py",
+      "source_location": 16,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "editor_tools_list_editor_tools",
+      "label": "list_editor_tools",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/editor_tools.py",
+      "source_location": 18,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "integration_flows_list_integration_flows",
+      "label": "list_integration_flows",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/integration_flows.py",
+      "source_location": 18,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "knowledge_spaces_create_knowledge_space",
+      "label": "create_knowledge_space",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/knowledge_spaces.py",
+      "source_location": 16,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "llm_config_create_or_update_llm_config",
+      "label": "create_or_update_llm_config",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/llm_config.py",
+      "source_location": 91,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "palettes_router",
+      "label": "Color Palettes API Router",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/palettes.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "palettes_list_palettes",
+      "label": "List Palettes Endpoint",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/palettes.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "users_provision_users",
+      "label": "Provision Users Endpoint",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/users.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "users_get_current_user_info",
+      "label": "Get Current User Info Endpoint",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/users.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "widgets_create_widget",
+      "label": "Create Widget Endpoint",
+      "file_type": "code",
+      "source_file": "backend/app/api/endpoints/widgets.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "config_settings",
+      "label": "Application Settings",
+      "file_type": "code",
+      "source_file": "backend/app/core/config.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "database_get_db",
+      "label": "Database Session Dependency",
+      "file_type": "code",
+      "source_file": "backend/app/core/database.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "encryption_encrypt_value",
+      "label": "Value Encryption Utility",
+      "file_type": "code",
+      "source_file": "backend/app/core/encryption.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "security_verify_token",
+      "label": "JWT Token Verification",
+      "file_type": "code",
+      "source_file": "backend/app/core/security.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "security_ensure_user_exists",
+      "label": "User Existence Assurance",
+      "file_type": "code",
+      "source_file": "backend/app/core/security.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "models_user",
+      "label": "User SQLAlchemy Model",
+      "file_type": "code",
+      "source_file": "backend/app/models/models.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "models_widget",
+      "label": "Widget SQLAlchemy Model",
+      "file_type": "code",
+      "source_file": "backend/app/models/models.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "schemas_widgetcreate",
+      "label": "Widget Creation Schema",
+      "file_type": "code",
+      "source_file": "backend/app/schemas/schemas.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vite_config",
+      "label": "Vite Configuration",
+      "file_type": "code",
+      "source_file": "dashboard-app/vite.config.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "app_vue",
+      "label": "Root Vue Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/App.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "main_js",
+      "label": "Main Entry Point",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/main.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "datatablewidget_vue",
+      "label": "DataTable Widget Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/charts/DataTableWidget.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "echartwrapper_vue",
+      "label": "EChart Wrapper Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/charts/EChartWrapper.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "kpiwidget_vue",
+      "label": "KPI Widget Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/charts/KpiWidget.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "confirmmodal_vue",
+      "label": "Confirmation Modal Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/common/ConfirmModal.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dashboardcard_vue",
+      "label": "Dashboard Card Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/common/DashboardCard.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "micon_vue",
+      "label": "Material Icon Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/common/MIcon.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "panelheadbodypiecomponent_vue",
+      "label": "Collapsible Panel Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/common/PanelHeadBodyPieComponent.vue",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "token_persistence_rationale",
+      "label": "Session Token Persistence Strategy",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/src/main.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "quickactioncard_component",
+      "label": "QuickActionCard Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/common/QuickActionCard.vue"
+    },
+    {
+      "id": "chartconfigmodal_component",
+      "label": "ChartConfigModal Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue"
+    },
+    {
+      "id": "chartlayoutmodal_component",
+      "label": "ChartLayoutModal Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/ChartLayoutModal.vue"
+    },
+    {
+      "id": "dashboardfilterbar_component",
+      "label": "DashboardFilterBar Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/DashboardFilterBar.vue"
+    },
+    {
+      "id": "dashboardgrid_component",
+      "label": "DashboardGrid Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/DashboardGrid.vue"
+    },
+    {
+      "id": "dashboardruntime_component",
+      "label": "DashboardRuntime Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/DashboardRuntime.vue"
+    },
+    {
+      "id": "dashboardwidget_component",
+      "label": "DashboardWidget Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/DashboardWidget.vue"
+    },
+    {
+      "id": "designercard_component",
+      "label": "DesignerCard Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dashboard/DesignerCard.vue"
+    },
+    {
+      "id": "addnodetodiagrammodal_component",
+      "label": "AddNodeToDiagramModal Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dimensional-model/AddNodeToDiagramModal.vue"
+    },
+    {
+      "id": "diagrampropspanel_component",
+      "label": "DiagramPropsPanel Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dimensional-model/DiagramPropsPanel.vue"
+    },
+    {
+      "id": "diagramtabbar_component",
+      "label": "DiagramTabBar Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dimensional-model/DiagramTabBar.vue"
+    },
+    {
+      "id": "modelcard_component",
+      "label": "ModelCard Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/dimensional-model/ModelCard.vue"
+    },
+    {
+      "id": "aicodeassist_component",
+      "label": "AiCodeAssist Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/editor/AiCodeAssist.vue"
+    },
+    {
+      "id": "floweditorcanvas_component",
+      "label": "FlowEditorCanvas Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/editor/FlowEditorCanvas.vue"
+    },
+    {
+      "id": "propdefstable_component",
+      "label": "PropDefsTable Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/editor/PropDefsTable.vue"
+    },
+    {
+      "id": "applayout_component",
+      "label": "AppLayout Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/layout/AppLayout.vue"
+    },
+    {
+      "id": "sidemenu_component",
+      "label": "SideMenu Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/layout/SideMenu.vue"
+    },
+    {
+      "id": "topbar_component",
+      "label": "TopBar Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/components/layout/TopBar.vue"
+    },
+    {
+      "id": "usecubequery_composable",
+      "label": "useCubeQuery Composable",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/composables/useCubeQuery.js"
+    },
+    {
+      "id": "usedashboardfilters_composable",
+      "label": "useDashboardFilters Composable",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/composables/useDashboardFilters.js"
+    },
+    {
+      "id": "usellmcall_composable",
+      "label": "useLlmCall Composable",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/composables/useLlmCall.js"
+    },
+    {
+      "id": "router_index",
+      "label": "App Router",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/router/index.js"
+    },
+    {
+      "id": "api_service",
+      "label": "API Service",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/services/api.js"
+    },
+    {
+      "id": "keycloak_service",
+      "label": "Keycloak Service",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/services/keycloak.js"
+    },
+    {
+      "id": "auth_store",
+      "label": "Auth Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/auth.js"
+    },
+    {
+      "id": "colorpalettes_usecolorpalettestore",
+      "label": "Color Palette Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/colorPalettes.js"
+    },
+    {
+      "id": "cubejs_usecubestore",
+      "label": "CubeJS Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/cubejs.js"
+    },
+    {
+      "id": "currencies_usecurrencystore",
+      "label": "Currency Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/currencies.js"
+    },
+    {
+      "id": "dashboard_usedashboardstore",
+      "label": "Dashboard Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dashboard.js"
+    },
+    {
+      "id": "datasources_usedatasourcesstore",
+      "label": "Data Sources Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dataSources.js"
+    },
+    {
+      "id": "datatypes_usedatatypestore",
+      "label": "Data Type Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dataTypes.js"
+    },
+    {
+      "id": "dimensionalmodel_usedimensionalmodelstore",
+      "label": "Dimensional Model Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/dimensionalModel.js"
+    },
+    {
+      "id": "integrations_useintegrationsstore",
+      "label": "Integrations Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/integrations.js"
+    },
+    {
+      "id": "knowledgespaces_useknowledgespacesstore",
+      "label": "Knowledge Spaces Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/knowledgeSpaces.js"
+    },
+    {
+      "id": "llm_usellmstore",
+      "label": "LLM Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/llm.js"
+    },
+    {
+      "id": "toolcatalog_usetoolcatalogstore",
+      "label": "Tool Catalog Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/toolCatalog.js"
+    },
+    {
+      "id": "ui_useuistore",
+      "label": "UI Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/ui.js"
+    },
+    {
+      "id": "visualizationconfigurator_usevisualizationconfiguratorstore",
+      "label": "Visualization Configurator Store",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/stores/visualizationConfigurator.js"
+    },
+    {
+      "id": "dashboarddesignerview_component",
+      "label": "Dashboard Designer View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "id": "dashboardviewerview_component",
+      "label": "Dashboard Viewer View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DashboardViewerView.vue"
+    },
+    {
+      "id": "datatypesview_component",
+      "label": "Data Types View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DataTypesView.vue"
+    },
+    {
+      "id": "diagramtypesview_component",
+      "label": "Diagram Types View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DiagramTypesView.vue"
+    },
+    {
+      "id": "dimensionalmodeleditorview_component",
+      "label": "Dimensional Model Editor View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DimensionalModelEditorView.vue"
+    },
+    {
+      "id": "dimensionalmodellistview_component",
+      "label": "Dimensional Model List View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/DimensionalModelListView.vue"
+    },
+    {
+      "id": "floweditorview_component",
+      "label": "Flow Editor View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/FlowEditorView.vue"
+    },
+    {
+      "id": "homeview_component",
+      "label": "Home View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/HomeView.vue"
+    },
+    {
+      "id": "integrationsview_component",
+      "label": "Integrations View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/IntegrationsView.vue"
+    },
+    {
+      "id": "knowledgespacesview_component",
+      "label": "Knowledge Spaces View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/KnowledgeSpacesView.vue"
+    },
+    {
+      "id": "loginview_component",
+      "label": "Login View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/LoginView.vue"
+    },
+    {
+      "id": "settingsview_component",
+      "label": "Settings View",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "id": "toolcatalogview_toolcatalogview",
+      "label": "ToolCatalogView Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/ToolCatalogView.vue"
+    },
+    {
+      "id": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "label": "VisualizationConfiguratorView Component",
+      "file_type": "code",
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "id": "concesionarias_cube_concesionarias",
+      "label": "Concesionarias Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "concesionarias_cube_tiendas",
+      "label": "Tiendas Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "concesionarias_cube_vendedores",
+      "label": "Vendedores Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "concesionarias_cube_ventas",
+      "label": "Ventas Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "cube_auth_config",
+      "label": "CubeJS Auth Config",
+      "file_type": "code",
+      "source_file": "environment/cube-data/cube.js",
+      "rationale": "Verifies Keycloak JWT tokens and normalizes claims into CubeJS security context for multi-tenant isolation."
+    },
+    {
+      "id": "date_cube_date",
+      "label": "Date Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Date.js"
+    },
+    {
+      "id": "orders_cube_orders",
+      "label": "Orders Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/Orders.js"
+    },
+    {
+      "id": "asignaciontareas_cube_asignaciontareas",
+      "label": "Asignaciontareas Fact Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "id": "horasreportadas_cube_horasreportadas",
+      "label": "Horasreportadas Fact Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Horasreportadas.js"
+    },
+    {
+      "id": "colaborador_cube_colaborador",
+      "label": "Colaborador Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Colaborador.js"
+    },
+    {
+      "id": "producto_cube_producto",
+      "label": "Producto Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Producto.js"
+    },
+    {
+      "id": "proyecto_cube_proyecto",
+      "label": "Proyecto Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Proyecto.js"
+    },
+    {
+      "id": "tarea_cube_tarea",
+      "label": "Tarea Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Tarea.js"
+    },
+    {
+      "id": "tiempo_cube_tiempo",
+      "label": "Tiempo Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Tiempo.js"
+    },
+    {
+      "id": "userstory_cube_userstory",
+      "label": "Userstory Dimension Cube",
+      "file_type": "code",
+      "source_file": "environment/cube-data/model/cubes/Userstory.js"
+    },
+    {
+      "id": "initdb_01_keycloak",
+      "label": "Keycloak Database Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/01_keycloak.sql"
+    },
+    {
+      "id": "initdb_02_analytics",
+      "label": "Analytics Schema Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/02_analytics.sql"
+    },
+    {
+      "id": "initdb_03_biportal",
+      "label": "BI Portal Database Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/03_biportal.sql"
+    },
+    {
+      "id": "initdb_03_concesionarios",
+      "label": "Concesionarias Schema Initialization",
+      "file_type": "code",
+      "source_file": "environment/initdb/03_concesionarios.sql"
+    },
+    {
+      "id": "prd_visualizacion_design",
+      "label": "Visualizacion Design Requirements",
+      "file_type": "rationale",
+      "source_file": "PRD.md",
+      "rationale": "Defines the 3-panel architecture (Source, Config, Preview) for the visualization configurator."
+    },
+    {
+      "id": "backend_fastapi_structure",
+      "label": "Backend Architecture",
+      "file_type": "rationale",
+      "source_file": "backend/README.md",
+      "rationale": "FastAPI backend using SQLAlchemy for ORM and Alembic for migrations, with Keycloak integration for auth."
+    },
+    {
+      "id": "chart_dashboardstudio",
+      "label": "Dashboard Studio Helm Chart",
+      "file_type": "code",
+      "source_file": "chart/Chart.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_cubejs",
+      "label": "CubeJS Helm Chart",
+      "file_type": "code",
+      "source_file": "cubejs/chart/Chart.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "backend_deployment",
+      "label": "Backend K8s Deployment",
+      "file_type": "code",
+      "source_file": "chart/templates/backend-resources.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "frontend_deployment",
+      "label": "Frontend K8s Deployment",
+      "file_type": "code",
+      "source_file": "chart/templates/frontend-resources.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cube_api_deployment",
+      "label": "CubeJS API Deployment",
+      "file_type": "code",
+      "source_file": "cubejs/chart/templates/cube-api.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cube_worker_deployment",
+      "label": "CubeJS Refresh Worker Deployment",
+      "file_type": "code",
+      "source_file": "cubejs/chart/templates/cube-worker.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cubestore_router_deployment",
+      "label": "CubeStore Router Deployment",
+      "file_type": "code",
+      "source_file": "cubejs/chart/templates/cubestore-router.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "cubestore_worker_statefulset",
+      "label": "CubeStore Worker StatefulSet",
+      "file_type": "code",
+      "source_file": "cubejs/chart/templates/cubestore-worker.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "git_sync_init_container",
+      "label": "Git-Sync Cube Definitions",
+      "file_type": "code",
+      "source_file": "cubejs/chart/templates/cube-api.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "designer_role",
+      "label": "Designer Role",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Users with this role can create, edit, and delete dashboards and configure widgets."
+    },
+    {
+      "id": "viewer_role",
+      "label": "Viewer Role",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Users with this role can only view public or assigned dashboards."
+    },
+    {
+      "id": "dashboard_grid_system",
+      "label": "Free Positioning Grid System",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/docs/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Implements a 12-column canvas with absolute positioning, drag & resize, and snapping logic."
+    },
+    {
+      "id": "localstorage_persistence_strategy",
+      "label": "LocalStorage Persistence",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Used for 'sin backend' mode, storing auth, dashboards, widgets, and mock users directly in the browser."
+    },
+    {
+      "id": "cubejs_semantic_layer",
+      "label": "CubeJS Semantic Layer",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Acts as the data source for dashboards, providing a metadata schema and SQL generation."
+    },
+    {
+      "id": "echarts_integration",
+      "label": "Apache ECharts Integration",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Uses vue-echarts to render various chart types (bar, line, pie, gauge, radar) with deep-merged custom options."
+    },
+    {
+      "id": "getting_started_doc",
+      "label": "Gu\u00c3\u00ada de Inicio",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/getting-started.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "hr_dimensional_model_doc",
+      "label": "Modelo Dimensional HR",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/hr_dimensional_model.md"
+    },
+    {
+      "id": "routing_doc",
+      "label": "Rutas y Navegaci\u00c3\u00b3n",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/routing.md"
+    },
+    {
+      "id": "walkthrough_doc",
+      "label": "Walkthrough: AI Assist & Export",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/walkthrough.md"
+    },
+    {
+      "id": "widget_doc",
+      "label": "Documentaci\u00c3\u00b3n t\u00c3\u00a9cnica de Widgets",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/widget_doc.md"
+    },
+    {
+      "id": "all_components_doc",
+      "label": "Componentes Reutilizables",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/components/all-components.md"
+    },
+    {
+      "id": "charts_doc",
+      "label": "Componente: EChartWrapper",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/components/charts.md"
+    },
+    {
+      "id": "dashboard_components_doc",
+      "label": "Componentes de Dashboard",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/components/dashboard.md"
+    },
+    {
+      "id": "layout_doc",
+      "label": "Componentes de Layout",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/components/layout.md"
+    },
+    {
+      "id": "cubejs_integration_doc",
+      "label": "Feature: Integraci\u00c3\u00b3n CubeJS",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/features/cubejs-integration.md"
+    },
+    {
+      "id": "dashboards_doc",
+      "label": "Feature: Dashboards",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/features/dashboards.md"
+    },
+    {
+      "id": "data_types_doc",
+      "label": "Feature: Tipos de Datos",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/features/data-types.md"
+    },
+    {
+      "id": "dimensional_models_doc",
+      "label": "Feature: Modelos Dimensionales",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/features/dimensional-models.md"
+    },
+    {
+      "id": "auth_store_doc",
+      "label": "Store: auth",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/auth.md"
+    },
+    {
+      "id": "color_palettes_store_doc",
+      "label": "Store: colorPalettes",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/colorPalettes.md"
+    },
+    {
+      "id": "cubejs_store_doc",
+      "label": "Store: cubejs",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/cubejs.md"
+    },
+    {
+      "id": "dashboard_store_doc",
+      "label": "Store: dashboard",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/dashboard.md"
+    },
+    {
+      "id": "data_types_store_doc",
+      "label": "Store: dataTypes",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/dataTypes.md"
+    },
+    {
+      "id": "dimensional_model_store_doc",
+      "label": "Store: dimensionalModel",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/dimensionalModel.md"
+    },
+    {
+      "id": "ui_store_doc",
+      "label": "Store: ui",
+      "file_type": "document",
+      "source_file": "dashboard-app/docs/stores/ui.md"
+    },
+    {
+      "id": "silent_check_sso_html",
+      "label": "Silent Check SSO",
+      "file_type": "code",
+      "source_file": "dashboard-app/public/silent-check-sso.html"
+    },
+    {
+      "id": "organismo_dashboardruntime_doc",
+      "label": "Organismo: DashboardRuntime",
+      "file_type": "document",
+      "source_file": "design/organismo_dashboardruntime.md"
+    },
+    {
+      "id": "asignar_roles_ui",
+      "label": "Asignar Roles UI",
+      "file_type": "code",
+      "source_file": "design/ux-ui/asignar-roles.html"
+    },
+    {
+      "id": "crear_modelo_conceptual_ui",
+      "label": "Crear Modelo Conceptual UI",
+      "file_type": "code",
+      "source_file": "design/ux-ui/crear-modelo-conceptual_con-botones.html"
+    },
+    {
+      "id": "ai_assist_rationale",
+      "label": "AI Assist Rationale",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/docs/walkthrough.md",
+      "rationale": "Permitir al usuario exportar e inspeccionar el Artifact (JSON puro) generado por la IA antes de aplicar cambios al canvas, aumentando la transparencia y confianza en las sugerencias del LLM."
+    },
+    {
+      "id": "keycloak_integration",
+      "label": "Integraci\u00c3\u00b3n con Keycloak",
+      "file_type": "rationale",
+      "source_file": "dashboard-app/docs/getting-started.md",
+      "rationale": "Gesti\u00c3\u00b3n de roles (admin, designer, viewer) centralizada para asegurar el acceso a dashboards y modelos seg\u00c3\u00ban el perfil del usuario."
+    },
+    {
+      "id": "crear_modelo_conceptual_variante1_ui",
+      "label": "Dimensional Model Designer UI",
+      "file_type": "image",
+      "source_file": "design/ux-ui/crear-modelo-conceptual_variante1.html",
+      "rationale": "Provides a canvas-based interface for ER diagrams and a modal for defining new dimensional models within 'Knowledge Spaces'."
+    },
+    {
+      "id": "frontpage_ui",
+      "label": "Platform Home Dashboard",
+      "file_type": "image",
+      "source_file": "design/ux-ui/frontpage.html",
+      "rationale": "Entry point for users, displaying high-level KPIs (Total Dashboards, Active Widgets) and quick actions for creation."
+    },
+    {
+      "id": "mis_dashboards_ui",
+      "label": "My Dashboards View",
+      "file_type": "image",
+      "source_file": "design/ux-ui/mis-dashboards.html",
+      "rationale": "Management interface for existing dashboards like 'Concesionaria' and 'Gesti\u00c3\u00b3n de Proyectos', including activity summaries."
+    },
+    {
+      "id": "tipos_datos_ui",
+      "label": "Data Type Modeler (DataForge)",
+      "file_type": "image",
+      "source_file": "design/ux-ui/tipos-datos.html",
+      "rationale": "Interface for defining reusable SQL data types (Serial, Money, etc.) to ensure precision and validation across models."
+    },
+    {
+      "id": "docker_compose_services",
+      "label": "Docker Infrastructure",
+      "file_type": "code",
+      "source_file": "environment/docker-compose.yml",
+      "rationale": "Orchestrates Postgres, Keycloak (Auth), Redis (Cache), CubeJS (Analytics API), and the FastAPI backend."
+    },
+    {
+      "id": "concesionarias_model",
+      "label": "Concesionarias Dimensional Model",
+      "file_type": "document",
+      "source_file": "environment/modelos-dimensionales/Concesionarias v2.yaml",
+      "rationale": "Defines automotive sales tracking with facts like fct_ventas and dimensions like dim_tiendas and dim_vendedores."
+    },
+    {
+      "id": "gestion_proyectos_model",
+      "label": "Project Management Dimensional Model",
+      "file_type": "document",
+      "source_file": "environment/modelos-dimensionales/Gestion_de_Proyectos v6.yaml",
+      "rationale": "Tracks project execution metrics through fct_horasreportadas and fct_asignaciontareas across dimensions like dim_colaborador and dim_milestone."
+    },
+    {
+      "id": "global_common_dimensions",
+      "label": "Global Dimensions",
+      "file_type": "document",
+      "source_file": "environment/modelos-dimensionales/Global.yaml",
+      "rationale": "Standardizes cross-model dimensions such as dim_date, dim_person, and dim_company."
+    },
+    {
+      "id": "feat00_designer_improvements",
+      "label": "Dashboard Designer Enhancements",
+      "file_type": "rationale",
+      "source_file": "features/FEAT00.md",
+      "rationale": "Requirements for an 'Edit Dashboard' sidebar, color palettes, and configurable filter panel positions."
+    },
+    {
+      "id": "feat01_secure_embedding",
+      "label": "Secure Embedding & Pop-out Sync",
+      "file_type": "rationale",
+      "source_file": "features/FEAT01.md",
+      "rationale": "Specifies JWT-based secure embedding and real-time state synchronization using Broadcast Channel API."
+    },
+    {
+      "id": "project_currency_task",
+      "label": "Currency Selection Task",
+      "file_type": "rationale",
+      "source_file": "memory/project_currency_task.md",
+      "rationale": "Instructions to implement a currency selector in the chart configuration modal, requiring backend migrations and frontend store updates."
+    },
+    {
+      "id": "feat02_models_management_menu",
+      "label": "Models Management Menu",
+      "file_type": "rationale",
+      "source_file": "plans/FEAT02.md",
+      "rationale": "Design for a new 'Models' menu to manage dimensional schemas with ER diagramming and DDL generation capabilities."
+    },
+    {
+      "id": "feat03_multi_diagram_support",
+      "label": "Multi-Diagram Design",
+      "file_type": "rationale",
+      "source_file": "plans/FEAT03.md",
+      "rationale": "Allows splitting complex dimensional models into multiple sub-diagrams while maintaining data synchronization."
+    },
+    {
+      "id": "feat04_table_sidebar_panel",
+      "label": "Table Selection Sidebar",
+      "file_type": "rationale",
+      "source_file": "plans/FEAT04.md",
+      "rationale": "Replaces the 'Add Table' button with a collapsible sidebar supporting drag-and-drop for fact and dimension entities."
+    },
+    {
+      "id": "plan01_drilldown_roadmap",
+      "label": "Drill-Down Implementation Roadmap",
+      "file_type": "rationale",
+      "source_file": "plans/plan01.md",
+      "rationale": "Phased approach for dynamic chart navigation, prioritizing state management (Pinia) before UI implementation."
+    },
+    {
+      "id": "reqspec01_drilldown_functional",
+      "label": "Drill-Down Functional Spec",
+      "file_type": "rationale",
+      "source_file": "plans/reqspec01.md",
+      "rationale": "Defines hierarchy-based navigation in widgets using Cube.js dimensions and cumulative filters."
+    },
+    {
+      "id": "reqspec02_drilldown_state_logic",
+      "label": "Drill-Down State Logic Spec",
+      "file_type": "rationale",
+      "source_file": "plans/reqspec02.md",
+      "rationale": "Technical details for the Pinia store, including DrillStep and WidgetDrillState models for reversibility."
+    },
+    {
+      "id": "chart_widget_container",
+      "label": "Chart Widget Container",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_widget_header",
+      "label": "Widget Header",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_widget_title",
+      "label": "Titulo del Grafico",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_widget_action_refresh",
+      "label": "Refresh/Swap Action",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_widget_action_settings",
+      "label": "Settings Action",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_widget_action_minimize",
+      "label": "Minimize/Remove Action",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chart_widget_resize_handles",
+      "label": "Resize Handles",
+      "file_type": "image",
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "configurar_metrica_no_permite_seleccion_moneda_configurar_metrica_modal",
+      "label": "Configurar M\u00c3\u00a9trica Modal",
+      "file_type": "image",
+      "source_file": "images/configurar_metrica_no_permite_seleccion_moneda.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "configurar_metrica_no_permite_seleccion_moneda_formato_dropdown",
+      "label": "Formato Dropdown",
+      "file_type": "image",
+      "source_file": "images/configurar_metrica_no_permite_seleccion_moneda.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "configurar_metrica_no_permite_seleccion_moneda_currency_selection_missing_issue",
+      "label": "Currency Selection Missing Issue",
+      "file_type": "image",
+      "source_file": "images/configurar_metrica_no_permite_seleccion_moneda.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_ui",
+      "label": "Visualization Builder UI",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_data_panel",
+      "label": "Data Source Panel",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "left_panel",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_config_panel",
+      "label": "Configuration Panel",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "middle_panel",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_preview_panel",
+      "label": "Preview Panel",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "right_panel",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_metric",
+      "label": "Metric Element",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "data_panel",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_series_config",
+      "label": "Series Configuration Drop Zone",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "config_panel",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_configure_action",
+      "label": "Configure Series Action",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "config_panel_series",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dise_o_visualizacion_expand_collapse_action",
+      "label": "Expand/Collapse Action",
+      "file_type": "image",
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "config_panel_header",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_01_uso_cube_ui_widget",
+      "label": "Barras Chart Widget",
+      "file_type": "image",
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_01_uso_cube_error_message",
+      "label": "Invalid query format error",
+      "file_type": "image",
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_01_uso_cube_query_format_pattern",
+      "label": "Pattern /^[a-zA-Z0-9_]+\\.[a-zA-Z0-9_]+$/",
+      "file_type": "image",
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_01_uso_cube_invalid_measure_value",
+      "label": "Value orders.orders.count",
+      "file_type": "image",
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_show_usd_instead_pen_screenshot",
+      "label": "UI Screenshot: Vista Previa Bar Chart",
+      "file_type": "image",
+      "source_file": "images/error_show_USD_instead_PEN.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_show_usd_instead_pen_chart",
+      "label": "Bar Chart: Costo by Department",
+      "file_type": "image",
+      "source_file": "images/error_show_USD_instead_PEN.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "error_show_usd_instead_pen_issue",
+      "label": "Currency Display Bug: Shows US$ instead of PEN",
+      "file_type": "image",
+      "source_file": "images/error_show_USD_instead_PEN.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "er_pata_gallina_one_or_many_symbol",
+      "label": "Crow's foot notation 'one or many' symbol",
+      "file_type": "image",
+      "source_file": "images/ER_pata_gallina.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_derecha_de_destino_fact_ventas_conces",
+      "label": "fact_ventas_conces",
+      "file_type": "image",
+      "source_file": "images/origen_a_derecha_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_derecha_de_destino_dim_tienda",
+      "label": "dim_tienda",
+      "file_type": "image",
+      "source_file": "images/origen_a_derecha_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_derecha_de_destino_layout_pattern",
+      "label": "Tabla Origen a la Derecha de la tabla Izquierda",
+      "file_type": "image",
+      "source_file": "images/origen_a_derecha_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_izquierda_de_destino_dim_producto",
+      "label": "dim_producto",
+      "file_type": "image",
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_izquierda_de_destino_fact_ventas_conces",
+      "label": "fact_ventas_conces",
+      "file_type": "image",
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_izquierda_de_destino_diagram",
+      "label": "Tabla Origen a la Izquierda Diagram",
+      "file_type": "image",
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "check_user_exists_check_user",
+      "target": "table_biportal_users",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "backend/check_user_exists.py",
+      "source_location": 16,
+      "weight": 1.0
+    },
+    {
+      "source": "env_run_migrations_online",
+      "target": "001_initial_schema_upgrade",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/alembic/env.py",
+      "source_location": 76,
+      "weight": 1.0
+    },
+    {
+      "source": "001_initial_schema_upgrade",
+      "target": "table_biportal_users",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/alembic/versions/001_initial_schema.py",
+      "source_location": 28,
+      "weight": 1.0
+    },
+    {
+      "source": "001_initial_schema_upgrade",
+      "target": "table_biportal_dashboards",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/alembic/versions/001_initial_schema.py",
+      "source_location": 44,
+      "weight": 1.0
+    },
+    {
+      "source": "table_biportal_dashboards",
+      "target": "table_biportal_users",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/alembic/versions/001_initial_schema.py",
+      "source_location": 53,
+      "weight": 1.0
+    },
+    {
+      "source": "main_app",
+      "target": "router_api_router",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/main.py",
+      "source_location": 98,
+      "weight": 1.0
+    },
+    {
+      "source": "router_api_router",
+      "target": "cube_config_create_cube_config",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/api/router.py",
+      "source_location": 17,
+      "weight": 1.0
+    },
+    {
+      "source": "cube_config_create_cube_config",
+      "target": "table_biportal_users",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "backend/app/api/endpoints/cube_config.py",
+      "source_location": 46,
+      "weight": 1.0
+    },
+    {
+      "source": "dashboards_create_dashboard",
+      "target": "table_biportal_dashboards",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "backend/app/api/endpoints/dashboards.py",
+      "source_location": 25,
+      "weight": 1.0
+    },
+    {
+      "source": "palettes_list_palettes",
+      "target": "database_get_db",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/api/endpoints/palettes.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "users_get_current_user_info",
+      "target": "security_ensure_user_exists",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "backend/app/api/endpoints/users.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "widgets_create_widget",
+      "target": "schemas_widgetcreate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/api/endpoints/widgets.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "security_verify_token",
+      "target": "config_settings",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/core/security.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "security_ensure_user_exists",
+      "target": "models_user",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/core/security.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "main_js",
+      "target": "token_persistence_rationale",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/main.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "app_vue",
+      "target": "main_js",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/App.vue",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "echartwrapper_vue",
+      "target": "kpiwidget_vue",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "dashboard-app/src/components/charts/EChartWrapper.vue",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dashboardcard_vue",
+      "target": "micon_vue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/common/DashboardCard.vue",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "kpiwidget_vue",
+      "target": "echartwrapper_vue",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/components/charts/KpiWidget.vue",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dashboardruntime_component",
+      "target": "dashboardfilterbar_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/dashboard/DashboardRuntime.vue"
+    },
+    {
+      "source": "dashboardruntime_component",
+      "target": "dashboardgrid_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/dashboard/DashboardRuntime.vue"
+    },
+    {
+      "source": "dashboardgrid_component",
+      "target": "dashboardwidget_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/dashboard/DashboardGrid.vue"
+    },
+    {
+      "source": "dashboardwidget_component",
+      "target": "usecubequery_composable",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/dashboard/DashboardWidget.vue"
+    },
+    {
+      "source": "chartconfigmodal_component",
+      "target": "usellmcall_composable",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue"
+    },
+    {
+      "source": "aicodeassist_component",
+      "target": "usellmcall_composable",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/editor/AiCodeAssist.vue"
+    },
+    {
+      "source": "dashboardfilterbar_component",
+      "target": "usedashboardfilters_composable",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/components/dashboard/DashboardFilterBar.vue"
+    },
+    {
+      "source": "applayout_component",
+      "target": "sidemenu_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/layout/AppLayout.vue"
+    },
+    {
+      "source": "applayout_component",
+      "target": "topbar_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/components/layout/AppLayout.vue"
+    },
+    {
+      "source": "auth_store",
+      "target": "keycloak_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/stores/auth.js"
+    },
+    {
+      "source": "api_service",
+      "target": "keycloak_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/services/api.js"
+    },
+    {
+      "source": "chartconfigmodal_component",
+      "target": "chartlayoutmodal_component",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/components/dashboard/ChartConfigModal.vue"
+    },
+    {
+      "source": "designercard_component",
+      "target": "modelcard_component",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/components/dashboard/DesignerCard.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "dashboard_usedashboardstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "ui_useuistore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "colorpalettes_usecolorpalettestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "cubejs_usecubestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "dashboarddesignerview_component",
+      "target": "llm_usellmstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DashboardDesignerView.vue"
+    },
+    {
+      "source": "visualizationconfigurator_usevisualizationconfiguratorstore",
+      "target": "cubejs_usecubestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/stores/visualizationConfigurator.js"
+    },
+    {
+      "source": "homeview_component",
+      "target": "dashboard_usedashboardstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/HomeView.vue"
+    },
+    {
+      "source": "dimensionalmodeleditorview_component",
+      "target": "dimensionalmodel_usedimensionalmodelstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelEditorView.vue"
+    },
+    {
+      "source": "dimensionalmodeleditorview_component",
+      "target": "datatypes_usedatatypestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelEditorView.vue"
+    },
+    {
+      "source": "floweditorview_component",
+      "target": "integrations_useintegrationsstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/FlowEditorView.vue"
+    },
+    {
+      "source": "integrationsview_component",
+      "target": "integrations_useintegrationsstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/IntegrationsView.vue"
+    },
+    {
+      "source": "knowledgespacesview_component",
+      "target": "knowledgespaces_useknowledgespacesstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/KnowledgeSpacesView.vue"
+    },
+    {
+      "source": "settingsview_component",
+      "target": "cubejs_usecubestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "source": "settingsview_component",
+      "target": "llm_usellmstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "source": "settingsview_component",
+      "target": "colorpalettes_usecolorpalettestore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/SettingsView.vue"
+    },
+    {
+      "source": "dimensionalmodellistview_component",
+      "target": "dimensionalmodel_usedimensionalmodelstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelListView.vue"
+    },
+    {
+      "source": "dimensionalmodellistview_component",
+      "target": "knowledgespaces_useknowledgespacesstore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/DimensionalModelListView.vue"
+    },
+    {
+      "source": "toolcatalogview_toolcatalogview",
+      "target": "useToolCatalogStore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/ToolCatalogView.vue"
+    },
+    {
+      "source": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "target": "useVisualizationConfiguratorStore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "source": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "target": "useCubeStore",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "source": "concesionarias_cube_ventas",
+      "target": "concesionarias_cube_concesionarias",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "source": "concesionarias_cube_ventas",
+      "target": "concesionarias_cube_tiendas",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "source": "concesionarias_cube_ventas",
+      "target": "concesionarias_cube_vendedores",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "tarea_cube_tarea",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "producto_cube_producto",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "colaborador_cube_colaborador",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "proyecto_cube_proyecto",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "asignaciontareas_cube_asignaciontareas",
+      "target": "tiempo_cube_tiempo",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "source": "horasreportadas_cube_horasreportadas",
+      "target": "userstory_cube_userstory",
+      "relation": "joins",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Horasreportadas.js"
+    },
+    {
+      "source": "cube_auth_config",
+      "target": "initdb_01_keycloak",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/cube-data/cube.js"
+    },
+    {
+      "source": "visualizationconfiguratorview_visualizationconfiguratorview",
+      "target": "prd_visualizacion_design",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "source": "initdb_03_concesionarios",
+      "target": "concesionarias_cube_ventas",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/initdb/03_concesionarios.sql"
+    },
+    {
+      "source": "chart_dashboardstudio",
+      "target": "backend_deployment",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "chart/templates/backend-resources.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_dashboardstudio",
+      "target": "frontend_deployment",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "chart/templates/frontend-resources.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_cubejs",
+      "target": "cube_api_deployment",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/cube-api.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_cubejs",
+      "target": "cube_worker_deployment",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/cube-worker.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_cubejs",
+      "target": "cubestore_router_deployment",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/cubestore-router.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_cubejs",
+      "target": "cubestore_worker_statefulset",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/cubestore-worker.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_deployment",
+      "target": "backend_deployment",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "chart/values.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_deployment",
+      "target": "cube_api_deployment",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "chart/values.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "cube_api_deployment",
+      "target": "cubestore_router_deployment",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/configmap.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "cube_worker_deployment",
+      "target": "cubestore_router_deployment",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/configmap.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "cubestore_router_deployment",
+      "target": "cubestore_worker_statefulset",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/cubestore-router.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "cube_api_deployment",
+      "target": "git_sync_init_container",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/templates/cube-api.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "git_sync_init_container",
+      "target": "cubejs_semantic_layer",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "cubejs/chart/templates/cube-api.yaml",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_grid_system",
+      "target": "echarts_integration",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/docs/architecture.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "localstorage_persistence_strategy",
+      "target": "designer_role",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "dashboard-app/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "getting_started_doc",
+      "target": "keycloak_integration",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/getting-started.md"
+    },
+    {
+      "source": "routing_doc",
+      "target": "auth_store_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/routing.md"
+    },
+    {
+      "source": "walkthrough_doc",
+      "target": "ai_assist_rationale",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/walkthrough.md"
+    },
+    {
+      "source": "dashboard_components_doc",
+      "target": "cubejs_integration_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/components/dashboard.md"
+    },
+    {
+      "source": "charts_doc",
+      "target": "color_palettes_store_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/components/charts.md"
+    },
+    {
+      "source": "dimensional_models_doc",
+      "target": "data_types_store_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/features/dimensional-models.md"
+    },
+    {
+      "source": "dimensional_models_doc",
+      "target": "dimensional_model_store_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/features/dimensional-models.md"
+    },
+    {
+      "source": "dashboards_doc",
+      "target": "dashboard_store_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/features/dashboards.md"
+    },
+    {
+      "source": "cubejs_integration_doc",
+      "target": "cubejs_store_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/features/cubejs-integration.md"
+    },
+    {
+      "source": "organismo_dashboardruntime_doc",
+      "target": "dashboard_components_doc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/organismo_dashboardruntime.md"
+    },
+    {
+      "source": "silent_check_sso_html",
+      "target": "keycloak_integration",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/public/silent-check-sso.html"
+    },
+    {
+      "source": "asignar_roles_ui",
+      "target": "auth_store_doc",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "design/ux-ui/asignar-roles.html"
+    },
+    {
+      "source": "crear_modelo_conceptual_ui",
+      "target": "dimensional_models_doc",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "design/ux-ui/crear-modelo-conceptual_con-botones.html"
+    },
+    {
+      "source": "feat02_models_management_menu",
+      "target": "crear_modelo_conceptual_variante1_ui",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/FEAT02.md"
+    },
+    {
+      "source": "feat04_table_sidebar_panel",
+      "target": "feat02_models_management_menu",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/FEAT04.md"
+    },
+    {
+      "source": "plan01_drilldown_roadmap",
+      "target": "reqspec01_drilldown_functional",
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/plan01.md"
+    },
+    {
+      "source": "reqspec02_drilldown_state_logic",
+      "target": "reqspec01_drilldown_functional",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/reqspec02.md"
+    },
+    {
+      "source": "concesionarias_model",
+      "target": "global_common_dimensions",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/modelos-dimensionales/Concesionarias v2.yaml"
+    },
+    {
+      "source": "gestion_proyectos_model",
+      "target": "global_common_dimensions",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "environment/modelos-dimensionales/Gestion_de_Proyectos v6.yaml"
+    },
+    {
+      "source": "concesionarias_model",
+      "target": "tipos_datos_ui",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "environment/modelos-dimensionales/Concesionarias v2.yaml"
+    },
+    {
+      "source": "project_currency_task",
+      "target": "tipos_datos_ui",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "memory/project_currency_task.md"
+    },
+    {
+      "source": "feat01_secure_embedding",
+      "target": "mis_dashboards_ui",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "features/FEAT01.md"
+    },
+    {
+      "source": "docker_compose_services",
+      "target": "concesionarias_model",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "environment/docker-compose.yml"
+    },
+    {
+      "source": "chart_widget_container",
+      "target": "chart_widget_header",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_widget_header",
+      "target": "chart_widget_title",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_widget_header",
+      "target": "chart_widget_action_refresh",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_widget_header",
+      "target": "chart_widget_action_settings",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_widget_header",
+      "target": "chart_widget_action_minimize",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "chart_widget_container",
+      "target": "chart_widget_resize_handles",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "design/images/chart_widget.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "configurar_metrica_no_permite_seleccion_moneda_configurar_metrica_modal",
+      "target": "configurar_metrica_no_permite_seleccion_moneda_formato_dropdown",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/configurar_metrica_no_permite_seleccion_moneda.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "configurar_metrica_no_permite_seleccion_moneda_formato_dropdown",
+      "target": "configurar_metrica_no_permite_seleccion_moneda_currency_selection_missing_issue",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "images/configurar_metrica_no_permite_seleccion_moneda.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_ui",
+      "target": "dise_o_visualizacion_data_panel",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_ui",
+      "target": "dise_o_visualizacion_config_panel",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_ui",
+      "target": "dise_o_visualizacion_preview_panel",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_metric",
+      "target": "dise_o_visualizacion_series_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "drag_and_drop_indicator",
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_series_config",
+      "target": "dise_o_visualizacion_configure_action",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "gear_icon_pointer",
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_config_panel",
+      "target": "dise_o_visualizacion_expand_collapse_action",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": "chevron_icon_pointer",
+      "weight": 1.0
+    },
+    {
+      "source": "dise_o_visualizacion_config_panel",
+      "target": "dise_o_visualizacion_preview_panel",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "images/dise\u00c3\u00b1o_visualizacion.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "error_01_uso_cube_ui_widget",
+      "target": "error_01_uso_cube_error_message",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "error_01_uso_cube_error_message",
+      "target": "error_01_uso_cube_invalid_measure_value",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "error_01_uso_cube_error_message",
+      "target": "error_01_uso_cube_query_format_pattern",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "error_01_uso_cube_invalid_measure_value",
+      "target": "error_01_uso_cube_query_format_pattern",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "images/error_01_uso_cube.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "error_show_usd_instead_pen_screenshot",
+      "target": "error_show_usd_instead_pen_chart",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/error_show_USD_instead_PEN.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "error_show_usd_instead_pen_screenshot",
+      "target": "error_show_usd_instead_pen_issue",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "images/error_show_USD_instead_PEN.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_derecha_de_destino_dim_tienda",
+      "target": "origen_a_derecha_de_destino_fact_ventas_conces",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/origen_a_derecha_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_derecha_de_destino_fact_ventas_conces",
+      "target": "origen_a_derecha_de_destino_dim_tienda",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "images/origen_a_derecha_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_derecha_de_destino_layout_pattern",
+      "target": "origen_a_derecha_de_destino_dim_tienda",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "images/origen_a_derecha_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_izquierda_de_destino_dim_producto",
+      "target": "origen_a_izquierda_de_destino_fact_ventas_conces",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_izquierda_de_destino_diagram",
+      "target": "origen_a_izquierda_de_destino_dim_producto",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_izquierda_de_destino_diagram",
+      "target": "origen_a_izquierda_de_destino_fact_ventas_conces",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "biportal_schema",
+      "label": "BI Portal Database Schema",
+      "nodes": [
+        "table_biportal_users",
+        "table_biportal_dashboards"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/alembic/versions/001_initial_schema.py"
+    },
+    {
+      "id": "api_v1_endpoints",
+      "label": "API v1 Endpoints",
+      "nodes": [
+        "cube_config_create_cube_config",
+        "currencies_list_currencies",
+        "dashboards_create_dashboard",
+        "data_sources_create_data_source",
+        "data_types_list_data_types",
+        "diagram_types_list_diagram_types",
+        "dimensional_models_create_model",
+        "editor_tools_list_editor_tools",
+        "integration_flows_list_integration_flows",
+        "knowledge_spaces_create_knowledge_space",
+        "llm_config_create_or_update_llm_config"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/api/router.py"
+    },
+    {
+      "id": "auth_flow",
+      "label": "Authentication and User Provisioning Flow",
+      "nodes": [
+        "security_verify_token",
+        "security_ensure_user_exists",
+        "users_get_current_user_info",
+        "main_js"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/app/core/security.py"
+    },
+    {
+      "id": "widget_rendering_system",
+      "label": "Dashboard Widget Rendering System",
+      "nodes": [
+        "widgets_create_widget",
+        "datatablewidget_vue",
+        "echartwrapper_vue",
+        "kpiwidget_vue"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/components/charts/EChartWrapper.vue"
+    },
+    {
+      "id": "authentication_flow",
+      "label": "Authentication and Security Flow",
+      "nodes": [
+        "auth_store",
+        "keycloak_service",
+        "api_service"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/stores/auth.js"
+    },
+    {
+      "id": "dashboard_runtime_stack",
+      "label": "Dashboard Runtime Components Stack",
+      "nodes": [
+        "dashboardruntime_component",
+        "dashboardfilterbar_component",
+        "dashboardgrid_component",
+        "dashboardwidget_component",
+        "usecubequery_composable"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/components/dashboard/DashboardRuntime.vue"
+    },
+    {
+      "id": "dimensional_modeling_ui",
+      "label": "Dimensional Modeling UI Components",
+      "nodes": [
+        "addnodetodiagrammodal_component",
+        "diagrampropspanel_component",
+        "diagramtabbar_component",
+        "modelcard_component"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/components/dimensional-model/DiagramTabBar.vue"
+    },
+    {
+      "id": "state_management_layer",
+      "label": "Pinia State Management Layer",
+      "nodes": [
+        "colorpalettes_usecolorpalettestore",
+        "cubejs_usecubestore",
+        "dashboard_usedashboardstore",
+        "dimensionalmodel_usedimensionalmodelstore",
+        "integrations_useintegrationsstore"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/src/stores/"
+    },
+    {
+      "id": "visual_editor_flow",
+      "label": "Visual Editor Pattern",
+      "nodes": [
+        "dimensionalmodeleditorview_component",
+        "floweditorview_component",
+        "dashboarddesignerview_component"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/views/"
+    },
+    {
+      "id": "gestion_proyectos_dimensional_model",
+      "label": "Gestion de Proyectos Dimensional Model",
+      "nodes": [
+        "asignaciontareas_cube_asignaciontareas",
+        "horasreportadas_cube_horasreportadas",
+        "tarea_cube_tarea",
+        "producto_cube_producto",
+        "colaborador_cube_colaborador",
+        "proyecto_cube_proyecto",
+        "tiempo_cube_tiempo",
+        "userstory_cube_userstory"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/model/cubes/Asignaciontareas.js"
+    },
+    {
+      "id": "concesionarias_dimensional_model",
+      "label": "Concesionarias Dimensional Model",
+      "nodes": [
+        "concesionarias_cube_ventas",
+        "concesionarias_cube_concesionarias",
+        "concesionarias_cube_tiendas",
+        "concesionarias_cube_vendedores",
+        "initdb_03_concesionarios"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "environment/cube-data/Concesionarias.js"
+    },
+    {
+      "id": "visualization_config_flow",
+      "label": "Visualization Configuration Flow",
+      "nodes": [
+        "visualizationconfiguratorview_visualizationconfiguratorview",
+        "prd_visualizacion_design",
+        "useVisualizationConfiguratorStore",
+        "useCubeStore"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "dashboard-app/src/views/VisualizationConfiguratorView.vue"
+    },
+    {
+      "id": "cubejs_distributed_cluster",
+      "label": "CubeJS Distributed Infrastructure",
+      "nodes": [
+        "cube_api_deployment",
+        "cube_worker_deployment",
+        "cubestore_router_deployment",
+        "cubestore_worker_statefulset"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "cubejs/chart/values.yaml"
+    },
+    {
+      "id": "frontend_tech_stack_core",
+      "label": "Frontend Framework Stack",
+      "nodes": [
+        "echarts_integration",
+        "cubejs_semantic_layer",
+        "localstorage_persistence_strategy",
+        "dashboard_grid_system"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/CLAUDE.md"
+    },
+    {
+      "id": "bi_core_stores",
+      "label": "BI Core Stores",
+      "nodes": [
+        "auth_store_doc",
+        "dashboard_store_doc",
+        "cubejs_store_doc",
+        "dimensional_model_store_doc",
+        "data_types_store_doc",
+        "color_palettes_store_doc",
+        "ui_store_doc"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "dashboard-app/docs/README.md"
+    },
+    {
+      "id": "visual_rendering_pipeline",
+      "label": "Visual Rendering Pipeline",
+      "nodes": [
+        "dashboard_components_doc",
+        "charts_doc",
+        "widget_doc",
+        "cubejs_integration_doc"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/docs/components/all-components.md"
+    },
+    {
+      "id": "authentication_and_security",
+      "label": "Authentication and Security Architecture",
+      "nodes": [
+        "auth_store_doc",
+        "keycloak_integration",
+        "silent_check_sso_html",
+        "routing_doc"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "dashboard-app/docs/routing.md"
+    },
+    {
+      "id": "dimensional_modeling_core",
+      "label": "Dimensional Modeling Ecosystem",
+      "nodes": [
+        "feat02_models_management_menu",
+        "feat03_multi_diagram_support",
+        "feat04_table_sidebar_panel",
+        "crear_modelo_conceptual_variante1_ui"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/FEAT02.md"
+    },
+    {
+      "id": "drilldown_implementation_cycle",
+      "label": "Dynamic Drill-Down Development",
+      "nodes": [
+        "plan01_drilldown_roadmap",
+        "reqspec01_drilldown_functional",
+        "reqspec02_drilldown_state_logic"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "plans/plan01.md"
+    },
+    {
+      "id": "data_standardization",
+      "label": "Data Governance and Standardization",
+      "nodes": [
+        "tipos_datos_ui",
+        "global_common_dimensions",
+        "project_currency_task"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "memory/project_currency_task.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

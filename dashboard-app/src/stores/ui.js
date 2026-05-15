@@ -19,7 +19,10 @@ export const useUIStore = defineStore('ui', {
     },
 
     setBreadcrumbs(crumbs) {
-      this.breadcrumbs = crumbs
+      this.breadcrumbs = crumbs.map(c => {
+        if (typeof c === 'string') return { label: c, path: null }
+        return c
+      })
     },
 
     toggleAlerts() {

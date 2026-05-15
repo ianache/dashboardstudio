@@ -437,7 +437,7 @@ const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 const llmStore = useLlmStore()
 
-uiStore.setBreadcrumbs(['Configuración'])
+uiStore.setBreadcrumbs([{ label: 'Configuración', path: '/settings' }])
 
 // CubeJS Config refs
 const apiUrl = ref('')

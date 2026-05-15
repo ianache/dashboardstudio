@@ -111,7 +111,7 @@ onMounted(async () => {
   await dashboardStore.loadFromBackend()
 })
 
-uiStore.setBreadcrumbs(['Inicio'])
+uiStore.setBreadcrumbs([{ label: 'Inicio', path: '/' }])
 
 const myDashboards = computed(() => {
   if (authStore.isDesigner) return dashboardStore.allDashboards

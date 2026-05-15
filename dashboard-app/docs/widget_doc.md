@@ -115,8 +115,8 @@ Cada widget es un objeto JSON con la siguiente estructura:
 | `key` | `string` | `Cubo.campo` | Clave exacta del measure en CubeJS. Ej: `Orders.count`. |
 | `label` | `string` | Libre | Etiqueta visible en leyenda, tooltip y ejes. |
 | `color` | `string` | Hex CSS | Color por defecto de la serie cuando no hay paleta activa. |
-| `format` | `string` | `numero`, `moneda`, `porcentaje` | Formato de los valores numéricos en tooltip y etiquetas. |
-| `currencyId` | `string \| null` | ID de moneda | Solo aplica cuando `format = 'moneda'`. Determina el símbolo (ej: `$`, `€`). |
+| `format` | `string` | `number`, `currency`, `percent` | Formato de los valores numéricos en tooltip y etiquetas. |
+| `currencyId` | `string \| null` | ID de moneda | Solo aplica cuando `format = 'currency'`. Determina el símbolo (ej: `$`, `€`). |
 | `seriesType` | `string` | `bar`, `line`, `area` | Estilo de renderizado de la serie. Solo aplica en tipos `bar` y `combined`. |
 | `showLabel` | `boolean` | `true \| false` | Muestra el valor directamente sobre cada punto/barra. |
 | `labelPosition` | `string` | `top`, `inside`, `bottom`, `left`, `right` | Posición del label respecto al punto de datos. |
@@ -271,13 +271,13 @@ Se configuran en la pestaña **Visualización → Opciones del gráfico Pie**.
 | Parámetro | Tipo | Predeterminado | Descripción |
 |---|---|---|---|
 | `showValue` | `boolean` | `false` | Muestra el valor absoluto en la etiqueta de cada segmento. |
-| `showPercent` | `boolean` | `true` | Muestra el porcentaje en la etiqueta de cada segmento. |
+| `showPercent` | `boolean` | `true` | Muestra el percent en la etiqueta de cada segmento. |
 | `showTotal` | `boolean` | `false` | Muestra el total de todos los segmentos en el centro del donut, junto al nombre de la medida. Cuando está activo, el radio interior se ajusta para dejar espacio al texto central. |
 
 ### Comportamiento predeterminado
 
 - Radio interior: `35%`–`65%` (donut). Con `showTotal: true` se ajusta a `40%`–`68%`.
-- Tooltip muestra nombre, valor formateado y porcentaje.
+- Tooltip muestra nombre, valor formateado y percent.
 - Efecto hover con sombra en el segmento seleccionado.
 - Leyenda scroll en la parte inferior.
 
@@ -288,7 +288,7 @@ Se configuran en la pestaña **Visualización → Opciones del gráfico Pie**.
   "title": "Distribución por región",
   "chartType": "pie",
   "cubeQuery": {
-    "measures": [{ "key": "Orders.count", "label": "Pedidos", "format": "numero" }],
+    "measures": [{ "key": "Orders.count", "label": "Pedidos", "format": "number" }],
     "dimensions": [{ "key": "Orders.region", "label": "Región" }]
   },
   "pieOptions": { "showValue": false, "showPercent": true, "showTotal": true }
@@ -301,13 +301,13 @@ Se configuran en la pestaña **Visualización → Opciones del gráfico Pie**.
 
 **Ícono:** 🎯 · **Motor:** Apache ECharts
 
-Marcador semicircular para visualizar un valor único en una escala 0–100. Ideal para KPIs de cumplimiento o porcentajes de avance.
+Marcador semicircular para visualizar un valor único en una escala 0–100. Ideal para KPIs de cumplimiento o percents de avance.
 
 ### Fuente de datos
 
 | Campo de datos | Descripción |
 |---|---|
-| `data[0].value` | Valor numérico entre 0 y 100 (representa el porcentaje del marcador). |
+| `data[0].value` | Valor numérico entre 0 y 100 (representa el percent del marcador). |
 | `data[0].label` | Etiqueta mostrada debajo del marcador (generalmente el nombre de la medida). |
 
 Solo se usa **el primer elemento** del array de datos y **1 medida**.
@@ -435,7 +435,7 @@ Se configuran en **Visualización → Opciones del gráfico Combinado**.
   "chartType": "combined",
   "cubeQuery": {
     "measures": [
-      { "key": "Orders.count",        "label": "Unidades",  "seriesType": "bar",  "format": "numero" },
+      { "key": "Orders.count",        "label": "Unidades",  "seriesType": "bar",  "format": "number" },
       { "key": "Orders.totalRevenue", "label": "Ingresos",  "seriesType": "line", "format": "moneda", "currencyId": "usd" }
     ],
     "timeDimension": { "dimension": "Orders.createdAt", "granularity": "month" }
@@ -540,9 +540,9 @@ El formato del valor principal se toma de `cubeQuery.measures[0].format`:
 
 | `format` | Resultado |
 |---|---|
-| `numero` | Número localizado en español. Valores ≥ 1K abreviados (ej: `125.4K`). Valores ≥ 1M abreviados (ej: `1.25M`). |
+| `number` | Número localizado en español. Valores ≥ 1K abreviados (ej: `125.4K`). Valores ≥ 1M abreviados (ej: `1.25M`). |
 | `moneda` | Símbolo de la moneda (`currencyId`) + valor abreviado. Ej: `$ 125.4K`, `€ 1.25M`. |
-| `porcentaje` | Valor con 1 decimal + símbolo `%`. Ej: `87.3%`. |
+| `percent` | Valor con 1 decimal + símbolo `%`. Ej: `87.3%`. |
 
 ### Diseño visual
 

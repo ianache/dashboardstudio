@@ -131,16 +131,21 @@
             <marker id="fec-arr-sel" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
               <path d="M0,0 L0,8 L10,4 z" fill="#2563eb" />
             </marker>
+            <marker id="fec-arr-active" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+              <path d="M0,0 L0,8 L10,4 z" fill="#22c55e" />
+            </marker>
           </defs>
           <!-- Connections -->
           <path
             v-for="conn in connections"
             :key="conn.id"
             :d="connPath(conn)"
-            :stroke="selectedConn === conn.id || hoveredConn === conn.id ? '#2563eb' : '#94a3b8'"
-            :stroke-width="selectedConn === conn.id ? 2.5 : 2"
+            class="fec-conn"
+            :class="{ 'fec-conn--active': nodeExecStatus[conn.from] === 'success' }"
+            :stroke="selectedConn === conn.id || hoveredConn === conn.id ? '#2563eb' : (nodeExecStatus[conn.from] === 'success' ? '#22c55e' : '#94a3b8')"
+            :stroke-width="selectedConn === conn.id ? 2.5 : (nodeExecStatus[conn.from] === 'success' ? 3 : 2)"
             fill="none"
-            :marker-end="selectedConn === conn.id || hoveredConn === conn.id ? 'url(#fec-arr-sel)' : 'url(#fec-arr)'"
+            :marker-end="selectedConn === conn.id || hoveredConn === conn.id ? 'url(#fec-arr-sel)' : (nodeExecStatus[conn.from] === 'success' ? 'url(#fec-arr-active)' : 'url(#fec-arr)')"
             style="cursor:pointer"
             @mouseenter="hoveredConn = conn.id"
             @mouseleave="hoveredConn = null"
@@ -162,10 +167,23 @@
         <div
           v-for="node in nodes" :key="node.id"
           class="fec-node"
-          :class="[`fec-node--${node.category}`, { 'fec-node--sel': selectedNode?.id === node.id }]"
+          :class="[
+            `fec-node--${node.category}`, 
+            { 
+              'fec-node--sel': selectedNode?.id === node.id,
+              'fec-node--executing': nodeExecStatus[node.id] === 'running',
+              'fec-node--success':   nodeExecStatus[node.id] === 'success',
+              'fec-node--error':     nodeExecStatus[node.id] === 'error'
+            }
+          ]"
           :style="{ left: node.x + 'px', top: node.y + 'px', '--nc': getCatColor(node.category), '--nb': getCatBg(node.category) }"
           @mousedown.stop="onNodeMousedown($event, node)"
           @click.stop="selectNode(node)">
+
+          <!-- Node status badge -->
+          <div v-if="nodeExecStatus[node.id] && nodeExecStatus[node.id] !== 'running'" class="fec-node-badge" :class="`fec-node-badge--${nodeExecStatus[node.id]}`">
+            <span class="msi">{{ nodeExecStatus[node.id] === 'success' ? 'check_circle' : 'cancel' }}</span>
+          </div>
 
           <div v-if="node.category !== 'source'" class="fec-port fec-port--in"
             @mousedown.stop="onPortMousedown($event, node, 'in')"
@@ -203,15 +221,25 @@
     </main>
 
     <!-- ── Right Panel: Properties ─────────────────────────────────────────── -->
-    <aside class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed }">
+    <aside class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--wide': selectedNode && hasCodeProp(selectedNode.toolType) }">
       <button class="fec-toggle fec-toggle--right" @click="rightCollapsed = !rightCollapsed" :title="rightCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ rightCollapsed ? 'chevron_left' : 'chevron_right' }}</span>
       </button>
 
       <div v-if="!rightCollapsed" class="fec-right-inner">
 
+        <!-- Tab Switcher -->
+        <div class="fec-tabs" v-if="!selectedNode">
+          <button class="fec-tab" :class="{ active: rightTab === 'props' }" @click="rightTab = 'props'">
+            <span class="msi" style="font-size:16px">settings</span>Propiedades
+          </button>
+          <button class="fec-tab" :class="{ active: rightTab === 'history' }" @click="loadHistory">
+            <span class="msi" style="font-size:16px">history</span>Historial
+          </button>
+        </div>
+
         <!-- ── Flow properties ── -->
-        <template v-if="!selectedNode">
+        <template v-if="!selectedNode && rightTab === 'props'">
           <div class="fec-props-hdr">
             <span class="msi" style="font-size:20px;color:#2563eb">settings</span>
             <div>
@@ -260,8 +288,33 @@
           </div>
         </template>
 
+        <!-- ── History ── -->
+        <template v-if="!selectedNode && rightTab === 'history'">
+          <div class="fec-history">
+            <div v-if="historyLoading" class="fec-history-loading">
+              <span class="msi spin">sync</span> Cargando historial...
+            </div>
+            <div v-else-if="history.length === 0" class="fec-history-empty">
+              No hay ejecuciones registradas.
+            </div>
+            <div v-else class="fec-history-list">
+              <div v-for="exec in history" :key="exec.id" class="fec-history-item" @click="loadExecutionLogs(exec.id)">
+                <div class="fec-hi-header">
+                  <span class="fec-hi-status" :class="`fec-hi-status--${exec.status}`"></span>
+                  <span class="fec-hi-date">{{ formatDateTime(exec.created_at) }}</span>
+                  <span class="fec-hi-duration">{{ exec.duration_ms }}ms</span>
+                </div>
+                <div class="fec-hi-footer">
+                  <span class="fec-hi-id">{{ exec.id }}</span>
+                  <span class="msi" style="font-size:14px">chevron_right</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
         <!-- ── Node properties ── -->
-        <template v-else>
+        <template v-else-if="selectedNode">
           <div class="fec-props-hdr">
             <div class="fec-props-node-ico" :style="{ background: getCatBg(selectedNode.category), color: getCatColor(selectedNode.category) }">
               <span class="msi" style="font-size:18px">{{ getToolByType(selectedNode.toolType)?.icon || 'circle' }}</span>
@@ -278,18 +331,83 @@
             <input v-model="selectedNode.label" class="fec-prop-i" />
           </div>
 
+          <!-- ── Connection binding (source & destination nodes only) ── -->
+          <template v-if="isConnectable(selectedNode.category)">
+            <div class="fec-divider"><span>Conexión de Datos</span></div>
+
+            <!-- Connection Type -->
+            <div class="fec-prop-g">
+              <label class="fec-prop-l">Tipo de Conexión</label>
+              <div class="fec-sel-wrap">
+                <select
+                  v-model="selectedNode.props.connection_type"
+                  class="fec-prop-sel"
+                  @change="onConnectionTypeChange"
+                >
+                  <option value="">— Seleccionar tipo —</option>
+                  <option v-for="ct in CONN_TYPES" :key="ct.value" :value="ct.value">{{ ct.label }}</option>
+                </select>
+                <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
+              </div>
+            </div>
+
+            <!-- Connection -->
+            <div class="fec-prop-g">
+              <label class="fec-prop-l">
+                Conexión
+                <span v-if="dataSrcLoading" class="fec-conn-spin">
+                  <span class="msi spin" style="font-size:12px">sync</span>
+                </span>
+              </label>
+              <div class="fec-sel-wrap">
+                <select
+                  v-model="selectedNode.props.connection_id"
+                  class="fec-prop-sel"
+                  :disabled="!selectedNode.props.connection_type || dataSrcLoading"
+                  @change="onConnectionSelect"
+                >
+                  <option value="">— Seleccionar conexión —</option>
+                  <option v-for="ds in filteredDataSources" :key="ds.id" :value="ds.id">{{ ds.name }}</option>
+                </select>
+                <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
+              </div>
+              <p v-if="selectedNode.props.connection_type && !dataSrcLoading && filteredDataSources.length === 0"
+                 class="fec-conn-hint">
+                Sin conexiones de tipo "{{ connTypeLabel(selectedNode.props.connection_type) }}"
+              </p>
+              <p v-if="selectedNode.props.connection_id" class="fec-conn-filled">
+                <span class="msi" style="font-size:12px">check_circle</span>
+                Propiedades completadas
+              </p>
+            </div>
+          </template>
+
           <div class="fec-divider"><span>Propiedades del componente</span></div>
 
           <template v-for="(def, key) in getNodePropDefs(selectedNode.toolType)" :key="key">
             <div class="fec-prop-g">
               <label class="fec-prop-l">{{ def.label }}</label>
-              <textarea v-if="def.type === 'textarea'" v-model="selectedNode.props[key]" class="fec-prop-ta" :rows="def.rows || 3" :placeholder="def.placeholder || ''"></textarea>
+              
+              <!-- Code Editor -->
+              <CodeEditor 
+                v-if="def.type === 'code'"
+                v-model="selectedNode.props[key]"
+                :language="def.language || 'javascript'"
+                height="320px"
+              />
+
+              <!-- Textarea -->
+              <textarea v-else-if="def.type === 'textarea'" v-model="selectedNode.props[key]" class="fec-prop-ta" :rows="def.rows || 3" :placeholder="def.placeholder || ''"></textarea>
+              
+              <!-- Select -->
               <div v-else-if="def.type === 'select'" class="fec-sel-wrap">
                 <select v-model="selectedNode.props[key]" class="fec-prop-sel">
                   <option v-for="o in def.options" :key="o.value" :value="o.value">{{ o.label }}</option>
                 </select>
                 <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
               </div>
+              
+              <!-- Default input -->
               <input v-else v-model="selectedNode.props[key]" class="fec-prop-i" :placeholder="def.placeholder || ''" />
             </div>
           </template>
@@ -304,20 +422,38 @@
       </div>
     </aside>
 
+    <!-- ── Execution Console (Bottom Panel) ────────────────────────────────── -->
+    <div v-if="showConsole" class="fec-bottom" :style="{ height: '240px' }">
+      <ExecutionConsole 
+        :logs="execLogs" 
+        :status="execStatus" 
+        @close="showConsole = false"
+        @clear="execLogs = []"
+      />
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { CAT_META } from '@/stores/toolCatalog'
+import { useAuthStore } from '@/stores/auth'
+import CodeEditor from './CodeEditor.vue'
+import ExecutionConsole from './ExecutionConsole.vue'
+import { dataSourcesApi } from '@/services/api'
+import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 const props = defineProps({
   diagramType: { type: String, required: true },
   tools:       { type: Array,  default: () => [] },
   diagramData: { type: Object, default: () => ({ nodes: [], connections: [], metadata: {} }) },
+  flowId:      { type: String, default: null } // New prop to allow execution
 })
 const emit = defineEmits(['save', 'dirty-change'])
+
+const authStore = useAuthStore()
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CANVAS_W = 4000
@@ -363,8 +499,70 @@ function getToolByType(toolType) {
 function getNodePropDefs(toolType) {
   return getToolByType(toolType)?.prop_defs || {}
 }
+function hasCodeProp(toolType) {
+  const defs = getNodePropDefs(toolType)
+  return Object.values(defs).some(d => d.type === 'code')
+}
 function getCatColor(cat) { return CAT_META[cat]?.color || '#64748b' }
 function getCatBg(cat)    { return CAT_META[cat]?.bg    || '#f8fafc' }
+
+// ─── Data-source connection binding ──────────────────────────────────────────
+// CONN_TYPES imported from @/constants/connectionTypes
+
+const dataSources    = ref([])
+const dataSrcLoading = ref(false)
+const dataSrcLoaded  = ref(false)
+
+async function loadDataSources() {
+  if (dataSrcLoaded.value) return
+  dataSrcLoading.value = true
+  try {
+    dataSources.value = await dataSourcesApi.getAll()
+    dataSrcLoaded.value = true
+  } catch (e) {
+    console.error('[FlowEditor] Failed to load data sources:', e)
+  } finally {
+    dataSrcLoading.value = false
+  }
+}
+
+function isConnectable(cat) { return cat === 'source' || cat === 'destination' }
+function connTypeLabel(v)   { return _connTypeLabel(v) }
+
+const filteredDataSources = computed(() => {
+  const type = selectedNode.value?.props?.connection_type
+  if (!type) return []
+  return dataSources.value.filter(ds => ds.type === type)
+})
+
+function onConnectionTypeChange() {
+  if (!selectedNode.value) return
+  selectedNode.value.props.connection_id = ''
+  _clearConnFields()
+}
+
+function onConnectionSelect() {
+  const node = selectedNode.value
+  if (!node) return
+  const ds = dataSources.value.find(d => d.id === node.props.connection_id)
+  if (!ds) return
+  const cfg = ds.connection_config || {}
+  const FILL = ['host', 'port', 'username', 'password', 'database', 'schema', 'url', 'email', 'api_key', 'token']
+  for (const key of FILL) {
+    if (cfg[key] !== undefined && key in (node.props || {})) {
+      node.props[key] = cfg[key]
+    }
+  }
+}
+
+function _clearConnFields() {
+  const node = selectedNode.value
+  if (!node) return
+  const FILL = ['host', 'port', 'username', 'password', 'database', 'schema', 'url', 'email', 'api_key', 'token']
+  for (const key of FILL) {
+    if (key in (node.props || {})) node.props[key] = ''
+  }
+}
 
 // Group tools by category for left panel
 const toolsByCategory = computed(() => {
@@ -422,6 +620,15 @@ const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k,
 const selectedNode   = ref(null)
 const selectedConn   = ref(null)
 const hoveredConn    = ref(null)
+
+// Lazy-load data sources + ensure connection props exist when a connectable node is selected
+watch(selectedNode, (node) => {
+  if (!node || !isConnectable(node.category)) return
+  loadDataSources()
+  if (!node.props) node.props = {}
+  if (!('connection_type' in node.props)) node.props.connection_type = ''
+  if (!('connection_id'   in node.props)) node.props.connection_id   = ''
+})
 const snapToGrid     = ref(true)
 const isDragOver     = ref(false)
 const zoom           = ref(1)
@@ -430,6 +637,143 @@ const panY           = ref(40)
 const fbarPos        = ref({ x: 16, y: 16 })
 const tempConn       = ref(null)
 const canvasAreaRef  = ref(null)
+
+// ─── Execution State ──────────────────────────────────────────────────────────
+const showConsole    = ref(false)
+const execLogs       = ref([])
+const execStatus     = ref('idle')
+const nodeExecStatus = ref({}) // mapping of node_id -> status
+let ws               = null
+
+const rightTab       = ref('props') // props, history
+const history        = ref([])
+const historyLoading = ref(false)
+
+async function loadHistory() {
+  if (!props.flowId) return
+  rightTab.value = 'history'
+  historyLoading.value = true
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/integration-flows/${props.flowId}/executions`, {
+      headers: { 'Authorization': `Bearer ${window.keycloak?.token}` }
+    })
+    history.value = await response.json()
+  } catch (e) {
+    console.error('Failed to load history:', e)
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+async function loadExecutionLogs(execId) {
+  showConsole.value = true
+  execStatus.value = 'idle'
+  execLogs.value = [{ type: 'info', message: `Cargando logs de ejecución ${execId}...` }]
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/integration-flows/executions/${execId}/logs`, {
+      headers: { 'Authorization': `Bearer ${window.keycloak?.token}` }
+    })
+    const data = await response.json()
+    execLogs.value = data.logs.map(l => ({ ...l, timestamp: new Date(data.created_at) }))
+    if (data.result_data) {
+      execLogs.value.push({ type: 'result', data: data.result_data, timestamp: new Date() })
+    }
+    execStatus.value = data.status
+  } catch (e) {
+    execLogs.value.push({ type: 'error', message: 'Error al cargar logs' })
+  }
+}
+
+function formatDateTime(val) {
+  if (!val) return ''
+  return new Date(val).toLocaleString()
+}
+
+function runFlow() {
+  if (!props.flowId) {
+    alert('Guarde el flujo antes de ejecutarlo')
+    return
+  }
+  
+  showConsole.value    = true
+  execStatus.value     = 'running'
+  nodeExecStatus.value = {}
+  execLogs.value       = [{ type: 'info', message: 'Iniciando conexión...', timestamp: new Date() }]
+  
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  let host = 'localhost:8000'
+
+  if (import.meta.env.VITE_API_URL) {
+    // Remove protocol and trailing slashes
+    host = import.meta.env.VITE_API_URL
+      .replace('http://', '')
+      .replace('https://', '')
+      .replace('/api/v1', '')
+    
+    // Ensure no trailing slash
+    if (host.endsWith('/')) host = host.slice(0, -1)
+  } else {
+    // Fallback to current location but different port if we are on dev port 3000
+    host = window.location.host.replace(':3000', ':8000')
+  }
+    
+  console.log(`[WebSocket] Connecting to: ${protocol}//${host}/api/v1/integration-flows/${props.flowId}/logs`)
+  ws = new WebSocket(`${protocol}//${host}/api/v1/integration-flows/${props.flowId}/logs`)
+  
+  ws.onopen = () => {
+    console.log('[WebSocket] Connection opened')
+    execLogs.value.push({ type: 'info', message: 'Ejecución iniciada', timestamp: new Date() })
+    ws.send(JSON.stringify({ 
+      payload: {},
+      user_id: authStore.user?.id
+    }))
+  }
+  
+  ws.onmessage = (event) => {
+    console.log('[WebSocket] Message received:', event.data)
+    const data = JSON.parse(event.data)
+    
+    if (data.type === 'node_status') {
+      nodeExecStatus.value[data.node_id] = data.status
+    } else if (data.type === 'status') {
+      execStatus.value = data.success ? 'success' : 'error'
+      execLogs.value.push({ 
+        type: data.success ? 'info' : 'error', 
+        message: `Fin de ejecución (Código: ${data.exit_code})`, 
+        timestamp: new Date() 
+      })
+    } else {
+      execLogs.value.push({
+        ...data,
+        timestamp: new Date()
+      })
+    }
+  }
+  
+  ws.onerror = (err) => {
+    console.error('[WebSocket] Error detected:', err)
+    execStatus.value = 'error'
+    execLogs.value.push({ type: 'error', message: 'Error de conexión WebSocket', timestamp: new Date() })
+  }
+  
+  ws.onclose = (event) => {
+    console.log(`[WebSocket] Connection closed (Code: ${event.code}, Reason: ${event.reason})`)
+    if (execStatus.value === 'running') {
+      execStatus.value = 'error'
+      const reason = event.reason ? `: ${event.reason}` : ''
+      execLogs.value.push({ 
+        type: 'error', 
+        message: `Conexión cerrada inesperadamente (Código ${event.code}${reason})`, 
+        timestamp: new Date() 
+      })
+    }
+  }
+}
+
+onBeforeUnmount(() => {
+  if (ws) ws.close()
+})
 
 function toggleCat(key) { openCats.value[key] = !openCats.value[key] }
 
@@ -636,7 +980,7 @@ function save() {
   markSaved()
 }
 
-defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView })
+defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView, runFlow, execStatus })
 
 onMounted(() => { setTimeout(fitView, 80) })
 </script>
@@ -758,6 +1102,23 @@ onMounted(() => { setTimeout(fitView, 80) })
 }
 .fec-node:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.12); border-color: #cbd5e1; }
 .fec-node--sel  { border-color: #2563eb !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
+/* Execution visual states */
+.fec-node--executing { border-color: #22c55e !important; border-width: 3px !important; box-shadow: 0 0 15px rgba(34,197,94,0.3); }
+.fec-node--success   { border-color: #22c55e !important; }
+.fec-node--error     { border-color: #ef4444 !important; }
+
+/* Status Badges */
+.fec-node-badge {
+  position: absolute; top: -10px; right: -10px; width: 22px; height: 22px;
+  border-radius: 50%; background: #fff; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.fec-node-badge .msi { font-size: 18px; }
+.fec-node-badge--success { color: #22c55e; }
+.fec-node-badge--error   { color: #ef4444; }
+
 .fec-node-hdr {
   display: flex; align-items: center; gap: 7px; padding: 8px 10px;
   background: var(--nb); border-radius: 8px 8px 0 0; border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -797,12 +1158,17 @@ onMounted(() => { setTimeout(fitView, 80) })
 }
 .fec-conn-del:hover { background: #fee2e2; }
 
+/* Connection visual states */
+.fec-conn { transition: stroke 0.3s, stroke-width 0.3s; }
+.fec-conn--active { stroke: #22c55e !important; stroke-width: 3 !important; }
+
 /* ── Right Panel ──────────────────────────────────────────────── */
 .fec-right {
   width: 272px; background: #fff; border-left: 1px solid #e2e8f0;
   display: flex; flex-shrink: 0; transition: width 0.22s ease;
   position: relative; overflow: hidden;
 }
+.fec-right--wide { width: 500px; }
 .fec-right--collapsed { width: 24px; }
 
 .fec-right-inner { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px; display: flex; flex-direction: column; }
@@ -854,4 +1220,58 @@ onMounted(() => { setTimeout(fitView, 80) })
   font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.12s;
 }
 .fec-node-del-btn:hover { background: #fee2e2; }
+
+/* Tabs */
+.fec-tabs { display: flex; gap: 4px; border-bottom: 1px solid #f1f5f9; margin-bottom: 16px; padding-bottom: 8px; }
+.fec-tab {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 6px 4px; border: none; background: transparent; cursor: pointer;
+  font-size: 11px; font-weight: 600; color: #94a3b8; border-radius: 6px; transition: all 0.15s;
+}
+.fec-tab:hover { background: #f8fafc; color: #475569; }
+.fec-tab.active { background: #eff6ff; color: #2563eb; }
+
+/* History */
+.fec-history-list { display: flex; flex-direction: column; gap: 8px; }
+.fec-history-item {
+  padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer;
+  transition: all 0.15s; background: #fff;
+}
+.fec-history-item:hover { border-color: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,0.08); }
+.fec-hi-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.fec-hi-status { width: 8px; height: 8px; border-radius: 50%; }
+.fec-hi-status--success { background: #10b981; box-shadow: 0 0 6px #10b98144; }
+.fec-hi-status--error { background: #ef4444; }
+.fec-hi-date { font-size: 11px; font-weight: 600; color: #1e293b; flex: 1; }
+.fec-hi-duration { font-size: 10px; color: #94a3b8; }
+.fec-hi-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.fec-hi-id { font-size: 10px; color: #cbd5e1; font-family: monospace; }
+.fec-history-loading, .fec-history-empty { padding: 32px 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+.spin { animation: spin 2s linear infinite; }
+
+.fec-run-wrap { margin-top: auto; padding-top: 24px; }
+.fec-run-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px; border-radius: 8px; border: none; cursor: pointer;
+  background: #2563eb; color: #fff; font-size: 13px; font-weight: 600;
+  transition: all 0.15s;
+}
+.fec-run-btn:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+.fec-run-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; }
+.fec-run-btn .msi { animation: none; }
+.exec-status-running .fec-run-btn .msi { animation: spin 2s linear infinite; }
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* ── Bottom Panel ─────────────────────────────────────────────── */
+.fec-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 30;
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+}
+
+/* Connection binding helpers */
+.fec-conn-hint   { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.fec-conn-spin   { margin-left: 6px; vertical-align: middle; }
+.fec-conn-filled { font-size: 11px; color: #16a34a; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 </style>

@@ -80,8 +80,12 @@
             <router-link to="/integrations/tool-catalog" class="nav-sub-item" :class="{ active: $route.name === 'ToolCatalog' }">
               <span class="sub-dot" />Catálogo de Herramientas
             </router-link>
-          </div>
-        </transition>
+            <router-link to="/integrations/connections" class="nav-sub-item" :class="{ active: $route.name === 'Connections' }">
+              <span class="sub-dot" />Conexiones
+            </router-link>
+            </div>
+            </transition>
+
       </div>
 
       <!-- Dashboards section -->

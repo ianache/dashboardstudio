@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    {
+      "id": "origen_a_izquierda_de_destino_dim_producto",
+      "label": "dim_producto",
+      "file_type": "image",
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_izquierda_de_destino_fact_ventas_conces",
+      "label": "fact_ventas_conces",
+      "file_type": "image",
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "origen_a_izquierda_de_destino_diagram",
+      "label": "Tabla Origen a la Izquierda Diagram",
+      "file_type": "image",
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "origen_a_izquierda_de_destino_dim_producto",
+      "target": "origen_a_izquierda_de_destino_fact_ventas_conces",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_izquierda_de_destino_diagram",
+      "target": "origen_a_izquierda_de_destino_dim_producto",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "origen_a_izquierda_de_destino_diagram",
+      "target": "origen_a_izquierda_de_destino_fact_ventas_conces",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "images/origen_a_izquierda_de_destino.png",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

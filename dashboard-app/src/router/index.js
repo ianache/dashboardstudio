@@ -91,6 +91,12 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Catálogo de Herramientas'] }
       },
       {
+        path: 'integrations/connections',
+        name: 'Connections',
+        component: () => import('@/views/ConnectionsView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Conexiones'] }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/SettingsView.vue'),

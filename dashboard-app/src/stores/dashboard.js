@@ -182,6 +182,29 @@ export const useDashboardStore = defineStore('dashboard', {
       }
     },
 
+    async updateDashboard(id, updates) {
+      console.log(`[Store] Updating dashboard ${id}`, updates)
+      try {
+        const backendUpdates = {}
+        if (updates.name !== undefined) backendUpdates.name = updates.name
+        if (updates.description !== undefined) backendUpdates.description = updates.description
+        if (updates.isPublic !== undefined) backendUpdates.is_public = updates.isPublic
+        if (updates.colorPalette !== undefined) backendUpdates.color_palette = updates.colorPalette
+        if (updates.filters !== undefined) backendUpdates.filters = updates.filters
+
+        await dashboardApi.update(id, backendUpdates)
+        
+        const idx = this.dashboards.findIndex(d => d.id === id)
+        if (idx !== -1) {
+          this.dashboards[idx] = { ...this.dashboards[idx], ...updates }
+          console.log(`[Store] Dashboard ${id} updated in local state`)
+        }
+      } catch (err) {
+        console.error('Failed to update dashboard:', err)
+        throw err
+      }
+    },
+
     async deleteDashboard(id) {
       try {
         await dashboardApi.delete(id)

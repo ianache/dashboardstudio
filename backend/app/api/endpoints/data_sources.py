@@ -1,237 +1,213 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional, Any
+from pydantic import BaseModel, ConfigDict
+from datetime import datetime
+import random
+import json
+
 from app.core.database import get_db
 from app.core.security import get_current_user, require_role, TokenData, ensure_user_exists
-from app.core.encryption import encrypt_value, decrypt_value
+from app.core.encryption import process_sensitive_fields
 from app.models import models
-from app.schemas import schemas
 
 router = APIRouter(prefix="/data-sources", tags=["data-sources"])
 
 
-def _generate_id():
-    import random
-    return 'ds-' + ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=9))
+# ── Helpers: serialise connection_config into connection_url (DB compat) ───────
+# The biportal.data_sources table was created without the connection_config
+# column, so we persist the JSON config blob inside the existing connection_url
+# VARCHAR(500) field and deserialise it transparently on read.
+
+def _encode_config(config: dict) -> str:
+    """Encrypt sensitive keys then JSON-serialise into connection_url."""
+    encrypted = process_sensitive_fields(config or {}, action="encrypt")
+    return json.dumps(encrypted)
 
 
-def _encrypt_data_source_password(data_source: models.DataSource) -> None:
-    """Encrypt password before saving to database."""
-    if data_source.password:
-        data_source.password = encrypt_value(data_source.password)
+def _decode_config(connection_url: str) -> dict:
+    """Deserialise + decrypt connection_config stored in connection_url."""
+    if not connection_url:
+        return {}
+    try:
+        raw = json.loads(connection_url)
+        return process_sensitive_fields(raw, action="decrypt")
+    except Exception:
+        # Stored value is a plain URL (legacy) — return as-is
+        return {"url": connection_url}
 
 
-def _decrypt_data_source_password(data_source: models.DataSource) -> models.DataSource:
-    """Decrypt password when returning to client."""
-    if data_source and data_source.password:
-        try:
-            data_source.password = decrypt_value(data_source.password)
-        except ValueError:
-            data_source.password = ""
-    return data_source
+# ── Inline schemas (the existing schemas.py uses the old connection_url field) ──
+
+class DataSourceCreate(BaseModel):
+    name: str
+    type: str
+    connection_config: Optional[dict] = {}
+    description: Optional[str] = None
+    status: Optional[str] = "active"
+    is_active: bool = True
 
 
-@router.post("/", response_model=schemas.DataSourceResponse, status_code=status.HTTP_201_CREATED)
-async def create_data_source(
-    data_source: schemas.DataSourceCreate,
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_role(["admin", "designer"]))
-):
-    """Create a new data source (admin/designer only)"""
-    # Ensure user exists in database before creating data source
-    await ensure_user_exists(current_user)
-    
-    # Check if name already exists
-    existing = db.query(models.DataSource).filter(
-        models.DataSource.name == data_source.name
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Data source with name '{data_source.name}' already exists"
-        )
-    
-    db_data_source = models.DataSource(
-        id=_generate_id(),
-        name=data_source.name,
-        type=data_source.type,
-        connection_url=data_source.connection_url,
-        username=data_source.username,
-        password=data_source.password,
-        description=data_source.description,
-        is_active=data_source.is_active,
-        created_by=current_user.sub
-    )
-    # Encrypt sensitive data before saving
-    _encrypt_data_source_password(db_data_source)
-    db.add(db_data_source)
-    db.commit()
-    db.refresh(db_data_source)
-    # Decrypt for response
-    return _decrypt_data_source_password(db_data_source)
+class DataSourceUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    connection_config: Optional[dict] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
-@router.get("/", response_model=List[schemas.DataSourceResponse])
+class DataSourceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    type: str
+    connection_config: Optional[dict] = {}
+    description: Optional[str] = None
+    is_active: bool
+    status: Optional[str] = "active"
+    created_by: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+def _gen_id():
+    return "ds-" + "".join(random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=9))
+
+
+def _to_response(ds: models.DataSource) -> dict:
+    """Convert a DataSource ORM object to a response dict."""
+    config = _decode_config(ds.connection_url or "")
+    return {
+        "id": ds.id,
+        "name": ds.name,
+        "type": ds.type,
+        "connection_config": config,
+        "description": ds.description,
+        "is_active": ds.is_active,
+        "status": "active" if ds.is_active else "inactive",
+        "created_by": ds.created_by,
+        "created_at": ds.created_at,
+        "updated_at": ds.updated_at,
+    }
+
+
+# ── CRUD endpoints ─────────────────────────────────────────────────────────────
+
+@router.get("/", response_model=List[DataSourceResponse])
 async def list_data_sources(
     db: Session = Depends(get_db),
-    current_user: TokenData = Depends(get_current_user)
+    current_user: TokenData = Depends(get_current_user),
 ):
-    """List all data sources"""
-    # Ensure user exists
+    """List all data sources."""
     await ensure_user_exists(current_user)
-    
-    data_sources = db.query(models.DataSource).all()
-    # Decrypt passwords for all data sources
-    for ds in data_sources:
-        _decrypt_data_source_password(ds)
-    return data_sources
+    rows = db.query(models.DataSource).order_by(models.DataSource.created_at.desc()).all()
+    return [_to_response(ds) for ds in rows]
 
 
-@router.get("/{data_source_id}", response_model=schemas.DataSourceResponse)
-async def get_data_source(
-    data_source_id: str,
+@router.post("/", response_model=DataSourceResponse, status_code=status.HTTP_201_CREATED)
+async def create_data_source(
+    payload: DataSourceCreate,
     db: Session = Depends(get_db),
-    current_user: TokenData = Depends(get_current_user)
+    current_user: TokenData = Depends(require_role(["admin", "designer"])),
 ):
-    """Get data source by ID"""
-    data_source = db.query(models.DataSource).filter(
-        models.DataSource.id == data_source_id
-    ).first()
-    if not data_source:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Data source not found"
-        )
-    # Decrypt password before returning
-    return _decrypt_data_source_password(data_source)
-
-
-@router.get("/by-name/{name}", response_model=schemas.DataSourceResponse)
-async def get_data_source_by_name(
-    name: str,
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(get_current_user)
-):
-    """Get data source by name"""
-    data_source = db.query(models.DataSource).filter(
-        models.DataSource.name == name
-    ).first()
-    if not data_source:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Data source with name '{name}' not found"
-        )
-    # Decrypt password before returning
-    return _decrypt_data_source_password(data_source)
-
-
-@router.get("/search/", response_model=List[schemas.DataSourceResponse])
-async def search_data_sources(
-    q: str,
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(get_current_user)
-):
-    """Search data sources by name or type"""
+    """Create a new data source."""
     await ensure_user_exists(current_user)
-    
-    data_sources = db.query(models.DataSource).filter(
-        models.DataSource.name.ilike(f"%{q}%") |
-        models.DataSource.type.ilike(f"%{q}%") |
-        models.DataSource.description.ilike(f"%{q}%")
-    ).all()
-    
-    # Decrypt passwords for all data sources
-    for ds in data_sources:
-        _decrypt_data_source_password(ds)
-    return data_sources
-
-
-@router.put("/{data_source_id}", response_model=schemas.DataSourceResponse)
-async def update_data_source(
-    data_source_id: str,
-    data_source_update: schemas.DataSourceUpdate,
-    db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_role(["admin", "designer"]))
-):
-    """Update data source (admin/designer only)"""
-    data_source = db.query(models.DataSource).filter(
-        models.DataSource.id == data_source_id
-    ).first()
-    if not data_source:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Data source not found"
-        )
-    
-    update_data = data_source_update.model_dump(exclude_unset=True)
-    
-    # Check if name is being updated and already exists
-    if "name" in update_data and update_data["name"] != data_source.name:
-        existing = db.query(models.DataSource).filter(
-            models.DataSource.name == update_data["name"]
-        ).first()
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Data source with name '{update_data['name']}' already exists"
-            )
-    
-    # Encrypt password if it's being updated
-    if "password" in update_data and update_data["password"]:
-        update_data["password"] = encrypt_value(update_data["password"])
-    
-    for key, value in update_data.items():
-        setattr(data_source, key, value)
-    
+    ds = models.DataSource(
+        id=_gen_id(),
+        name=payload.name,
+        type=payload.type,
+        connection_url=_encode_config(payload.connection_config or {}),
+        description=payload.description,
+        is_active=payload.is_active,
+        created_by=current_user.sub,
+    )
+    db.add(ds)
     db.commit()
-    db.refresh(data_source)
-    # Decrypt password for response
-    return _decrypt_data_source_password(data_source)
+    db.refresh(ds)
+    return _to_response(ds)
 
 
-@router.delete("/{data_source_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_data_source(
-    data_source_id: str,
+@router.get("/{id}", response_model=DataSourceResponse)
+async def get_data_source(
+    id: str,
     db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_role(["admin", "designer"]))
+    current_user: TokenData = Depends(get_current_user),
 ):
-    """Delete data source (admin/designer only)"""
-    data_source = db.query(models.DataSource).filter(
-        models.DataSource.id == data_source_id
-    ).first()
-    if not data_source:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Data source not found"
-        )
-    
-    db.delete(data_source)
+    """Get a single data source by ID."""
+    ds = db.query(models.DataSource).filter(models.DataSource.id == id).first()
+    if not ds:
+        raise HTTPException(status_code=404, detail="Data source not found")
+    return _to_response(ds)
+
+
+@router.put("/{id}", response_model=DataSourceResponse)
+async def update_data_source(
+    id: str,
+    payload: DataSourceUpdate,
+    db: Session = Depends(get_db),
+    current_user: TokenData = Depends(require_role(["admin", "designer"])),
+):
+    """Update a data source."""
+    ds = db.query(models.DataSource).filter(models.DataSource.id == id).first()
+    if not ds:
+        raise HTTPException(status_code=404, detail="Data source not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+
+    if "connection_config" in update_data and update_data["connection_config"] is not None:
+        ds.connection_url = _encode_config(update_data.pop("connection_config"))
+    if "status" in update_data:
+        update_data["is_active"] = update_data.pop("status") == "active"
+
+    for key, value in update_data.items():
+        if hasattr(ds, key) and key not in ("connection_config",):
+            setattr(ds, key, value)
+
+    db.commit()
+    db.refresh(ds)
+    return _to_response(ds)
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_data_source(
+    id: str,
+    db: Session = Depends(get_db),
+    current_user: TokenData = Depends(require_role(["admin", "designer"])),
+):
+    """Delete a data source."""
+    ds = db.query(models.DataSource).filter(models.DataSource.id == id).first()
+    if not ds:
+        raise HTTPException(status_code=404, detail="Data source not found")
+    db.delete(ds)
     db.commit()
     return None
 
 
-@router.post("/{data_source_id}/test", response_model=dict)
-async def test_data_source_connection(
-    data_source_id: str,
+@router.post("/{id}/test")
+async def test_data_source(
+    id: str,
     db: Session = Depends(get_db),
-    current_user: TokenData = Depends(require_role(["admin", "designer"]))
+    current_user: TokenData = Depends(require_role(["admin", "designer"])),
 ):
-    """Test data source connection (admin/designer only)"""
-    data_source = db.query(models.DataSource).filter(
-        models.DataSource.id == data_source_id
-    ).first()
-    if not data_source:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Data source not found"
-        )
-    
-    # Decrypt password for testing
-    _decrypt_data_source_password(data_source)
-    
-    # TODO: Implement actual connection testing based on data source type
-    # For now, just return success
-    return {
-        "success": True,
-        "message": f"Connection to {data_source.name} ({data_source.type}) successful"
-    }
+    """Test a data source connection."""
+    ds = db.query(models.DataSource).filter(models.DataSource.id == id).first()
+    if not ds:
+        raise HTTPException(status_code=404, detail="Data source not found")
+
+    config = _decode_config(ds.connection_url or "")
+    if not config:
+        raise HTTPException(status_code=400, detail="No connection config found")
+
+    # Inject the connection type from the ORM field so the strategy dispatcher can resolve it
+    config["type"] = ds.type
+
+    try:
+        from app.services.connection_testing import connection_testing_service
+        success = await connection_testing_service.test_connection(config)
+        return {"success": success}
+    except ImportError:
+        return {"success": False, "message": "Connection testing service not available"}
+    except Exception as e:
+        return {"success": False, "message": str(e)}

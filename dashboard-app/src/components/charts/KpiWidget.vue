@@ -77,9 +77,9 @@ const isMaterialIcon = computed(() => {
 
 function formatValue(val) {
   if (val == null || isNaN(val)) return '—'
-  const fmt = measure.value.format || 'numero'
-  if (fmt === 'porcentaje') return val.toFixed(1) + '%'
-  if (fmt === 'moneda') {
+  const fmt = measure.value.format || 'number'
+  if (fmt === 'percent') return val.toFixed(1) + '%'
+  if (fmt === 'currency') {
     const cur = measure.value.currencyId
       ? currencyStore.currencies?.find(c => c.id === measure.value.currencyId)
       : null

@@ -113,13 +113,13 @@
                     class="form-input form-select measure-format-select"
                     :title="'Formato de la medida'"
                   >
-                    <option value="numero">Número</option>
-                    <option value="moneda">Moneda</option>
-                    <option value="porcentaje">Porcentaje</option>
+                    <option value="number">Número</option>
+                    <option value="currency">Moneda</option>
+                    <option value="percent">Porcentaje</option>
                   </select>
                   <!-- Selector de moneda (solo si formato = moneda) -->
                   <select
-                    v-if="measure.format === 'moneda'"
+                    v-if="measure.format === 'currency'"
                     v-model="measure.currencyId"
                     class="form-input form-select measure-currency-select"
                     :title="'Moneda'"
@@ -648,7 +648,7 @@ if (!form.value.cubeQuery) {
 // Using map+replace to guarantee Vue 3 tracks the new properties reactively
 form.value.cubeQuery.measures = form.value.cubeQuery.measures.map(m => ({
   ...m,
-  format: m.format ?? 'numero',
+  format: m.format ?? 'number',
   currencyId: m.currencyId ?? null
 }))
 
@@ -819,7 +819,7 @@ watch(chartOptionsJson, (v) => {
 })
 
 function addMeasure() {
-  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff', seriesType: 'bar', format: 'numero', currencyId: null })
+  form.value.cubeQuery.measures.push({ key: '', label: '', color: '#1890ff', seriesType: 'bar', format: 'number', currencyId: null })
 }
 function removeMeasure(idx) {
   form.value.cubeQuery.measures.splice(idx, 1)
@@ -845,7 +845,7 @@ function getMemberKey(cubeName, memberName) {
 
 function insertMeasure(key) {
   const label = key.split('.').pop()
-  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff', seriesType: 'bar', format: 'numero', currencyId: null })
+  form.value.cubeQuery.measures.push({ key, label, color: '#1890ff', seriesType: 'bar', format: 'number', currencyId: null })
   activeTab.value = 'data'
 }
 function insertDimension(key) {

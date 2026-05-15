@@ -1,5 +1,5 @@
 <template>
-  <div class="filter-bar">
+  <div class="filter-bar" :class="{ 'is-vertical': vertical }">
     <!-- Filtros configurados -->
     <template v-if="filters.length > 0 || isDesignMode">
     <div v-for="filter in filters" :key="filter.id" class="filter-chip">
@@ -220,7 +220,8 @@ const props = defineProps({
   dashboardId: { type: String, required: true },
   filters: { type: Array, default: () => [] },
   modelValue: { type: Object, default: () => ({}) },
-  isDesignMode: { type: Boolean, default: false }
+  isDesignMode: { type: Boolean, default: false },
+  vertical: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue', 'refresh'])
@@ -440,11 +441,18 @@ function removeFilter(filterId) {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 8px 12px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 10px;
+  padding: 0; /* Remove padding for flat look */
+  background: transparent; /* No background */
+  border: none; /* No border */
+  margin-bottom: 0; /* Let organism gap handle it */
+}
+
+/* Vertical layout adaptations */
+.filter-bar.is-vertical {
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .filter-chip {
@@ -457,11 +465,21 @@ function removeFilter(filterId) {
   border-radius: 6px;
 }
 
+.is-vertical .filter-chip {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px;
+}
+
 .filter-label {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary);
   white-space: nowrap;
+}
+
+.is-vertical .filter-label {
+  margin-bottom: 4px;
 }
 
 /* Multi-select */
@@ -483,6 +501,10 @@ function removeFilter(filterId) {
   color: var(--text);
   min-width: 120px;
   transition: border-color 0.15s;
+}
+
+.is-vertical .multiselect-trigger {
+  width: 100%;
 }
 .multiselect-trigger:hover,
 .multiselect-trigger.active { border-color: var(--primary); }

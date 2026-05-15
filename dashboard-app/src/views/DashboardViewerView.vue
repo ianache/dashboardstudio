@@ -8,52 +8,48 @@
     </div>
 
     <template v-else>
-      <!-- Dashboard header -->
-      <div class="viewer-header card">
+      <div class="viewer-header">
         <div class="vh-info">
           <h2 class="vh-title">{{ dashboard.name }}</h2>
           <p v-if="dashboard.description" class="vh-desc">{{ dashboard.description }}</p>
         </div>
         <div class="vh-actions">
-          <span class="badge badge-blue">{{ dashboard.widgets.length }} gráficos</span>
-          <span v-if="dashboard.isPublic" class="badge badge-green">Público</span>
-          <button class="btn btn-secondary btn-sm" @click="refreshAll">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <!-- Layout Toggle for Demo -->
+          <div class="layout-toggle">
+            <button 
+              v-for="pos in ['top', 'left', 'right']" 
+              :key="pos"
+              class="btn btn-icon btn-sm"
+              :class="{ 'btn-primary': filterPlacement === pos, 'btn-secondary': filterPlacement !== pos }"
+              @click="filterPlacement = pos"
+              :title="`Filtros a la ${pos}`"
+            >
+              <MIcon :icon="pos === 'top' ? 'vertical_align_top' : (pos === 'left' ? 'format_align_left' : 'format_align_right')" :size="18" />
+            </button>
+          </div>
+
+          <button class="btn btn-secondary btn-icon btn-sm" @click="refreshAll" title="Actualizar datos">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="23 4 23 10 17 10"/>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
             </svg>
-            Actualizar todo
           </button>
-          <button v-if="authStore.isDesigner" class="btn btn-secondary btn-sm" @click="router.push(`/designer/${dashboard.id}`)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            Editar
+          <button v-if="authStore.isDesigner" class="btn btn-secondary btn-icon btn-sm" @click="router.push(`/designer/${dashboard.id}`)" title="Editar dashboard">
+            <MIcon icon="edit" :size="16" />
           </button>
         </div>
       </div>
 
-      <!-- Filter bar -->
-      <DashboardFilterBar
+      <DashboardRuntime
         :dashboard-id="dashboard.id"
+        :widgets="dashboard.widgets"
         :filters="dashboard.filters || []"
-        :is-design-mode="false"
-        v-model="activeFilterValues"
+        :palette="dashboard.colorPalette"
+        :filter-placement="filterPlacement"
+        v-model:filter-values="activeFilterValues"
+        :resolved-filters="resolvedDashboardFilters"
         @refresh="refreshAll"
       />
-
-      <!-- Dashboard grid -->
-      <div class="viewer-canvas">
-        <DashboardGrid
-          :widgets="dashboard.widgets"
-          :is-design-mode="false"
-          :dashboard-id="dashboard.id"
-          :dashboard-filters="resolvedDashboardFilters"
-          :dashboard-palette="dashboard.colorPalette || null"
-          :key="refreshKey"
-        />
-      </div>
     </template>
   </div>
 </template>
@@ -64,8 +60,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
-import DashboardGrid from '@/components/dashboard/DashboardGrid.vue'
-import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
+import DashboardRuntime from '@/components/dashboard/DashboardRuntime.vue'
+import MIcon from '@/components/common/MIcon.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 
 const route = useRoute()
@@ -74,12 +70,13 @@ const authStore = useAuthStore()
 const dashboardStore = useDashboardStore()
 const uiStore = useUIStore()
 
+const filterPlacement = ref('top')
+const refreshKey = ref(0)
+
 // Load data from backend on mount
 onMounted(async () => {
   await dashboardStore.loadFromBackend()
 })
-
-const refreshKey = ref(0)
 
 const dashboard = computed(() => {
   const id = route.params.id
@@ -97,7 +94,10 @@ const { activeFilterValues, resolvedDashboardFilters, resetFilters } = useDashbo
 
 watch(dashboard, (db) => {
   if (db) {
-    uiStore.setBreadcrumbs(['Dashboards', db.name])
+    uiStore.setBreadcrumbs([
+      { label: 'Dashboards', path: '/' },
+      { label: db.name, path: `/dashboard/${db.id}` }
+    ])
   }
 }, { immediate: true })
 
@@ -107,29 +107,45 @@ function refreshAll() {
 </script>
 
 <style scoped>
-.viewer-view { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.viewer-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Consistent gap between header and runtime */
+}
 
 .viewer-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 0; /* Remove internal padding */
+  background: transparent; /* No card background */
+  border: none; /* No border */
+  box-shadow: none; /* No shadow */
   flex-shrink: 0;
 }
 .vh-info { flex: 1; min-width: 0; }
-.vh-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.vh-title { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .vh-desc { font-size: 14px; color: var(--text-secondary); margin: 0; }
-.vh-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+.vh-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-.viewer-canvas {
-  flex: 1;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: auto;
-  box-shadow: var(--shadow);
-  padding: 8px;
-  min-height: 400px;
+.layout-toggle {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
 }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  text-align: center;
+  gap: 16px;
+}
+.empty-icon { font-size: 48px; }
 </style>

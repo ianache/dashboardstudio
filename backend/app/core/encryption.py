@@ -23,10 +23,10 @@ def _get_fernet() -> Fernet:
 
 def encrypt_value(value: str) -> str:
     """Encrypt a string value.
-    
+
     Args:
         value: The string to encrypt
-        
+
     Returns:
         Encrypted string (base64 encoded)
     """
@@ -36,22 +36,50 @@ def encrypt_value(value: str) -> str:
     return f.encrypt(value.encode()).decode()
 
 
-def decrypt_value(encrypted_value: str) -> str:
-    """Decrypt an encrypted string value.
-    
+def decrypt_value(value: str) -> str:
+    """Decrypt a string value that was encrypted with encrypt_value.
+
     Args:
-        encrypted_value: The encrypted string (base64 encoded)
-        
+        value: The encrypted string (base64 encoded)
+
     Returns:
-        Decrypted string
-        
+        Decrypted plain-text string
+
     Raises:
-        ValueError: If decryption fails
+        ValueError: If the value cannot be decrypted (wrong key or corrupted data)
     """
-    if not encrypted_value:
-        return encrypted_value
+    if not value:
+        return value
     try:
         f = _get_fernet()
-        return f.decrypt(encrypted_value.encode()).decode()
+        return f.decrypt(value.encode()).decode()
     except Exception as e:
-        raise ValueError(f"Failed to decrypt value: {str(e)}")
+        raise ValueError(f"Failed to decrypt value: {e}") from e
+
+
+from typing import Any
+
+# Keys to automatically encrypt/decrypt in configuration dictionaries
+SENSITIVE_KEYS = {"password", "api_key", "client_secret", "token", "api_token"}
+
+def process_sensitive_fields(data: Any, action: str = "encrypt") -> Any:
+    """Recursively encrypt/decrypt sensitive fields in a JSON-compatible structure."""
+    if isinstance(data, list):
+        return [process_sensitive_fields(item, action) for item in data]
+    
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key in SENSITIVE_KEYS and isinstance(value, str) and value:
+                if action == "encrypt":
+                    result[key] = encrypt_value(value)
+                else:
+                    try:
+                        result[key] = decrypt_value(value)
+                    except Exception:
+                        result[key] = value # Fallback if decryption fails
+            else:
+                result[key] = process_sensitive_fields(value, action)
+        return result
+    
+    return data
