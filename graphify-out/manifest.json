@@ -84,8 +84,8 @@
     "hash": "288dedcc5d71dc9650f1e5ea83084a8d"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\api\\endpoints\\data_sources.py": {
-    "mtime": 1777350390.5211425,
-    "hash": "62e8d14ece4664399dbf485f30442b11"
+    "mtime": 1778820070.206058,
+    "hash": "b479fc64ef93c57dc18948788c46c0fa"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\api\\endpoints\\data_types.py": {
     "mtime": 1777350390.5422957,
@@ -166,6 +166,10 @@
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\schemas\\schemas.py": {
     "mtime": 1778811334.8981073,
     "hash": "d51ae919bff4eedc4b0461f033d8d102"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\connection_testing.py": {
+    "mtime": 1778820038.41584,
+    "hash": "eb99afc303488962e629f9beaf0b6173"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\deno_service.py": {
     "mtime": 1778817224.5443292,
