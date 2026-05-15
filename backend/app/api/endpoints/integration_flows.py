@@ -161,15 +161,13 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
             exec_id = 'exec-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
             logger.info(f"Saving execution {exec_id} to history")
             
-            execution = models.IntegrationFlowExecution(
+            execution = models.ExecutionHistory(
                 id=exec_id,
                 flow_id=flow_id,
                 status="success" if success else "error",
-                logs=all_logs,
-                result_data=final_result,
-                duration_ms=duration_ms,
-                executed_by=user_id,
-                created_at=start_time
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration_ms
             )
             db.add(execution)
             
@@ -204,7 +202,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
             pass
 
 
-@router.get("/{flow_id}/executions", response_model=List[schemas.IntegrationFlowExecutionResponse])
+@router.get("/{flow_id}/executions")
 async def list_flow_executions(
     flow_id: str,
     limit: int = Query(20, gt=0, le=100),
@@ -213,9 +211,9 @@ async def list_flow_executions(
 ):
     """Lista las últimas ejecuciones de un flujo."""
     await ensure_user_exists(current_user)
-    return db.query(models.IntegrationFlowExecution)\
-             .filter(models.IntegrationFlowExecution.flow_id == flow_id)\
-             .order_by(models.IntegrationFlowExecution.created_at.desc())\
+    return db.query(models.ExecutionHistory)\
+             .filter(models.ExecutionHistory.flow_id == flow_id)\
+             .order_by(models.ExecutionHistory.start_time.desc())\
              .limit(limit).all()
 
 
@@ -227,15 +225,15 @@ async def get_execution_logs(
 ):
     """Obtiene los logs y resultados de una ejecución específica."""
     await ensure_user_exists(current_user)
-    execution = db.query(models.IntegrationFlowExecution).filter(models.IntegrationFlowExecution.id == exec_id).first()
+    execution = db.query(models.ExecutionHistory).filter(models.ExecutionHistory.id == exec_id).first()
     if not execution:
         raise HTTPException(status_code=404, detail="Execution not found")
     return {
         "status": execution.status,
-        "logs": execution.logs,
-        "result_data": execution.result_data,
-        "duration_ms": execution.duration_ms,
-        "created_at": execution.created_at
+        "logs": [], # TODO: Implement node_logs fetching
+        "result_data": None, # TODO: Implement result_data
+        "duration_ms": execution.duration,
+        "created_at": execution.start_time
     }
 
 
@@ -291,15 +289,13 @@ async def run_integration_flow(
         for line in result["errors"].split("\n"):
             all_logs.append({"type": "error", "message": line})
 
-    execution = models.IntegrationFlowExecution(
+    execution = models.ExecutionHistory(
         id=exec_id,
         flow_id=flow_id,
         status=result["status"],
-        logs=all_logs,
-        result_data=result.get("result"),
-        duration_ms=duration_ms,
-        executed_by=current_user.user_id,
-        created_at=start_time
+        start_time=start_time,
+        end_time=datetime.utcnow(),
+        duration=duration_ms
     )
     db.add(execution)
     
