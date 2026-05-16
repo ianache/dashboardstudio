@@ -1,8 +1,8 @@
-# Project State: Connection Management & Centralized Credentials
+# Project State: Integration Flow Execution Visualizer
 
 - **Status:** Planning 📝
-- **Current Phase:** Phase 15 - Backend Data Model
-- **Last Action:** Initialized new milestone, researched schemas, and updated planning documents.
+- **Current Phase:** Phase 18 - Frontend Execution Visualizer Popup
+- **Last Action:** Created execution plan 18-01-PLAN.md for visualizer components.
 
 ## Workflow Status
 - [x] Config defined
@@ -10,16 +10,17 @@
 - [x] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
+- [x] Phase 18 Planned
 - [ ] Execution in progress
 
-## Milestone: Connection Management & Centralized Credentials
-- [ ] Phase 15: Backend - Connection Data Model
-- [ ] Phase 16: Backend - Connection Testing Logic
-- [ ] Phase 17: Frontend - Connections UI & Navigation
+## Milestone: Integration Flow Execution Visualizer (Popup)
+- [ ] Phase 18: Frontend - Execution Visualizer Popup (Plan: 18-01)
+- [ ] Phase 19: Integration & Data Wiring
 
 ## Accumulated Context
 ### Milestone Goals
-- Centralized management of Email, DB, FTP, HTTP, and JWT connections.
-- Secure storage with recursive JSON encryption.
-- Reusable connections in the Flow Editor.
-- UI integration under "Data Integration" submenu.
+- Visual diagram of integration flows in a popup.
+- Execution time badge (top-left) and Success/Error badge (top-right).
+- Hover info for start/end timestamps.
+- Triggered by "lupa" icon in Integrations table.
+- Read-only view using existing diagram logic.
