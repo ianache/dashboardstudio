@@ -6,7 +6,7 @@
 |-------|----------------|--------|-----------|
 | 1-19. Core & Early Milestones | 19/19 | Completed | 2026-05-16 |
 | 20. Execution History UI Refactor | 1/1 | In Progress | - |
-| 21. History to Graph Integration | 0/1 | Pending | - |
+| 21. History to Graph Integration | 1/1 | Pending | - |
 
 ---
 
@@ -24,6 +24,9 @@ Plans:
 **Goal**: Integrate `FlowExecutionPopup.vue` trigger from the history table and ensure data consistency.
 **Requirements**: FR-02, FR-04, TR-01, TR-02
 **Status**: Pending
+
+Plans:
+- [ ] 21-01-PLAN.md — Integrate `FlowExecutionPopup.vue` trigger and handle events in `IntegrationsView.vue`.
 
 ---
 
