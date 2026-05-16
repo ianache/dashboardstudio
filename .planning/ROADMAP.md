@@ -5,7 +5,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1-28. Core & Extensions | 28/28 | Completed | 2026-05-17 |
-| 29. Metadata Inspection API | 0/1 | Pending | - |
+| 29. Metadata Inspection API | 1/2 | In Progress|  |
 | 30. ODS Node UI Enhancement | 0/1 | Pending | - |
 | 31. ODS Execution Engine | 0/1 | Pending | - |
 
@@ -16,7 +16,10 @@
 ### Phase 29: Metadata Inspection API
 **Goal**: Implement backend services to inspect database schemas, tables, and columns.
 **Requirements**: FR-01, FR-04, TR-01
-**Status**: Pending
+**Status**: In Progress
+**Plans**: 2 plans
+- [ ] 29-01-PLAN.md — Implement MetadataService with PostgreSQL support.
+- [ ] 29-02-PLAN.md — Expose metadata inspection via FastAPI endpoints.
 
 ### Phase 30: ODS Node UI Enhancement
 **Goal**: Update the ODS PostgreSQL node properties with dynamic selectors and conditional fields.
@@ -33,8 +36,8 @@
 ## Phase Details
 
 ### Phase 29: Metadata Inspection API
-- [ ] Create `metadata_service.py` to handle database metadata fetching (PostgreSQL focus).
-- [ ] Add endpoints to `data_sources.py` or a new controller for listing tables/columns.
+- [x] Create `metadata_service.py` to handle database metadata fetching (PostgreSQL focus).
+- [x] Add endpoints to `data_sources.py` for listing tables/columns.
 - [ ] Test API responses with real connection credentials.
 
 ### Phase 30: ODS Node UI Enhancement
