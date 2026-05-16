@@ -132,7 +132,7 @@
             left: note.x + 'px',
             top: note.y + 'px',
             width: (note.props.width || 240) + 'px',
-            minHeight: (note.props.height || 120) + 'px',
+            height: (note.props.height || 120) + 'px',
             background: note.props.color || '#fef9c3',
             borderColor: darkenColor(note.props.color || '#fef9c3')
           }"
