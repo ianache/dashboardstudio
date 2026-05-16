@@ -806,6 +806,13 @@ function onResizeBottomMousedown(e) {
 function onNoteResizeStart(e, note) {
   isResizingNote.value = true
   resizingNote.value = note
+  const pos = getCanvasPos(e.clientX, e.clientY)
+  nodeDragStart = { 
+    sx: pos.x, 
+    sy: pos.y, 
+    nw: note.props.width || 240, 
+    nh: note.props.height || 120 
+  }
 }
 
 const hasWideMode = computed(() => selectedNode.value && hasCodeProp(selectedNode.value.toolType))
@@ -1081,6 +1088,14 @@ function onGlobalMousemove(e) {
     bottomHeight.value = Math.max(100, Math.min(newHeight, window.innerHeight * 0.8))
     return
   }
+  if (isResizingNote.value && resizingNote.value) {
+    const pos = getCanvasPos(e.clientX, e.clientY)
+    const dw = pos.x - nodeDragStart.sx
+    const dh = pos.y - nodeDragStart.sy
+    resizingNote.value.props.width = Math.max(100, nodeDragStart.nw + dw)
+    resizingNote.value.props.height = Math.max(100, nodeDragStart.nh + dh)
+    return
+  }
   if ((isDraggingNode || isDraggingNote) && draggedNode) {
     hasDragged = true
     const pos = getCanvasPos(e.clientX, e.clientY)
@@ -1107,6 +1122,8 @@ function onGlobalMousemove(e) {
 function onGlobalMouseup() {
   isResizingRight.value = false
   isResizingBottom.value = false
+  isResizingNote.value = false
+  resizingNote.value = null
   isDraggingNode = false; isDraggingNote = false; draggedNode = null; nodeDragStart = null
   isPanning = false; panStart = null
   isDraggingFbar = false; fbarDragStart = null
