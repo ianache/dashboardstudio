@@ -6,7 +6,7 @@
 |-------|----------------|--------|-----------|
 | 1-19. Core & Early Milestones | 19/19 | Completed | 2026-05-16 |
 | 20. Execution History UI Refactor | 1/1 | In Progress | - |
-| 21. History to Graph Integration | 1/1 | Pending | - |
+| 21. History to Graph Integration | 1/1 | Complete   | 2026-05-16 |
 
 ---
 
