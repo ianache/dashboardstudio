@@ -5,28 +5,28 @@ milestone_name: Markdown Notes in Editor
 current_phase: 28
 current_plan: 2
 total_plans_in_phase: 2
-status: In Progress 🛠️
-last_updated: "2026-05-17T00:00:00.000Z"
+status: Execution Complete ✅
+last_updated: "2026-05-16T20:36:27.261Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State: Markdown Notes in Editor
 
-- **Status:** In Progress 🛠️
+- **Status:** Execution Complete ✅
 - **Current Phase:** Phase 28: Advanced Interaction & Persistence
-- **Last Action:** Successfully completed Phase 28 Plan 01, refactoring FlowEditorCanvas note handling.
+- **Last Action:** Successfully completed Phase 28 Plan 02, implementing dynamic corner-based resizing for Markdown Notes.
 
 ## Workflow Status
 - [x] Config defined
 - [x] Context created
-- [ ] Research completed
+- [x] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
-- [ ] Execution complete
+- [x] Execution complete
 
 ## Milestone: Markdown Notes in Editor
 - [x] Phase 25: Architecture & DB Extension
@@ -50,12 +50,14 @@ progress:
 - [Phase 28]: Notes are now stored in a dedicated 'notes' array, isolated from functional 'nodes'.
 - [Phase 28]: Background rendering layer implemented for notes to ensure correct Z-ordering.
 - [Phase 28]: Dedicated interaction refs (selectedNote, isDraggingNote) implemented for clean separation.
+- [Phase 28]: Strict Resizing: Changed 'minHeight' to 'height' for notes.
 
 ## Performance Metrics
 | Phase | Plan | Duration | Tasks | Files | Date |
 |-------|------|----------|-------|-------|------|
 | 28    | 01   | 20m      | 3     | 1     | 2026-05-17 |
+| 28    | 02   | 15m      | 3     | 1     | 2026-05-16 |
 
 ## Session Info
-- **Last session:** 2026-05-17
-- **Stopped at:** Completed 28-01-PLAN.md
+- **Last session:** 2026-05-16
+- **Stopped at:** Completed Phase 28 Plan 02.
