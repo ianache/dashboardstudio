@@ -32,7 +32,7 @@ progress:
 - [x] Phase 25: Architecture & DB Extension
 - [x] Phase 26: Note Layer & Drag Logic
 - [x] Phase 27: Markdown Engine & Styling
-- [ ] Phase 28: Advanced Interaction & Persistence
+- [x] Phase 28: Advanced Interaction & Persistence
 
 ## Accumulated Context
 ### Milestone Goals
@@ -49,11 +49,12 @@ progress:
 - **Rendering:** Marked.js + DOMPurify for secure Markdown display.
 - [Phase 28]: Notes are now stored in a dedicated 'notes' array, isolated from functional 'nodes'.
 - [Phase 28]: Background rendering layer implemented for notes to ensure correct Z-ordering.
+- [Phase 28]: Dedicated interaction refs (selectedNote, isDraggingNote) implemented for clean separation.
 
 ## Performance Metrics
 | Phase | Plan | Duration | Tasks | Files | Date |
 |-------|------|----------|-------|-------|------|
-| 28    | 01   | 15m      | 3     | 1     | 2026-05-17 |
+| 28    | 01   | 20m      | 3     | 1     | 2026-05-17 |
 
 ## Session Info
 - **Last session:** 2026-05-17
