@@ -1,21 +1,36 @@
-# Requirements: Resizable Properties Sidebar
+# Requirements: Markdown Notes in Editor
 
 ## Overview
-Se requiere que la barra lateral derecha de propiedades en el editor de integraciones sea ajustable en ancho. Esto permitirá a los usuarios expandir el panel cuando trabajen con campos extensos (como el editor de código o payloads JSON) y contraerlo para maximizar el área de trabajo del canvas.
+Se requiere extender las capacidades del editor de integraciones permitiendo a los usuarios añadir notas descriptivas en formato Markdown directamente sobre el lienzo de diseño. Estas notas servirán como documentación visual, permitiendo explicar la lógica del flujo, marcar secciones o dejar recordatorios.
 
 ## Functional Requirements (FR)
-- [x] **FR-01: Tirador de Ajuste (Resize Handle):** Debe aparecer un borde interactivo en el margen izquierdo del panel de propiedades.
-- [x] **FR-02: Interacción de Arrastre (Drag-to-Resize):** El usuario debe poder hacer clic en el tirador, arrastrar horizontalmente y soltar para fijar el nuevo ancho.
-- [x] **FR-03: Límites de Tamaño:** El ancho debe tener un mínimo (ej: 250px) y un máximo (ej: 800px o 50% de la pantalla) para evitar romper la UI.
-- [x] **FR-04: Persistencia de Estado:** El ancho ajustado debe mantenerse mientras el usuario navega por diferentes nodos en la misma sesión del editor.
-- [x] **FR-05: Compatibilidad con Colapso:** La funcionalidad de resizable debe integrarse con el botón de colapsar actual, manteniendo el ancho personalizado al re-expandir.
+- **FR-01: Herramienta "Note":** Añadir una nueva herramienta llamada "Note" en el catálogo de herramientas del editor.
+- **FR-02: Categoría "Annotations":** Crear una nueva categoría visual en el panel izquierdo llamada "Annotations" (Anotaciones) para agrupar herramientas de documentación.
+- **FR-03: Colocación por Drag & Drop:** El usuario debe poder arrastrar la herramienta "Note" desde el catálogo y soltarla en cualquier posición libre del canvas.
+- **FR-04: Edición en Línea (Inline Editing):**
+    - Al hacer clic sobre una nota, esta debe entrar en "Modo Edición", mostrando un `textarea` con el contenido Markdown crudo.
+    - Al hacer clic fuera de la nota (blur), se debe renderizar el contenido visualmente usando sintaxis Markdown.
+- **FR-05: Personalización de Estilo:**
+    - **Paleta de Colores:** En modo edición, la cabecera de la nota debe mostrar 5 círculos de color (Amarillo, Azul, Verde, Rosa, Gris) para cambiar el color de fondo de la nota.
+    - **Tamaño de Fuente:** En modo edición, la cabecera debe incluir botones (+ / -) para ajustar el tamaño de fuente base del contenido Markdown.
+- **FR-06: Redimensionado Dinámico:** La nota debe permitir ajustar su ancho y alto mediante un tirador (handle) ubicado en la esquina inferior derecha.
+- **FR-07: Persistencia Dedicada:** Las notas deben guardarse en un array independiente (`flow_notes`) separado de los nodos funcionales del flujo.
+- **FR-08: Capa de Fondo (Z-Order):** Las notas deben dibujarse siempre en el fondo, por detrás de todos los nodos funcionales y de todas las conexiones (flechas).
 
 ## Technical Requirements (TR)
-- [x] **TR-01: Implementación en Vue 3:** Utilizar el `Composition API` y eventos globales de mouse en `FlowEditorCanvas.vue`.
-- [x] **TR-02: Estilo CSS:** Definir el tirador con feedback visual (cambio de cursor a `col-resize` y resaltado al hacer hover).
-- [x] **TR-03: Performance:** Asegurar que el redimensionado sea fluido (60fps) mediante el uso de `requestAnimationFrame` o optimización de reactividad.
+- **TR-01: Integración de Marked.js:** Utilizar la librería `marked` para la conversión de MD a HTML.
+- **TR-02: Sanitización de HTML:** Utilizar `dompurify` para asegurar que el HTML generado por Markdown sea seguro.
+- **TR-03: Renderizado de Capas:** Modificar `FlowEditorCanvas.vue` para renderizar el array de notas antes que los SVGs de las conexiones y el array de nodos funcionales.
+- **TR-04: Extensión del Esquema DB:** Añadir la columna `flow_notes` (JSON) al modelo `IntegrationFlow` en el backend.
+- **TR-05: Lógica de Resize NWSE:** Implementar manejadores de eventos de ratón específicos para el tirador de redimensionado de las notas.
 
 ## User Interface (UI)
-- [x] **UI-01: Visual Handle:** Tirador: Línea sutil de 4px-6px en el borde izquierdo del panel derecho.
-- [x] **UI-02: Cursor:** Cursor: `col-resize`.
-- [x] **UI-03: Active State:** Color: Azul primario (`#2563eb`) o gris suave (`#e2e8f0`) al estar activo.
+- **Icono:** `sticky_note_2` o `description` (Material Symbols).
+- **Colores (Sticky Notes):** 
+    - Amarillo: `#fef9c3` (Borde: `#fde047`)
+    - Azul: `#dbeafe` (Borde: `#93c5fd`)
+    - Verde: `#dcfce7` (Borde: `#86efac`)
+    - Rosa: `#fce7f3` (Borde: `#f9a8d4`)
+    - Gris: `#f1f5f9` (Borde: `#cbd5e1`)
+- **Tirador de Resize:** Icono discreto en la esquina inferior derecha.
+- **Cursor:** `nwse-resize` sobre el tirador.

@@ -1,53 +1,48 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Resizable Properties Sidebar
-current_phase: 22
+milestone: v1.4
+milestone_name: Markdown Notes in Editor
+current_phase: 25
 status: In Progress 🛠️
-last_updated: "2026-05-16T15:00:00.000Z"
+last_updated: "2026-05-16T21:00:00.000Z"
 progress:
-  total_phases: 1
+  total_phases: 4
   completed_phases: 0
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 0
 ---
 
-# Project State: Resizable Properties Sidebar
+# Project State: Markdown Notes in Editor
 
 - **Status:** In Progress 🛠️
-- **Current Phase:** Phase 22: Sidebar Resizability Implementation
-- **Last Action:** Completed core logic and constraints for sidebar resizing.
+- **Current Phase:** Phase 25: Architecture & DB Extension
+- **Last Action:** Updated architecture to use a dedicated background layer and separate storage for notes.
 
 ## Workflow Status
 - [x] Config defined
 - [x] Context created
-- [x] Research completed
+- [ ] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
-- [x] Execution complete
+- [ ] Execution complete
 
-## Milestone: Resizable Properties Sidebar
-- [x] Phase 22: Sidebar Resizability Implementation
+## Milestone: Markdown Notes in Editor
+- [ ] Phase 25: Architecture & DB Extension
+- [ ] Phase 26: Note Layer & Drag Logic
+- [ ] Phase 27: Markdown Engine & Styling
+- [ ] Phase 28: Advanced Interaction & Persistence
 
 ## Accumulated Context
 ### Milestone Goals
-- Make the right properties sidebar resizable by dragging its left edge.
-- Support a minimum and maximum width to maintain UI integrity.
-- Ensure seamless integration with the existing collapse/expand functionality.
+- Add a "Note" tool for canvas documentation.
+- Support markdown rendering, inline editing, and custom styling.
+- Enable dynamic resizing for notes.
+- **New Architecture:** Notes are stored in a dedicated `flow_notes` array and rendered in the background (z-order behind everything).
 
 ### Decisions Made
-- Implementation resides in `FlowEditorCanvas.vue` using native mouse events.
-- A dedicated resize handle element added to the left border of the right sidebar.
-- CSS transitions for width disabled during active resizing to ensure fluidity.
-- Resizing handled via native mouse events on a global level to ensure smooth dragging.
-- Minimum width set to 272px and Maximum width set to 50% of screen.
-
-## Performance Metrics
-| Phase | Plan | Duration | Tasks | Files | Date |
-|-------|------|----------|-------|-------|------|
-| 22    | 01   | 15m      | 2     | 1     | 2026-05-16 |
-| 22    | 02   | 10m      | 2     | 1     | 2026-05-16 |
-
-## Session Info
-- **Last Session:** 2026-05-16
-- **Stopped At:** Completed Phase 22
+- Category: "Annotations" (New).
+- Palette: Classic Sticky Notes (Yellow, Blue, Green, Pink, Grey).
+- Interaction: NWSE-resize via corner handle.
+- Libraries: Using already installed `marked` and `dompurify`.
+- **Storage:** Dedicated `flow_notes` column in the database to separate documentation from functional nodes.
+- **Layering:** The `notes` array will be rendered first in the `FlowEditorCanvas.vue` DOM to ensure it sits behind SVG connections and nodes.
