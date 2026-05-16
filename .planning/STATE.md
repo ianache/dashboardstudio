@@ -2,28 +2,26 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Markdown Notes in Editor
-current_phase: 28
-current_plan: 2
-total_plans_in_phase: 2
-status: Execution Complete ✅
-last_updated: "2026-05-16T20:36:27.261Z"
+current_phase: None
+status: Completed ✅
+last_updated: "2026-05-17T01:00:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 8
+  completed_plans: 8
 ---
 
 # Project State: Markdown Notes in Editor
 
-- **Status:** Execution Complete ✅
-- **Current Phase:** Phase 28: Advanced Interaction & Persistence
-- **Last Action:** Successfully completed Phase 28 Plan 02, implementing dynamic corner-based resizing for Markdown Notes.
+- **Status:** Completed ✅
+- **Current Phase:** None
+- **Last Action:** Successfully implemented dynamic resizing and completed the Markdown Notes milestone.
 
 ## Workflow Status
 - [x] Config defined
 - [x] Context created
-- [x] Research completed
+- [ ] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
 - [x] Execution complete
@@ -34,30 +32,18 @@ progress:
 - [x] Phase 27: Markdown Engine & Styling
 - [x] Phase 28: Advanced Interaction & Persistence
 
+## Pending Todos
+- [ ] **Frontend:** [Corregir comportamiento de arrastre de notas](todos/frontend/note-dragging-fix.md) (Medium)
+
 ## Accumulated Context
 ### Milestone Goals
 - Add a "Note" tool for canvas documentation.
 - Support markdown rendering, inline editing, and custom styling.
 - Enable dynamic resizing for notes.
-- Notes are stored in a dedicated `flow_notes` array and rendered in the background.
+- Separate storage (`flow_notes`) and background Z-order rendering.
 
 ### Decisions Made
-- **Architecture:** Dedicated `flow_notes` column in `biportal.integration_flows` (JSON).
-- **UI Layering:** Notes render first in the canvas to stay behind functional nodes.
-- **Editing:** Double-click to edit, focus management with `v-focus`.
-- **Styling:** Floating toolbar for color (5 options) and font size.
-- **Rendering:** Marked.js + DOMPurify for secure Markdown display.
-- [Phase 28]: Notes are now stored in a dedicated 'notes' array, isolated from functional 'nodes'.
-- [Phase 28]: Background rendering layer implemented for notes to ensure correct Z-ordering.
-- [Phase 28]: Dedicated interaction refs (selectedNote, isDraggingNote) implemented for clean separation.
-- [Phase 28]: Strict Resizing: Changed 'minHeight' to 'height' for notes.
-
-## Performance Metrics
-| Phase | Plan | Duration | Tasks | Files | Date |
-|-------|------|----------|-------|-------|------|
-| 28    | 01   | 20m      | 3     | 1     | 2026-05-17 |
-| 28    | 02   | 15m      | 3     | 1     | 2026-05-16 |
-
-## Session Info
-- **Last session:** 2026-05-16
-- **Stopped at:** Completed Phase 28 Plan 02.
+- **Isolation:** Notes live in a dedicated array and layer, separate from functional nodes.
+- **Z-Order:** Notes render first in the template, ensuring they stay behind nodes and connections.
+- **Interactions:** Double-click for editing, NWSE handle for resizing, toolbar for style.
+- **Persistence:** All dimensions and styles are persisted via the new `flow_notes` DB column.
