@@ -462,6 +462,7 @@ class IntegrationFlowCreate(IntegrationFlowBase):
     flow_nodes: List[dict] = []
     flow_connections: List[dict] = []
     flow_metadata: dict = {}
+    flow_notes: List[dict] = []
 
 class IntegrationFlowUpdate(BaseModel):
     name: Optional[str] = None
@@ -475,6 +476,7 @@ class IntegrationFlowUpdate(BaseModel):
     flow_nodes: Optional[List[dict]] = None
     flow_connections: Optional[List[dict]] = None
     flow_metadata: Optional[dict] = None
+    flow_notes: Optional[List[dict]] = None
     last_run_success: Optional[bool] = None
 
 class IntegrationFlowResponse(IntegrationFlowBase):
@@ -483,8 +485,11 @@ class IntegrationFlowResponse(IntegrationFlowBase):
     flow_nodes: List[dict] = []
     flow_connections: List[dict] = []
     flow_metadata: dict = {}
+    flow_notes: List[dict] = []
     last_run: Optional[datetime] = None
     last_run_success: Optional[bool] = None
+    next_run_at: Optional[datetime] = None
+    progress: int = 0
     created_by: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
