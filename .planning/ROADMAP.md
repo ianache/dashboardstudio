@@ -7,8 +7,8 @@
 | 1-24. Core & UI Enhancements | 24/24 | Completed | 2026-05-16 |
 | 25. Architecture & DB Extension | 2/2 | Completed | 2026-05-16 |
 | 26. Note Layer & Drag Logic | 2/2 | Completed | 2026-05-16 |
-| 27. Markdown Engine & Styling | 0/2 | Pending | - |
-| 28. Advanced Interaction & Persistence | 0/1 | Pending | - |
+| 27. Markdown Engine & Styling | 2/2 | Completed | 2026-05-16 |
+| 28. Advanced Interaction & Persistence | 0/2 | Pending | - |
 
 ---
 
@@ -35,16 +35,20 @@ Plans:
 ### Phase 27: Markdown Engine & Styling
 **Goal**: Implement inline editing with `marked.js` and the styling header (colors, font size).
 **Requirements**: FR-04, FR-05, TR-01, TR-02, UI
-**Status**: Pending
+**Status**: Completed (2026-05-16)
 
-**Plans:** 2 plans
-- [ ] 27-01-PLAN.md — Markdown Rendering & Inline Editing
-- [ ] 27-02-PLAN.md — On-Canvas Styling Toolbar
+Plans:
+- [x] 27-01-PLAN.md — Markdown Rendering & Inline Editing
+- [x] 27-02-PLAN.md — On-Canvas Styling Toolbar
 
 ### Phase 28: Advanced Interaction & Persistence
 **Goal**: Implement the NWSE resizing handle and ensure full persistence of the note state.
 **Requirements**: FR-06, TR-05, FR-07
 **Status**: Pending
+
+Plans:
+- [ ] 28-01-PLAN.md — Note Layer Isolation & Selection
+- [ ] 28-02-PLAN.md — Dynamic NWSE Resizing Logic
 
 ---
 
@@ -64,13 +68,15 @@ Plans:
 - [x] Adapt drag logic to handle note movement on the canvas.
 
 ### Phase 27: Markdown Engine & Styling
-- [ ] Implement Markdown rendering using `marked` and `DOMPurify`.
-- [ ] Add inline editing toggle (`editingNoteId`) and textarea template.
-- [ ] Implement the styling header with color palette and font size buttons.
-- [ ] Apply styling logic to update note properties on the canvas.
+- [x] Implement inline editing with `marked.js` and `dompurify`.
+- [x] Add toggle state for edit/preview (double-click to edit).
+- [x] Add the styling header with color palette and font size buttons.
+- [x] Apply "Sticky Note" CSS variants based on selected color.
 
 ### Phase 28: Advanced Interaction & Persistence
+- [ ] Refactor `onDrop` to separate notes into the dedicated `notes` array.
+- [ ] Render notes in a dedicated layer before the SVG connection layer.
 - [ ] Add NWSE resize handle to the note.
-- [ ] Implement `onNoteResize` mouse tracking logic.
+- [ ] Implement `onNoteResize` mouse tracking logic with 100x100 min-size.
 - [ ] Ensure `width`, `height`, `content`, `color`, and `fontSize` are all serialized and saved.
 - [ ] Final polishing of Z-index and focus behavior.
