@@ -935,7 +935,7 @@ function onCanvasClick() {
 function onGlobalMousemove(e) {
   if (isResizingRight.value) {
     const newWidth = window.innerWidth - e.clientX
-    rightWidth.value = newWidth
+    rightWidth.value = Math.max(272, Math.min(newWidth, window.innerWidth * 0.5))
     return
   }
   if (isDraggingNode && draggedNode) {
