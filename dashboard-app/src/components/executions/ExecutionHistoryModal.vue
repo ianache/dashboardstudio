@@ -64,7 +64,7 @@ import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 
 const props = defineProps(['flowId', 'flowName'])
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'view-graph'])
 const history = ref([])
 const selectedExec = ref(null)
 
@@ -85,7 +85,11 @@ const selectExecution = async (ex) => {
 }
 
 const showGraph = (ex) => {
-  console.log("Showing graph for execution:", ex.id)
+  emit('view-graph', {
+    executionId: ex.id,
+    flowId: props.flowId,
+    flowName: props.flowName
+  })
 }
 
 onMounted(fetchHistory)
