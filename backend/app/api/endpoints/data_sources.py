@@ -205,9 +205,54 @@ async def test_data_source(
 
     try:
         from app.services.connection_testing import connection_testing_service
-        success = await connection_testing_service.test_connection(config)
-        return {"success": success}
+        success, message = await connection_testing_service.test_connection(config)
+        return {"success": success, "message": message}
     except ImportError:
         return {"success": False, "message": "Connection testing service not available"}
     except Exception as e:
         return {"success": False, "message": str(e)}
+
+
+@router.get("/{id}/tables", response_model=List[str])
+async def get_data_source_tables(
+    id: str,
+    schema: str = "public",
+    db: Session = Depends(get_db),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """List tables in a data source."""
+    ds = db.query(models.DataSource).filter(models.DataSource.id == id).first()
+    if not ds:
+        raise HTTPException(status_code=404, detail="Data source not found")
+
+    config = _decode_config(ds.connection_url or "")
+    config["type"] = ds.type
+
+    try:
+        from app.services.metadata_service import metadata_service
+        return await metadata_service.get_tables(config, schema)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{id}/tables/{table_name}/columns", response_model=List[dict])
+async def get_data_source_columns(
+    id: str,
+    table_name: str,
+    schema: str = "public",
+    db: Session = Depends(get_db),
+    current_user: TokenData = Depends(get_current_user),
+):
+    """List columns in a specific table of a data source."""
+    ds = db.query(models.DataSource).filter(models.DataSource.id == id).first()
+    if not ds:
+        raise HTTPException(status_code=404, detail="Data source not found")
+
+    config = _decode_config(ds.connection_url or "")
+    config["type"] = ds.type
+
+    try:
+        from app.services.metadata_service import metadata_service
+        return await metadata_service.get_columns(config, schema, table_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
