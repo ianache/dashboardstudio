@@ -22,7 +22,14 @@
                 <td><span :class="['badge', ex.status]">{{ ex.status }}</span></td>
                 <td>{{ new Date(ex.start_time).toLocaleString() }}</td>
                 <td>{{ ex.duration || 0 }} ms</td>
-                <td><button class="btn-detail" @click="selectExecution(ex)">Ver</button></td>
+                <td class="actions-cell">
+                  <button class="btn-icon" @click="selectExecution(ex)" title="Ver detalles">
+                    <span class="material-symbols-outlined">description</span>
+                  </button>
+                  <button class="btn-icon" @click="showGraph(ex)" title="Ver gráfico">
+                    <span class="material-symbols-outlined">search</span>
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -77,6 +84,10 @@ const selectExecution = async (ex) => {
   } catch (e) { console.error("Error loading detail:", e) }
 }
 
+const showGraph = (ex) => {
+  console.log("Showing graph for execution:", ex.id)
+}
+
 onMounted(fetchHistory)
 </script>
 
@@ -95,7 +106,13 @@ onMounted(fetchHistory)
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
 .selected { background: #eff6ff; }
-.btn-detail { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.actions-cell { display: flex; gap: 8px; align-items: center; }
+.btn-icon { 
+  background: transparent; border: none; padding: 4px; border-radius: 4px; 
+  cursor: pointer; color: #64748b; display: inline-flex; transition: all 0.2s;
+}
+.btn-icon:hover { background: #eff6ff; color: #2563eb; }
+.btn-icon .material-symbols-outlined { font-size: 20px; }
 .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
 .badge.success { background: #dcfce7; color: #16a34a; }
 .badge.error { background: #fee2e2; color: #dc2626; }
