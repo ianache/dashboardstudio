@@ -320,6 +320,7 @@
       :flow-id="historyTarget?.id"
       :flow-name="historyTarget?.name"
       @close="showHistoryModal = false"
+      @view-graph="handleViewGraph"
     />
 
     <!-- Modal: Confirmar eliminar -->
@@ -337,13 +338,6 @@
         </div>
       </div>
     </div>
-    
-    <ExecutionHistoryModal
-      v-if="showHistoryModal"
-      :flow-id="historyTarget?.id"
-      :flow-name="historyTarget?.name"
-      @close="showHistoryModal = false"
-    />
 
     <FlowExecutionPopup
       v-if="showExecutionPopup"
@@ -423,6 +417,13 @@ const selectedFlowName = ref('')
 const openHistory = (flow) => {
   historyTarget.value = flow
   showHistoryModal.value = true
+}
+
+const handleViewGraph = (event) => {
+  selectedExecutionId.value = event.executionId
+  selectedFlowId.value = event.flowId
+  selectedFlowName.value = event.flowName
+  showExecutionPopup.value = true
 }
 
 const viewLatestExecution = async (flow) => {
