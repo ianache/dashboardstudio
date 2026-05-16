@@ -96,6 +96,9 @@
             <div class="intg-flow-card-footer">
               <span class="text-xs text-slate-400">{{ formatDate(flow.lastRun) }}</span>
               <div class="intg-row-actions">
+                <button class="intg-action" title="Visualizar última ejecución" @click="viewLatestExecution(flow)">
+                  <span class="material-symbols-outlined" style="font-size:16px">search</span>
+                </button>
                 <button class="intg-action intg-action--diagram" title="Abrir editor de diagrama" @click="openDiagramEditor(flow)">
                   <span class="material-symbols-outlined" style="font-size:16px">schema</span>
                 </button>
@@ -122,13 +125,14 @@
                 <th>Estado</th>
                 <th>Tipo</th>
                 <th>Origen → Destino</th>
-                <th>Última Ejecución</th>
+                <th>Próxima Ejecución</th>
+                <th>Progreso</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="pagedFlows.length === 0">
-                <td colspan="6">
+                <td colspan="7">
                   <div class="intg-empty">
                     <span class="material-symbols-outlined intg-empty-icon">sync_disabled</span>
                     <span class="intg-empty-text">No se encontraron flujos</span>
@@ -161,13 +165,32 @@
                   </span>
                 </td>
                 <td>
-                  <p class="text-sm text-slate-700">{{ formatDate(flow.lastRun) }}</p>
-                  <p class="text-xs" :class="flow.lastRunSuccess ? 'text-emerald-600' : 'text-red-500'">
-                    {{ flow.lastRunSuccess ? 'Exitoso' : 'Fallido' }}
-                  </p>
+                  <p class="text-sm text-slate-700">{{ formatDate(flow.next_run_at) }}</p>
+                </td>
+                <td>
+                  <div class="flex flex-col gap-1">
+                    <div class="w-32 bg-slate-200 rounded-full h-2">
+                      <div :class="{'bg-blue-600': flow.last_run_success === null || flow.progress < 100, 'bg-green-500': flow.last_run_success === true && flow.progress === 100, 'bg-red-500': flow.last_run_success === false}" class="h-2 rounded-full transition-all duration-300" :style="{ width: `${flow.progress || 0}%` }"></div>
+                    </div>
+                    <div class="flex justify-between items-center w-32">
+                      <p class="text-xs text-slate-500 font-medium">{{ flow.progress || 0 }}%</p>
+                      <div v-if="flow.last_run_success === true && flow.progress === 100" class="flex items-center gap-1 text-green-600 text-xs font-bold">
+                        <span class="material-symbols-outlined" style="font-size:14px">check_circle</span>
+                      </div>
+                      <div v-else-if="flow.last_run_success === false" class="flex items-center gap-1 text-red-600 text-xs font-bold">
+                        <span class="material-symbols-outlined" style="font-size:14px">error</span>
+                      </div>
+                      <div v-else-if="flow.progress > 0 && flow.progress < 100" class="flex items-center gap-1 text-blue-600 text-xs font-bold">
+                        <span class="material-symbols-outlined animate-spin" style="font-size:14px">sync</span>
+                      </div>
+                    </div>
+                  </div>
                 </td>
                 <td>
                 <div class="intg-row-actions">
+                    <button class="intg-action" title="Visualizar última ejecución" @click="viewLatestExecution(flow)">
+                      <span class="material-symbols-outlined" style="font-size:18px">search</span>
+                    </button>
                     <button class="intg-action" title="Historial de ejecuciones" @click="openHistory(flow)">
                       <span class="material-symbols-outlined" style="font-size:18px">history</span>
                     </button>
@@ -321,22 +344,34 @@
       :flow-name="historyTarget?.name"
       @close="showHistoryModal = false"
     />
+
+    <FlowExecutionPopup
+      v-if="showExecutionPopup"
+      :execution-id="selectedExecutionId"
+      :flow-id="selectedFlowId"
+      :flow-name="selectedFlowName"
+      @close="showExecutionPopup = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { useIntegrationsStore } from '@/stores/integrations'
 import { useToolCatalogStore } from '@/stores/toolCatalog'
 import KpiCard from '@/components/common/KpiCard.vue'
 import ExecutionHistoryModal from '@/components/executions/ExecutionHistoryModal.vue'
+import FlowExecutionPopup from '@/components/executions/FlowExecutionPopup.vue'
+import { integrationFlowsApi } from '@/services/api'
 
 const router = useRouter()
 const uiStore = useUIStore()
 const flowStore = useIntegrationsStore()
 const catalog = useToolCatalogStore()
+
+let refreshInterval = null
 
 onMounted(async () => {
   uiStore.setBreadcrumbs([
@@ -344,16 +379,27 @@ onMounted(async () => {
     { label: 'Integrations', path: '/integrations' }
   ])
   await Promise.all([flowStore.loadFromBackend(), catalog.loadDiagramTypes()])
+  // Setup polling to refresh table data (status, next_run_at, etc) in real-time
+  refreshInterval = setInterval(() => {
+    flowStore.refreshFlows()
+  }, 10000)
+})
+
+// Clear interval on unmount
+onUnmounted(() => {
+  if (refreshInterval) clearInterval(refreshInterval)
 })
 
 const STATUS_LABELS = { active: 'Activo', scheduled: 'Programado', paused: 'Pausado', error: 'Error' }
 
 const flows = computed(() =>
   flowStore.allFlows.map(f => ({
+    ...f, // Include original backend properties like progress, next_run_at, last_run_success
     id: f.id, name: f.name, description: f.description,
     status: f.status, type: f.flow_type,
     source: f.source_system, target: f.target_system,
     lastRun: f.last_run, lastRunSuccess: f.last_run_success,
+    nextRun: f.next_run_at,
   }))
 )
 
@@ -368,9 +414,37 @@ const historyTarget = ref(null)
 const editTarget = ref(null)
 const deleteTarget = ref(null)
 
+// State for the execution visualizer popup
+const showExecutionPopup = ref(false)
+const selectedExecutionId = ref('')
+const selectedFlowId = ref('')
+const selectedFlowName = ref('')
+
 const openHistory = (flow) => {
   historyTarget.value = flow
   showHistoryModal.value = true
+}
+
+const viewLatestExecution = async (flow) => {
+  try {
+    const latest = await integrationFlowsApi.getLatestExecution(flow.id)
+    if (latest) {
+      selectedExecutionId.value = latest.id
+      selectedFlowId.value = flow.id
+      selectedFlowName.value = flow.name
+      showExecutionPopup.value = true
+    } else {
+      uiStore.addAlert({
+        type: 'warning',
+        message: 'No se encontraron ejecuciones para este flujo.'
+      })
+    }
+  } catch (err) {
+    uiStore.addAlert({
+      type: 'error',
+      message: 'Error al obtener la última ejecución: ' + err.message
+    })
+  }
 }
 
 const emptyForm = () => ({
