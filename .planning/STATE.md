@@ -1,26 +1,42 @@
-# Project State: Integration Flow Execution Visualizer
+---
+gsd_state_version: 1.0
+milestone: v1.1
+milestone_name: Graphical Visualization in Execution History
+current_phase: 20
+status: In Progress 🛠️
+last_updated: "2026-05-16T03:00:00.000Z"
+progress:
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 0
+---
 
-- **Status:** Planning 📝
-- **Current Phase:** Phase 18 - Frontend Execution Visualizer Popup
-- **Last Action:** Created execution plan 18-01-PLAN.md for visualizer components.
+# Project State: Graphical Visualization in Execution History
+
+- **Status:** In Progress 🛠️
+- **Current Phase:** Phase 20: Execution History UI Refactor
+- **Last Action:** Created plan for Phase 20.
 
 ## Workflow Status
 - [x] Config defined
 - [x] Context created
-- [x] Research completed
+- [ ] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
-- [x] Phase 18 Planned
-- [ ] Execution in progress
+- [ ] Execution complete
 
-## Milestone: Integration Flow Execution Visualizer (Popup)
-- [ ] Phase 18: Frontend - Execution Visualizer Popup (Plan: 18-01)
-- [ ] Phase 19: Integration & Data Wiring
+## Milestone: Graphical Visualization in Execution History
+- [ ] Phase 20: Execution History UI Refactor
+- [ ] Phase 21: History to Graph Integration
 
 ## Accumulated Context
 ### Milestone Goals
-- Visual diagram of integration flows in a popup.
-- Execution time badge (top-left) and Success/Error badge (top-right).
-- Hover info for start/end timestamps.
-- Triggered by "lupa" icon in Integrations table.
-- Read-only view using existing diagram logic.
+- Add graphical visualization trigger (lupa icon) to each row in the execution history table.
+- Replace text buttons with icons for a cleaner, unified UI.
+- Reuse `FlowExecutionPopup.vue` to show the execution graph for any historical run.
+
+### Decisions Made
+- Use `Modal Popup` for visualization instead of in-place rendering to maintain readability of the diagram.
+- Icons to be used: `search` for graph visualization and `description` for text logs (details).
+- Ensure `flowId` is passed to the popup to correctly load the diagram nodes/connections.

@@ -1,41 +1,42 @@
-# Project Roadmap: Integration Flow Execution Visualizer
+# Project Roadmap: Graphical Visualization in Execution History
 
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1-14. Core & Integration Flows | 24/24 | Completed | 2026-05-14 |
-| 15-17. Connection Management | 3/3 | Completed | 2026-05-15 |
-| 18. Execution Visualizer Popup | 0/1 | Planned | |
+| 1-19. Core & Early Milestones | 19/19 | Completed | 2026-05-16 |
+| 20. Execution History UI Refactor | 1/1 | In Progress | - |
+| 21. History to Graph Integration | 0/1 | Pending | - |
 
 ---
 
-## Milestone: Integration Flow Execution Visualizer (Popup)
+## Milestone: Graphical Visualization in Execution History
 
-### Phase 18: Frontend - Execution Visualizer Popup
-**Goal**: Implement the reusable popup component and the node badges/hovers.
-**Requirements**: FR-02, FR-03, FR-04, TR-01, TR-03
-**Plans**: 1
-- [ ] 18-01-PLAN.md — Create visualizer popup and adapt canvas for read-only visualization.
+### Phase 20: Execution History UI Refactor
+**Goal**: Refactor `ExecutionHistoryModal.vue` to use icons for actions and prepare the UI for graphical triggers.
+**Requirements**: FR-01, FR-03, UI
+**Status**: In Progress
 
-### Phase 19: Integration & Data Wiring
-**Goal**: Add the "lupa" icon to the integrations table and wire it to fetch historical data.
-**Requirements**: FR-01, FR-05, TR-02, TR-04
-**Plans**: 19-01-PLAN.md
+Plans:
+- [ ] 20-01-PLAN.md — Update `ExecutionHistoryModal.vue` template, styles, and add placeholder logic for graph view.
+
+### Phase 21: History to Graph Integration
+**Goal**: Integrate `FlowExecutionPopup.vue` trigger from the history table and ensure data consistency.
+**Requirements**: FR-02, FR-04, TR-01, TR-02
+**Status**: Pending
 
 ---
 
 ## Phase Details
 
-### Phase 18: Frontend - Execution Visualizer Popup
-- [ ] Create `FlowExecutionPopup.vue` as a modal wrapper.
-- [ ] Adapt `FlowEditorCanvas.vue` to support a `readOnly` mode that hides toolbars/side panels.
-- [ ] Implement `fec-node-badge--left` for execution time.
-- [ ] Implement `fec-node-tooltip` for hover start/end times.
-- [ ] Ensure SVG connections also reflect the execution state (already partially implemented).
+### Phase 20: Execution History UI Refactor
+- [x] Update table header and rows in `ExecutionHistoryModal.vue`.
+- [x] Replace "Ver" button with `description` icon.
+- [x] Add `search` (lupa) icon button.
+- [x] Style the action buttons for better UX.
 
-### Phase 19: Integration & Data Wiring
-- [ ] Update `IntegrationsView.vue` to include the "ACCIONES" column and "lupa" icon.
-- [ ] Implement logic to fetch the latest execution ID for a given flow.
-- [ ] Pass the execution data (node statuses, times) to the visualizer popup.
-- [ ] Final end-to-end testing of the visualization flow.
+### Phase 21: History to Graph Integration
+- [ ] Implement `showGraph(execId)` logic in `ExecutionHistoryModal.vue`.
+- [ ] Ensure `FlowExecutionPopup.vue` is globally accessible or properly imported.
+- [ ] Pass `flowId` and `flowName` along with `executionId` to the popup.
+- [ ] Verify that historical data is correctly rendered in the canvas.
