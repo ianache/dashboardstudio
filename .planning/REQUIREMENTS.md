@@ -14,13 +14,13 @@ Se requiere extender las capacidades del editor de integraciones permitiendo a l
     - **Paleta de Colores:** En modo edición, la cabecera de la nota debe mostrar 5 círculos de color (Amarillo, Azul, Verde, Rosa, Gris) para cambiar el color de fondo de la nota.
     - **Tamaño de Fuente:** En modo edición, la cabecera debe incluir botones (+ / -) para ajustar el tamaño de fuente base del contenido Markdown.
 - **FR-06: Redimensionado Dinámico:** La nota debe permitir ajustar su ancho y alto mediante un tirador (handle) ubicado en la esquina inferior derecha.
-- **FR-07: Persistencia Dedicada:** Las notas deben guardarse en un array independiente (`flow_notes`) separado de los nodos funcionales del flujo.
-- **FR-08: Capa de Fondo (Z-Order):** Las notas deben dibujarse siempre en el fondo, por detrás de todos los nodos funcionales y de todas las conexiones (flechas).
+- [x] **FR-07: Persistencia Dedicada:** Las notas deben guardarse en un array independiente (`flow_notes`) separado de los nodos funcionales del flujo.
+- [x] **FR-08: Capa de Fondo (Z-Order):** Las notas deben dibujarse siempre en el fondo, por detrás de todos los nodos funcionales y de todas las conexiones (flechas).
 
 ## Technical Requirements (TR)
 - **TR-01: Integración de Marked.js:** Utilizar la librería `marked` para la conversión de MD a HTML.
 - **TR-02: Sanitización de HTML:** Utilizar `dompurify` para asegurar que el HTML generado por Markdown sea seguro.
-- **TR-03: Renderizado de Capas:** Modificar `FlowEditorCanvas.vue` para renderizar el array de notas antes que los SVGs de las conexiones y el array de nodos funcionales.
+- [x] **TR-03: Renderizado de Capas:** Modificar `FlowEditorCanvas.vue` para renderizar el array de notas antes que los SVGs de las conexiones y el array de nodos funcionales.
 - **TR-04: Extensión del Esquema DB:** Añadir la columna `flow_notes` (JSON) al modelo `IntegrationFlow` en el backend.
 - **TR-05: Lógica de Resize NWSE:** Implementar manejadores de eventos de ratón específicos para el tirador de redimensionado de las notas.
 

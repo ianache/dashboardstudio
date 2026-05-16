@@ -2,21 +2,23 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Markdown Notes in Editor
-current_phase: 25
+current_phase: 28
+current_plan: 2
+total_plans_in_phase: 2
 status: In Progress 🛠️
-last_updated: "2026-05-16T21:00:00.000Z"
+last_updated: "2026-05-17T00:00:00.000Z"
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 0
+  completed_phases: 3
+  total_plans: 7
+  completed_plans: 6
 ---
 
 # Project State: Markdown Notes in Editor
 
 - **Status:** In Progress 🛠️
-- **Current Phase:** Phase 25: Architecture & DB Extension
-- **Last Action:** Updated architecture to use a dedicated background layer and separate storage for notes.
+- **Current Phase:** Phase 28: Advanced Interaction & Persistence
+- **Last Action:** Successfully completed Phase 28 Plan 01, refactoring FlowEditorCanvas note handling.
 
 ## Workflow Status
 - [x] Config defined
@@ -27,9 +29,9 @@ progress:
 - [ ] Execution complete
 
 ## Milestone: Markdown Notes in Editor
-- [ ] Phase 25: Architecture & DB Extension
-- [ ] Phase 26: Note Layer & Drag Logic
-- [ ] Phase 27: Markdown Engine & Styling
+- [x] Phase 25: Architecture & DB Extension
+- [x] Phase 26: Note Layer & Drag Logic
+- [x] Phase 27: Markdown Engine & Styling
 - [ ] Phase 28: Advanced Interaction & Persistence
 
 ## Accumulated Context
@@ -37,12 +39,22 @@ progress:
 - Add a "Note" tool for canvas documentation.
 - Support markdown rendering, inline editing, and custom styling.
 - Enable dynamic resizing for notes.
-- **New Architecture:** Notes are stored in a dedicated `flow_notes` array and rendered in the background (z-order behind everything).
+- Notes are stored in a dedicated `flow_notes` array and rendered in the background.
 
 ### Decisions Made
-- Category: "Annotations" (New).
-- Palette: Classic Sticky Notes (Yellow, Blue, Green, Pink, Grey).
-- Interaction: NWSE-resize via corner handle.
-- Libraries: Using already installed `marked` and `dompurify`.
-- **Storage:** Dedicated `flow_notes` column in the database to separate documentation from functional nodes.
-- **Layering:** The `notes` array will be rendered first in the `FlowEditorCanvas.vue` DOM to ensure it sits behind SVG connections and nodes.
+- **Architecture:** Dedicated `flow_notes` column in `biportal.integration_flows` (JSON).
+- **UI Layering:** Notes render first in the canvas to stay behind functional nodes.
+- **Editing:** Double-click to edit, focus management with `v-focus`.
+- **Styling:** Floating toolbar for color (5 options) and font size.
+- **Rendering:** Marked.js + DOMPurify for secure Markdown display.
+- [Phase 28]: Notes are now stored in a dedicated 'notes' array, isolated from functional 'nodes'.
+- [Phase 28]: Background rendering layer implemented for notes to ensure correct Z-ordering.
+
+## Performance Metrics
+| Phase | Plan | Duration | Tasks | Files | Date |
+|-------|------|----------|-------|-------|------|
+| 28    | 01   | 15m      | 3     | 1     | 2026-05-17 |
+
+## Session Info
+- **Last session:** 2026-05-17
+- **Stopped at:** Completed 28-01-PLAN.md

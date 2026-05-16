@@ -8,7 +8,7 @@
 | 25. Architecture & DB Extension | 2/2 | Completed | 2026-05-16 |
 | 26. Note Layer & Drag Logic | 2/2 | Completed | 2026-05-16 |
 | 27. Markdown Engine & Styling | 2/2 | Completed | 2026-05-16 |
-| 28. Advanced Interaction & Persistence | 0/2 | Pending | - |
+| 28. Advanced Interaction & Persistence | 1/2 | In Progress|  |
 
 ---
 
