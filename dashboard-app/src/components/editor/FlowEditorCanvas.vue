@@ -266,7 +266,7 @@
     </main>
 
     <!-- ── Right Panel: Properties ─────────────────────────────────────────── -->
-    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--wide': selectedNode && hasCodeProp(selectedNode.toolType) }">
+    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed }" :style="{ width: rightCollapsed ? '24px' : rightWidth + 'px' }">
       <div class="fec-resizer" @mousedown.stop="onResizeMousedown"></div>
       <button class="fec-toggle fec-toggle--right" @click="rightCollapsed = !rightCollapsed" :title="rightCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ rightCollapsed ? 'chevron_left' : 'chevron_right' }}</span>
@@ -933,6 +933,11 @@ function onCanvasClick() {
 
 // ─── Global move / up (on root element) ──────────────────────────────────────
 function onGlobalMousemove(e) {
+  if (isResizingRight.value) {
+    const newWidth = window.innerWidth - e.clientX
+    rightWidth.value = newWidth
+    return
+  }
   if (isDraggingNode && draggedNode) {
     hasDragged = true
     const pos = getCanvasPos(e.clientX, e.clientY)
@@ -957,6 +962,7 @@ function onGlobalMousemove(e) {
   }
 }
 function onGlobalMouseup() {
+  isResizingRight.value = false
   isDraggingNode = false; draggedNode = null; nodeDragStart = null
   isPanning = false; panStart = null
   isDraggingFbar = false; fbarDragStart = null
