@@ -1,22 +1,22 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: Markdown Notes in Editor
-current_phase: None
-status: Completed ✅
-last_updated: "2026-05-17T01:00:00.000Z"
+milestone: v1.5
+milestone_name: ODS PostgreSQL Upsert & Dynamic Discovery
+current_phase: 29
+status: In Progress 🛠️
+last_updated: "2026-05-17T03:00:00.000Z"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 0
 ---
 
-# Project State: Markdown Notes in Editor
+# Project State: ODS PostgreSQL Upsert & Dynamic Discovery
 
-- **Status:** Completed ✅
-- **Current Phase:** None
-- **Last Action:** Successfully implemented dynamic resizing and completed the Markdown Notes milestone.
+- **Status:** In Progress 🛠️
+- **Current Phase:** Phase 29: Metadata Inspection API
+- **Last Action:** Initialized new milestone requirements and roadmap for ODS PostgreSQL enhancements.
 
 ## Workflow Status
 - [x] Config defined
@@ -24,26 +24,21 @@ progress:
 - [ ] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
-- [x] Execution complete
+- [ ] Execution complete
 
-## Milestone: Markdown Notes in Editor
-- [x] Phase 25: Architecture & DB Extension
-- [x] Phase 26: Note Layer & Drag Logic
-- [x] Phase 27: Markdown Engine & Styling
-- [x] Phase 28: Advanced Interaction & Persistence
-
-## Pending Todos
-- [ ] **Frontend:** [Corregir comportamiento de arrastre de notas](todos/frontend/note-dragging-fix.md) (Medium)
+## Milestone: ODS PostgreSQL Upsert & Dynamic Discovery
+- [ ] Phase 29: Metadata Inspection API
+- [ ] Phase 30: ODS Node UI Enhancement
+- [ ] Phase 31: ODS Execution Engine
 
 ## Accumulated Context
 ### Milestone Goals
-- Add a "Note" tool for canvas documentation.
-- Support markdown rendering, inline editing, and custom styling.
-- Enable dynamic resizing for notes.
-- Separate storage (`flow_notes`) and background Z-order rendering.
+- Enable dynamic table and column discovery for ODS PostgreSQL nodes.
+- Support composite identity keys for UPSERT operations.
+- Centralize write logic in Python for better driver support and bulk performance.
 
 ### Decisions Made
-- **Isolation:** Notes live in a dedicated array and layer, separate from functional nodes.
-- **Z-Order:** Notes render first in the template, ensuring they stay behind nodes and connections.
-- **Interactions:** Double-click for editing, NWSE handle for resizing, toolbar for style.
-- **Persistence:** All dimensions and styles are persisted via the new `flow_notes` DB column.
+- **Connection:** The ODS node will allow selecting a DataSource from the manager.
+- **UI:** A "Refresh" button will be added next to table/column selectors to trigger re-scans.
+- **Execution:** Deno will delegate the final data write to a Python service (ods_executor.py) when reaching an `ods_pg` node.
+- **Visibility:** Identity fields selection will only be visible when "UPSERT" mode is chosen.

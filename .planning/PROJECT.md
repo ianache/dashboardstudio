@@ -50,9 +50,39 @@ Implementar un configurador de visualizaciones dinámico con:
 **Objective:** Automatizar la ejecución de flujos de integración mediante cronjobs y mantener un historial detallado de ejecuciones por flujo y nodo.
 
 ### Success Criteria
-- [ ] Implementación de `APScheduler` para la gestión de cronjobs en background.
-- [ ] Esquema de base de datos para almacenar `ExecutionHistory` (Flow level) y `NodeExecutionLogs` (Node level).
+- [x] Implementación de `APScheduler` para la gestión de cronjobs en background.
+- [x] Esquema de base de datos para almacenar `ExecutionHistory` (Flow level) y `NodeExecutionLogs` (Node level).
 - [ ] Interfaz de historial de ejecución (tabla paginable) accesible desde un nuevo icono "Log" en la vista de Integraciones.
 - [ ] Visualización de detalles (inputs/outputs, estado, duración) por nodo en un panel lateral.
 - [ ] Configuración configurable de nivel de detalle de logs (resumen vs detallado).
+
+## Milestone: Resizable Properties Sidebar
+**Objective:** Mejorar la usabilidad del editor permitiendo ajustar dinámicamente el ancho del panel de propiedades.
+
+### Success Criteria
+- [x] Tirador interactivo en el borde izquierdo de la barra lateral de propiedades.
+- [x] Soporte para arrastrar y soltar para cambiar el ancho (min 272px, max 50% de la pantalla).
+- [x] Persistencia del ancho durante la edición de diferentes nodos.
+- [x] Integración fluida con la función de colapso existente.
+
+## Milestone: Execution Console Improvements
+**Objective:** Corregir la visualización de iconos y permitir el ajuste vertical del panel de la consola de ejecución (Terminal).
+
+### Success Criteria
+- [x] Visualización correcta de los iconos "delete_sweep" y "close" en la consola (sin textos superpuestos).
+- [x] Panel de consola resizable verticalmente mediante arrastre de su borde superior.
+- [x] Implementación de límites de altura (mín/máx) para mantener la estabilidad de la UI.
+- [x] Integración de la clase de iconos `.msi` de forma global para consistencia.
+
+## Milestone: ODS PostgreSQL Upsert & Dynamic Discovery
+**Objective:** Potenciar el nodo "ODS PostgreSQL" con capacidades de descubrimiento dinámico de metadatos y soporte avanzado para operaciones de UPSERT con llaves compuestas.
+
+### Success Criteria
+- [ ] Inspección dinámica de tablas y columnas basada en la conexión seleccionada.
+- [ ] Selector de tabla tipo combobox con botón de "Refresh" en el panel de propiedades.
+- [ ] Soporte para selección de múltiples campos de identidad para el modo UPSERT.
+- [ ] Motor de ejecución en Python para operaciones ODS (Append, Overwrite, Upsert).
+- [ ] Visualización condicional de propiedades según el modo de escritura seleccionado.
+
+
 
