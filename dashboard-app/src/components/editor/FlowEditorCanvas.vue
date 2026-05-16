@@ -127,7 +127,7 @@
         <div
           v-for="note in notes" :key="note.id"
           class="fec-node fec-node--annotations"
-          :class="{ 'fec-node--sel': selectedNode?.id === note.id }"
+          :class="{ 'fec-node--sel': selectedNote?.id === note.id }"
           :style="{
             left: note.x + 'px',
             top: note.y + 'px',
@@ -137,11 +137,11 @@
             borderColor: darkenColor(note.props.color || '#fef9c3')
           }"
           @mousedown.stop="onNoteMousedown($event, note)"
-          @click.stop="selectNode(note)">
+          @click.stop="selectNote(note)">
           
           <div class="fec-note-body">
             <!-- Styling Toolbar -->
-            <div v-if="(selectedNode?.id === note.id || editingNoteId === note.id) && !readOnly" class="fec-note-toolbar" @mousedown.stop @click.stop>
+            <div v-if="(selectedNote?.id === note.id || editingNoteId === note.id) && !readOnly" class="fec-note-toolbar" @mousedown.stop @click.stop>
               <div class="fec-note-palette">
                 <button v-for="c in ['#fef9c3', '#dbeafe', '#dcfce7', '#fce7f3', '#f1f5f9']" 
                   :key="c" class="fec-note-color" :style="{ background: c, borderColor: darkenColor(c) }"
@@ -151,6 +151,8 @@
               <button class="fec-note-tbtn" @click="changeNoteFontSize(note, -1)"><span class="msi" style="font-size:14px">remove</span></button>
               <span class="fec-note-tsize">{{ parseInt(note.props.fontSize || 13) }}</span>
               <button class="fec-note-tbtn" @click="changeNoteFontSize(note, 1)"><span class="msi" style="font-size:14px">add</span></button>
+              <div class="fec-note-tsep"></div>
+              <button class="fec-note-tbtn fec-note-tbtn--del" @click="deleteSelectedNote" title="Eliminar nota"><span class="msi" style="font-size:14px">delete</span></button>
             </div>
 
             <textarea
@@ -781,6 +783,7 @@ const isResizingBottom = ref(false)
 const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k, true])))
 const editingNoteId  = ref(null)
 const selectedNode   = ref(null)
+const selectedNote   = ref(null)
 const selectedConn   = ref(null)
 const hoveredNode    = ref(null)
 const hoveredConn    = ref(null)
@@ -966,7 +969,7 @@ function toggleCat(key) { openCats.value[key] = !openCats.value[key] }
 
 // ─── Drag state (non-reactive, performance-critical) ─────────────────────────
 let isPanning       = false, panStart       = null
-let isDraggingNode  = false, draggedNode    = null, nodeDragStart = null
+let isDraggingNode  = false, isDraggingNote = false, draggedNode = null, nodeDragStart = null
 let isDraggingFbar  = false, fbarDragStart  = null
 let hasDragged      = false
 let isConnecting    = false, connectFrom    = null
@@ -1046,7 +1049,11 @@ function onCanvasMousedown(e) {
   panStart   = { mx: e.clientX, my: e.clientY, px: panX.value, py: panY.value }
 }
 function onCanvasClick() {
-  if (!hasDragged) { selectedNode.value = null; selectedConn.value = null }
+  if (!hasDragged) {
+    selectedNode.value = null
+    selectedNote.value = null
+    selectedConn.value = null
+  }
   hasDragged = false
 }
 
@@ -1062,7 +1069,7 @@ function onGlobalMousemove(e) {
     bottomHeight.value = Math.max(100, Math.min(newHeight, window.innerHeight * 0.8))
     return
   }
-  if (isDraggingNode && draggedNode) {
+  if ((isDraggingNode || isDraggingNote) && draggedNode) {
     hasDragged = true
     const pos = getCanvasPos(e.clientX, e.clientY)
     const { x, y } = snapPos(nodeDragStart.nx + pos.x - nodeDragStart.sx, nodeDragStart.ny + pos.y - nodeDragStart.sy)
@@ -1088,7 +1095,7 @@ function onGlobalMousemove(e) {
 function onGlobalMouseup() {
   isResizingRight.value = false
   isResizingBottom.value = false
-  isDraggingNode = false; draggedNode = null; nodeDragStart = null
+  isDraggingNode = false; isDraggingNote = false; draggedNode = null; nodeDragStart = null
   isPanning = false; panStart = null
   isDraggingFbar = false; fbarDragStart = null
   isConnecting = false; connectFrom = null; tempConn.value = null
@@ -1103,11 +1110,29 @@ function onNodeMousedown(e, node) {
   nodeDragStart = { sx: pos.x, sy: pos.y, nx: node.x, ny: node.y }
 }
 function onNoteMousedown(e, note) {
-  onNodeMousedown(e, note)
+  if (props.readOnly) return
+  if (e.button !== 0) return
+  isDraggingNote = true; draggedNode = note; hasDragged = false
+  const pos = getCanvasPos(e.clientX, e.clientY)
+  nodeDragStart = { sx: pos.x, sy: pos.y, nx: note.x, ny: note.y }
 }
 function selectNode(node) {
   if (props.readOnly) return
-  if (!hasDragged) { selectedNode.value = node; selectedConn.value = null; rightCollapsed.value = false }
+  if (!hasDragged) { 
+    selectedNode.value = node
+    selectedNote.value = null
+    selectedConn.value = null
+    rightCollapsed.value = false 
+  }
+  hasDragged = false
+}
+function selectNote(note) {
+  if (props.readOnly) return
+  if (!hasDragged) {
+    selectedNote.value = note
+    selectedNode.value = null
+    selectedConn.value = null
+  }
   hasDragged = false
 }
 function deleteSelectedNode() {
@@ -1115,9 +1140,15 @@ function deleteSelectedNode() {
   if (!selectedNode.value) return
   const id = selectedNode.value.id
   nodes.value = nodes.value.filter(n => n.id !== id)
-  notes.value = notes.value.filter(n => n.id !== id)
   connections.value = connections.value.filter(c => c.from !== id && c.to !== id)
   selectedNode.value = null
+}
+function deleteSelectedNote() {
+  if (props.readOnly) return
+  if (!selectedNote.value) return
+  const id = selectedNote.value.id
+  notes.value = notes.value.filter(n => n.id !== id)
+  selectedNote.value = null
 }
 
 // ─── Port events ──────────────────────────────────────────────────────────────
@@ -1578,6 +1609,7 @@ onMounted(() => { setTimeout(fitView, 80) })
   border: none; background: transparent; cursor: pointer; color: #64748b; border-radius: 4px;
 }
 .fec-note-tbtn:hover { background: #f1f5f9; color: #2563eb; }
+.fec-note-tbtn--del:hover { background: #fee2e2; color: #dc2626; }
 .fec-note-tsize { font-size: 11px; font-weight: 700; color: #475569; min-width: 16px; text-align: center; }
 
 .fec-note-ta {
