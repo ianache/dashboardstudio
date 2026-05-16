@@ -13,6 +13,7 @@ from app.models import models
 from app.schemas import schemas
 
 from app.services.deno_service import deno_service
+from app.services.scheduler import schedule_flow, unschedule_flow
 from app.services.source_executor import execute_source_node, POSTGRES_TYPES, MYSQL_TYPES, HTTP_TYPES
 from app.api.endpoints.data_sources import _decode_config
 
@@ -60,79 +61,12 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
             "metadata": flow.flow_metadata
         }
 
-        # ── Pre-execute source nodes in Python (before Deno) ──────────────────
-        # Deno runs with --no-remote (no network), so Python resolves source nodes
-        # (DB queries, REST calls) first and injects results as initial payload.
-        import json as _json
-        from copy import deepcopy
-
-        RESOLVABLE = POSTGRES_TYPES | MYSQL_TYPES | HTTP_TYPES
-        nodes_copy  = deepcopy(flow.flow_nodes or [])
-        initial_payload = payload or {}
-        prefetched_outputs = {}
-        pre_exec_ok = True
-
-        for node in nodes_copy:
-            if node.get("category") != "source":
-                continue
-            conn_type = (node.get("props") or {}).get("connection_type", "").lower()
-            if conn_type not in RESOLVABLE:
-                continue  # let Deno handle unknown source types
-
-            # Emit running status immediately
-            await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "running"})
-            await websocket.send_json({"type": "info",
-                "message": f"[Fuente] Ejecutando '{node.get('label', node['id'])}' ..."})
-
-            # ── Enrich node props with credentials from DB (decrypted) ──────────────
-            # The frontend auto-fill only copies keys that already exist in prop_defs,
-            # so username/password may be missing. We resolve them server-side from
-            # the DataSource record to guarantee correct credentials.
-            connection_id = (node.get("props") or {}).get("connection_id", "")
-            if connection_id:
-                ds = db.query(models.DataSource).filter(models.DataSource.id == connection_id).first()
-                if ds:
-                    resolved_cfg = _decode_config(ds.connection_url or "")
-                    if not node.get("props"):
-                        node["props"] = {}
-                    # Merge: DB credentials always take precedence over node.props values
-                    for cfg_key in ["host", "port", "username", "password", "database",
-                                    "schema", "url", "email", "api_key", "token",
-                                    "token_url", "client_id", "client_secret"]:
-                        if cfg_key in resolved_cfg:
-                            node["props"][cfg_key] = resolved_cfg[cfg_key]
-                    # Also ensure connection_type matches what's stored in the DataSource
-                    if ds.type:
-                        node["props"]["connection_type"] = ds.type
-                    logger.info(f"[SourceExec] Credenciales resueltas desde DataSource '{ds.name}' "
-                                f"(user={resolved_cfg.get('username', '<vacío>')})")
-                else:
-                    logger.warning(f"[SourceExec] DataSource '{connection_id}' no encontrado en DB")
-            # ───────────────────────────────────────────────────────────────────────
-
-            result = await execute_source_node(node)
-
-            if result["success"]:
-                prefetched_outputs[node["id"]] = result["rows"]
-                node["__pre_executed"] = True
-                await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "success"})
-                await websocket.send_json({"type": "info",
-                    "message": f"[Fuente] {result['count']} registros cargados desde '{node.get('label', '')}'"})
-            else:
-                node["__pre_executed"] = True  # skip in Deno so error is the final state
-                await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "error"})
-                await websocket.send_json({"type": "error",
-                    "message": f"[Fuente Error] {result['error']}"})
-                pre_exec_ok = False
-                break  # abort further execution on source failure
+        from app.services.source_executor import pre_execute_flow_nodes
+        pre_exec_ok, flow_data = await pre_execute_flow_nodes(flow_data, db, websocket)
 
         if not pre_exec_ok:
             await websocket.send_json({"type": "status", "success": False, "exit_code": 1})
             return
-
-        # Replace nodes list with annotated copy so runner.ts can skip pre-executed nodes
-        flow_data["nodes"] = nodes_copy
-        flow_data["prefetched_outputs"] = prefetched_outputs
 
         logger.info(f"WebSocket flow {flow_id}: Starting Deno stream")
         start_time = datetime.utcnow()
@@ -142,7 +76,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
         success = False
 
         log_count = 0
-        async for log in deno_service.run_flow_stream(flow_data, initial_payload):
+        async for log in deno_service.run_flow_stream(flow_data, payload):
             log_count += 1
             await websocket.send_json(log)
             
@@ -256,6 +190,7 @@ async def get_execution_logs(
     ]
     
     return {
+        "flow_id": execution.flow_id,
         "status": execution.status,
         "logs": nl_dicts,
         "result_data": None, 
@@ -297,6 +232,9 @@ async def run_integration_flow(
         "connections": flow.flow_connections,
         "metadata": flow.flow_metadata
     }
+
+    from app.services.source_executor import pre_execute_flow_nodes
+    pre_exec_ok, flow_data = await pre_execute_flow_nodes(flow_data, db)
 
     start_time = datetime.utcnow()
     result = await deno_service.run_flow(flow_data, payload)
@@ -370,7 +308,27 @@ async def list_integration_flows(
         q = q.filter(models.IntegrationFlow.status == status)
     if diagram_type:
         q = q.filter(models.IntegrationFlow.diagram_type == diagram_type)
-    return q.order_by(models.IntegrationFlow.created_at.desc()).all()
+    flows = q.order_by(models.IntegrationFlow.created_at.desc()).all()
+    
+    # Compute dynamic progress and backfill missing last_run_success for older flows
+    for flow in flows:
+        latest_exec = db.query(models.ExecutionHistory).filter(models.ExecutionHistory.flow_id == flow.id).order_by(models.ExecutionHistory.start_time.desc()).first()
+        if latest_exec:
+            if latest_exec.status == "running":
+                nodes_done = db.query(models.NodeExecutionLogs).filter(models.NodeExecutionLogs.execution_id == latest_exec.id).count()
+                total = len(flow.flow_nodes) if flow.flow_nodes else 1
+                prog = int((nodes_done / total) * 100)
+                flow.progress = min(prog, 99) # 99% until fully success
+            elif latest_exec.status == "success":
+                flow.progress = 100
+                flow.last_run_success = True
+            else:
+                flow.progress = 100
+                flow.last_run_success = False
+        else:
+            flow.progress = 0
+            
+    return flows
 
 
 @router.get("/{flow_id}", response_model=schemas.IntegrationFlowResponse)
@@ -400,6 +358,7 @@ async def create_integration_flow(
     db.add(flow)
     db.commit()
     db.refresh(flow)
+    schedule_flow(flow)
     return flow
 
 
@@ -417,6 +376,7 @@ async def update_integration_flow(
         setattr(flow, key, value)
     db.commit()
     db.refresh(flow)
+    schedule_flow(flow)
     return flow
 
 
@@ -439,11 +399,12 @@ async def save_flow_diagram(
         flow.flow_metadata = body["metadata"]
         # Sync top-level fields from metadata if present
         meta = body["metadata"]
-        for field in ("name", "description", "status", "flow_type", "schedule", "source_system", "target_system"):
+        for field in ("name", "description", "status", "flow_type", "cron_expression", "log_level", "source_system", "target_system"):
             if field in meta:
                 setattr(flow, field, meta[field])
     db.commit()
     db.refresh(flow)
+    schedule_flow(flow)
     return flow
 
 
@@ -458,4 +419,5 @@ async def delete_integration_flow(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration flow not found")
     db.delete(flow)
     db.commit()
+    unschedule_flow(flow_id)
     return None

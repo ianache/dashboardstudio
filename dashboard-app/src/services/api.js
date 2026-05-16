@@ -418,6 +418,14 @@ export const integrationFlowsApi = {
   async saveDiagram(id, diagramData) { return apiRequest(`/api/v1/integration-flows/${id}/diagram`, { method: 'PUT', body: JSON.stringify(diagramData) }) },
   async delete(id) { return apiRequest(`/api/v1/integration-flows/${id}`, { method: 'DELETE' }) },
   
+  async getLatestExecution(flowId) {
+    const results = await apiRequest(`/api/v1/integration-flows/${flowId}/executions?limit=1`)
+    return results && results.length > 0 ? results[0] : null
+  },
+  async getExecutionLogs(execId) {
+    return apiRequest(`/api/v1/integration-flows/executions/${execId}/logs`)
+  },
+
   async getHistory(flowId) { return apiRequest(`/api/v1/execution-history/${flowId}`) },
   async getExecutionDetail(executionId) { return apiRequest(`/api/v1/execution-history/detail/${executionId}`) }
 }
