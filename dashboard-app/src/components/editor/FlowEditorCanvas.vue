@@ -177,7 +177,14 @@
               'fec-node--error':     (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) === 'error'
             }
           ]"
-          :style="{ left: node.x + 'px', top: node.y + 'px', '--nc': getCatColor(node.category), '--nb': getCatBg(node.category) }"
+          :style="{ 
+            left: node.x + 'px', 
+            top: node.y + 'px', 
+            '--nc': getCatColor(node.category), 
+            '--nb': getCatBg(node.category),
+            background: node.category?.toLowerCase() === 'annotations' ? (node.props.color || '#fef9c3') : undefined,
+            borderColor: node.category?.toLowerCase() === 'annotations' ? darkenColor(node.props.color || '#fef9c3') : undefined
+          }"
           @mousedown.stop="onNodeMousedown($event, node)"
           @mouseenter="hoveredNode = node"
           @mouseleave="hoveredNode = null"
@@ -235,11 +242,25 @@
             @mouseup="onPortMouseup($event, node, 'in')">
           </div>
 
-          <div v-if="node.category === 'annotations'" class="fec-note-body">
+          <div v-if="node.category?.toLowerCase() === 'annotations'" class="fec-note-body">
+            <!-- Styling Toolbar -->
+            <div v-if="(selectedNode?.id === node.id || editingNoteId === node.id) && !readOnly" class="fec-note-toolbar" @mousedown.stop @click.stop>
+              <div class="fec-note-palette">
+                <button v-for="c in ['#fef9c3', '#dbeafe', '#dcfce7', '#fce7f3', '#f1f5f9']" 
+                  :key="c" class="fec-note-color" :style="{ background: c, borderColor: darkenColor(c) }"
+                  @click="changeNoteColor(node, c)"></button>
+              </div>
+              <div class="fec-note-tsep"></div>
+              <button class="fec-note-tbtn" @click="changeNoteFontSize(node, -1)"><span class="msi" style="font-size:14px">remove</span></button>
+              <span class="fec-note-tsize">{{ parseInt(node.props.fontSize || 13) }}</span>
+              <button class="fec-note-tbtn" @click="changeNoteFontSize(node, 1)"><span class="msi" style="font-size:14px">add</span></button>
+            </div>
+
             <textarea
               v-if="editingNoteId === node.id"
               v-model="node.props.content"
               class="fec-note-ta"
+              :style="{ fontSize: node.props.fontSize || '13px' }"
               @blur="editingNoteId = null"
               @mousedown.stop
               v-focus
@@ -247,6 +268,7 @@
             <div
               v-else
               class="fec-note-content"
+              :style="{ fontSize: node.props.fontSize || '13px' }"
               v-html="renderMarkdown(node.props.content || '')"
               @dblclick="editingNoteId = node.id"
             ></div>
@@ -526,6 +548,29 @@ function renderMarkdown(content) {
   return DOMPurify.sanitize(rawHtml)
 }
 
+function changeNoteColor(node, color) {
+  if (!node.props) node.props = {}
+  node.props.color = color
+}
+
+function changeNoteFontSize(node, delta) {
+  if (!node.props) node.props = {}
+  const current = parseInt(node.props.fontSize || 13)
+  const next = Math.min(48, Math.max(8, current + delta))
+  node.props.fontSize = next + 'px'
+}
+
+function darkenColor(hex) {
+  if (!hex || hex[0] !== '#') return hex
+  let r = parseInt(hex.slice(1, 3), 16)
+  let g = parseInt(hex.slice(3, 5), 16)
+  let b = parseInt(hex.slice(5, 7), 16)
+  r = Math.max(0, Math.floor(r * 0.9))
+  g = Math.max(0, Math.floor(g * 0.9))
+  b = Math.max(0, Math.floor(b * 0.9))
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+}
+
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 const props = defineProps({
   diagramType:   { type: String,  required: true },
@@ -672,6 +717,7 @@ const toolsByCategory = computed(() => {
 // ─── Diagram state (owned by this component) ──────────────────────────────────
 const nodes       = ref([])
 const connections = ref([])
+const notes       = ref([])
 const metadata    = ref({})
 
 // ─── Dirty tracking ───────────────────────────────────────────────────────────
@@ -679,7 +725,7 @@ let savedSnapshot      = ''
 let initializingFromProp = false
 
 function takeSnapshot() {
-  return JSON.stringify({ nodes: nodes.value, connections: connections.value, metadata: metadata.value })
+  return JSON.stringify({ nodes: nodes.value, connections: connections.value, notes: notes.value, metadata: metadata.value })
 }
 
 // Initialize from prop
@@ -687,6 +733,7 @@ watch(() => props.diagramData, (data) => {
   initializingFromProp = true
   nodes.value       = data?.nodes       ? JSON.parse(JSON.stringify(data.nodes))       : []
   connections.value = data?.connections ? JSON.parse(JSON.stringify(data.connections)) : []
+  notes.value       = data?.notes       ? JSON.parse(JSON.stringify(data.notes))       : []
   metadata.value    = data?.metadata    ? JSON.parse(JSON.stringify(data.metadata))    : {}
   nextTick(() => {
     savedSnapshot = takeSnapshot()
@@ -695,7 +742,7 @@ watch(() => props.diagramData, (data) => {
   })
 }, { immediate: true })
 
-watch([nodes, connections, metadata], () => {
+watch([nodes, connections, notes, metadata], () => {
   if (initializingFromProp) return
   const dirty = takeSnapshot() !== savedSnapshot
   emit('dirty-change', dirty)
@@ -1099,6 +1146,7 @@ function getCurrentDiagramData() {
   return {
     nodes:       JSON.parse(JSON.stringify(nodes.value)),
     connections: JSON.parse(JSON.stringify(connections.value)),
+    notes:       JSON.parse(JSON.stringify(notes.value)),
     metadata:    JSON.parse(JSON.stringify(metadata.value)),
   }
 }
@@ -1474,6 +1522,28 @@ onMounted(() => { setTimeout(fitView, 80) })
   display: flex; flex-direction: column;
 }
 .fec-note-body { flex: 1; display: flex; flex-direction: column; padding: 12px; position: relative; }
+
+/* Styling Toolbar */
+.fec-note-toolbar {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid #e2e8f0;
+  border-radius: 8px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+.fec-note-palette { display: flex; gap: 4px; }
+.fec-note-color {
+  width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1);
+  cursor: pointer; padding: 0; transition: transform 0.1s;
+}
+.fec-note-color:hover { transform: scale(1.2); }
+.fec-note-tsep { width: 1px; height: 16px; background: #e2e8f0; margin: 0 4px; }
+.fec-note-tbtn {
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; cursor: pointer; color: #64748b; border-radius: 4px;
+}
+.fec-note-tbtn:hover { background: #f1f5f9; color: #2563eb; }
+.fec-note-tsize { font-size: 11px; font-weight: 700; color: #475569; min-width: 16px; text-align: center; }
+
 .fec-note-ta {
   width: 100%; height: 100%; min-height: 100px;
   border: none; background: transparent; resize: none;
