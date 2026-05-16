@@ -420,6 +420,50 @@
           </div>
         </template>
 
+        <!-- ── Note properties ── -->
+        <template v-else-if="selectedNote">
+          <div class="fec-props-hdr">
+            <div class="fec-props-node-ico" style="background:#fef9c3;color:#854d0e">
+              <span class="msi" style="font-size:18px">sticky_note_2</span>
+            </div>
+            <div style="flex:1">
+              <p class="fec-props-title">Propiedades de Nota</p>
+              <p class="fec-props-sub">Anotación de canvas</p>
+            </div>
+            <button class="fec-close-btn" @click="selectedNote = null"><span class="msi" style="font-size:15px">close</span></button>
+          </div>
+          
+          <div class="fec-prop-g">
+            <label class="fec-prop-l">Color</label>
+            <div class="fec-note-palette" style="padding: 4px 0;">
+              <button v-for="c in ['#fef9c3', '#dbeafe', '#dcfce7', '#fce7f3', '#f1f5f9']" 
+                :key="c" class="fec-note-color" 
+                :style="{ background: c, borderColor: darkenColor(c), transform: selectedNote.props.color === c ? 'scale(1.2)' : 'none' }"
+                @click="changeNoteColor(selectedNote, c)"></button>
+            </div>
+          </div>
+          
+          <div class="fec-prop-g">
+            <label class="fec-prop-l">Tamaño de Fuente</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="fec-note-tbtn" style="border:1px solid #e2e8f0;background:#fff;" @click="changeNoteFontSize(selectedNote, -1)"><span class="msi" style="font-size:14px">remove</span></button>
+              <span class="fec-note-tsize">{{ parseInt(selectedNote.props.fontSize || 13) }}px</span>
+              <button class="fec-note-tbtn" style="border:1px solid #e2e8f0;background:#fff;" @click="changeNoteFontSize(selectedNote, 1)"><span class="msi" style="font-size:14px">add</span></button>
+            </div>
+          </div>
+
+          <div class="fec-prop-g">
+            <label class="fec-prop-l">Contenido (Markdown)</label>
+            <textarea v-model="selectedNote.props.content" class="fec-prop-ta" rows="8" placeholder="# Titulo..."></textarea>
+          </div>
+
+          <div class="fec-node-del-wrap">
+            <button class="fec-node-del-btn" @click="deleteSelectedNote">
+              <span class="msi" style="font-size:15px">delete</span>Eliminar nota
+            </button>
+          </div>
+        </template>
+
         <!-- ── Node properties ── -->
         <template v-else-if="selectedNode">
           <div class="fec-props-hdr">
@@ -1161,6 +1205,7 @@ function selectNote(note) {
     selectedNote.value = note
     selectedNode.value = null
     selectedConn.value = null
+    rightCollapsed.value = false
   }
   hasDragged = false
 }
