@@ -34,6 +34,7 @@ progress:
 
 ## Pending Todos
 - [ ] **Frontend:** [Corregir comportamiento de arrastre de notas](todos/frontend/note-dragging-fix.md) (Medium)
+- [ ] **Frontend:** [Corregir selección y edición de propiedades de notas](todos/frontend/note-properties-edit-fix.md) (High)
 
 ## Accumulated Context
 ### Milestone Goals
