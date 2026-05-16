@@ -235,19 +235,38 @@
             @mouseup="onPortMouseup($event, node, 'in')">
           </div>
 
-          <div class="fec-node-hdr">
-            <div class="fec-node-hdr-ico">
-              <span class="msi" style="font-size:13px">{{ getToolByType(node.toolType)?.icon || 'circle' }}</span>
+          <div v-if="node.category === 'annotations'" class="fec-note-body">
+            <textarea
+              v-if="editingNoteId === node.id"
+              v-model="node.props.content"
+              class="fec-note-ta"
+              @blur="editingNoteId = null"
+              @mousedown.stop
+              v-focus
+            ></textarea>
+            <div
+              v-else
+              class="fec-note-content"
+              v-html="renderMarkdown(node.props.content || '')"
+              @dblclick="editingNoteId = node.id"
+            ></div>
+          </div>
+
+          <template v-else>
+            <div class="fec-node-hdr">
+              <div class="fec-node-hdr-ico">
+                <span class="msi" style="font-size:13px">{{ getToolByType(node.toolType)?.icon || 'circle' }}</span>
+              </div>
+              <span class="fec-node-lbl" :title="node.label">{{ node.label }}</span>
             </div>
-            <span class="fec-node-lbl" :title="node.label">{{ node.label }}</span>
-          </div>
-          <div class="fec-node-bdy">
-            <span class="fec-node-tag">{{ node.toolType }}</span>
-            <span v-if="node.props?.table || node.props?.schema" class="fec-node-meta">
-              {{ [node.props.schema, node.props.table].filter(Boolean).join('.') }}
-            </span>
-            <span v-else-if="node.props?.url" class="fec-node-meta">{{ node.props.url }}</span>
-          </div>
+            <div class="fec-node-bdy">
+              <span class="fec-node-tag">{{ node.toolType }}</span>
+              <span v-if="node.props?.table || node.props?.schema" class="fec-node-meta">
+                {{ [node.props.schema, node.props.table].filter(Boolean).join('.') }}
+              </span>
+              <span v-else-if="node.props?.url" class="fec-node-meta">{{ node.props.url }}</span>
+            </div>
+          </template>
 
           <div v-if="!readOnly && node.category !== 'destination' && node.category !== 'notification'" class="fec-port fec-port--out"
             @mousedown.stop="onPortMousedown($event, node, 'out')"
@@ -484,12 +503,28 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { CAT_META } from '@/stores/toolCatalog'
 import { useAuthStore } from '@/stores/auth'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
 import { dataSourcesApi } from '@/services/api'
 import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
+
+// ─── Markdown Configuration ───────────────────────────────────────────────────
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  headerIds: false,
+  mangle: false
+})
+
+function renderMarkdown(content) {
+  if (!content) return ''
+  const rawHtml = marked.parse(content)
+  return DOMPurify.sanitize(rawHtml)
+}
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 const props = defineProps({
@@ -501,6 +536,10 @@ const props = defineProps({
   executionData: { type: Object,  default: null }
 })
 const emit = defineEmits(['save', 'dirty-change'])
+
+const vFocus = {
+  mounted: (el) => el.focus()
+}
 
 const authStore = useAuthStore()
 
@@ -552,8 +591,8 @@ function hasCodeProp(toolType) {
   const defs = getNodePropDefs(toolType)
   return Object.values(defs).some(d => d.type === 'code')
 }
-function getCatColor(cat) { return CAT_META[cat]?.color || '#64748b' }
-function getCatBg(cat)    { return CAT_META[cat]?.bg    || '#f8fafc' }
+function getCatColor(cat) { return CAT_META[cat?.toLowerCase()]?.color || '#64748b' }
+function getCatBg(cat)    { return CAT_META[cat?.toLowerCase()]    || '#f8fafc' }
 
 // ─── Data-source connection binding ──────────────────────────────────────────
 // CONN_TYPES imported from @/constants/connectionTypes
@@ -670,6 +709,7 @@ const isResizingRight = ref(false)
 const bottomHeight    = ref(240)
 const isResizingBottom = ref(false)
 const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k, true])))
+const editingNoteId  = ref(null)
 const selectedNode   = ref(null)
 const selectedConn   = ref(null)
 const hoveredNode    = ref(null)
@@ -1426,4 +1466,30 @@ onMounted(() => { setTimeout(fitView, 80) })
 .fec-conn-hint   { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 .fec-conn-spin   { margin-left: 6px; vertical-align: middle; }
 .fec-conn-filled { font-size: 11px; color: #16a34a; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+/* ── Notes (Annotations) ───────────────────────────────────────── */
+.fec-node--annotations {
+  width: 240px; min-height: 120px; padding: 0;
+  background: #fef9c3; border-color: #fde047;
+  display: flex; flex-direction: column;
+}
+.fec-note-body { flex: 1; display: flex; flex-direction: column; padding: 12px; position: relative; }
+.fec-note-ta {
+  width: 100%; height: 100%; min-height: 100px;
+  border: none; background: transparent; resize: none;
+  font-family: inherit; font-size: 13px; color: #713f12; outline: none;
+}
+.fec-note-content {
+  flex: 1; font-size: 13px; color: #713f12; line-height: 1.5;
+  overflow-y: auto; overflow-x: hidden;
+}
+
+/* Markdown Styling inside notes */
+.fec-note-content :deep(h1) { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem; color: #422006; }
+.fec-note-content :deep(h2) { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.4rem; color: #422006; }
+.fec-note-content :deep(p) { margin: 0 0 0.5rem; }
+.fec-note-content :deep(ul), .fec-note-content :deep(ol) { margin: 0 0 0.5rem; padding-left: 1.25rem; }
+.fec-note-content :deep(code) { background: rgba(0,0,0,0.05); padding: 0.1rem 0.2rem; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+.fec-note-content :deep(pre) { background: rgba(0,0,0,0.05); padding: 0.5rem; border-radius: 5px; overflow-x: auto; margin: 0.5rem 0; }
+.fec-note-content :deep(pre code) { background: transparent; padding: 0; }
 </style>
