@@ -4,10 +4,10 @@
 Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usuarios finales descubrir tablas y columnas de forma dinámica desde el editor, y configurar operaciones de escritura avanzadas como el UPSERT con múltiples campos de identidad.
 
 ## Functional Requirements (FR)
-- [ ] **FR-01: Descubrimiento de Tablas:** El panel de propiedades del nodo ODS PostgreSQL debe permitir seleccionar una tabla desde un dropdown/combobox cuyos valores se obtengan en tiempo real de la base de datos conectada.
+- [x] **FR-01: Descubrimiento de Tablas:** El panel de propiedades del nodo ODS PostgreSQL debe permitir seleccionar una tabla desde un dropdown/combobox cuyos valores se obtengan en tiempo real de la base de datos conectada.
 - [ ] **FR-02: Botón de Refresh:** Incluir un botón al costado del selector de tabla para forzar la actualización del listado desde el backend.
 - [ ] **FR-03: Selección de Campos de Identidad:** Cuando el modo de escritura sea "UPSERT", se debe habilitar un campo de selección múltiple para elegir las columnas que conforman la llave primaria o de identidad.
-- [ ] **FR-04: Descubrimiento de Columnas:** El selector de campos de identidad debe poblarse automáticamente con las columnas de la tabla seleccionada en FR-01.
+- [x] **FR-04: Descubrimiento de Columnas:** El selector de campos de identidad debe poblarse automáticamente con las columnas de la tabla seleccionada en FR-01.
 - [ ] **FR-05: Soporte para Upsert Compuesto:** El motor de ejecución debe ser capaz de generar sentencias SQL `ON CONFLICT (...) DO UPDATE` considerando uno o múltiples campos de identidad.
 - [ ] **FR-06: Operaciones ODS robustas:** Implementar en Python (Backend) el procesamiento de los modos "Append", "Overwrite" y "Upsert" para garantizar el manejo correcto de transacciones y tipos de datos.
 
