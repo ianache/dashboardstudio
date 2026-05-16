@@ -266,8 +266,8 @@
     </main>
 
     <!-- ── Right Panel: Properties ─────────────────────────────────────────── -->
-    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed }" :style="{ width: rightCollapsed ? '24px' : rightWidth + 'px' }">
-      <div class="fec-resizer" @mousedown.stop="onResizeMousedown"></div>
+    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--resizing': isResizingRight }" :style="{ width: rightCollapsed ? '24px' : (hasWideMode ? Math.max(500, rightWidth) : rightWidth) + 'px' }">
+      <div v-if="!rightCollapsed" class="fec-resizer" @mousedown.stop="onResizeMousedown"></div>
       <button class="fec-toggle fec-toggle--right" @click="rightCollapsed = !rightCollapsed" :title="rightCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ rightCollapsed ? 'chevron_left' : 'chevron_right' }}</span>
       </button>
@@ -675,6 +675,8 @@ const hoveredConn    = ref(null)
 function onResizeMousedown(e) {
   isResizingRight.value = true
 }
+
+const hasWideMode = computed(() => selectedNode.value && hasCodeProp(selectedNode.value.toolType))
 
 // Lazy-load data sources + ensure connection props exist when a connectable node is selected
 watch(selectedNode, (node) => {
@@ -1300,6 +1302,7 @@ onMounted(() => { setTimeout(fitView, 80) })
 }
 .fec-right--wide { width: 500px; }
 .fec-right--collapsed { width: 24px; }
+.fec-right--resizing { transition: none !important; }
 
 .fec-resizer {
   position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
