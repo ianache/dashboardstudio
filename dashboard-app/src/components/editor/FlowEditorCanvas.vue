@@ -12,10 +12,10 @@
     save(diagramData) — full diagram state when user clicks Save
 -->
 <template>
-  <div class="fec-root" @mousemove="onGlobalMousemove" @mouseup="onGlobalMouseup">
+  <div class="fec-root" :class="{ 'fec-root--readonly': readOnly }" @mousemove="onGlobalMousemove" @mouseup="onGlobalMouseup">
 
     <!-- ── Left Panel: Components Toolbar ─────────────────────────────────── -->
-    <aside class="fec-left" :class="{ 'fec-left--collapsed': leftCollapsed }">
+    <aside v-if="!readOnly" class="fec-left" :class="{ 'fec-left--collapsed': leftCollapsed }">
       <button class="fec-toggle fec-toggle--left" @click="leftCollapsed = !leftCollapsed" :title="leftCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ leftCollapsed ? 'chevron_right' : 'chevron_left' }}</span>
       </button>
@@ -90,6 +90,7 @@
 
       <!-- Floating Toolbar (draggable) -->
       <div
+        v-if="!readOnly"
         class="fec-float-bar"
         :style="{ left: fbarPos.x + 'px', top: fbarPos.y + 'px' }"
         @mousedown.stop="onFbarMousedown">
@@ -141,11 +142,11 @@
             :key="conn.id"
             :d="connPath(conn)"
             class="fec-conn"
-            :class="{ 'fec-conn--active': nodeExecStatus[conn.from] === 'success' }"
-            :stroke="selectedConn === conn.id || hoveredConn === conn.id ? '#2563eb' : (nodeExecStatus[conn.from] === 'success' ? '#22c55e' : '#94a3b8')"
-            :stroke-width="selectedConn === conn.id ? 2.5 : (nodeExecStatus[conn.from] === 'success' ? 3 : 2)"
+            :class="{ 'fec-conn--active': (readOnly ? nodeLogsMap[conn.from]?.status : nodeExecStatus[conn.from]) === 'success' }"
+            :stroke="selectedConn === conn.id || hoveredConn === conn.id ? '#2563eb' : ((readOnly ? nodeLogsMap[conn.from]?.status : nodeExecStatus[conn.from]) === 'success' ? '#22c55e' : '#94a3b8')"
+            :stroke-width="selectedConn === conn.id ? 2.5 : ((readOnly ? nodeLogsMap[conn.from]?.status : nodeExecStatus[conn.from]) === 'success' ? 3 : 2)"
             fill="none"
-            :marker-end="selectedConn === conn.id || hoveredConn === conn.id ? 'url(#fec-arr-sel)' : (nodeExecStatus[conn.from] === 'success' ? 'url(#fec-arr-active)' : 'url(#fec-arr)')"
+            :marker-end="selectedConn === conn.id || hoveredConn === conn.id ? 'url(#fec-arr-sel)' : ((readOnly ? nodeLogsMap[conn.from]?.status : nodeExecStatus[conn.from]) === 'success' ? 'url(#fec-arr-active)' : 'url(#fec-arr)')"
             style="cursor:pointer"
             @mouseenter="hoveredConn = conn.id"
             @mouseleave="hoveredConn = null"
@@ -171,21 +172,65 @@
             `fec-node--${node.category}`, 
             { 
               'fec-node--sel': selectedNode?.id === node.id,
-              'fec-node--executing': nodeExecStatus[node.id] === 'running',
-              'fec-node--success':   nodeExecStatus[node.id] === 'success',
-              'fec-node--error':     nodeExecStatus[node.id] === 'error'
+              'fec-node--executing': (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) === 'running',
+              'fec-node--success':   (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) === 'success',
+              'fec-node--error':     (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) === 'error'
             }
           ]"
           :style="{ left: node.x + 'px', top: node.y + 'px', '--nc': getCatColor(node.category), '--nb': getCatBg(node.category) }"
           @mousedown.stop="onNodeMousedown($event, node)"
+          @mouseenter="hoveredNode = node"
+          @mouseleave="hoveredNode = null"
           @click.stop="selectNode(node)">
 
           <!-- Node status badge -->
-          <div v-if="nodeExecStatus[node.id] && nodeExecStatus[node.id] !== 'running'" class="fec-node-badge" :class="`fec-node-badge--${nodeExecStatus[node.id]}`">
-            <span class="msi">{{ nodeExecStatus[node.id] === 'success' ? 'check_circle' : 'cancel' }}</span>
+          <div v-if="(readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) && (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) !== 'running'" 
+               class="fec-node-badge" 
+               :class="`fec-node-badge--${readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]}`">
+            <span class="msi">{{ (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) === 'success' ? 'check_circle' : 'cancel' }}</span>
           </div>
 
-          <div v-if="node.category !== 'source'" class="fec-port fec-port--in"
+          <!-- Node duration badge (left) -->
+          <div v-if="readOnly && nodeLogsMap[node.id]" class="fec-node-badge--left" title="Tiempo de ejecución">
+            {{ formatDuration(nodeLogsMap[node.id].duration) }}
+          </div>
+
+          <!-- Node Tooltip (Ficha) -->
+          <div v-if="readOnly && hoveredNode?.id === node.id && nodeLogsMap[node.id]" class="fec-node-tooltip">
+            <div class="fec-tooltip-hdr">Detalles de Ejecución</div>
+            <div class="fec-tooltip-title">{{ node.label }}</div>
+            
+            <div class="fec-tooltip-status">
+              <span :class="['fec-status-badge', nodeLogsMap[node.id].status]">
+                <span class="msi">{{ nodeLogsMap[node.id].status === 'success' ? 'check_circle' : 'cancel' }}</span>
+                {{ nodeLogsMap[node.id].status === 'success' ? 'Completado' : 'Fallido' }}
+              </span>
+            </div>
+
+            <div class="fec-tooltip-grid">
+              <div class="fec-tooltip-row">
+                <span class="msi start">play_arrow</span>
+                <div>
+                  <p class="fec-tooltip-label">Inicio</p>
+                  <p class="fec-tooltip-val">{{ formatDateTime(nodeLogsMap[node.id].start_time) }}</p>
+                </div>
+              </div>
+              <div class="fec-tooltip-row">
+                <span class="msi end">stop</span>
+                <div>
+                  <p class="fec-tooltip-label">Fin</p>
+                  <p class="fec-tooltip-val">{{ formatDateTime(nodeLogsMap[node.id].end_time) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="fec-tooltip-footer">
+              <span class="msi">timer</span>
+              <span>Duración: <strong>{{ formatDuration(nodeLogsMap[node.id].duration) }}</strong></span>
+            </div>
+          </div>
+
+          <div v-if="!readOnly && node.category !== 'source'" class="fec-port fec-port--in"
             @mousedown.stop="onPortMousedown($event, node, 'in')"
             @mouseup="onPortMouseup($event, node, 'in')">
           </div>
@@ -204,7 +249,7 @@
             <span v-else-if="node.props?.url" class="fec-node-meta">{{ node.props.url }}</span>
           </div>
 
-          <div v-if="node.category !== 'destination' && node.category !== 'notification'" class="fec-port fec-port--out"
+          <div v-if="!readOnly && node.category !== 'destination' && node.category !== 'notification'" class="fec-port fec-port--out"
             @mousedown.stop="onPortMousedown($event, node, 'out')"
             @mouseup="onPortMouseup($event, node, 'out')">
           </div>
@@ -221,7 +266,8 @@
     </main>
 
     <!-- ── Right Panel: Properties ─────────────────────────────────────────── -->
-    <aside class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--wide': selectedNode && hasCodeProp(selectedNode.toolType) }">
+    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--wide': selectedNode && hasCodeProp(selectedNode.toolType) }">
+      <div class="fec-resizer" @mousedown.stop="onResizeMousedown"></div>
       <button class="fec-toggle fec-toggle--right" @click="rightCollapsed = !rightCollapsed" :title="rightCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ rightCollapsed ? 'chevron_left' : 'chevron_right' }}</span>
       </button>
@@ -446,10 +492,12 @@ import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connect
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 const props = defineProps({
-  diagramType: { type: String, required: true },
-  tools:       { type: Array,  default: () => [] },
-  diagramData: { type: Object, default: () => ({ nodes: [], connections: [], metadata: {} }) },
-  flowId:      { type: String, default: null } // New prop to allow execution
+  diagramType:   { type: String,  required: true },
+  tools:         { type: Array,   default: () => [] },
+  diagramData:   { type: Object,  default: () => ({ nodes: [], connections: [], metadata: {} }) },
+  flowId:        { type: String,  default: null },
+  readOnly:      { type: Boolean, default: false },
+  executionData: { type: Object,  default: null }
 })
 const emit = defineEmits(['save', 'dirty-change'])
 
@@ -466,7 +514,7 @@ const GRID     = 20
 const DIAGRAM_META_PROPS = {
   'data-integration': {
     type:     { label: 'Tipo',                  type: 'select', options: [{ value: 'Batch ETL', label: 'Batch ETL' }, { value: 'Real-time Stream', label: 'Real-time Stream' }, { value: 'CDC', label: 'CDC' }, { value: 'API Pull', label: 'API Pull' }] },
-    schedule: { label: 'Programación (Cron)',    type: 'text',   placeholder: '0 6 * * *' },
+    cron_expression: { label: 'Programación (Cron)',    type: 'text',   placeholder: '0 6 * * *' },
     source:   { label: 'Sistema Origen',         type: 'text',   placeholder: 'ERP SAP' },
     target:   { label: 'Sistema Destino',        type: 'text',   placeholder: 'ODS PostgreSQL' },
   },
@@ -476,7 +524,7 @@ const DIAGRAM_META_PROPS = {
   },
   'data-quality': {
     severity: { label: 'Severidad por defecto',  type: 'select', options: [{ value: 'low', label: 'Baja' }, { value: 'medium', label: 'Media' }, { value: 'high', label: 'Alta' }, { value: 'critical', label: 'Crítica' }] },
-    schedule: { label: 'Programación (Cron)',    type: 'text',   placeholder: '0 * * * *' },
+    cron_expression: { label: 'Programación (Cron)',    type: 'text',   placeholder: '0 * * * *' },
   },
 }
 
@@ -616,10 +664,17 @@ watch([nodes, connections, metadata], () => {
 // ─── UI state ─────────────────────────────────────────────────────────────────
 const leftCollapsed  = ref(false)
 const rightCollapsed = ref(false)
+const rightWidth     = ref(272)
+const isResizingRight = ref(false)
 const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k, true])))
 const selectedNode   = ref(null)
 const selectedConn   = ref(null)
+const hoveredNode    = ref(null)
 const hoveredConn    = ref(null)
+
+function onResizeMousedown(e) {
+  isResizingRight.value = true
+}
 
 // Lazy-load data sources + ensure connection props exist when a connectable node is selected
 watch(selectedNode, (node) => {
@@ -644,6 +699,17 @@ const execLogs       = ref([])
 const execStatus     = ref('idle')
 const nodeExecStatus = ref({}) // mapping of node_id -> status
 let ws               = null
+
+const nodeLogsMap = computed(() => {
+  if (!props.executionData?.logs) return {}
+  return Object.fromEntries(props.executionData.logs.map(log => [log.node_id, log]))
+})
+
+function formatDuration(ms) {
+  if (ms === undefined || ms === null) return ''
+  if (ms < 1000) return `${ms}ms`
+  return `${(ms / 1000).toFixed(1)}s`
+}
 
 const rightTab       = ref('props') // props, history
 const history        = ref([])
@@ -686,8 +752,10 @@ async function loadExecutionLogs(execId) {
 }
 
 function formatDateTime(val) {
-  if (!val) return ''
-  return new Date(val).toLocaleString()
+  if (!val) return '—'
+  const date = new Date(val)
+  if (isNaN(date.getTime())) return val
+  return date.toLocaleString()
 }
 
 function runFlow() {
@@ -897,16 +965,19 @@ function onGlobalMouseup() {
 
 // ─── Node events ──────────────────────────────────────────────────────────────
 function onNodeMousedown(e, node) {
+  if (props.readOnly) return
   if (e.button !== 0) return
   isDraggingNode = true; draggedNode = node; hasDragged = false
   const pos = getCanvasPos(e.clientX, e.clientY)
   nodeDragStart = { sx: pos.x, sy: pos.y, nx: node.x, ny: node.y }
 }
 function selectNode(node) {
+  if (props.readOnly) return
   if (!hasDragged) { selectedNode.value = node; selectedConn.value = null; rightCollapsed.value = false }
   hasDragged = false
 }
 function deleteSelectedNode() {
+  if (props.readOnly) return
   if (!selectedNode.value) return
   const id = selectedNode.value.id
   nodes.value = nodes.value.filter(n => n.id !== id)
@@ -916,11 +987,13 @@ function deleteSelectedNode() {
 
 // ─── Port events ──────────────────────────────────────────────────────────────
 function onPortMousedown(e, node, portType) {
+  if (props.readOnly) return
   if (portType !== 'out') return
   isConnecting = true; connectFrom = node
   tempConn.value = tempConnPath(node, e.clientX, e.clientY)
 }
 function onPortMouseup(e, node, portType) {
+  if (props.readOnly) return
   if (portType !== 'in' || !isConnecting || !connectFrom || connectFrom.id === node.id) return
   if (!connections.value.find(c => c.from === connectFrom.id && c.to === node.id)) {
     connections.value.push({ id: `c${Date.now()}`, from: connectFrom.id, to: node.id })
@@ -1119,6 +1192,57 @@ onMounted(() => { setTimeout(fitView, 80) })
 .fec-node-badge--success { color: #22c55e; }
 .fec-node-badge--error   { color: #ef4444; }
 
+.fec-node-badge--left {
+  position: absolute; top: -10px; left: -10px; min-width: 22px; height: 22px;
+  padding: 0 6px; background: #fff; color: #475569; border-radius: 11px;
+  font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.12); border: 1.5px solid #e2e8f0; z-index: 5;
+}
+
+/* Tooltip (Ficha) */
+.fec-node-tooltip {
+  position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%);
+  width: 200px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 14px; z-index: 100; pointer-events: none;
+  animation: fec-tooltip-fade 0.15s ease-out;
+}
+.fec-node-tooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border-width: 6px; border-style: solid; border-color: #e2e8f0 transparent transparent transparent;
+}
+.fec-tooltip-hdr { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.fec-tooltip-title { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+
+.fec-tooltip-status { margin-bottom: 12px; }
+.fec-status-badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border-radius: 12px; font-size: 9px; font-weight: 800; text-transform: uppercase;
+}
+.fec-status-badge.success { background: #ecfdf5; color: #059669; }
+.fec-status-badge.error   { background: #fef2f2; color: #dc2626; }
+.fec-status-badge .msi { font-size: 13px; }
+
+.fec-tooltip-grid { display: grid; gap: 8px; margin-bottom: 12px; }
+.fec-tooltip-row { display: flex; align-items: flex-start; gap: 10px; }
+.fec-tooltip-row .msi { font-size: 16px; margin-top: 2px; }
+.fec-tooltip-row .msi.start { color: #10b981; }
+.fec-tooltip-row .msi.end { color: #ef4444; }
+
+.fec-tooltip-label { font-size: 9px; font-weight: 700; color: #64748b; margin: 0; }
+.fec-tooltip-val   { font-size: 11px; font-weight: 600; color: #1e293b; margin: 1px 0 0; }
+
+.fec-tooltip-footer {
+  display: flex; align-items: center; gap: 6px; padding-top: 10px;
+  border-top: 1px solid #f1f5f9; font-size: 10px; color: #64748b;
+}
+.fec-tooltip-footer .msi { font-size: 15px; color: #6366f1; }
+
+@keyframes fec-tooltip-fade {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 .fec-node-hdr {
   display: flex; align-items: center; gap: 7px; padding: 8px 10px;
   background: var(--nb); border-radius: 8px 8px 0 0; border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -1170,6 +1294,12 @@ onMounted(() => { setTimeout(fitView, 80) })
 }
 .fec-right--wide { width: 500px; }
 .fec-right--collapsed { width: 24px; }
+
+.fec-resizer {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  cursor: col-resize; z-index: 50; transition: background 0.2s;
+}
+.fec-resizer:hover { background: rgba(37, 99, 235, 0.2); }
 
 .fec-right-inner { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px; display: flex; flex-direction: column; }
 .fec-right-inner::-webkit-scrollbar { width: 4px; }
