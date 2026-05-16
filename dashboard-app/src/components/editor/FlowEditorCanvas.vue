@@ -171,6 +171,11 @@
               v-html="renderMarkdown(note.props.content || '')"
               @dblclick="editingNoteId = note.id"
             ></div>
+
+            <!-- Resize Handle -->
+            <div v-if="!readOnly" class="fec-note-resizer" @mousedown.stop="onNoteResizeStart($event, note)">
+              <span class="msi">south_east</span>
+            </div>
           </div>
         </div>
 
@@ -780,6 +785,8 @@ const rightWidth     = ref(272)
 const isResizingRight = ref(false)
 const bottomHeight    = ref(240)
 const isResizingBottom = ref(false)
+const isResizingNote   = ref(false)
+const resizingNote     = ref(null)
 const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k, true])))
 const editingNoteId  = ref(null)
 const selectedNode   = ref(null)
@@ -794,6 +801,11 @@ function onResizeMousedown(e) {
 
 function onResizeBottomMousedown(e) {
   isResizingBottom.value = true
+}
+
+function onNoteResizeStart(e, note) {
+  isResizingNote.value = true
+  resizingNote.value = note
 }
 
 const hasWideMode = computed(() => selectedNode.value && hasCodeProp(selectedNode.value.toolType))
@@ -1630,4 +1642,14 @@ onMounted(() => { setTimeout(fitView, 80) })
 .fec-note-content :deep(code) { background: rgba(0,0,0,0.05); padding: 0.1rem 0.2rem; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
 .fec-note-content :deep(pre) { background: rgba(0,0,0,0.05); padding: 0.5rem; border-radius: 5px; overflow-x: auto; margin: 0.5rem 0; }
 .fec-note-content :deep(pre code) { background: transparent; padding: 0; }
+
+.fec-note-resizer {
+  position: absolute; bottom: 0; right: 0;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  color: #94a3b8; cursor: nwse-resize; z-index: 10;
+  transition: color 0.1s;
+}
+.fec-note-resizer:hover { color: #2563eb; }
+.fec-note-resizer .msi { font-size: 16px; }
 </style>
