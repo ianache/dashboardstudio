@@ -123,6 +123,55 @@
         ref="canvasRef"
         :style="{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', width: CANVAS_W + 'px', height: CANVAS_H + 'px' }">
 
+        <!-- Notes (Background Layer) -->
+        <div
+          v-for="note in notes" :key="note.id"
+          class="fec-node fec-node--annotations"
+          :class="{ 'fec-node--sel': selectedNode?.id === note.id }"
+          :style="{
+            left: note.x + 'px',
+            top: note.y + 'px',
+            width: (note.props.width || 240) + 'px',
+            minHeight: (note.props.height || 120) + 'px',
+            background: note.props.color || '#fef9c3',
+            borderColor: darkenColor(note.props.color || '#fef9c3')
+          }"
+          @mousedown.stop="onNoteMousedown($event, note)"
+          @click.stop="selectNode(note)">
+          
+          <div class="fec-note-body">
+            <!-- Styling Toolbar -->
+            <div v-if="(selectedNode?.id === note.id || editingNoteId === note.id) && !readOnly" class="fec-note-toolbar" @mousedown.stop @click.stop>
+              <div class="fec-note-palette">
+                <button v-for="c in ['#fef9c3', '#dbeafe', '#dcfce7', '#fce7f3', '#f1f5f9']" 
+                  :key="c" class="fec-note-color" :style="{ background: c, borderColor: darkenColor(c) }"
+                  @click="changeNoteColor(note, c)"></button>
+              </div>
+              <div class="fec-note-tsep"></div>
+              <button class="fec-note-tbtn" @click="changeNoteFontSize(note, -1)"><span class="msi" style="font-size:14px">remove</span></button>
+              <span class="fec-note-tsize">{{ parseInt(note.props.fontSize || 13) }}</span>
+              <button class="fec-note-tbtn" @click="changeNoteFontSize(note, 1)"><span class="msi" style="font-size:14px">add</span></button>
+            </div>
+
+            <textarea
+              v-if="editingNoteId === note.id"
+              v-model="note.props.content"
+              class="fec-note-ta"
+              :style="{ fontSize: note.props.fontSize || '13px' }"
+              @blur="editingNoteId = null"
+              @mousedown.stop
+              v-focus
+            ></textarea>
+            <div
+              v-else
+              class="fec-note-content"
+              :style="{ fontSize: note.props.fontSize || '13px' }"
+              v-html="renderMarkdown(note.props.content || '')"
+              @dblclick="editingNoteId = note.id"
+            ></div>
+          </div>
+        </div>
+
         <!-- SVG layer: connections -->
         <svg :width="CANVAS_W" :height="CANVAS_H" style="position:absolute;top:0;left:0;overflow:visible">
           <defs>
@@ -181,9 +230,7 @@
             left: node.x + 'px', 
             top: node.y + 'px', 
             '--nc': getCatColor(node.category), 
-            '--nb': getCatBg(node.category),
-            background: node.category?.toLowerCase() === 'annotations' ? (node.props.color || '#fef9c3') : undefined,
-            borderColor: node.category?.toLowerCase() === 'annotations' ? darkenColor(node.props.color || '#fef9c3') : undefined
+            '--nb': getCatBg(node.category)
           }"
           @mousedown.stop="onNodeMousedown($event, node)"
           @mouseenter="hoveredNode = node"
@@ -242,53 +289,19 @@
             @mouseup="onPortMouseup($event, node, 'in')">
           </div>
 
-          <div v-if="node.category?.toLowerCase() === 'annotations'" class="fec-note-body">
-            <!-- Styling Toolbar -->
-            <div v-if="(selectedNode?.id === node.id || editingNoteId === node.id) && !readOnly" class="fec-note-toolbar" @mousedown.stop @click.stop>
-              <div class="fec-note-palette">
-                <button v-for="c in ['#fef9c3', '#dbeafe', '#dcfce7', '#fce7f3', '#f1f5f9']" 
-                  :key="c" class="fec-note-color" :style="{ background: c, borderColor: darkenColor(c) }"
-                  @click="changeNoteColor(node, c)"></button>
-              </div>
-              <div class="fec-note-tsep"></div>
-              <button class="fec-note-tbtn" @click="changeNoteFontSize(node, -1)"><span class="msi" style="font-size:14px">remove</span></button>
-              <span class="fec-note-tsize">{{ parseInt(node.props.fontSize || 13) }}</span>
-              <button class="fec-note-tbtn" @click="changeNoteFontSize(node, 1)"><span class="msi" style="font-size:14px">add</span></button>
+          <div class="fec-node-hdr">
+            <div class="fec-node-hdr-ico">
+              <span class="msi" style="font-size:13px">{{ getToolByType(node.toolType)?.icon || 'circle' }}</span>
             </div>
-
-            <textarea
-              v-if="editingNoteId === node.id"
-              v-model="node.props.content"
-              class="fec-note-ta"
-              :style="{ fontSize: node.props.fontSize || '13px' }"
-              @blur="editingNoteId = null"
-              @mousedown.stop
-              v-focus
-            ></textarea>
-            <div
-              v-else
-              class="fec-note-content"
-              :style="{ fontSize: node.props.fontSize || '13px' }"
-              v-html="renderMarkdown(node.props.content || '')"
-              @dblclick="editingNoteId = node.id"
-            ></div>
+            <span class="fec-node-lbl" :title="node.label">{{ node.label }}</span>
           </div>
-
-          <template v-else>
-            <div class="fec-node-hdr">
-              <div class="fec-node-hdr-ico">
-                <span class="msi" style="font-size:13px">{{ getToolByType(node.toolType)?.icon || 'circle' }}</span>
-              </div>
-              <span class="fec-node-lbl" :title="node.label">{{ node.label }}</span>
-            </div>
-            <div class="fec-node-bdy">
-              <span class="fec-node-tag">{{ node.toolType }}</span>
-              <span v-if="node.props?.table || node.props?.schema" class="fec-node-meta">
-                {{ [node.props.schema, node.props.table].filter(Boolean).join('.') }}
-              </span>
-              <span v-else-if="node.props?.url" class="fec-node-meta">{{ node.props.url }}</span>
-            </div>
-          </template>
+          <div class="fec-node-bdy">
+            <span class="fec-node-tag">{{ node.toolType }}</span>
+            <span v-if="node.props?.table || node.props?.schema" class="fec-node-meta">
+              {{ [node.props.schema, node.props.table].filter(Boolean).join('.') }}
+            </span>
+            <span v-else-if="node.props?.url" class="fec-node-meta">{{ node.props.url }}</span>
+          </div>
 
           <div v-if="!readOnly && node.category !== 'destination' && node.category !== 'notification'" class="fec-port fec-port--out"
             @mousedown.stop="onPortMousedown($event, node, 'out')"
@@ -731,9 +744,19 @@ function takeSnapshot() {
 // Initialize from prop
 watch(() => props.diagramData, (data) => {
   initializingFromProp = true
-  nodes.value       = data?.nodes       ? JSON.parse(JSON.stringify(data.nodes))       : []
+  
+  const rawNodes = data?.nodes ? JSON.parse(JSON.stringify(data.nodes)) : []
+  // Separate nodes from notes if mixed (backward compatibility)
+  nodes.value = rawNodes.filter(n => n.category?.toLowerCase() !== 'annotations')
+  const legacyNotes = rawNodes.filter(n => n.category?.toLowerCase() === 'annotations')
+
   connections.value = data?.connections ? JSON.parse(JSON.stringify(data.connections)) : []
   notes.value       = data?.notes       ? JSON.parse(JSON.stringify(data.notes))       : []
+  
+  if (legacyNotes.length > 0) {
+    notes.value.push(...legacyNotes)
+  }
+
   metadata.value    = data?.metadata    ? JSON.parse(JSON.stringify(data.metadata))    : {}
   nextTick(() => {
     savedSnapshot = takeSnapshot()
@@ -1079,6 +1102,9 @@ function onNodeMousedown(e, node) {
   const pos = getCanvasPos(e.clientX, e.clientY)
   nodeDragStart = { sx: pos.x, sy: pos.y, nx: node.x, ny: node.y }
 }
+function onNoteMousedown(e, note) {
+  onNodeMousedown(e, note)
+}
 function selectNode(node) {
   if (props.readOnly) return
   if (!hasDragged) { selectedNode.value = node; selectedConn.value = null; rightCollapsed.value = false }
@@ -1089,6 +1115,7 @@ function deleteSelectedNode() {
   if (!selectedNode.value) return
   const id = selectedNode.value.id
   nodes.value = nodes.value.filter(n => n.id !== id)
+  notes.value = notes.value.filter(n => n.id !== id)
   connections.value = connections.value.filter(c => c.from !== id && c.to !== id)
   selectedNode.value = null
 }
@@ -1129,7 +1156,7 @@ function onDrop(e) {
   if (!dragTool || !canvasAreaRef.value) return
   const pos = getCanvasPos(e.clientX, e.clientY)
   const { x, y } = snapPos(pos.x - NODE_W / 2, pos.y - NODE_H / 2)
-  nodes.value.push({
+  const newItem = {
     id:       `n${Date.now()}`,
     toolType: dragTool.type,
     category: dragTool.category,
@@ -1137,7 +1164,16 @@ function onDrop(e) {
     x: Math.max(0, x),
     y: Math.max(0, y),
     props: Object.fromEntries(Object.keys(dragTool.prop_defs || {}).map(k => [k, dragTool.default_props?.[k] ?? ''])),
-  })
+  }
+  
+  if (dragTool.category?.toLowerCase() === 'annotations') {
+    if (!newItem.props.width) newItem.props.width = 240
+    if (!newItem.props.height) newItem.props.height = 120
+    notes.value.push(newItem)
+  } else {
+    nodes.value.push(newItem)
+  }
+  
   dragTool = null
 }
 
