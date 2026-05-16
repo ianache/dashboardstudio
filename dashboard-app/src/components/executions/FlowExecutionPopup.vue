@@ -147,14 +147,6 @@ onMounted(async () => {
   align-items: center; justify-content: center; gap: 12px; color: #64748b;
 }
 
-.msi {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal; font-style: normal; font-size: 20px; line-height: 1;
-  letter-spacing: normal; text-transform: none; display: inline-flex;
-  align-items: center; justify-content: center; white-space: nowrap;
-  direction: ltr; -webkit-font-smoothing: antialiased; flex-shrink: 0;
-}
-
 .spin { animation: spin 2s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>

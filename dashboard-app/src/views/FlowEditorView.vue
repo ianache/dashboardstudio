@@ -165,7 +165,7 @@ const diagramData = computed(() => {
   return {
     metadata: {
       name: f.name, description: f.description, status: f.status,
-      type: f.flow_type, schedule: f.schedule,
+      type: f.flow_type, cron_expression: f.cron_expression, log_level: f.log_level,
       source: f.source_system, target: f.target_system,
     },
     nodes:       f.flow_nodes?.length       ? f.flow_nodes       : [],
@@ -202,13 +202,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.msi {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal; font-style: normal; font-size: 20px; line-height: 1;
-  display: inline-flex; align-items: center; justify-content: center;
-  white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; flex-shrink: 0;
-}
-
 .fe-root {
   position: fixed; inset: 0;
   display: flex; flex-direction: column;

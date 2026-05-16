@@ -36,19 +36,57 @@
         </div>
 
         <div v-if="selectedExec" class="detail-panel">
-          <h3>Detalle de Nodos (ID: {{ selectedExec.id }})</h3>
+          <div class="detail-hdr">
+            <span class="msi">analytics</span>
+            <h3>Detalle de Nodos (ID: {{ selectedExec.id }})</h3>
+          </div>
+          
           <div v-for="log in selectedExec.node_logs" :key="log.node_id" class="node-log">
             <div class="node-log-header">
-              <strong>Nodo: {{ log.node_id }}</strong>
-              <span :class="['badge', log.status]">{{ log.status }}</span>
+              <div class="node-info">
+                <span class="msi node-icon">terminal</span>
+                <strong>Nodo: {{ log.node_id }}</strong>
+              </div>
+              <span :class="['badge', log.status]">{{ log.status === 'success' ? 'Completado' : 'Fallido' }}</span>
             </div>
+
+            <div class="node-timing-grid">
+              <div class="timing-item">
+                <span class="msi">play_arrow</span>
+                <div>
+                  <label>Inicio</label>
+                  <span>{{ log.start_time ? new Date(log.start_time).toLocaleString() : '—' }}</span>
+                </div>
+              </div>
+              <div class="timing-item">
+                <span class="msi">stop</span>
+                <div>
+                  <label>Fin</label>
+                  <span>{{ log.end_time ? new Date(log.end_time).toLocaleString() : '—' }}</span>
+                </div>
+              </div>
+              <div class="timing-item">
+                <span class="msi">timer</span>
+                <div>
+                  <label>Duración</label>
+                  <span>{{ log.duration || 0 }} ms</span>
+                </div>
+              </div>
+            </div>
+
             <div class="log-grid">
               <div>
-                <small>Input:</small>
+                <div class="payload-hdr">
+                  <span class="msi">input</span>
+                  <small>Input Payload:</small>
+                </div>
                 <pre>{{ JSON.stringify(log.input_data, null, 2) }}</pre>
               </div>
               <div>
-                <small>Output:</small>
+                <div class="payload-hdr">
+                  <span class="msi">output</span>
+                  <small>Output Payload:</small>
+                </div>
                 <pre>{{ JSON.stringify(log.output_data, null, 2) }}</pre>
               </div>
             </div>
@@ -121,8 +159,24 @@ th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
 .badge.success { background: #dcfce7; color: #16a34a; }
 .badge.error { background: #fee2e2; color: #dc2626; }
 .detail-panel { border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 20px; }
-.node-log { background: #f8fafc; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #f1f5f9; }
-.node-log-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-pre { background: #1e293b; color: #e2e8f0; padding: 8px; border-radius: 4px; font-size: 11px; overflow-x: auto; }
+.detail-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; color: #1e293b; }
+.detail-hdr .msi { color: #2563eb; }
+.detail-hdr h3 { margin: 0; font-size: 15px; font-weight: 700; }
+
+.node-log { background: #f8fafc; padding: 16px; margin-bottom: 16px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.node-log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.node-info { display: flex; align-items: center; gap: 8px; }
+.node-icon { color: #64748b; font-size: 18px; }
+
+.node-timing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid #f1f5f9; }
+.timing-item { display: flex; align-items: flex-start; gap: 8px; }
+.timing-item .msi { font-size: 16px; margin-top: 2px; color: #94a3b8; }
+.timing-item label { display: block; font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+.timing-item span { font-size: 11px; font-weight: 600; color: #1e293b; }
+
+.payload-hdr { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; color: #64748b; }
+.payload-hdr .msi { font-size: 14px; }
+.log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+pre { background: #1e293b; color: #cbd5e1; padding: 12px; border-radius: 8px; font-size: 10px; overflow-x: auto; max-height: 200px; margin: 0; }
+
 </style>
