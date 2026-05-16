@@ -134,7 +134,9 @@
             width: (note.props.width || 240) + 'px',
             height: (note.props.height || 120) + 'px',
             background: note.props.color || '#fef9c3',
-            borderColor: darkenColor(note.props.color || '#fef9c3')
+            borderColor: darkenColor(note.props.color || '#fef9c3'),
+            zIndex: selectedNote?.id === note.id ? 10 : 1,
+            pointerEvents: 'auto'
           }"
           @mousedown.stop="onNoteMousedown($event, note)"
           @click.stop="selectNote(note)">
@@ -535,9 +537,14 @@
 
           <div class="fec-divider"><span>Propiedades del componente</span></div>
 
-          <template v-for="(def, key) in getNodePropDefs(selectedNode.toolType)" :key="key">
+          <template v-for="(def, key) in visiblePropDefs" :key="key">
             <div class="fec-prop-g">
-              <label class="fec-prop-l">{{ def.label }}</label>
+              <label class="fec-prop-l">
+                {{ def.label }}
+                <span v-if="dynamicLoading[key]" class="fec-conn-spin">
+                  <span class="msi spin" style="font-size:12px">sync</span>
+                </span>
+              </label>
               
               <!-- Code Editor -->
               <CodeEditor 
@@ -553,9 +560,75 @@
               <!-- Select -->
               <div v-else-if="def.type === 'select'" class="fec-sel-wrap">
                 <select v-model="selectedNode.props[key]" class="fec-prop-sel">
-                  <option v-for="o in def.options" :key="o.value" :value="o.value">{{ o.label }}</option>
+                  <option value="">— {{ def.placeholder || 'Seleccionar' }} —</option>
+                  <option v-for="o in getSelectOptions(def)" :key="o.value" :value="o.value">{{ o.label }}</option>
                 </select>
                 <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
+              </div>
+              
+              <!-- Dynamic Select with Refresh -->
+              <div v-else-if="def.type === 'dynamic_select'" class="fec-dynamic-sel-wrap">
+                <div class="fec-sel-with-refresh">
+                  <select 
+                    v-model="selectedNode.props[key]" 
+                    class="fec-prop-sel"
+                    :disabled="!canFetchDynamic(def) || dynamicLoading[key]"
+                  >
+                    <option value="">— {{ def.placeholder || 'Seleccionar' }} —</option>
+                    <option v-for="opt in getOptionsForDef(def, key)" :key="typeof opt === 'string' ? opt : opt.name" :value="typeof opt === 'string' ? opt : opt.name">{{ typeof opt === 'string' ? opt : opt.name }}</option>
+                  </select>
+                  <button 
+                    v-if="def.refreshable"
+                    class="fec-refresh-btn"
+                    :disabled="!canFetchDynamic(def) || dynamicLoading[key]"
+                    @click="refreshDynamicOptions(def, key)"
+                    :title="'Actualizar ' + def.label"
+                  >
+                    <span class="msi" :class="{ spin: dynamicLoading[key] }">refresh</span>
+                  </button>
+                </div>
+                <p v-if="!canFetchDynamic(def)" class="fec-conn-hint">
+                  Complete los campos requeridos primero
+                </p>
+              </div>
+              
+              <!-- Multi Select (for identity fields) -->
+              <div v-else-if="def.type === 'multi_select'" class="fec-multi-sel-wrap">
+                <div class="fec-sel-with-refresh" style="margin-bottom: 8px;">
+                  <button
+                    v-if="def.refreshable"
+                    class="fec-refresh-btn"
+                    :disabled="!canFetchDynamic(def) || dynamicLoading[key]"
+                    @click="refreshDynamicOptions(def, key)"
+                    :title="'Actualizar ' + def.label"
+                  >
+                    <span class="msi" :class="{ spin: dynamicLoading[key] }">refresh</span>
+                  </button>
+                </div>
+                <p v-if="!canFetchDynamic(def)" class="fec-conn-hint">
+                  Seleccione una tabla primero
+                </p>
+                <div v-else-if="getOptionsForDef(def, key).length === 0 && !dynamicLoading[key]" class="fec-conn-hint">
+                  No hay columnas disponibles. Haga clic en refresh.
+                </div>
+                <div v-else class="fec-checkbox-list">
+                  <label 
+                    v-for="opt in getOptionsForDef(def, key)" 
+                    :key="typeof opt === 'string' ? opt : opt.name"
+                    class="fec-checkbox-item"
+                  >
+                    <input 
+                      type="checkbox" 
+                      :value="typeof opt === 'string' ? opt : opt.name"
+                      v-model="selectedNode.props[key]"
+                      class="fec-checkbox"
+                    />
+                    <span class="fec-checkbox-label">
+                      {{ typeof opt === 'string' ? opt : opt.name }}
+                      <span v-if="opt.type" class="fec-checkbox-meta">({{ opt.type }})</span>
+                    </span>
+                  </label>
+                </div>
               </div>
               
               <!-- Default input -->
@@ -596,6 +669,7 @@ import { useAuthStore } from '@/stores/auth'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
 import { dataSourcesApi } from '@/services/api'
+import keycloak from '@/services/keycloak'
 import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
 
 // ─── Markdown Configuration ───────────────────────────────────────────────────
@@ -691,10 +765,38 @@ const diagramMetaPropDefs = computed(() => DIAGRAM_META_PROPS[props.diagramType]
 
 // ─── Tool helpers ─────────────────────────────────────────────────────────────
 function getToolByType(toolType) {
-  return props.tools.find(t => t.type === toolType) || null
+  const tool = props.tools.find(t => t.type === toolType) || null
+  if (!tool) return null
+  
+  // Parse prop_defs and default_props if they are JSON strings
+  const parsedTool = { ...tool }
+  if (typeof parsedTool.prop_defs === 'string') {
+    try {
+      parsedTool.prop_defs = JSON.parse(parsedTool.prop_defs)
+    } catch (e) {
+      console.warn('Failed to parse prop_defs for tool:', tool.type, e)
+      parsedTool.prop_defs = {}
+    }
+  }
+  if (typeof parsedTool.default_props === 'string') {
+    try {
+      parsedTool.default_props = JSON.parse(parsedTool.default_props)
+    } catch (e) {
+      console.warn('Failed to parse default_props for tool:', tool.type, e)
+      parsedTool.default_props = {}
+    }
+  }
+  
+  return parsedTool
 }
 function getNodePropDefs(toolType) {
-  return getToolByType(toolType)?.prop_defs || {}
+  const tool = getToolByType(toolType)
+  if (!tool?.prop_defs) return {}
+  
+  // Parse prop_defs if it's a JSON string
+  return typeof tool.prop_defs === 'string' 
+    ? JSON.parse(tool.prop_defs) 
+    : tool.prop_defs
 }
 function hasCodeProp(toolType) {
   const defs = getNodePropDefs(toolType)
@@ -709,6 +811,10 @@ function getCatBg(cat)    { return CAT_META[cat?.toLowerCase()]    || '#f8fafc' 
 const dataSources    = ref([])
 const dataSrcLoading = ref(false)
 const dataSrcLoaded  = ref(false)
+
+// ─── Dynamic selector state ───────────────────────────────────────────────────
+const dynamicOptionsCache = ref({})  // key: endpoint, value: options[]
+const dynamicLoading = ref({})       // key: propKey, value: boolean
 
 async function loadDataSources() {
   if (dataSrcLoaded.value) return
@@ -761,6 +867,169 @@ function _clearConnFields() {
   }
 }
 
+// ─── Dynamic selector helpers ────────────────────────────────────────────────
+
+/**
+ * Check if a property should be shown based on show_if condition
+ */
+function shouldShowProp(def) {
+  if (!def.show_if) return true
+  const { field, equals, not_equals } = def.show_if
+  const nodeVal = selectedNode.value?.props?.[field]
+  if (equals !== undefined) return nodeVal === equals
+  if (not_equals !== undefined) return nodeVal !== not_equals
+  return true
+}
+
+/**
+ * Computed property definitions filtered by show_if conditions
+ */
+const visiblePropDefs = computed(() => {
+  const defs = getNodePropDefs(selectedNode.value?.toolType)
+  const visible = {}
+  for (const [key, def] of Object.entries(defs)) {
+    if (shouldShowProp(def)) {
+      visible[key] = def
+    }
+  }
+  return visible
+})
+
+/**
+ * Get select options - handles options_source for data sources
+ */
+function getSelectOptions(def) {
+  if (def.options_source === 'data_sources') {
+    return dataSources.value
+      .filter(ds => !def.filter_by_type || ds.type === def.filter_by_type)
+      .map(ds => ({ value: ds.id, label: ds.name }))
+  }
+  return def.options || []
+}
+
+/**
+ * Check if all dependencies are met for a dynamic selector
+ */
+function canFetchDynamic(def) {
+  if (!selectedNode.value) return false
+  const deps = Array.isArray(def.depends_on) ? def.depends_on : [def.depends_on]
+  return deps.every(dep => {
+    const val = selectedNode.value.props?.[dep]
+    return val !== undefined && val !== '' && val !== null
+  })
+}
+
+/**
+ * Build endpoint URL with variable substitution
+ */
+function buildEndpoint(def) {
+  if (!def.fetch_endpoint || !selectedNode.value) return null
+  
+  let endpoint = def.fetch_endpoint
+  const deps = Array.isArray(def.depends_on) ? def.depends_on : [def.depends_on]
+  
+  for (const dep of deps) {
+    const value = selectedNode.value.props?.[dep]
+    if (!value) return null
+    endpoint = endpoint.replace(`{${dep}}`, encodeURIComponent(value))
+  }
+  
+  return endpoint
+}
+
+/**
+ * Get options for a dynamic selector - triggers fetch if needed
+ */
+function getOptionsForDef(def, key) {
+  // Trigger async fetch if conditions are met
+  const endpoint = buildEndpoint(def)
+  if (endpoint && !dynamicOptionsCache.value[endpoint] && !dynamicLoading.value[key]) {
+    fetchDynamicOptions(def, key)
+  }
+  return dynamicOptionsCache.value[endpoint] || []
+}
+
+/**
+ * Get dynamic options - returns cached or triggers fetch
+ */
+async function getDynamicOptions(def, key) {
+  if (!canFetchDynamic(def)) return []
+  
+  const endpoint = buildEndpoint(def)
+  if (!endpoint) return []
+  
+  // Auto-fetch on first view if not cached and not loading
+  if (!dynamicOptionsCache.value[endpoint] && !dynamicLoading.value[key]) {
+    await fetchDynamicOptions(def, key)
+  }
+  
+  return dynamicOptionsCache.value[endpoint] || []
+}
+
+/**
+ * Fetch dynamic options from API
+ */
+async function fetchDynamicOptions(def, key) {
+  const endpoint = buildEndpoint(def)
+  if (!endpoint) return
+  
+  // Check if keycloak is initialized and has a token
+  if (!keycloak.token) {
+    console.error(`Cannot fetch options for ${key}: No authentication token available`)
+    dynamicOptionsCache.value[endpoint] = []
+    return
+  }
+  
+  // Refresh token if it will expire in less than 30 seconds
+  if (keycloak.isTokenExpired(30)) {
+    try {
+      await keycloak.updateToken(30)
+    } catch (err) {
+      console.error('Failed to refresh token:', err)
+      dynamicOptionsCache.value[endpoint] = []
+      return
+    }
+  }
+  
+  dynamicLoading.value[key] = true
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+      headers: { 
+        'Authorization': `Bearer ${keycloak.token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (!response.ok) {
+      console.error(`Failed to fetch options for ${key}: ${response.status}`)
+      dynamicOptionsCache.value[endpoint] = []
+      return
+    }
+    
+    const data = await response.json()
+    // Handle different response formats (tables vs columns)
+    dynamicOptionsCache.value[endpoint] = data
+  } catch (e) {
+    console.error(`Error fetching options for ${key}:`, e)
+    dynamicOptionsCache.value[endpoint] = []
+  } finally {
+    dynamicLoading.value[key] = false
+  }
+}
+
+/**
+ * Force refresh of dynamic options
+ */
+async function refreshDynamicOptions(def, key) {
+  const endpoint = buildEndpoint(def)
+  if (!endpoint) return
+  
+  // Clear cache to force refetch
+  delete dynamicOptionsCache.value[endpoint]
+  await fetchDynamicOptions(def, key)
+}
+
+
 // Group tools by category for left panel
 const toolsByCategory = computed(() => {
   const map = {}
@@ -798,7 +1067,7 @@ watch(() => props.diagramData, (data) => {
   
   const rawNodes = data?.nodes ? JSON.parse(JSON.stringify(data.nodes)) : []
   // Separate nodes from notes if mixed (backward compatibility)
-  nodes.value = rawNodes.filter(n => n.category?.toLowerCase() !== 'annotations')
+  const parsedNodes = rawNodes.filter(n => n.category?.toLowerCase() !== 'annotations')
   const legacyNotes = rawNodes.filter(n => n.category?.toLowerCase() === 'annotations')
 
   connections.value = data?.connections ? JSON.parse(JSON.stringify(data.connections)) : []
@@ -809,6 +1078,25 @@ watch(() => props.diagramData, (data) => {
   }
 
   metadata.value    = data?.metadata    ? JSON.parse(JSON.stringify(data.metadata))    : {}
+  
+  // Merge node props with tool defaults for backward compatibility
+  for (const node of parsedNodes) {
+    const tool = props.tools.find(t => t.type === node.toolType)
+    if (tool?.default_props) {
+      const defaults = typeof tool.default_props === 'string' 
+        ? JSON.parse(tool.default_props) 
+        : tool.default_props
+      
+      if (!node.props) node.props = {}
+      for (const [key, value] of Object.entries(defaults)) {
+        if (!(key in node.props)) {
+          node.props[key] = value
+        }
+      }
+    }
+  }
+  nodes.value = parsedNodes
+  
   nextTick(() => {
     savedSnapshot = takeSnapshot()
     initializingFromProp = false
@@ -839,6 +1127,9 @@ const selectedConn   = ref(null)
 const hoveredNode    = ref(null)
 const hoveredConn    = ref(null)
 
+// Flag to prevent cascading clears during initial node selection
+let isInitializingNodeSelection = false
+
 function onResizeMousedown(e) {
   isResizingRight.value = true
 }
@@ -863,11 +1154,92 @@ const hasWideMode = computed(() => selectedNode.value && hasCodeProp(selectedNod
 
 // Lazy-load data sources + ensure connection props exist when a connectable node is selected
 watch(selectedNode, (node) => {
-  if (!node || !isConnectable(node.category)) return
-  loadDataSources()
+  if (!node) return
+  
+  // Set flag to prevent cascading watchers from clearing values during initialization
+  isInitializingNodeSelection = true
+  
+  // Initialize props object if missing
   if (!node.props) node.props = {}
-  if (!('connection_type' in node.props)) node.props.connection_type = ''
-  if (!('connection_id'   in node.props)) node.props.connection_id   = ''
+  
+  // Merge with tool's default_props to ensure all properties exist
+  const tool = getToolByType(node.toolType)
+  if (tool?.default_props) {
+    const defaults = typeof tool.default_props === 'string' 
+      ? JSON.parse(tool.default_props) 
+      : tool.default_props
+    
+    for (const [key, value] of Object.entries(defaults)) {
+      if (!(key in node.props)) {
+        node.props[key] = value
+      }
+    }
+  }
+  
+  // Load data sources for connectable nodes
+  if (isConnectable(node.category)) {
+    loadDataSources()
+    if (!('connection_type' in node.props)) node.props.connection_type = ''
+    if (!('connection_id'   in node.props)) node.props.connection_id   = ''
+  }
+  
+  // Clear flag after initialization is complete
+  nextTick(() => {
+    isInitializingNodeSelection = false
+  })
+})
+
+// ─── Cascading clear watchers ─────────────────────────────────────────────────
+
+// Watch for connection_id changes - clears table and identity_fields
+watch(() => selectedNode.value?.props?.connection_id, (newVal, oldVal) => {
+  // Skip if we're initializing the node selection (loading saved values)
+  if (isInitializingNodeSelection) return
+  // Skip on initial watch (when oldVal is undefined and newVal is the saved value)
+  if (oldVal === undefined) return
+  if (newVal !== oldVal && selectedNode.value) {
+    selectedNode.value.props.table = ''
+    selectedNode.value.props.identity_fields = []
+    // Clear cache for table options
+    Object.keys(dynamicOptionsCache.value).forEach(key => {
+      if (key.includes('/tables?')) {
+        delete dynamicOptionsCache.value[key]
+      }
+    })
+  }
+})
+
+// Watch for table changes - clears identity_fields
+watch(() => selectedNode.value?.props?.table, (newVal, oldVal) => {
+  // Skip if we're initializing the node selection (loading saved values)
+  if (isInitializingNodeSelection) return
+  // Skip on initial watch (when oldVal is undefined and newVal is the saved value)
+  if (oldVal === undefined) return
+  if (newVal !== oldVal && selectedNode.value) {
+    selectedNode.value.props.identity_fields = []
+    // Clear cache for column options
+    Object.keys(dynamicOptionsCache.value).forEach(key => {
+      if (key.includes('/columns')) {
+        delete dynamicOptionsCache.value[key]
+      }
+    })
+  }
+})
+
+// Watch for schema changes - clears table and identity_fields
+watch(() => selectedNode.value?.props?.schema, (newVal, oldVal) => {
+  // Skip if we're initializing the node selection (loading saved values)
+  if (isInitializingNodeSelection) return
+  // Skip on initial watch (when oldVal is undefined and newVal is the saved value)
+  if (oldVal === undefined) return
+  if (newVal !== oldVal && selectedNode.value) {
+    selectedNode.value.props.table = ''
+    selectedNode.value.props.identity_fields = []
+    // Clear all table/column caches
+    Object.keys(dynamicOptionsCache.value).forEach(key => {
+      delete dynamicOptionsCache.value[key]
+    })
+  }
 })
 const snapToGrid     = ref(true)
 const isDragOver     = ref(false)
@@ -1261,6 +1633,11 @@ function onDrop(e) {
   if (!dragTool || !canvasAreaRef.value) return
   const pos = getCanvasPos(e.clientX, e.clientY)
   const { x, y } = snapPos(pos.x - NODE_W / 2, pos.y - NODE_H / 2)
+  // Parse default_props if it's a JSON string
+  const defaultProps = dragTool.default_props
+    ? (typeof dragTool.default_props === 'string' ? JSON.parse(dragTool.default_props) : dragTool.default_props)
+    : {}
+  
   const newItem = {
     id:       `n${Date.now()}`,
     toolType: dragTool.type,
@@ -1268,7 +1645,7 @@ function onDrop(e) {
     label:    dragTool.name,
     x: Math.max(0, x),
     y: Math.max(0, y),
-    props: Object.fromEntries(Object.keys(dragTool.prop_defs || {}).map(k => [k, dragTool.default_props?.[k] ?? ''])),
+    props: Object.fromEntries(Object.keys(dragTool.prop_defs || {}).map(k => [k, defaultProps[k] ?? ''])),
   }
   
   if (dragTool.category?.toLowerCase() === 'annotations') {
@@ -1714,4 +2091,98 @@ onMounted(() => { setTimeout(fitView, 80) })
 }
 .fec-note-resizer:hover { color: #2563eb; }
 .fec-note-resizer .msi { font-size: 16px; }
+
+/* ── Dynamic Select Styles ───────────────────────────────────────── */
+.fec-dynamic-sel-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fec-sel-with-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fec-sel-with-refresh .fec-prop-sel {
+  flex: 1;
+}
+
+.fec-refresh-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s;
+}
+
+.fec-refresh-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.fec-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fec-refresh-btn .msi {
+  font-size: 16px;
+}
+
+/* Multi Select Styles */
+.fec-multi-sel-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fec-checkbox-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fff;
+}
+
+.fec-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+
+.fec-checkbox-item:hover {
+  background: #f1f5f9;
+}
+
+.fec-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.fec-checkbox-label {
+  flex: 1;
+  font-size: 13px;
+  color: #334155;
+}
+
+.fec-checkbox-meta {
+  color: #94a3b8;
+  font-size: 11px;
+  margin-left: 4px;
+}
 </style>

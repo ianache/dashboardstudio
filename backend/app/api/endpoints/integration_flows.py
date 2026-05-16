@@ -266,6 +266,10 @@ async def run_integration_flow(
         for line in result["errors"].split("\n"):
             all_logs.append({"type": "error", "message": line})
 
+    # Post-execute destination nodes
+    from app.services.destination_executor import post_execute_flow_nodes
+    node_logs = await post_execute_flow_nodes(flow_data, node_logs, db)
+
     execution = models.ExecutionHistory(
         id=exec_id,
         flow_id=flow_id,

@@ -23,6 +23,7 @@ interface FlowConnection {
 interface FlowData {
   nodes: FlowNode[];
   connections: FlowConnection[];
+  notes?: any[]; // New separate layer for documentation
   test_mode?: boolean;
   payload?: any;
   prefetched_outputs?: Record<string, any[]>;
@@ -37,22 +38,67 @@ async function readStdin(): Promise<string> {
   return text;
 }
 
-async function executeScriptNode(code: string, context: any) {
-  try {
-    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-    const trimmed = code.trim();
-
-    if (trimmed.startsWith("export default")) {
-      // ES module style: export default async function(ctx) { ... }
-      // Strip the "export default" prefix and invoke the remaining function expression.
-      const funcExpr = trimmed.replace(/^export\s+default\s+/, "");
-      const wrapper = new AsyncFunction("ctx", `return (${funcExpr})(ctx);`);
-      return await wrapper(context);
-    } else {
-      // Function body style: the code IS the body of an async function.
-      const userFunc = new AsyncFunction("ctx", code);
-      return await userFunc(context);
+/**
+ * Replaces {{path.to.val}} placeholders with values from context.
+ */
+function resolveString(str: string, context: any): string {
+  if (!str || typeof str !== 'string') return str;
+  return str.replace(/\{\{([\s\S]+?)\}\}/g, (match, path) => {
+    const parts = path.trim().split('.');
+    let val: any = context;
+    for (const part of parts) {
+      if (val && typeof val === 'object' && part in val) {
+        val = val[part];
+      } else {
+        return match; // Not found, keep placeholder
+      }
     }
+    if (val === undefined || val === null) return "";
+    return typeof val === 'object' ? JSON.stringify(val) : String(val);
+  });
+}
+
+async function executeScriptNode(code: string, imports: string, context: any) {
+  try {
+    // ── Node.js built-in shim: Deno requires 'node:' prefix ──────────────────
+    const NODE_BUILTINS = [
+      'https', 'http', 'fs', 'path', 'crypto', 'stream', 'url',
+      'util', 'os', 'buffer', 'events', 'querystring', 'net',
+      'tls', 'zlib', 'child_process', 'readline', 'assert',
+    ];
+    let normalizedCode = code;
+    let normalizedImports = imports || "";
+    for (const mod of NODE_BUILTINS) {
+      const fromRegex = new RegExp(`from\\s+['"]${mod}['"]`, 'g');
+      const importRegex = new RegExp(`import\\(['"\`]${mod}['"\`]\\)`, 'g');
+      
+      normalizedCode = normalizedCode.replace(fromRegex, `from 'node:${mod}'`).replace(importRegex, `import('node:${mod}')`);
+      normalizedImports = normalizedImports.replace(fromRegex, `from 'node:${mod}'`).replace(importRegex, `import('node:${mod}')`);
+    }
+
+    // ── Detect export default (may appear after import statements) ────────────
+    const withoutComments = normalizedCode.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').trim();
+    const hasExportDefault = /\bexport\s+default\b/.test(withoutComments);
+    const hasTopLevelImport = /^\s*import\s+/m.test(withoutComments);
+
+    let moduleContent = '';
+    if (hasExportDefault || hasTopLevelImport) {
+      // Code is already module style — use as-is
+      moduleContent = normalizedImports ? `${normalizedImports}\n\n${normalizedCode}` : normalizedCode;
+    } else {
+      // Wrap function body in an async function export
+      moduleContent = `${normalizedImports ? normalizedImports + '\n\n' : ''}export default async function(ctx) {\n${normalizedCode}\n}`;
+    }
+
+    // Convert to base64 data URI so Deno treats it as a module
+    const base64 = btoa(unescape(encodeURIComponent(moduleContent)));
+    const dataUri = `data:text/javascript;base64,${base64}`;
+
+    const mod = await import(dataUri);
+    if (typeof mod.default === 'function') {
+      return await mod.default(context);
+    }
+    return mod.default ?? context.payload;
   } catch (err: any) {
     console.error(`[Script Error in Node]: ${err.message}`);
     throw err;
@@ -114,7 +160,7 @@ async function main() {
       console.log("Deno Runtime: OK");
       console.log(`Deno Version: ${Deno.version.deno}`);
       if (flow.payload?.script) {
-        const result = await executeScriptNode(flow.payload.script, { payload: flow.payload.data || {} });
+        const result = await executeScriptNode(flow.payload.script, "", { payload: flow.payload.data || {} });
         console.log("Execution Result:", JSON.stringify(result));
       }
       return;
@@ -129,12 +175,34 @@ async function main() {
     const context = { payload: currentPayload, variables: {} };
 
     for (const node of sortedNodes) {
+      const startMs = Date.now();
+      const startTime = new Date(startMs).toISOString();
+
       // Source nodes resolved by Python before Deno – skip but keep success status
       if ((node as any).__pre_executed) {
         console.log(`[Flow] Nodo pre-ejecutado: ${node.label} (${node.toolType}) — omitiendo`);
-        const p = prefetchedOutputs[node.id] || [];
+        const prefetched = prefetchedOutputs[node.id] || { rows: [], duration: 0 };
+        // Support both old (array) and new (object) format for robustness
+        const p = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
+        const pythonDuration = Array.isArray(prefetched) ? 0 : (prefetched.duration || 0);
+
         nodeOutputs.set(node.id, p);
         currentPayload = p;
+        
+        const endMs = Date.now();
+        const endTime = new Date(endMs).toISOString();
+        const totalDuration = pythonDuration + (endMs - startMs);
+
+        // Emit status AND log json so history catches it
+        console.log(`NODE_LOG_JSON:${JSON.stringify({
+          node_id: node.id, 
+          status: 'success', 
+          input: {}, 
+          output: p, 
+          duration: totalDuration, 
+          start_time: startTime, 
+          end_time: endTime
+        })}`);
         emitStatus(node.id, 'success');
         continue;
       }
@@ -151,7 +219,117 @@ async function main() {
       emitStatus(node.id, 'running');
       console.log(`[Flow] Executing Node: ${node.label} (${node.toolType})`);
       
-      if (node.toolType === 'join') {
+      if (['http_rest', 'graphql_api', 'graphql', 'rest_api', 'http'].includes(node.toolType)) {
+        try {
+          const rawUrl = node.props?.url || "";
+          const url = resolveString(rawUrl, context);
+          
+          let method = node.props?.method || 'GET';
+          const rawHeaders = node.props?.headers || '{}';
+          let headers: any = {};
+          try { 
+            headers = JSON.parse(resolveString(rawHeaders, context)); 
+          } catch(e) {}
+
+          // Auth handling (using credentials resolved by Python)
+          const authType = node.props?.auth_type;
+          if (authType === 'bearer' && node.props?.api_key) {
+            headers['Authorization'] = `Bearer ${node.props.api_key}`;
+          } else if (authType === 'basic' && node.props?.username) {
+             const auth = btoa(`${node.props.username}:${node.props.password || ''}`);
+             headers['Authorization'] = `Basic ${auth}`;
+          }
+
+          const fetchOptions: any = { method, headers };
+
+          if (node.toolType === 'graphql_api' || node.toolType === 'graphql') {
+            method = 'POST';
+            fetchOptions.method = 'POST';
+            
+            const rawQuery = node.props?.query || node.props?.graphql_query || "";
+            const resolvedQuery = resolveString(rawQuery, context);
+            
+            let gqlBody: any = {};
+            
+            // Check if user provided a full JSON object in the query field
+            const trimmedQuery = resolvedQuery.trim();
+            if (trimmedQuery.startsWith('{') && trimmedQuery.endsWith('}')) {
+              try {
+                const parsed = JSON.parse(trimmedQuery);
+                if (parsed.query) {
+                  gqlBody = parsed;
+                } else {
+                  gqlBody = { query: resolvedQuery };
+                }
+              } catch {
+                gqlBody = { query: resolvedQuery };
+              }
+            } else {
+              gqlBody = { query: resolvedQuery };
+            }
+
+            // Handle variables
+            const rawVars = node.props?.variables || node.props?.graphql_variables;
+            if (rawVars) {
+              try {
+                const resolvedVars = resolveString(rawVars, context);
+                gqlBody.variables = typeof resolvedVars === 'string' 
+                  ? JSON.parse(resolvedVars) 
+                  : resolvedVars;
+              } catch (e: any) {
+                console.warn(`[GraphQL] Invalid variables JSON: ${e.message}`);
+              }
+            } else if (!gqlBody.variables && context.payload && !Array.isArray(context.payload)) {
+              // Auto-inject payload as variables if not explicitly defined
+              gqlBody.variables = context.payload;
+            }
+
+            fetchOptions.body = JSON.stringify(gqlBody);
+            if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+          } else {
+            // REST / Generic HTTP logic
+            if (method !== 'GET' && method !== 'HEAD') {
+              if (node.props?.body) {
+                fetchOptions.body = resolveString(node.props.body, context);
+              } else if (context.payload) {
+                fetchOptions.body = JSON.stringify(context.payload);
+              }
+              if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+            }
+          }
+
+          console.log(`[HTTP] ${method} ${url}`);
+          const response = await fetch(url, fetchOptions);
+          
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errText}`);
+          }
+
+          // Try to parse JSON, fallback to text if not possible
+          let data;
+          const contentType = response.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            data = await response.json();
+          } else {
+            data = { text: await response.text() };
+          }
+          
+          context.payload = data;
+          
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
+          emitStatus(node.id, 'success');
+        } catch (err: any) {
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
+          console.error(`[HTTP Error] Failed to fetch: ${err.message}`);
+          emitStatus(node.id, 'error');
+          Deno.exit(1);
+        }
+      } else if (node.toolType === 'join') {
         try {
           const joinType = node.props?.join_type || 'inner';
           const joinKey = node.props?.join_key;
@@ -227,8 +405,14 @@ async function main() {
           }
           
           context.payload = result;
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           console.error(`[Join Error] Failed to join: ${err.message}`);
           emitStatus(node.id, 'error');
           Deno.exit(1);
@@ -236,11 +420,15 @@ async function main() {
       } else if (node.toolType === 'js_script' && node.props?.code) {
         try {
           const inputPayload = context.payload;
-          context.payload = await executeScriptNode(node.props.code, context);
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: inputPayload, output: context.payload, duration: 0})}`);
+          context.payload = await executeScriptNode(node.props.code, node.props.imports || "", context);
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: inputPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: context.payload, output: {}, duration: 0})}`);
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: context.payload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }
@@ -272,8 +460,14 @@ async function main() {
             }
           }
           console.log(`[CSV] Loaded ${context.payload.length} rows`);
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           console.error(`[CSV Error] Failed to read ${node.props.path}: ${err.message}`);
           emitStatus(node.id, 'error');
           Deno.exit(1);
@@ -295,8 +489,14 @@ async function main() {
           console.log(`[Email] Content: ${body.substring(0, 100)}${body.length > 100 ? '...' : ''}`);
           
           console.log(`[Email] ✅ Message delivered to mail queue (simulated)`);
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           console.error(`[Email Error] Failed to send: ${err.message}`);
           emitStatus(node.id, 'error');
         }
@@ -315,15 +515,24 @@ async function main() {
           console.log(`EXEC_SQL:${connectionId}:${query}`);
 
           // Placeholder: in real integration the Python service handles the result
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: { status: 'executed' }, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           emitStatus(node.id, 'success');
           context.payload = { status: 'executed' };
         } catch (err: any) {
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
           console.error(`[SQL Error]: ${err.message}`);
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }
       } else {
         console.log(`[Flow Info] Node ${node.label} (${node.toolType}) is a system node. Passing through data.`);
+        const endMs = Date.now();
+        const endTime = new Date(endMs).toISOString();
+        console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
         emitStatus(node.id, 'success');
       }
 

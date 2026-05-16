@@ -161,7 +161,7 @@ const flowName = computed(() => flowStore.currentFlow?.name || `Flujo ${flowId}`
 
 const diagramData = computed(() => {
   const f = flowStore.currentFlow
-  if (!f) return { metadata: {}, nodes: [], connections: [] }
+  if (!f) return { metadata: {}, nodes: [], connections: [], notes: [] }
   return {
     metadata: {
       name: f.name, description: f.description, status: f.status,
@@ -170,6 +170,7 @@ const diagramData = computed(() => {
     },
     nodes:       f.flow_nodes?.length       ? f.flow_nodes       : [],
     connections: f.flow_connections?.length ? f.flow_connections : [],
+    notes:       f.flow_notes?.length       ? f.flow_notes       : [],
   }
 })
 
@@ -177,7 +178,12 @@ const diagramData = computed(() => {
 async function doSave() {
   const data = canvasRef.value?.getCurrentDiagramData()
   if (!data) return
-  await flowStore.saveDiagram(flowId, { nodes: data.nodes, connections: data.connections, metadata: data.metadata })
+  await flowStore.saveDiagram(flowId, { 
+    nodes: data.nodes, 
+    connections: data.connections, 
+    notes: data.notes,
+    metadata: data.metadata 
+  })
   canvasRef.value?.markSaved()
   uiStore.addAlert({ type: 'success', message: 'Diagrama guardado exitosamente' })
 }

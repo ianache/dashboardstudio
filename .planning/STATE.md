@@ -1,46 +1,57 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: ODS PostgreSQL Upsert & Dynamic Discovery
-current_phase: 29
-current_plan: 2
-status: Complete
-last_updated: "2026-05-17T03:45:00.000Z"
+milestone: v1.6
+milestone_name: ODS Execution Engine
+current_phase: 31
+current_plan: null
+status: Planning
+last_updated: "2026-05-17T04:00:00.000Z"
 progress:
-  total_phases: 3
+  total_phases: 1
   completed_phases: 0
-  total_plans: 3
-  completed_plans: 2
+  total_plans: 0
+  completed_plans: 0
 ---
 
-# Project State: ODS PostgreSQL Upsert & Dynamic Discovery
+# Project State: ODS Execution Engine
 
-- **Status:** Complete
-- **Current Phase:** Phase 29: Metadata Inspection API
-- **Last Action:** Completed Phase 29 Plan 02 - FastAPI endpoints for metadata inspection.
+- **Status:** Planning
+- **Current Phase:** Phase 31: ODS Execution Engine
+- **Last Action:** Iniciado nuevo milestone v1.6 - Definiendo requisitos
 
 ## Workflow Status
 - [x] Config defined
 - [x] Context created
 - [ ] Research completed
-- [x] Requirements finalized
-- [x] Roadmap structured
+- [ ] Requirements finalized
+- [ ] Roadmap structured
 - [ ] Execution complete
 
-## Milestone: ODS PostgreSQL Upsert & Dynamic Discovery
-- [ ] Phase 29: Metadata Inspection API
-- [ ] Phase 30: ODS Node UI Enhancement
+## Milestone: v1.6 ODS Execution Engine
 - [ ] Phase 31: ODS Execution Engine
 
 ## Accumulated Context
 ### Milestone Goals
-- Enable dynamic table and column discovery for ODS PostgreSQL nodes.
-- Support composite identity keys for UPSERT operations.
-- Centralize write logic in Python for better driver support and bulk performance.
+- Implementar motor de ejecución Python para nodos ODS PostgreSQL
+- Soporte completo para operaciones: Append, Overwrite, Upsert, Merge (SCD2)
+- Integración con Deno runner mediante señal EXEC_ODS
+- Batch processing eficiente con manejo de errores
+
+### Technical Context
+- **Phase 29 completada:** Metadata Inspection API funcional (endpoints para tablas/columnas)
+- **Phase 30 completada:** UI de nodo ODS con selectores dinámicos y campos condicionales
+- **Infraestructura existente:** Deno runner, Python flow runner, APScheduler, sistema de logs
+- **Base de datos:** PostgreSQL como target ODS
 
 ### Decisions Made
-- **Connection:** The ODS node will allow selecting a DataSource from the manager.
-- **UI:** A "Refresh" button will be added next to table/column selectors to trigger re-scans.
-- **Execution:** Deno will delegate the final data write to a Python service (ods_executor.py) when reaching an `ods_pg` node.
-- **Visibility:** Identity fields selection will only be visible when "UPSERT" mode is chosen.
-- **Service Design:** Used a strategy pattern for MetadataService to allow future expansion to other database types (MySQL, etc.)
+- **Execution Strategy:** Deno delegará escritura a Python mediante señal especial `EXEC_ODS`
+- **Service Pattern:** Extender el patrón existente de servicios Python
+- **Batch Processing:** Procesamiento por lotes para mejor performance
+- **Error Handling:** Logging detallado por batch y registro de errores en tabla de ejecución
+
+### Project Reference
+
+See: .planning/PROJECT.md (updated 2026-05-17)
+
+**Core value:** User can configure and execute integration flows that write data to PostgreSQL ODS with various strategies (append, overwrite, upsert, merge)
+**Current focus:** Phase 31 - Building the execution engine

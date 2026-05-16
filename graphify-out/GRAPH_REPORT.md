@@ -1,16 +1,16 @@
-# Graph Report - dashboardstudio  (2026-05-15)
+# Graph Report - dashboardstudio  (2026-05-16)
 
 ## Corpus Check
-- 179 files · ~161,218 words
+- 191 files · ~180,198 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1495 nodes · 1566 edges · 176 communities (143 shown, 33 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 51 edges (avg confidence: 0.78)
+- 1575 nodes · 1660 edges · 185 communities (151 shown, 34 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.78)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `be5159f3`
+- Built from commit: `c2aeeef9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -92,10 +92,10 @@
 - [[_COMMUNITY_Community 74|Community 74]]
 - [[_COMMUNITY_Community 75|Community 75]]
 - [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
 - [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
@@ -116,180 +116,185 @@
 - [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 100|Community 100]]
 - [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
 - [[_COMMUNITY_Community 106|Community 106]]
-- [[_COMMUNITY_Community 107|Community 107]]
 - [[_COMMUNITY_Community 108|Community 108]]
-- [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
 - [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 114|Community 114]]
+- [[_COMMUNITY_Community 115|Community 115]]
+- [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 117|Community 117]]
 - [[_COMMUNITY_Community 118|Community 118]]
-- [[_COMMUNITY_Community 119|Community 119]]
-- [[_COMMUNITY_Community 121|Community 121]]
-- [[_COMMUNITY_Community 122|Community 122]]
-- [[_COMMUNITY_Community 123|Community 123]]
 - [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
 - [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 128|Community 128]]
+- [[_COMMUNITY_Community 129|Community 129]]
+- [[_COMMUNITY_Community 130|Community 130]]
 - [[_COMMUNITY_Community 131|Community 131]]
+- [[_COMMUNITY_Community 132|Community 132]]
+- [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 139|Community 139]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `ensure_user_exists()` - 25 edges
 2. `Documentación técnica de Widgets — Dashboard Studio` - 15 edges
 3. `Dashboard Studio — CLAUDE.md` - 14 edges
 4. `create_data_source()` - 10 edges
-5. `Guía de inicio` - 10 edges
-6. `Store: dataTypes` - 10 edges
-7. `Store: dimensionalModel` - 10 edges
-8. `_decrypt_data_source_password()` - 10 edges
-9. `encrypt_value()` - 9 edges
-10. `process_sensitive_fields()` - 9 edges
+5. `process_sensitive_fields()` - 10 edges
+6. `Guía de inicio` - 10 edges
+7. `Store: dataTypes` - 10 edges
+8. `Store: dimensionalModel` - 10 edges
+9. `_decrypt_data_source_password()` - 10 edges
+10. `save_flow_diagram()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `list_diagram_types()` --calls--> `ensure_user_exists()`  [INFERRED]
-  backend/app/api/endpoints/diagram_types.py → backend/app/core/security.py
-- `create_diagram_type()` --calls--> `ensure_user_exists()`  [INFERRED]
-  backend/app/api/endpoints/diagram_types.py → backend/app/core/security.py
-- `list_editor_tools()` --calls--> `ensure_user_exists()`  [INFERRED]
-  backend/app/api/endpoints/editor_tools.py → backend/app/core/security.py
+- `mock_get_current_user()` --calls--> `TokenData`  [INFERRED]
+  backend/test_metadata_api.py → backend/app/core/security.py
 - `list_integration_flows()` --calls--> `ensure_user_exists()`  [INFERRED]
   backend/app/api/endpoints/integration_flows.py → backend/app/core/security.py
-- `_encrypt_config_token()` --calls--> `encrypt_value()`  [INFERRED]
-  backend/app/api/endpoints/cube_config.py → backend/app/core/encryption.py
+- `mock_get_current_user()` --calls--> `TokenData`  [INFERRED]
+  backend/test_api.py → backend/app/core/security.py
+- `MockDS` --uses--> `TokenData`  [INFERRED]
+  backend/test_metadata_api.py → backend/app/core/security.py
+- `run_migration()` --calls--> `get_settings()`  [INFERRED]
+  backend/update_db_phase25.py → backend/app/core/config.py
 
-## Communities (176 total, 33 thin omitted)
+## Communities (185 total, 34 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
 Nodes (75): BaseModel, DbConfig, FtpConfig, HttpConfig, JwtConfig, SmtpConfig, ColorPaletteBase, ColorPaletteCreate (+67 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.04
-Nodes (30): global_exception_handler(), lifespan(), # NOTE: We manually add CORS headers here because unhandled exceptions can bypas, # NOTE: We manually add CORS headers here because unhandled exceptions can bypas, BaseSettings, get_settings(), Settings, init_db() (+22 more)
+Cohesion: 0.05
+Nodes (34): global_exception_handler(), # NOTE: We manually add CORS headers here because unhandled exceptions can bypas, # NOTE: We manually add CORS headers here because unhandled exceptions can bypas, DenoService, Run Deno with the provided flow data., Run Deno with the provided flow data., Check if Deno is installed and accessible., Run Deno with the provided flow data. (+26 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
 Nodes (41): Añadir dimensión global, Canvas, code:block1 ([← Volver]  [Nombre ✏]  [■ CubeJS] [⬡ DDL] [⬆ Import YAML] [), code:yaml (name: Ventas), code:block2 (┌─────────────────────────┐  ← fact: azul / dimension: verde), code:block3 ([Tabla de Hecho]               [■ CubeJS]  [✕]), code:block4 ([Dimensión]  [Global]       [■ CubeJS]  [✕]), code:block5 ([Relación]                              [✕]) (+33 more)
 
 ### Community 3 - "Community 3"
+Cohesion: 0.08
+Nodes (36): mock_get_current_user(), TokenData, create_data_source(), DataSourceCreate, DataSourceResponse, DataSourceUpdate, _decrypt_data_source_password(), delete_data_source() (+28 more)
+
+### Community 4 - "Community 4"
 Cohesion: 0.05
 Nodes (38): Acciones — Campos, Acciones — Modelos, Acciones — Nodos, Acciones — Relaciones, `addField(modelId, nodeId, { name, description, dataType, isKey, isFk })`, `addGlobalDimRef(modelId, globalNodeId, position)`, `addNode(modelId, { type, name, x, y })`, `addRelationship(modelId, { fromNodeId, toNodeId, cardinality })` (+30 more)
 
-### Community 4 - "Community 4"
+### Community 5 - "Community 5"
 Cohesion: 0.06
 Nodes (35): 1. General, 2. Datos (CubeJS), 3. Visualización, 4. Schema, Botones de acción, ChartConfigModal.vue, `clientToCanvas(clientX, clientY)`, code:javascript (COL_COUNT = 12       // número de columnas) (+27 more)
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.06
 Nodes (21): apiToken, apiUrl, authStore, configName, cubeStore, dashboardStore, deletingPalette, expandedSections (+13 more)
 
-### Community 6 - "Community 6"
+### Community 7 - "Community 7"
 Cohesion: 0.06
 Nodes (33): `AddNodeToDiagramModal`, `AppLayout`, `ChartConfigModal`, `ChartLayoutModal`, `charts/` — Visualizaciones, code:vue (<MIcon icon="analytics" :size="20" :fill="1" :weight="600" /), code:vue (<KpiCard label="Dashboards activos" value="12" icon="dashboa), code:vue (<QuickActionCard) (+25 more)
 
-### Community 7 - "Community 7"
+### Community 8 - "Community 8"
 Cohesion: 0.06
 Nodes (20): activeTab, aiError, aiLoading, aiOpen, aiPrompt, aiResult, chartOptionsJson, chartTypes (+12 more)
 
-### Community 8 - "Community 8"
+### Community 9 - "Community 9"
 Cohesion: 0.07
 Nodes (29): Añadir widget, Actualizar todo, Asignación de usuarios, Cadena de herencia completa, code:block1 ([← Volver]  [Nombre del dashboard ✏]  [Paleta ▾]  [Público ☐), code:block2 ([← Volver]  [Nombre del dashboard]    [🔄 Actualizar todo] [✏), code:block3 (DashboardWidget), code:block4 (widget.colorPalette === 'none'   →  sin paleta) (+21 more)
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
+Cohesion: 0.11
+Nodes (11): ABC, BaseConnectionStrategy, ConnectionTestingService, DbStrategy, HttpStrategy, SmtpStrategy, BaseMetadataStrategy, MetadataService (+3 more)
+
+### Community 11 - "Community 11"
 Cohesion: 0.07
 Nodes (26): Auto-resize, `bar` — Barras verticales, Cargando, `chartOptions` (override personalizado), code:block1 (widget.colorPalette === 'none'   →  sin paleta (usa colores ), code:javascript ([), code:javascript (const finalOption = deepMerge(baseOption, widget.chartOption), code:json ({) (+18 more)
 
-### Community 10 - "Community 10"
+### Community 12 - "Community 12"
 Cohesion: 0.08
 Nodes (25): code:env (VITE_CUBEJS_API_URL=http://localhost:4000/cubejs-api/v1), code:javascript (const { data, loading, error, lastUpdated, fetchData } =), code:block3 (fetchData()), code:javascript ({), code:javascript (// CubeJS TablePivot → formato interno), code:javascript (buildCubeFilter(filterDef, activeValue)), code:javascript (downloadCSV(data, filename)), code:javascript (// Estructura del meta-schema) (+17 more)
 
-### Community 11 - "Community 11"
+### Community 13 - "Community 13"
 Cohesion: 0.09
 Nodes (6): activeDashboardPalette, confirmImport(), createDashboard(), saveAndCloseProps(), saveDescription(), saveTitle()
 
-### Community 12 - "Community 12"
+### Community 14 - "Community 14"
+Cohesion: 0.11
+Nodes (22): context, emitStatus(), executeScriptNode(), flow, FlowConnection, FlowData, FlowNode, getTopologicalOrder() (+14 more)
+
+### Community 15 - "Community 15"
 Cohesion: 0.09
 Nodes (22): Arquitectura, code:bash (npm run dev      # Servidor de desarrollo → http://localhost), code:block2 (src/), code:javascript ({), code:javascript ({), code:css (--primary: #1890ff        /* Color principal */), code:env (VITE_CUBEJS_API_URL=http://localhost:4000/cubejs-api/v1), Comandos esenciales (+14 more)
 
-### Community 13 - "Community 13"
+### Community 16 - "Community 16"
 Cohesion: 0.17
 Nodes (20): Base, ColorPalette, CubeConfig, Currency, Dashboard, DashboardAssignment, DataSource, DataType (+12 more)
 
-### Community 14 - "Community 14"
-Cohesion: 0.11
-Nodes (21): context, emitStatus(), executeScriptNode(), flow, FlowConnection, FlowData, FlowNode, getTopologicalOrder() (+13 more)
+### Community 17 - "Community 17"
+Cohesion: 0.1
+Nodes (18): data, date, dx, f, legacyNotes, map, minX, minY (+10 more)
 
-### Community 15 - "Community 15"
+### Community 18 - "Community 18"
 Cohesion: 0.13
 Nodes (20): activate_cube_config(), create_cube_config(), _decrypt_config_token(), delete_cube_config(), _encrypt_config_token(), _generate_id(), get_active_cube_config(), get_cube_config() (+12 more)
 
-### Community 16 - "Community 16"
+### Community 19 - "Community 19"
+Cohesion: 0.13
+Nodes (10): ensure_user_exists(), get_current_user(), get_jwks(), Ensure user exists in database, create if not, verify_token(), create_diagram_type(), list_diagram_types(), create_editor_tool() (+2 more)
+
+### Community 20 - "Community 20"
+Cohesion: 0.15
+Nodes (19): flow_logs_websocket(), Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Streaming de logs de ejecución vía WebSocket., Streaming de logs de ejecución vía WebSocket. (+11 more)
+
+### Community 21 - "Community 21"
 Cohesion: 0.16
 Nodes (17): activeColors, activePaletteId, buildBarOption(), buildBaseOption(), buildCombinedOption(), buildGaugeOption(), buildLineOption(), buildPieOption() (+9 more)
 
-### Community 17 - "Community 17"
+### Community 22 - "Community 22"
 Cohesion: 0.1
 Nodes (19): Acciones, code:javascript (await cubeStore.setConfig('http://localhost:4000/cubejs-api/), code:javascript (await cubeStore.loadMeta()), code:javascript (const resultSet = await cubeStore.executeQuery({), code:javascript (const values = await cubeStore.getDimensionValues('Orders.st), code:javascript ({), code:javascript (// Resultado CubeJS → formato interno), Estado (+11 more)
 
-### Community 18 - "Community 18"
+### Community 23 - "Community 23"
 Cohesion: 0.12
 Nodes (17): add_filter(), assign_dashboard(), create_dashboard(), delete_dashboard(), _generate_id(), list_dashboards(), Delete dashboard (admin/designer only), Assign dashboard to users (admin/designer only) (+9 more)
 
-### Community 19 - "Community 19"
+### Community 24 - "Community 24"
 Cohesion: 0.12
 Nodes (11): authStore, router, routes, keycloak, cubeStore, app, authStore, pinia (+3 more)
 
-### Community 20 - "Community 20"
+### Community 25 - "Community 25"
 Cohesion: 0.11
 Nodes (18): AppLayout.vue, Cierre de dropdowns, code:block1 (┌─────────────────────────────────────────────────┐), code:block2 (─ Inicio                         (todos los roles)), code:javascript (const isModelRoute = computed(() =>), code:block4 (┌──────────────────────────────────────────────────────────┐), Componentes de Layout, Comportamiento (+10 more)
 
-### Community 21 - "Community 21"
+### Community 26 - "Community 26"
 Cohesion: 0.11
 Nodes (18): Acciones, Asignación de usuarios, code:javascript ({), code:javascript ({), code:javascript ({), code:block4 (left  = GAP + x * (colWidth + GAP)), Dashboard, Estado (+10 more)
 
-### Community 22 - "Community 22"
-Cohesion: 0.11
-Nodes (15): data, dx, f, map, minX, minY, nz, pos (+7 more)
-
-### Community 23 - "Community 23"
-Cohesion: 0.17
-Nodes (15): TokenData, create_data_source(), DataSourceCreate, DataSourceResponse, DataSourceUpdate, _encode_config(), _encrypt_data_source_password(), _gen_id() (+7 more)
-
-### Community 24 - "Community 24"
-Cohesion: 0.13
-Nodes (17): _decrypt_data_source_password(), get_data_source(), list_data_sources(), List all data sources., Search data sources by name or type, Get a single data source by ID., Update a data source., Update data source (admin/designer only) (+9 more)
-
-### Community 25 - "Community 25"
+### Community 27 - "Community 27"
 Cohesion: 0.12
 Nodes (15): ApiError, apiRequest(), cubeConfigApi, currenciesApi, dashboardApi, dataSourcesApi, diagramTypesApi, dimensionalModelApi (+7 more)
 
-### Community 26 - "Community 26"
+### Community 28 - "Community 28"
 Cohesion: 0.13
 Nodes (15): create_knowledge_space(), delete_knowledge_space(), _generate_id(), get_knowledge_space(), get_knowledge_space_by_name(), list_knowledge_spaces(), Search knowledge spaces by name or description, Update knowledge space (admin/designer only) (+7 more)
 
-### Community 27 - "Community 27"
-Cohesion: 0.13
-Nodes (12): check_deno_runtime(), create_integration_flow(), _gen_id(), get_execution_logs(), list_integration_flows(), Obtiene los logs y resultados de una ejecución específica., Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Ejecuta un flujo de integración en el runtime de Deno. (+4 more)
-
-### Community 28 - "Community 28"
+### Community 29 - "Community 29"
 Cohesion: 0.12
 Nodes (13): columns, currentPage, PAGE_SIZES, pagedRows, pageSize, props, rangeEnd, rangeStart (+5 more)
 
-### Community 29 - "Community 29"
+### Community 30 - "Community 30"
 Cohesion: 0.12
 Nodes (15): API Endpoints, BI Portal Backend, code:bash (cp .env.example .env), code:bash (cd backend), code:bash (uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8), code:bash (uv run alembic revision --autogenerate -m "create users tabl), code:bash (uv sync), code:block6 (backend/) (+7 more)
 
-### Community 30 - "Community 30"
+### Community 31 - "Community 31"
 Cohesion: 0.12
 Nodes (15): 📌 Cambios Implementados, 📌 Cambios Implementados, 📌 Cambios Implementados, 📌 Cambios Implementados, Interfaz del Modal de Asistente IA, Lógica Refactorizada, 📌 Modificaciones Ejecutadas, 📌 Modificaciones Ejecutadas (+7 more)
-
-### Community 31 - "Community 31"
-Cohesion: 0.15
-Nodes (8): DenoService, Run Deno with the provided flow data., Run Deno with the provided flow data., Check if Deno is installed and accessible., Run Deno with the provided flow data., Execute a simple script test in Deno., Run a full integration flow in Deno., Runs a flow in Deno and yields log messages.         Uses subprocess.run via ru
 
 ### Community 32 - "Community 32"
 Cohesion: 0.13
@@ -336,20 +341,20 @@ Cohesion: 0.17
 Nodes (11): create_palette(), delete_palette(), _generate_id(), list_palettes(), Update palette (admin/designer only), Delete palette (admin/designer only), Set palette as default (admin/designer only), Create a new color palette (admin/designer only) (+3 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.26
-Nodes (6): ABC, BaseConnectionStrategy, ConnectionTestingService, DbStrategy, HttpStrategy, SmtpStrategy
-
-### Community 44 - "Community 44"
 Cohesion: 0.15
 Nodes (12): Acciones, code:javascript ({), code:json ({), code:block3 (widget.colorPalette === 'none'  →  sin paleta (usa colores p), Estado, Estructura `Palette`, Getters, Lógica de herencia de paleta en widgets (+4 more)
 
-### Community 45 - "Community 45"
+### Community 44 - "Community 44"
 Cohesion: 0.15
 Nodes (12): Acciones, code:javascript ({), code:javascript (sqlTypeString({ baseType: 'VARCHAR', size: 100 })   // → 'VA), Estado, Función `sqlTypeString(dt)`, Getters, Modelo de tipo de dato, Persistencia (+4 more)
 
-### Community 46 - "Community 46"
+### Community 45 - "Community 45"
 Cohesion: 0.15
 Nodes (12): 1. Objective, 2. Technical Stack, 3. Functional Requirements, 4. Security & Constraints (Non-Functional), 5. Implementation Tasks (Steps for Gemini), FR1: Secure Embedding (Iframe), FR2: Pop-out Window (Independent View), FR3: Real-time State Sync (Pinia + BroadcastChannel) (+4 more)
+
+### Community 46 - "Community 46"
+Cohesion: 0.18
+Nodes (4): run_migration(), BaseSettings, get_settings(), Settings
 
 ### Community 47 - "Community 47"
 Cohesion: 0.18
@@ -360,16 +365,16 @@ Cohesion: 0.17
 Nodes (11): 1. `dim_empleado`, 1. `fact_headcount_mensual` (Snapshot Mensual), 2. `dim_departamento`, 2. `fact_ausentismo`, 3. `dim_rol`, 3. `fact_reclutamiento`, 4. `dim_tiempo`, Contexto del Modelo (+3 more)
 
 ### Community 49 - "Community 49"
-Cohesion: 0.25
-Nodes (10): decrypt_value(), encrypt_value(), _get_fernet(), process_sensitive_fields(), Encryption utilities for sensitive data like API tokens., Get Fernet instance with key derived from settings., Encrypt a string value.      Args:         value: The string to encrypt, Decrypt a string value that was encrypted with encrypt_value.      Args: (+2 more)
-
-### Community 50 - "Community 50"
 Cohesion: 0.18
 Nodes (10): get_current_user_info(), get_user(), list_users(), provision_users(), List all users (admin/designer only), Update user (admin only), Upsert user records from Keycloak data (admin/designer only).     Creates a stu, Get current authenticated user info - auto-creates user if not exists (+2 more)
 
-### Community 51 - "Community 51"
+### Community 50 - "Community 50"
 Cohesion: 0.2
 Nodes (9): create_widget(), delete_widget(), _generate_id(), list_widgets(), Delete widget (admin/designer only), Create a new widget in a dashboard (admin/designer only), List all widgets in a dashboard, Update widget (admin/designer only) (+1 more)
+
+### Community 51 - "Community 51"
+Cohesion: 0.25
+Nodes (10): decrypt_value(), encrypt_value(), _get_fernet(), process_sensitive_fields(), Encryption utilities for sensitive data like API tokens., Get Fernet instance with key derived from settings., Encrypt a string value.      Args:         value: The string to encrypt, Decrypt a string value that was encrypted with encrypt_value.      Args: (+2 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.18
@@ -388,152 +393,168 @@ Cohesion: 0.22
 Nodes (7): create_data_type(), delete_data_type(), _generate_id(), Delete data type (admin/designer only), Create a new data type (admin/designer only), Update data type (admin/designer only), update_data_type()
 
 ### Community 56 - "Community 56"
-Cohesion: 0.24
-Nodes (8): ensure_user_exists(), get_current_user(), get_jwks(), Ensure user exists in database, create if not, verify_token(), list_flow_executions(), Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo.
+Cohesion: 0.27
+Nodes (7): create_integration_flow(), delete_integration_flow(), _gen_id(), list_integration_flows(), update_integration_flow(), schedule_flow(), unschedule_flow()
 
 ### Community 57 - "Community 57"
+Cohesion: 0.22
+Nodes (9): _decode_config(), get_data_source_columns(), get_data_source_tables(), Test a data source connection., List tables in a data source., List columns in a specific table of a data source., Deserialise + decrypt connection_config stored in connection_url., Test a data source connection (+1 more)
+
+### Community 58 - "Community 58"
 Cohesion: 0.25
 Nodes (7): defaultOptions, editorRef, emit, handleChange(), internalValue, mergedOptions, props
 
-### Community 58 - "Community 58"
+### Community 59 - "Community 59"
+Cohesion: 0.22
+Nodes (8): Milestone: Integration Flow Execution Visualizer (Popup), Phase 18: Frontend - Execution Visualizer Popup, Phase 18: Frontend - Execution Visualizer Popup, Phase 19: Integration & Data Wiring, Phase 19: Integration & Data Wiring, Phase Details, Progress Table, Project Roadmap: Integration Flow Execution Visualizer
+
+### Community 60 - "Community 60"
 Cohesion: 0.22
 Nodes (9): 11. Personalización avanzada con `chartOptions`, Casos de uso frecuentes, code:json ({), code:json ({), code:json ({), code:json ({), code:json ({), IA Assist (+1 more)
 
-### Community 59 - "Community 59"
-Cohesion: 0.54
-Nodes (7): _err(), _execute_http(), _execute_mysql(), _execute_postgres(), execute_source_node(), execute_sql(), get_db_engine()
-
-### Community 60 - "Community 60"
-Cohesion: 0.25
-Nodes (8): _decode_config(), Test a data source connection., Deserialise + decrypt connection_config stored in connection_url., Test a data source connection, test_data_source(), flow_logs_websocket(), Streaming de logs de ejecución vía WebSocket., Streaming de logs de ejecución vía WebSocket.
-
 ### Community 61 - "Community 61"
+Cohesion: 0.25
+Nodes (8): Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., save_flow_diagram()
+
+### Community 62 - "Community 62"
+Cohesion: 0.29
+Nodes (5): emit, history, props, selectedExec, showGraph()
+
+### Community 63 - "Community 63"
 Cohesion: 0.25
 Nodes (4): ALL_MODELS, LLM_OPERATIONS, PROVIDERS, useLlmStore
 
-### Community 62 - "Community 62"
+### Community 64 - "Community 64"
 Cohesion: 0.25
 Nodes (5): decoded, jwks, jwksClient, jwt, payload
 
-### Community 63 - "Community 63"
-Cohesion: 0.33
-Nodes (3): create_editor_tool(), _gen_id(), list_editor_tools()
-
-### Community 64 - "Community 64"
-Cohesion: 0.29
-Nodes (3): emit, filterValues, props
-
 ### Community 65 - "Community 65"
 Cohesion: 0.29
-Nodes (4): emit, history, props, selectedExec
+Nodes (7): check_deno_runtime(), Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Verifica el estado del runtime de Deno y realiza una ejecución de prueba., Verifica el estado del runtime de Deno y realiza una ejecución de prueba.
 
 ### Community 66 - "Community 66"
 Cohesion: 0.29
-Nodes (3): BASE_TYPES, DEFAULT_TYPES, useDataTypeStore
+Nodes (3): emit, filterValues, props
 
 ### Community 67 - "Community 67"
 Cohesion: 0.29
-Nodes (6): code:bash (npm run dev      # Servidor de desarrollo → http://localhost), Comandos esenciales, Dashboard Studio — Documentación, Índice, Roles de usuario, Stack tecnológico
+Nodes (3): BASE_TYPES, DEFAULT_TYPES, useDataTypeStore
 
 ### Community 68 - "Community 68"
 Cohesion: 0.29
-Nodes (7): 8. Widget: Combinado — `combined`, code:json ({), code:json ({), Ejemplo: Unidades vendidas vs. ingresos, Fuente de datos, Opciones específicas — `combinedOptions`, Parámetros de medidas aplicables
+Nodes (6): code:bash (npm run dev      # Servidor de desarrollo → http://localhost), Comandos esenciales, Dashboard Studio — Documentación, Índice, Roles de usuario, Stack tecnológico
 
 ### Community 69 - "Community 69"
+Cohesion: 0.29
+Nodes (7): 8. Widget: Combinado — `combined`, code:json ({), code:json ({), Ejemplo: Unidades vendidas vs. ingresos, Fuente de datos, Opciones específicas — `combinedOptions`, Parámetros de medidas aplicables
+
+### Community 70 - "Community 70"
 Cohesion: 0.29
 Nodes (7): 5. Widget: Pastel / Donut — `pie`, code:json ({), code:json ({), Comportamiento predeterminado, Ejemplo con total al centro, Fuente de datos, Opciones específicas — `pieOptions`
 
 ### Community 71 - "Community 71"
 Cohesion: 0.33
-Nodes (3): CONN_DEFAULTS, CONN_META, CONN_TYPES
+Nodes (3): lifespan(), init_db(), init_scheduler()
 
 ### Community 72 - "Community 72"
-Cohesion: 0.33
-Nodes (6): 4. Widget: Líneas — `line`, code:json ({ "series": [{ "areaStyle": null }] }), Comportamiento predeterminado, Fuente de datos, Parámetros configurables, Para eliminar el área rellena
+Cohesion: 0.4
+Nodes (3): get_mock_db(), mock_get_current_user(), MockDS
 
 ### Community 73 - "Community 73"
 Cohesion: 0.33
-Nodes (6): 3. Widget: Barras — `bar`, code:json ({), Comportamiento predeterminado, Ejemplo mínimo, Fuente de datos, Parámetros configurables
+Nodes (3): CONN_DEFAULTS, CONN_META, CONN_TYPES
 
 ### Community 74 - "Community 74"
-Cohesion: 0.33
-Nodes (5): 12. Paletas de colores, 13. Datos de demostración (`useMockData`), code:block21 (widget.colorPalette  →  dashboardPalette  →  paletteStore.de), Documentación técnica de Widgets — Dashboard Studio, Índice
-
-### Community 75 - "Community 75"
-Cohesion: 0.33
-Nodes (6): 2. Configuración de Medidas (Measures), code:json ({), Parámetros de Dimensión de Tiempo (`timeDimension`), Parámetros de Dimensiones, Parámetros de Filtros, Parámetros de una Medida
-
-### Community 76 - "Community 76"
 Cohesion: 0.4
 Nodes (5): diagramData, doSave(), flowName, handleSave(), toolsForDiagram
 
+### Community 75 - "Community 75"
+Cohesion: 0.33
+Nodes (6): 3. Widget: Barras — `bar`, code:json ({), Comportamiento predeterminado, Ejemplo mínimo, Fuente de datos, Parámetros configurables
+
+### Community 76 - "Community 76"
+Cohesion: 0.33
+Nodes (6): 2. Configuración de Medidas (Measures), code:json ({), Parámetros de Dimensión de Tiempo (`timeDimension`), Parámetros de Dimensiones, Parámetros de Filtros, Parámetros de una Medida
+
+### Community 77 - "Community 77"
+Cohesion: 0.33
+Nodes (5): 12. Paletas de colores, 13. Datos de demostración (`useMockData`), code:block21 (widget.colorPalette  →  dashboardPalette  →  paletteStore.de), Documentación técnica de Widgets — Dashboard Studio, Índice
+
 ### Community 78 - "Community 78"
-Cohesion: 0.5
-Nodes (4): emit, isExpanded, props, toggleExpand()
+Cohesion: 0.33
+Nodes (6): 4. Widget: Líneas — `line`, code:json ({ "series": [{ "areaStyle": null }] }), Comportamiento predeterminado, Fuente de datos, Parámetros configurables, Para eliminar el área rellena
 
 ### Community 79 - "Community 79"
 Cohesion: 0.4
-Nodes (4): data, existing, toAdd, toReplace
+Nodes (5): get_execution_logs(), Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica.
 
 ### Community 80 - "Community 80"
 Cohesion: 0.4
-Nodes (5): 1. Modelo de datos del Widget, Campos raíz, code:json ({), code:json ({ "x": 0, "y": 0, "w": 6, "h": 3 }), Position
-
-### Community 81 - "Community 81"
-Cohesion: 0.4
-Nodes (5): 6. Widget: Gauge — `gauge`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
+Nodes (5): list_flow_executions(), Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo.
 
 ### Community 82 - "Community 82"
-Cohesion: 0.4
-Nodes (5): 9. Widget: Tabla — `table`, Construcción de columnas, Fuente de datos, Funciones interactivas, Parámetros configurables
+Cohesion: 0.5
+Nodes (4): emit, isExpanded, props, toggleExpand()
 
 ### Community 83 - "Community 83"
 Cohesion: 0.4
+Nodes (4): data, existing, toAdd, toReplace
+
+### Community 84 - "Community 84"
+Cohesion: 0.4
 Nodes (5): 7. Widget: Radar — `radar`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
 
-### Community 96 - "Community 96"
-Cohesion: 0.5
-Nodes (4): Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., save_flow_diagram()
+### Community 85 - "Community 85"
+Cohesion: 0.4
+Nodes (5): 9. Widget: Tabla — `table`, Construcción de columnas, Fuente de datos, Funciones interactivas, Parámetros configurables
 
-### Community 97 - "Community 97"
-Cohesion: 0.5
-Nodes (3): callLlm(), buildAIPrompt(), generateWithAI()
+### Community 86 - "Community 86"
+Cohesion: 0.4
+Nodes (5): 6. Widget: Gauge — `gauge`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
 
-### Community 99 - "Community 99"
-Cohesion: 0.5
-Nodes (3): doc, m, newModel
+### Community 87 - "Community 87"
+Cohesion: 0.4
+Nodes (5): 1. Modelo de datos del Widget, Campos raíz, code:json ({), code:json ({ "x": 0, "y": 0, "w": 6, "h": 3 }), Position
 
-### Community 100 - "Community 100"
-Cohesion: 0.5
-Nodes (3): Notas técnicas, Resumen de la implementación, Tarea: Monedas en "Configurar Métrica" - COMPLETADO ✅
+### Community 88 - "Community 88"
+Cohesion: 0.67
+Nodes (3): gen_id(), patch(), Patch tool catalog:   1. Update rest_api tool -> pure HTTP REST (remove graphql
 
 ### Community 101 - "Community 101"
 Cohesion: 0.5
-Nodes (3): Mejoras, Objetivo, Requerimientos
+Nodes (3): callLlm(), buildAIPrompt(), generateWithAI()
+
+### Community 103 - "Community 103"
+Cohesion: 0.5
+Nodes (3): doc, m, newModel
 
 ### Community 104 - "Community 104"
-Cohesion: 0.67
-Nodes (3): delete_data_source(), Delete a data source., Delete data source (admin/designer only)
+Cohesion: 0.5
+Nodes (3): Notas técnicas, Resumen de la implementación, Tarea: Monedas en "Configurar Métrica" - COMPLETADO ✅
+
+### Community 105 - "Community 105"
+Cohesion: 0.5
+Nodes (3): Mejoras, Objetivo, Requerimientos
 
 ## Knowledge Gaps
-- **700 isolated node(s):** `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07`, `seed default data  Revision ID: 002 Revises: 001 Create Date: 2025-04-07`, `add llm_config table  Revision ID: 003 Revises: 002 Create Date: 2025-04-07`, `add diagrams column to dimensional_models  Revision ID: 004 Revises: 003 Cre`, `add currencies table  Revision ID: 005 Revises: 004 Create Date: 2026-04-17` (+695 more)
+- **734 isolated node(s):** `Patch tool catalog:   1. Update rest_api tool -> pure HTTP REST (remove graphql`, `Patch the rest_api editor tool to add graphql_query and graphql_variables fields`, `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07`, `seed default data  Revision ID: 002 Revises: 001 Create Date: 2025-04-07`, `add llm_config table  Revision ID: 003 Revises: 002 Create Date: 2025-04-07` (+729 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **34 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ensure_user_exists()` connect `Community 56` to `Community 36`, `Community 70`, `Community 42`, `Community 15`, `Community 47`, `Community 18`, `Community 51`, `Community 23`, `Community 24`, `Community 26`, `Community 27`, `Community 63`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
-- **Why does `_get_fernet()` connect `Community 49` to `Community 1`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `get_settings()` connect `Community 1` to `Community 49`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `ensure_user_exists()` connect `Community 19` to `Community 3`, `Community 36`, `Community 42`, `Community 79`, `Community 80`, `Community 47`, `Community 18`, `Community 50`, `Community 23`, `Community 56`, `Community 28`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `lifespan()` connect `Community 71` to `Community 1`, `Community 46`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Are the 22 inferred relationships involving `ensure_user_exists()` (e.g. with `create_cube_config()` and `list_cube_configs()`) actually correct?**
   _`ensure_user_exists()` has 22 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07`, `seed default data  Revision ID: 002 Revises: 001 Create Date: 2025-04-07`, `add llm_config table  Revision ID: 003 Revises: 002 Create Date: 2025-04-07` to the rest of the system?**
-  _700 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Patch tool catalog:   1. Update rest_api tool -> pure HTTP REST (remove graphql`, `Patch the rest_api editor tool to add graphql_query and graphql_variables fields`, `initial schema  Revision ID: 001 Revises:  Create Date: 2025-04-07` to the rest of the system?**
+  _734 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._

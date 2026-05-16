@@ -4,6 +4,7 @@ import { integrationFlowsApi } from '@/services/api'
 export const useIntegrationsStore = defineStore('integrations', {
   state: () => ({
     flows: [],
+    progressMap: {},
     currentFlow: null,
     loading: false,
     error: null,
@@ -12,6 +13,7 @@ export const useIntegrationsStore = defineStore('integrations', {
   getters: {
     allFlows: (state) => state.flows,
     flowById: (state) => (id) => state.flows.find(f => f.id === id) || null,
+    getProgress: (state) => (id) => state.progressMap[id] || 0,
     flowsByStatus: (state) => (status) => state.flows.filter(f => f.status === status),
     activeCount:    (state) => state.flows.filter(f => f.status === 'active').length,
     errorCount:     (state) => state.flows.filter(f => f.status === 'error').length,
@@ -19,16 +21,28 @@ export const useIntegrationsStore = defineStore('integrations', {
   },
 
   actions: {
+    updateProgress(id, progress) {
+      this.progressMap = { ...this.progressMap, [id]: progress }
+    },
     async loadFromBackend() {
       this.loading = true
       this.error = null
       try {
-        this.flows = await integrationFlowsApi.getAll()
+        this.flows = await integrationFlowsApi.getAll({ _t: Date.now() })
       } catch (err) {
         this.error = err.message
         console.error('Failed to load integration flows:', err)
       } finally {
         this.loading = false
+      }
+    },
+
+    async refreshFlows() {
+      try {
+        // Use a cache-busting timestamp to ensure we get fresh execution data
+        this.flows = await integrationFlowsApi.getAll({ _t: Date.now() })
+      } catch (err) {
+        console.error('Failed to refresh flows:', err)
       }
     },
 

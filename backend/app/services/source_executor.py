@@ -143,3 +143,72 @@ async def _execute_http(props: Dict, label: str) -> Dict:
 def _err(msg: str) -> Dict:
     return {"success": False, "rows": [], "count": 0, "error": msg}
 
+async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) -> tuple[bool, Dict[str, Any]]:
+    import copy
+    import time
+    nodes_copy = copy.deepcopy(flow_data.get("nodes", []))
+    prefetched_outputs = {}
+    pre_exec_ok = True
+
+    # Only pre-execute traditional DB sources. 
+    # API/HTTP sources should run in Deno to support dynamic params/methods.
+    PRE_EXECUTABLE_TYPES = POSTGRES_TYPES | MYSQL_TYPES 
+
+    for node in nodes_copy:
+        # Resolve credentials first for EVERY node that has a connection_id
+        connection_id = (node.get("props") or {}).get("connection_id", "")
+        if connection_id:
+            ds = db.query(DataSource).filter(DataSource.id == connection_id).first()
+            if ds:
+                try:
+                    raw_config = json.loads(ds.connection_url)
+                except Exception:
+                    raw_config = {"url": ds.connection_url}
+                resolved_cfg = process_sensitive_fields(raw_config, action="decrypt")
+                
+                if not node.get("props"):
+                    node["props"] = {}
+                for cfg_key in ["host", "port", "username", "password", "database", "schema", "url", "email", "api_key", "token", "token_url", "client_id", "client_secret"]:
+                    if cfg_key in resolved_cfg:
+                        node["props"][cfg_key] = resolved_cfg[cfg_key]
+                if ds.type:
+                    node["props"]["connection_type"] = ds.type
+                logger.info(f"[SourceExec] Credenciales resueltas desde DataSource '{ds.name}' para nodo {node['id']}")
+
+        # Now decide if we pre-execute
+        if node.get("toolType") not in ["sql_source", "sql_destination"] and node.get("category") != "source":
+            continue
+            
+        conn_type = (node.get("props") or {}).get("connection_type", "").lower()
+        if conn_type not in PRE_EXECUTABLE_TYPES:
+            continue
+
+        if websocket:
+            await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "running"})
+            await websocket.send_json({"type": "info", "message": f"[Fuente] Ejecutando '{node.get('label', node['id'])}' ..."})
+
+        start_time = time.perf_counter()
+        result = await execute_source_node(node)
+        duration_ms = int((time.perf_counter() - start_time) * 1000)
+
+        if result["success"]:
+            prefetched_outputs[node["id"]] = {
+                "rows": result["rows"],
+                "duration": duration_ms
+            }
+            node["__pre_executed"] = True
+            if websocket:
+                await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "success"})
+                await websocket.send_json({"type": "info", "message": f"[Fuente] {result['count']} registros cargados desde '{node.get('label', '')}' ({duration_ms}ms)"})
+        else:
+            node["__pre_executed"] = True
+            if websocket:
+                await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "error"})
+                await websocket.send_json({"type": "error", "message": f"[Fuente Error] {result['error']}"})
+            pre_exec_ok = False
+            break
+
+    flow_data["nodes"] = nodes_copy
+    flow_data["prefetched_outputs"] = prefetched_outputs
+    return pre_exec_ok, flow_data
+

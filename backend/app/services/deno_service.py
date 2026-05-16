@@ -100,10 +100,17 @@ class DenoService:
 
         def _run_deno():
             return subprocess.run(
-                ["deno", "run", "--no-remote", "--allow-read", self.full_runner_path],
+                [
+                    "deno", "run",
+                    "--allow-read",
+                    "--allow-net",        # Required for rest_api / http nodes
+                    "--allow-env",        # Required for reading environment variables
+                    "--allow-sys",        # Required for node:os and similar builtins
+                    self.full_runner_path
+                ],
                 input=input_json.encode(),
                 capture_output=True,
-                timeout=30,
+                timeout=120,  # Increased from 30s to accommodate HTTP calls
             )
 
         try:
@@ -133,10 +140,8 @@ class DenoService:
             logger.error(f"Deno stderr:\n{stderr_text.strip()}")
 
         # Stream stdout lines
-        execution_id = None # Should be passed from the scheduler
-        
-        # Helper to extract execution_id from scope if possible
-        # For now, let's assume we pass execution_id to the runner or it's provided by context
+        total_nodes = len(flow_data.get("nodes", []))
+        nodes_processed = set()
         
         for line in stdout_text.splitlines():
             line = line.strip()
@@ -145,18 +150,35 @@ class DenoService:
             if line.startswith("NODE_STATUS:"):
                 parts = line.split(":")
                 if len(parts) >= 3:
-                    yield {"type": "node_status", "node_id": parts[1], "status": parts[2]}
+                    node_id = parts[1]
+                    status = parts[2]
+                    yield {"type": "node_status", "node_id": node_id, "status": status}
+                    
+                    if status in ["success", "error"]:
+                        nodes_processed.add(node_id)
+                        if total_nodes > 0:
+                            progress = (len(nodes_processed) / total_nodes) * 100
+                            yield {"type": "progress", "progress": round(progress, 2)}
             elif line.startswith("NODE_LOG_JSON:"):
                 try:
                     data = json.loads(line[len("NODE_LOG_JSON:"):])
+                    node_id = data.get("node_id")
+                    status = data.get("status")
+                    
                     yield {
                         "type": "node_log", 
-                        "node_id": data.get("node_id"), 
-                        "status": data.get("status"),
+                        "node_id": node_id, 
+                        "status": status,
                         "input": data.get("input"),
                         "output": data.get("output"),
                         "duration": data.get("duration", 0)
                     }
+                    
+                    if status in ["success", "error"]:
+                        nodes_processed.add(node_id)
+                        if total_nodes > 0:
+                            progress = (len(nodes_processed) / total_nodes) * 100
+                            yield {"type": "progress", "progress": round(progress, 2)}
                 except Exception:
                     pass
             elif line.startswith("FINAL_RESULT:"):

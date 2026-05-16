@@ -78,11 +78,21 @@ Implementar un configurador de visualizaciones dinámico con:
 **Objective:** Potenciar el nodo "ODS PostgreSQL" con capacidades de descubrimiento dinámico de metadatos y soporte avanzado para operaciones de UPSERT con llaves compuestas.
 
 ### Success Criteria
-- [ ] Inspección dinámica de tablas y columnas basada en la conexión seleccionada.
-- [ ] Selector de tabla tipo combobox con botón de "Refresh" en el panel de propiedades.
-- [ ] Soporte para selección de múltiples campos de identidad para el modo UPSERT.
+- [x] Inspección dinámica de tablas y columnas basada en la conexión seleccionada.
+- [x] Selector de tabla tipo combobox con botón de "Refresh" en el panel de propiedades.
+- [x] Soporte para selección de múltiples campos de identidad para el modo UPSERT.
+- [x] Visualización condicional de propiedades según el modo de escritura seleccionado.
 - [ ] Motor de ejecución en Python para operaciones ODS (Append, Overwrite, Upsert).
-- [ ] Visualización condicional de propiedades según el modo de escritura seleccionado.
+
+## Current Milestone: v1.6 ODS Execution Engine
+**Goal:** Implementar el motor de ejecución que procese nodos ODS PostgreSQL durante la ejecución de flujos de integración, soportando operaciones de escritura reales en la base de datos.
+
+**Target features:**
+- Motor de ejecución Python (`ods_executor.py`) para operaciones Append, Overwrite, Upsert y Merge (SCD2)
+- Integración Deno-to-Python mediante señal `EXEC_ODS`
+- Soporte para batch processing con tamaño configurable
+- Manejo de conflictos en operaciones Upsert con múltiples campos de identidad
+- Logging detallado de operaciones de escritura
 
 
 

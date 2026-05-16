@@ -9,6 +9,7 @@ export const CAT_META = {
   notification: { label: 'Notificaciones',   icon: 'notifications', color: '#d97706', bg: '#fffbeb' },
   validator:    { label: 'Validadores',      icon: 'verified',      color: '#dc2626', bg: '#fef2f2' },
   processor:    { label: 'Procesadores',     icon: 'memory',        color: '#0891b2', bg: '#ecfeff' },
+  annotations:  { label: 'Anotaciones',     icon: 'edit_note',     color: '#d97706', bg: '#fffbeb' },
 }
 
 export const useToolCatalogStore = defineStore('toolCatalog', {
