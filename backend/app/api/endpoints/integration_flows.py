@@ -115,7 +115,9 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
                     status=nl["status"],
                     input_data=nl["input"],
                     output_data=nl["output"],
-                    duration=nl["duration"]
+                    duration=nl["duration"],
+                    start_time=nl.get("start_time"),
+                    end_time=nl.get("end_time")
                 )
                 db.add(db_nl)
             
@@ -184,7 +186,9 @@ async def get_execution_logs(
             "status": nl.status,
             "input": nl.input_data,
             "output": nl.output_data,
-            "duration": nl.duration
+            "duration": nl.duration,
+            "start_time": nl.start_time.isoformat() if nl.start_time else None,
+            "end_time": nl.end_time.isoformat() if nl.end_time else None
         }
         for nl in node_logs
     ]
@@ -395,6 +399,8 @@ async def save_flow_diagram(
         flow.flow_nodes = body["nodes"]
     if "connections" in body:
         flow.flow_connections = body["connections"]
+    if "notes" in body:
+        flow.flow_notes = body["notes"]
     if "metadata" in body:
         flow.flow_metadata = body["metadata"]
         # Sync top-level fields from metadata if present
