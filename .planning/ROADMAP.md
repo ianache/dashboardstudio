@@ -5,7 +5,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1-21. Core & Early Milestones | 21/21 | Completed | 2026-05-16 |
-| 22. Sidebar Resizability Implementation | 0/2 | Pending | - |
+| 22. Sidebar Resizability Implementation | 2/2 | Complete   | 2026-05-16 |
 
 ---
 
@@ -17,7 +17,7 @@
 **Status**: Pending
 
 **Plans:**
-- [ ] 22-01-PLAN.md — Core Resizing Logic (UI Handle + Mouse Events)
+2/2 plans complete
 - [ ] 22-02-PLAN.md — Constraints, Persistence & Compatibility
 
 ---

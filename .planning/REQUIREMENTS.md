@@ -1,20 +1,21 @@
-# Requirements: Graphical Visualization in Execution History
+# Requirements: Resizable Properties Sidebar
 
 ## Overview
-Se requiere extender la funcionalidad de visualización de flujos para que sea accesible desde cualquier entrada del historial de ejecuciones, permitiendo ver el estado gráfico de nodos y conexiones para ejecuciones pasadas.
+Se requiere que la barra lateral derecha de propiedades en el editor de integraciones sea ajustable en ancho. Esto permitirá a los usuarios expandir el panel cuando trabajen con campos extensos (como el editor de código o payloads JSON) y contraerlo para maximizar el área de trabajo del canvas.
 
 ## Functional Requirements (FR)
-- [x] **FR-01: Icono de Lupa en Historial:** Cada fila de la tabla de historial en `ExecutionHistoryModal.vue` debe tener un icono de lupa (`search`).
-- [x] **FR-02: Visualización Gráfica Modal:** Al hacer clic en la lupa, se debe abrir el modal `FlowExecutionPopup.vue` cargando los datos específicos de esa ejecución (`execution_id`).
-- [x] **FR-03: Icono de Detalles:** El botón actual "Ver" debe ser reemplazado por un icono de "detalles" (ej: `description` o `assignment`).
-- [x] **FR-04: Persistencia de Contexto:** El modal de visualización debe recibir correctamente tanto el `execution_id` como el `flow_id` y `flowName` para asegurar que el diagrama y los logs coincidan.
+- [x] **FR-01: Tirador de Ajuste (Resize Handle):** Debe aparecer un borde interactivo en el margen izquierdo del panel de propiedades.
+- [x] **FR-02: Interacción de Arrastre (Drag-to-Resize):** El usuario debe poder hacer clic en el tirador, arrastrar horizontalmente y soltar para fijar el nuevo ancho.
+- [x] **FR-03: Límites de Tamaño:** El ancho debe tener un mínimo (ej: 250px) y un máximo (ej: 800px o 50% de la pantalla) para evitar romper la UI.
+- [x] **FR-04: Persistencia de Estado:** El ancho ajustado debe mantenerse mientras el usuario navega por diferentes nodos en la misma sesión del editor.
+- [x] **FR-05: Compatibilidad con Colapso:** La funcionalidad de resizable debe integrarse con el botón de colapsar actual, manteniendo el ancho personalizado al re-expandir.
 
 ## Technical Requirements (TR)
-- [x] **TR-01: Reutilización de `FlowExecutionPopup`:** Utilizar el componente existente sin crear duplicados.
-- [x] **TR-02: Manejo de Eventos:** Asegurar que el modal de historial (`ExecutionHistoryModal`) pueda emitir o manejar la apertura del popup de visualización.
-- [x] **TR-03: Estilado de Acciones:** Agrupar los iconos en la columna "Acciones" con espaciado consistente y feedback visual al hacer hover.
+- [x] **TR-01: Implementación en Vue 3:** Utilizar el `Composition API` y eventos globales de mouse en `FlowEditorCanvas.vue`.
+- [x] **TR-02: Estilo CSS:** Definir el tirador con feedback visual (cambio de cursor a `col-resize` y resaltado al hacer hover).
+- [x] **TR-03: Performance:** Asegurar que el redimensionado sea fluido (60fps) mediante el uso de `requestAnimationFrame` o optimización de reactividad.
 
 ## User Interface (UI)
-- [x] Icono Lupa: `search` (Material Symbols).
-- [x] Icono Detalles: `description` (Material Symbols).
-- [x] Botones de acción: Estilo `btn-icon` o similar para consistencia con el resto de la aplicación.
+- [x] **UI-01: Visual Handle:** Tirador: Línea sutil de 4px-6px en el borde izquierdo del panel derecho.
+- [x] **UI-02: Cursor:** Cursor: `col-resize`.
+- [x] **UI-03: Active State:** Color: Azul primario (`#2563eb`) o gris suave (`#e2e8f0`) al estar activo.
