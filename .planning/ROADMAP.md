@@ -1,45 +1,34 @@
-# Project Roadmap: Graphical Visualization in Execution History
+# Project Roadmap: Resizable Properties Sidebar
 
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1-19. Core & Early Milestones | 19/19 | Completed | 2026-05-16 |
-| 20. Execution History UI Refactor | 1/1 | In Progress | - |
-| 21. History to Graph Integration | 1/1 | Complete   | 2026-05-16 |
+| 1-21. Core & Early Milestones | 21/21 | Completed | 2026-05-16 |
+| 22. Sidebar Resizability Implementation | 0/2 | Pending | - |
 
 ---
 
-## Milestone: Graphical Visualization in Execution History
+## Milestone: Resizable Properties Sidebar
 
-### Phase 20: Execution History UI Refactor
-**Goal**: Refactor `ExecutionHistoryModal.vue` to use icons for actions and prepare the UI for graphical triggers.
-**Requirements**: FR-01, FR-03, UI
-**Status**: In Progress
-
-Plans:
-- [ ] 20-01-PLAN.md — Update `ExecutionHistoryModal.vue` template, styles, and add placeholder logic for graph view.
-
-### Phase 21: History to Graph Integration
-**Goal**: Integrate `FlowExecutionPopup.vue` trigger from the history table and ensure data consistency.
-**Requirements**: FR-02, FR-04, TR-01, TR-02
+### Phase 22: Sidebar Resizability Implementation
+**Goal**: Implement drag-to-resize functionality for the right properties panel in `FlowEditorCanvas.vue`.
+**Requirements**: FR-01, FR-02, FR-03, FR-04, FR-05, TR-01, TR-02, UI
 **Status**: Pending
 
-Plans:
-- [ ] 21-01-PLAN.md — Integrate `FlowExecutionPopup.vue` trigger and handle events in `IntegrationsView.vue`.
+**Plans:**
+- [ ] 22-01-PLAN.md — Core Resizing Logic (UI Handle + Mouse Events)
+- [ ] 22-02-PLAN.md — Constraints, Persistence & Compatibility
 
 ---
 
 ## Phase Details
 
-### Phase 20: Execution History UI Refactor
-- [x] Update table header and rows in `ExecutionHistoryModal.vue`.
-- [x] Replace "Ver" button with `description` icon.
-- [x] Add `search` (lupa) icon button.
-- [x] Style the action buttons for better UX.
-
-### Phase 21: History to Graph Integration
-- [ ] Implement `showGraph(execId)` logic in `ExecutionHistoryModal.vue`.
-- [ ] Ensure `FlowExecutionPopup.vue` is globally accessible or properly imported.
-- [ ] Pass `flowId` and `flowName` along with `executionId` to the popup.
-- [ ] Verify that historical data is correctly rendered in the canvas.
+### Phase 22: Sidebar Resizability Implementation
+- [x] Add state variables for `rightWidth` and `isResizingRight` in `FlowEditorCanvas.vue`.
+- [x] Add the resize handle element in the template.
+- [x] Implement `onResizeMousedown` to start tracking.
+- [x] Update `onGlobalMousemove` to calculate the new width based on cursor position.
+- [x] Update `onGlobalMouseup` to clean up the resizing state.
+- [x] Apply the dynamic width to the `.fec-right` element.
+- [x] Ensure compatibility with the collapsed state and different node types (JS Script wide mode).
