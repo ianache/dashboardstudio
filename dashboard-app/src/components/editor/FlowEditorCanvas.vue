@@ -469,7 +469,8 @@
     </aside>
 
     <!-- ── Execution Console (Bottom Panel) ────────────────────────────────── -->
-    <div v-if="showConsole" class="fec-bottom" :style="{ height: '240px' }">
+    <div v-if="showConsole" class="fec-bottom" :class="{ 'fec-bottom--resizing': isResizingBottom }" :style="{ height: bottomHeight + 'px' }">
+      <div class="fec-resizer-v" @mousedown.stop="onResizeBottomMousedown"></div>
       <ExecutionConsole 
         :logs="execLogs" 
         :status="execStatus" 
@@ -666,6 +667,8 @@ const leftCollapsed  = ref(false)
 const rightCollapsed = ref(false)
 const rightWidth     = ref(272)
 const isResizingRight = ref(false)
+const bottomHeight    = ref(240)
+const isResizingBottom = ref(false)
 const openCats       = ref(Object.fromEntries(Object.keys(CAT_META).map(k => [k, true])))
 const selectedNode   = ref(null)
 const selectedConn   = ref(null)
@@ -674,6 +677,10 @@ const hoveredConn    = ref(null)
 
 function onResizeMousedown(e) {
   isResizingRight.value = true
+}
+
+function onResizeBottomMousedown(e) {
+  isResizingBottom.value = true
 }
 
 const hasWideMode = computed(() => selectedNode.value && hasCodeProp(selectedNode.value.toolType))
@@ -940,6 +947,11 @@ function onGlobalMousemove(e) {
     rightWidth.value = Math.max(272, Math.min(newWidth, window.innerWidth * 0.5))
     return
   }
+  if (isResizingBottom.value) {
+    const newHeight = window.innerHeight - e.clientY
+    bottomHeight.value = Math.max(100, Math.min(newHeight, window.innerHeight * 0.8))
+    return
+  }
   if (isDraggingNode && draggedNode) {
     hasDragged = true
     const pos = getCanvasPos(e.clientX, e.clientY)
@@ -965,6 +977,7 @@ function onGlobalMousemove(e) {
 }
 function onGlobalMouseup() {
   isResizingRight.value = false
+  isResizingBottom.value = false
   isDraggingNode = false; draggedNode = null; nodeDragStart = null
   isPanning = false; panStart = null
   isDraggingFbar = false; fbarDragStart = null
@@ -1399,7 +1412,15 @@ onMounted(() => { setTimeout(fitView, 80) })
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 30;
   border-top: 1px solid #e2e8f0;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+  background: #fff;
 }
+.fec-bottom--resizing { transition: none !important; }
+
+.fec-resizer-v {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  cursor: row-resize; z-index: 50; transition: background 0.2s;
+}
+.fec-resizer-v:hover { background: rgba(37, 99, 235, 0.2); }
 
 /* Connection binding helpers */
 .fec-conn-hint   { font-size: 11px; color: #94a3b8; margin-top: 4px; }
