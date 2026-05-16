@@ -91,6 +91,12 @@ onMounted(async () => {
   padding: 40px;
 }
 
+@media (max-width: 768px) {
+  .fep-overlay {
+    padding: 10px;
+  }
+}
+
 .fep-modal {
   background: #fff; width: 100%; height: 100%; border-radius: 12px;
   display: flex; flex-direction: column; overflow: hidden;
@@ -101,10 +107,20 @@ onMounted(async () => {
   padding: 16px 24px; border-bottom: 1px solid #e2e8f0;
   display: flex; justify-content: space-between; align-items: center;
   background: #fff;
+  gap: 12px;
 }
 
-.fep-header-left { display: flex; align-items: center; gap: 16px; }
-.fep-title { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0; }
+@media (max-width: 640px) {
+  .fep-header {
+    padding: 12px 16px;
+  }
+}
+
+.fep-header-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.fep-title { 
+  font-size: 18px; font-weight: 700; color: #1e293b; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .fep-subtitle { font-size: 11px; color: #64748b; margin: 2px 0 0; font-family: monospace; }
 
 .fep-header-right { display: flex; align-items: center; gap: 16px; }
