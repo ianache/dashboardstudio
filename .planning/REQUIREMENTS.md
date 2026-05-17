@@ -180,10 +180,10 @@ Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usua
 
 ### UI/UX (EMAIL)
 
-- [ ] **EMAIL-21**: Node properties panel includes connection selector (SMTP DataSource)
-- [ ] **EMAIL-22**: Subject field is a text input with template support
-- [ ] **EMAIL-23**: Body field supports both text and HTML modes
-- [ ] **EMAIL-24**: Recipients, CC, BCC fields support comma-separated email lists
+- [x] **EMAIL-21**: Node properties panel includes connection selector (SMTP DataSource)
+- [x] **EMAIL-22**: Subject field is a text input with template support
+- [x] **EMAIL-23**: Body field supports both text and HTML modes
+- [x] **EMAIL-24**: Recipients, CC, BCC fields support comma-separated email lists
 
 ## v2 Requirements (Deferred)
 
@@ -235,10 +235,10 @@ Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usua
 | EMAIL-18 | Phase 32 | Pending |
 | EMAIL-19 | Phase 32 | Pending |
 | EMAIL-20 | Phase 32 | Pending |
-| EMAIL-21 | Phase 32 | Pending |
-| EMAIL-22 | Phase 32 | Pending |
-| EMAIL-23 | Phase 32 | Pending |
-| EMAIL-24 | Phase 32 | Pending |
+| EMAIL-21 | Phase 32 | Complete |
+| EMAIL-22 | Phase 32 | Complete |
+| EMAIL-23 | Phase 32 | Complete |
+| EMAIL-24 | Phase 32 | Complete |
 
 **Coverage:**
 - v1 requirements: 24 total

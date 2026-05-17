@@ -8,7 +8,7 @@
 | 29. Metadata Inspection API | 2/2 | Complete   | 2026-05-16 |
 | 30. ODS Node UI Enhancement | 1/1 | Complete | 2026-05-16 |
 | 31. ODS Execution Engine | 3/3 | Complete    | 2026-05-17 |
-| 32. Email Node Implementation | 2/3 | In Progress | 2026-05-16 |
+| 32. Email Node Implementation | 3/3 | Complete | 2026-05-17 |
 
 ---
 
@@ -137,13 +137,13 @@ Files: `backend/app/services/ods_executor.py`, `backend/app/services/destination
 ### Phase 32: Email Node Implementation
 **Goal**: Implementar el nodo Email con soporte para plantillas dinámicas usando Jinja2, permitiendo el envío de correos con contenido generado dinámicamente desde el input del flujo.
 **Requirements**: EMAIL-01 through EMAIL-24
-**Status**: In Progress (2/3 plans complete)
+**Status**: Complete (3/3 plans complete)
 **Plans**: 3 plans in 3 waves
 
 **Phase 32 Details:**
 - [x] 32-01-PLAN.md — Core Email Service (email_executor.py, email_schemas.py, Jinja2 integration) - **COMPLETE**
 - [x] 32-02-PLAN.md — Deno Integration (EXEC_EMAIL signal, runner.ts modifications, deno_service.py handler) - **COMPLETE**
-- [ ] 32-03-PLAN.md — UI & Testing (FlowEditorCanvas.vue updates, HTML sanitization, unit tests)
+- [x] 32-03-PLAN.md — UI & Testing (FlowEditorCanvas.vue updates, database migration, unit tests) - **COMPLETE**
 
 **Plan Structure:**
 
@@ -175,17 +175,18 @@ Files: `backend/app/runtime/runner.ts`, `backend/app/services/deno_service.py`
 - ✅ Stream results back through WebSocket (type: "email_result")
 - ✅ Template context from upstream nodes passed to executor
 
-**Plan 32-03: UI & Testing (Wave 3)**
+**Plan 32-03: UI & Testing (Wave 3)** - **COMPLETE**
 Requirements: EMAIL-21, EMAIL-22, EMAIL-23, EMAIL-24
 Depends: 32-02
+Completed: 2026-05-17
 Files: `backend/alembic/versions/032_add_email_tool.py`, `dashboard-app/src/components/editor/FlowEditorCanvas.vue`, `backend/tests/test_email_executor.py`
-- Create database migration for email node tool definition
-- Add connection selector for SMTP DataSource
-- Subject field with template support indicator
-- Body field supporting HTML and text modes
-- Recipients, CC, BCC fields with comma-separated email lists
-- Template syntax hints in UI
-- Comprehensive unit tests for template rendering, sanitization, and validation
+- ✅ Create database migration for email node tool definition (032_add_email_tool.py)
+- ✅ Add connection selector for SMTP DataSource (dynamic_select with /api/v1/data-sources?type=smtp)
+- ✅ Subject field with template support indicator
+- ✅ Body field supporting HTML and text modes (textarea with 10 rows)
+- ✅ Recipients, CC, BCC fields with comma-separated email lists
+- ✅ Template syntax hints in UI ({{variable}} and {% for %} indicators)
+- ✅ Comprehensive unit tests for template rendering, sanitization, and validation (26 tests passing)
 
 **Wave Structure:**
 - Wave 1: 32-01 — Core email service (no dependencies)
