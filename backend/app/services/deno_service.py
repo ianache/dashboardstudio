@@ -266,7 +266,7 @@ class DenoService:
                             
                             # Execute email operation if db session available
                             if db is not None:
-                                email_result = await self._handle_email_execution(email_payload, db)
+                                email_result = self._handle_email_execution(email_payload, db)
                                 
                                 # Yield result
                                 yield {
@@ -527,7 +527,7 @@ class DenoService:
                 "duration_ms": 0
             }
 
-    async def _handle_email_execution(
+    def _handle_email_execution(
         self, 
         payload: Dict[str, Any], 
         db: Any
@@ -554,8 +554,8 @@ class DenoService:
                 template_context=payload.get('template_context', {})
             )
             
-            # Execute email sending
-            result = await email_executor.execute(email_payload, db)
+            # Execute email sending (email_executor.execute is synchronous)
+            result = email_executor.execute(email_payload, db)
             
             return {
                 "success": result.success,
