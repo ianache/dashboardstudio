@@ -793,8 +793,13 @@ class ODSExecutor:
         
         Returns:
             Tuple of (sql_query, column_names_list)
+        
+        Raises:
+            ValueError: If columns is empty
         """
         column_list = list(columns)
+        if not column_list:
+            raise ValueError("Cannot build INSERT query with empty columns")
         quoted_schema = self._quote_identifier(config.schema)
         quoted_table = self._quote_identifier(config.table)
         quoted_columns = [self._quote_identifier(col) for col in column_list]
