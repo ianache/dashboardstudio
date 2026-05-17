@@ -37,7 +37,7 @@
 **Plan Structure:**
 - [x] 31-01-PLAN.md — Core ODSExecutor Service (ods_executor.py with Append, Overwrite, Upsert)
 - [x] 31-02-PLAN.md — Deno Integration & Signal Protocol (runner.ts, deno_service.py)
-- [ ] 31-03-PLAN.md — Validation, Testing & Hardening (validation, logging, tests, deprecation)
+- [x] 31-03-PLAN.md — Validation, Testing & Hardening (validation, logging, tests, deprecation)
 
 **Wave Structure:**
 - Wave 1: 31-01 — Core executor (no dependencies)
