@@ -36,11 +36,11 @@ Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usua
 
 ### Core Operations (EXEC)
 
-- [ ] **EXEC-01**: Executor can perform Append operations (INSERT without conflict checking)
-- [ ] **EXEC-02**: Executor can perform Overwrite operations (TRUNCATE + INSERT)
-- [ ] **EXEC-03**: Executor can perform Upsert operations (INSERT ON CONFLICT DO UPDATE)
-- [ ] **EXEC-04**: Upsert supports single and composite identity fields
-- [ ] **EXEC-05**: All operations support configurable batch sizes (default: 1000 rows)
+- [x] **EXEC-01**: Executor can perform Append operations (INSERT without conflict checking)
+- [x] **EXEC-02**: Executor can perform Overwrite operations (TRUNCATE + INSERT)
+- [x] **EXEC-03**: Executor can perform Upsert operations (INSERT ON CONFLICT DO UPDATE)
+- [x] **EXEC-04**: Upsert supports single and composite identity fields
+- [x] **EXEC-05**: All operations support configurable batch sizes (default: 1000 rows)
 
 ### Deno Integration (EXEC)
 
@@ -51,16 +51,16 @@ Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usua
 
 ### Data & Connection Management (EXEC)
 
-- [ ] **EXEC-10**: ODSExecutor resolves connection credentials from DataSource manager
-- [ ] **EXEC-11**: Connection pooling via asyncpg for concurrent operations
-- [ ] **EXEC-12**: Batch processing with per-batch transaction isolation
-- [ ] **EXEC-13**: Automatic retry with exponential backoff for connection/timeout errors
+- [x] **EXEC-10**: ODSExecutor resolves connection credentials from DataSource manager
+- [x] **EXEC-11**: Connection pooling via asyncpg for concurrent operations
+- [x] **EXEC-12**: Batch processing with per-batch transaction isolation
+- [x] **EXEC-13**: Automatic retry with exponential backoff for connection/timeout errors
 
 ### Error Handling & Logging (EXEC)
 
-- [ ] **EXEC-14**: Detailed error classification (Connection, UniqueViolation, FKViolation, TypeMismatch, Timeout)
-- [ ] **EXEC-15**: Row counts returned for all operations (inserted, updated, affected)
-- [ ] **EXEC-16**: Execution duration tracking per batch and total
+- [x] **EXEC-14**: Detailed error classification (Connection, UniqueViolation, FKViolation, TypeMismatch, Timeout)
+- [x] **EXEC-15**: Row counts returned for all operations (inserted, updated, affected)
+- [x] **EXEC-16**: Execution duration tracking per batch and total
 - [ ] **EXEC-17**: Errors logged to NodeExecutionLogs with batch context
 
 ### Validation & Safety (EXEC)
@@ -113,22 +113,22 @@ Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usua
 | TR-02 | Phase 30 | ✓ Complete |
 | TR-03 | Phase 30 | ✓ Complete |
 | TR-04 | Phase 31 | Pending |
-| EXEC-01 | Phase 31 | Pending |
-| EXEC-02 | Phase 31 | Pending |
-| EXEC-03 | Phase 31 | Pending |
-| EXEC-04 | Phase 31 | Pending |
-| EXEC-05 | Phase 31 | Pending |
+| EXEC-01 | Phase 31 | Complete |
+| EXEC-02 | Phase 31 | Complete |
+| EXEC-03 | Phase 31 | Complete |
+| EXEC-04 | Phase 31 | Complete |
+| EXEC-05 | Phase 31 | Complete |
 | EXEC-06 | Phase 31 | Pending |
 | EXEC-07 | Phase 31 | Pending |
 | EXEC-08 | Phase 31 | Pending |
 | EXEC-09 | Phase 31 | Pending |
-| EXEC-10 | Phase 31 | Pending |
-| EXEC-11 | Phase 31 | Pending |
-| EXEC-12 | Phase 31 | Pending |
-| EXEC-13 | Phase 31 | Pending |
-| EXEC-14 | Phase 31 | Pending |
-| EXEC-15 | Phase 31 | Pending |
-| EXEC-16 | Phase 31 | Pending |
+| EXEC-10 | Phase 31 | Complete |
+| EXEC-11 | Phase 31 | Complete |
+| EXEC-12 | Phase 31 | Complete |
+| EXEC-13 | Phase 31 | Complete |
+| EXEC-14 | Phase 31 | Complete |
+| EXEC-15 | Phase 31 | Complete |
+| EXEC-16 | Phase 31 | Complete |
 | EXEC-17 | Phase 31 | Pending |
 | EXEC-18 | Phase 31 | Pending |
 | EXEC-19 | Phase 31 | Pending |

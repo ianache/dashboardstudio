@@ -7,7 +7,7 @@
 | 1-28. Core & Extensions | 28/28 | Completed | 2026-05-17 |
 | 29. Metadata Inspection API | 2/2 | Complete   | 2026-05-16 |
 | 30. ODS Node UI Enhancement | 1/1 | Complete | 2026-05-16 |
-| 31. ODS Execution Engine | 0/1 | Pending | - |
+| 31. ODS Execution Engine | 1/3 | In Progress | 2026-05-17 |
 
 ---
 
@@ -35,7 +35,7 @@
 **Plans**: 3 plans in 3 waves
 
 **Plan Structure:**
-- [ ] 31-01-PLAN.md — Core ODSExecutor Service (ods_executor.py with Append, Overwrite, Upsert)
+- [x] 31-01-PLAN.md — Core ODSExecutor Service (ods_executor.py with Append, Overwrite, Upsert)
 - [ ] 31-02-PLAN.md — Deno Integration & Signal Protocol (runner.ts, deno_service.py)
 - [ ] 31-03-PLAN.md — Validation, Testing & Hardening (validation, logging, tests, deprecation)
 
