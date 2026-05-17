@@ -279,6 +279,8 @@ class NodeExecutionLogs(Base):
     duration = Column(Integer, nullable=True)
     input_data = Column(JSON, nullable=True)
     output_data = Column(JSON, nullable=True)
-    
+    error_message = Column(Text, nullable=True)
+    batch_context = Column(JSON, nullable=True)
+
     execution = relationship("ExecutionHistory", back_populates="node_logs")
 

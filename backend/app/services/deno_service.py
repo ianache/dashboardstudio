@@ -388,7 +388,16 @@ class DenoService:
             # Execute with connection
             conn = await asyncpg.connect(dsn=connection_string)
             try:
-                result = await ods_executor.execute(config, records, conn)
+                # Pass logging parameters for NodeExecutionLogs
+                execution_id = payload.get('metadata', {}).get('execution_id')
+                node_id = payload.get('node_id')
+                
+                result = await ods_executor.execute(
+                    config, records, conn,
+                    db=db,  # Pass db for logging
+                    execution_id=execution_id,
+                    node_id=node_id
+                )
                 
                 return {
                     "success": result.success,

@@ -390,11 +390,76 @@ class ODSExecutor:
             f"Upsert requires a unique index or primary key on the identity fields."
         )
     
+    async def _log_execution(
+        self,
+        execution_id: str,
+        node_id: str,
+        status: str,
+        result: ODSResult,
+        error_message: Optional[str] = None,
+        db: Any = None
+    ) -> None:
+        """
+        Log execution results to NodeExecutionLogs.
+        
+        Args:
+            execution_id: Flow execution ID
+            node_id: Node ID
+            status: success, error, partial_success
+            result: ODS execution result
+            error_message: Optional error summary
+            db: Database session for logging
+        """
+        if db is None:
+            return  # Can't log without db session
+        
+        try:
+            from datetime import datetime
+            from app.models.models import NodeExecutionLogs
+            
+            log_entry = NodeExecutionLogs(
+                execution_id=execution_id,
+                node_id=node_id,
+                status=status,
+                start_time=datetime.utcnow(),  # Approximate - should track actual start
+                end_time=datetime.utcnow(),
+                duration=result.duration_ms,
+                output_data={
+                    "rows_affected": result.rows_affected,
+                    "rows_inserted": result.rows_inserted,
+                    "rows_updated": result.rows_updated,
+                    "batches_total": result.batches_total,
+                    "batches_successful": result.batches_successful,
+                    "batches_failed": result.batches_failed
+                },
+                error_message=error_message,
+                batch_context={
+                    "errors": [
+                        {
+                            "batch": e.batch_number,
+                            "type": e.error_type,
+                            "message": e.message
+                        }
+                        for e in result.errors
+                    ]
+                }
+            )
+            
+            db.add(log_entry)
+            db.commit()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to log execution: {e}")
+            # Don't raise - logging failure shouldn't fail the operation
+    
     async def execute(
         self,
         config: ODSConfig,
         records: List[Dict[str, Any]],
-        connection: asyncpg.Connection
+        connection: asyncpg.Connection,
+        db: Any = None,
+        execution_id: Optional[str] = None,
+        node_id: Optional[str] = None
     ) -> ODSResult:
         """Execute the configured ODS operation on the provided records.
         
@@ -495,6 +560,18 @@ class ODSExecutor:
             f"rows_affected={result.rows_affected}, "
             f"batches={result.batches_successful}/{result.batches_total}, "
             f"duration={result.duration_ms}ms"
+        )
+        
+        # Log execution results to NodeExecutionLogs
+        status = 'success' if result.complete_success else ('partial_success' if result.success else 'error')
+        error_msg = result.errors[0].message if result.errors else None
+        await self._log_execution(
+            execution_id=execution_id or 'unknown',
+            node_id=node_id or 'unknown',
+            status=status,
+            result=result,
+            error_message=error_msg,
+            db=db
         )
         
         return result
