@@ -3,22 +3,22 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Email Node with Dynamic Templates
 current_phase: 32
-current_plan: 02
+current_plan: 03
 status: In Progress
-last_updated: "2026-05-16T23:35:00Z"
+last_updated: "2026-05-16T23:50:00Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State: Email Node with Dynamic Templates
 
 - **Status:** In Progress
 - **Current Phase:** Phase 32: Email Node Implementation
-- **Current Plan:** Plan 02 - Email Signal Integration
-- **Last Action:** Completed Plan 01 - Core Email Service with Jinja2 templating
+- **Current Plan:** Plan 03 - UI Integration
+- **Last Action:** Completed Plan 02 - EXEC_EMAIL signal integration
 
 ## Workflow Status
 - [x] Config defined
@@ -26,10 +26,10 @@ progress:
 - [x] Research completed
 - [x] Requirements finalized
 - [x] Roadmap structured
-- [~] Execution in progress (1/3 plans complete)
+- [~] Execution in progress (2/3 plans complete)
 
 ## Milestone: v1.7 Email Node with Dynamic Templates
-- [~] Phase 32: Email Node Implementation (Plan 1/3 complete)
+- [~] Phase 32: Email Node Implementation (Plan 2/3 complete)
 
 ## Accumulated Context
 ### Milestone Goals
@@ -54,6 +54,9 @@ progress:
 - **Integration Pattern:** Similar a nodos existentes (connection_id, propiedades configurables)
 - **HTML Sanitization:** nh3 library (replacing deprecated bleach)
 - **XSS Prevention:** Jinja2 auto-escaping enabled by default
+- **Signal Pattern:** EXEC_EMAIL follows EXEC_ODS pattern for architectural consistency
+- **Template Resolution:** Template strings resolved in Deno runner before payload construction
+- **Execution Model:** _handle_email_execution is synchronous (email_executor.execute blocks on SMTP)
 
 ### Project Reference
 

@@ -8,7 +8,7 @@
 | 29. Metadata Inspection API | 2/2 | Complete   | 2026-05-16 |
 | 30. ODS Node UI Enhancement | 1/1 | Complete | 2026-05-16 |
 | 31. ODS Execution Engine | 3/3 | Complete    | 2026-05-17 |
-| 32. Email Node Implementation | 1/3 | In Progress | 2026-05-16 |
+| 32. Email Node Implementation | 2/3 | In Progress | 2026-05-16 |
 
 ---
 
@@ -137,12 +137,12 @@ Files: `backend/app/services/ods_executor.py`, `backend/app/services/destination
 ### Phase 32: Email Node Implementation
 **Goal**: Implementar el nodo Email con soporte para plantillas dinámicas usando Jinja2, permitiendo el envío de correos con contenido generado dinámicamente desde el input del flujo.
 **Requirements**: EMAIL-01 through EMAIL-24
-**Status**: In Progress (1/3 plans complete)
+**Status**: In Progress (2/3 plans complete)
 **Plans**: 3 plans in 3 waves
 
 **Phase 32 Details:**
 - [x] 32-01-PLAN.md — Core Email Service (email_executor.py, email_schemas.py, Jinja2 integration) - **COMPLETE**
-- [ ] 32-02-PLAN.md — Deno Integration (EXEC_EMAIL signal, runner.ts modifications, deno_service.py handler)
+- [x] 32-02-PLAN.md — Deno Integration (EXEC_EMAIL signal, runner.ts modifications, deno_service.py handler) - **COMPLETE**
 - [ ] 32-03-PLAN.md — UI & Testing (FlowEditorCanvas.vue updates, HTML sanitization, unit tests)
 
 **Plan Structure:**
@@ -161,18 +161,19 @@ Files: `backend/app/services/email_schemas.py`, `backend/app/services/email_exec
 - ✅ Clear error messages for template syntax errors
 - ✅ Comprehensive unit tests (44 tests passing)
 
-**Plan 32-02: Deno Integration (Wave 2)**
+**Plan 32-02: Deno Integration (Wave 2)** - **COMPLETE**
 Requirements: EMAIL-10, EMAIL-11, EMAIL-12, EMAIL-13, EMAIL-14
 Depends: 32-01
+Completed: 2026-05-16
 Files: `backend/app/runtime/runner.ts`, `backend/app/services/deno_service.py`
-- Modify runner.ts to emit EXEC_EMAIL signal when encountering email nodes
-- EXEC_EMAIL payload includes: connection_id, recipients, subject_template, body_template, template_context
-- Modify deno_service.py to intercept EXEC_EMAIL signals
-- Parse EXEC_EMAIL header and EXEC_EMAIL_PAYLOAD JSON
-- Resolve SMTP credentials via DataSource service
-- Delegate execution to EmailExecutor
-- Stream results back through WebSocket (type: "email_result")
-- Template context from upstream nodes passed to executor
+- ✅ Modify runner.ts to emit EXEC_EMAIL signal when encountering email nodes
+- ✅ EXEC_EMAIL payload includes: connection_id, recipients, subject_template, body_template, template_context
+- ✅ Modify deno_service.py to intercept EXEC_EMAIL signals
+- ✅ Parse EXEC_EMAIL header and EXEC_EMAIL_PAYLOAD JSON
+- ✅ Resolve SMTP credentials via DataSource service
+- ✅ Delegate execution to EmailExecutor
+- ✅ Stream results back through WebSocket (type: "email_result")
+- ✅ Template context from upstream nodes passed to executor
 
 **Plan 32-03: UI & Testing (Wave 3)**
 Requirements: EMAIL-21, EMAIL-22, EMAIL-23, EMAIL-24

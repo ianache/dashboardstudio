@@ -141,5 +141,110 @@ Este hito se enfoca en mejorar el nodo "ODS PostgreSQL" para permitir a los usua
 - Unmapped: 0 ✓
 
 ---
+
+# Requirements: Email Node with Dynamic Templates (Milestone v1.7)
+
+**Defined:** 2026-05-17
+**Core Value:** User can send emails from integration flows with dynamic content generated from templates and input data
+
+## v1 Requirements
+
+### Core Functionality (EMAIL)
+
+- [ ] **EMAIL-01**: Email node can send emails using SMTP connections from DataSource
+- [ ] **EMAIL-02**: User can configure recipient(s), CC, BCC email addresses
+- [ ] **EMAIL-03**: Subject field supports template syntax with {{expression}} markers
+- [ ] **EMAIL-04**: Body field supports template syntax with {{expression}} markers
+- [ ] **EMAIL-05**: Body can be either plain text or HTML format
+- [ ] **EMAIL-06**: Template engine supports nested object access ({{user.profile.name}})
+- [ ] **EMAIL-07**: Template engine supports iteration with {% for %} for table/list generation
+- [ ] **EMAIL-08**: Template engine supports conditionals with {% if %}/{% else %}
+- [ ] **EMAIL-09**: Variables are auto-escaped by default for XSS prevention
+- [x] **EMAIL-10**: Input data from upstream nodes is available as template context
+
+### Integration (EMAIL)
+
+- [x] **EMAIL-11**: Deno runner emits EXEC_EMAIL signal when encountering email node
+- [x] **EMAIL-12**: EXEC_EMAIL payload includes connection_id, recipients, subject_template, body_template
+- [x] **EMAIL-13**: Python EmailExecutor renders templates and sends via SMTP
+- [x] **EMAIL-14**: Execution results flow back through WebSocket to UI
+- [ ] **EMAIL-15**: Email addresses are validated before sending
+
+### Security & Validation (EMAIL)
+
+- [ ] **EMAIL-16**: Templates use SandboxedEnvironment to prevent code injection
+- [ ] **EMAIL-17**: HTML body is sanitized with nh3 to remove dangerous tags
+- [ ] **EMAIL-18**: SMTP credentials are resolved from encrypted DataSource
+- [ ] **EMAIL-19**: Invalid template syntax produces clear error messages
+- [ ] **EMAIL-20**: Missing template variables can be configured to fail or render empty
+
+### UI/UX (EMAIL)
+
+- [ ] **EMAIL-21**: Node properties panel includes connection selector (SMTP DataSource)
+- [ ] **EMAIL-22**: Subject field is a text input with template support
+- [ ] **EMAIL-23**: Body field supports both text and HTML modes
+- [ ] **EMAIL-24**: Recipients, CC, BCC fields support comma-separated email lists
+
+## v2 Requirements (Deferred)
+
+### Enhanced Templating
+
+- **EMAIL-25**: Built-in filters for date/number formatting
+- **EMAIL-26**: Custom helper functions for common operations
+- **EMAIL-27**: Template preview mode in UI
+- **EMAIL-28**: MJML integration for responsive email templates
+
+### Advanced Features
+
+- **EMAIL-29**: Attachment support with template-based filenames
+- **EMAIL-30**: Inline image embedding
+- **EMAIL-31**: Email queuing for high-volume sends
+- **EMAIL-32**: Delivery tracking and bounce handling
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Custom SMTP library | Python smtplib is sufficient, DataSource handles connection mgmt |
+| Rich text editor (Quill, etc.) | Plain textarea with HTML syntax highlighting sufficient for v1 |
+| Email scheduling | Already covered by Background Scheduler milestone (cron) |
+| Email threading/conversations | Complex state management, not core to integration flows |
+| Advanced template inheritance | Adds complexity, loops/conditionals sufficient for v1 |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| EMAIL-01 | Phase 32 | Pending |
+| EMAIL-02 | Phase 32 | Pending |
+| EMAIL-03 | Phase 32 | Pending |
+| EMAIL-04 | Phase 32 | Pending |
+| EMAIL-05 | Phase 32 | Pending |
+| EMAIL-06 | Phase 32 | Pending |
+| EMAIL-07 | Phase 32 | Pending |
+| EMAIL-08 | Phase 32 | Pending |
+| EMAIL-09 | Phase 32 | Pending |
+| EMAIL-10 | Phase 32 | Complete |
+| EMAIL-11 | Phase 32 | Complete |
+| EMAIL-12 | Phase 32 | Complete |
+| EMAIL-13 | Phase 32 | Complete |
+| EMAIL-14 | Phase 32 | Complete |
+| EMAIL-15 | Phase 32 | Pending |
+| EMAIL-16 | Phase 32 | Pending |
+| EMAIL-17 | Phase 32 | Pending |
+| EMAIL-18 | Phase 32 | Pending |
+| EMAIL-19 | Phase 32 | Pending |
+| EMAIL-20 | Phase 32 | Pending |
+| EMAIL-21 | Phase 32 | Pending |
+| EMAIL-22 | Phase 32 | Pending |
+| EMAIL-23 | Phase 32 | Pending |
+| EMAIL-24 | Phase 32 | Pending |
+
+**Coverage:**
+- v1 requirements: 24 total
+- Mapped to Phase 32: 24
+- Unmapped: 0 ✓
+
+---
 *Requirements defined: 2026-05-17*
 *Last updated: 2026-05-17 after research synthesis*
