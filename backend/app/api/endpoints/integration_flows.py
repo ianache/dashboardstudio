@@ -68,6 +68,24 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
             await websocket.send_json({"type": "status", "success": False, "exit_code": 1})
             return
 
+        # Pre-create execution history record so that nested logs (like node_execution_logs)
+        # can safely reference it without violating foreign key constraints.
+        exec_id = 'exec-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
+        logger.info(f"Pre-creating execution history {exec_id} in database")
+        try:
+            execution = models.ExecutionHistory(
+                id=exec_id,
+                flow_id=flow_id,
+                status="running",
+                start_time=datetime.utcnow(),
+                duration=0
+            )
+            db.add(execution)
+            db.commit()
+        except Exception as db_err:
+            logger.error(f"Failed to pre-create execution history: {str(db_err)}")
+            db.rollback()
+
         logger.info(f"WebSocket flow {flow_id}: Starting Deno stream")
         start_time = datetime.utcnow()
         all_logs = []
@@ -76,7 +94,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
         success = False
 
         log_count = 0
-        async for log in deno_service.run_flow_stream(flow_data, payload, db=db):
+        async for log in deno_service.run_flow_stream(flow_data, payload, db=db, execution_id=exec_id):
             log_count += 1
             await websocket.send_json(log)
             
@@ -93,29 +111,23 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
         end_time = datetime.utcnow()
         duration_ms = int((end_time - start_time).total_seconds() * 1000)
 
-        # Save to history
+        # Update execution history with final results
         try:
-            exec_id = 'exec-' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
-            logger.info(f"Saving execution {exec_id} to history")
-            
-            execution = models.ExecutionHistory(
-                id=exec_id,
-                flow_id=flow_id,
-                status="success" if success else "error",
-                start_time=start_time,
-                end_time=end_time,
-                duration=duration_ms
-            )
-            db.add(execution)
+            logger.info(f"Updating execution {exec_id} in history")
+            execution_record = db.query(models.ExecutionHistory).filter(models.ExecutionHistory.id == exec_id).first()
+            if execution_record:
+                execution_record.status = "success" if success else "error"
+                execution_record.end_time = end_time
+                execution_record.duration = duration_ms
             
             for nl in node_logs:
                 db_nl = models.NodeExecutionLogs(
                     execution_id=exec_id,
-                    node_id=nl["node_id"],
-                    status=nl["status"],
-                    input_data=nl["input"],
-                    output_data=nl["output"],
-                    duration=nl["duration"],
+                    node_id=nl.get("node_id"),
+                    status=nl.get("status"),
+                    input_data=nl.get("input"),
+                    output_data=nl.get("output"),
+                    duration=nl.get("duration"),
                     start_time=nl.get("start_time"),
                     end_time=nl.get("end_time")
                 )
@@ -125,10 +137,9 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
             flow.last_run = start_time
             flow.last_run_success = success
             db.commit()
-            logger.info(f"Execution {exec_id} saved successfully")
+            logger.info(f"Execution {exec_id} updated successfully")
         except Exception as db_err:
-            logger.error(f"Failed to save execution history: {str(db_err)}")
-            # Don't fail the WebSocket if only DB history fails
+            logger.error(f"Failed to update execution history: {str(db_err)}")
             db.rollback()
 
         # Small delay so the browser can process the final 'status' message

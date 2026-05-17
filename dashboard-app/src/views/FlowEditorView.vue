@@ -21,7 +21,7 @@
         <button
           class="fe-tbr-btn fe-tbr-btn--run"
           :disabled="loading || canvasRef?.execStatus === 'running'"
-          @click="canvasRef?.runFlow()"
+          @click="handleRunFlow()"
           :title="canvasRef?.execStatus === 'running' ? 'Ejecutando...' : 'Ejecutar Flujo'">
           <span class="msi" :class="{ 'spin': canvasRef?.execStatus === 'running' }">
             {{ canvasRef?.execStatus === 'running' ? 'sync' : 'play_arrow' }}
@@ -194,6 +194,18 @@ async function handleSave() {
   } catch (err) {
     uiStore.addAlert({ type: 'error', message: 'Error al guardar: ' + err.message })
   }
+}
+
+async function handleRunFlow() {
+  if (isDirty.value) {
+    try {
+      await doSave()
+    } catch (err) {
+      uiStore.addAlert({ type: 'error', message: 'No se pudo guardar el diagrama antes de ejecutar: ' + err.message })
+      return
+    }
+  }
+  canvasRef.value?.runFlow()
 }
 
 

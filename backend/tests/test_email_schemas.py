@@ -111,6 +111,26 @@ class TestEmailPayload:
         )
         assert payload.template_context == context
 
+    def test_email_payload_with_list_context_preprocessing(self):
+        """Should handle template_context when preprocessed as a list."""
+        list_context = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+        wrapped_context = {
+            "records": list_context,
+            "payload": list_context
+        }
+        if len(list_context) > 0 and isinstance(list_context[0], dict):
+            wrapped_context.update({f"first_{k}": v for k, v in list_context[0].items()})
+        
+        payload = EmailPayload(
+            node_id="node-123",
+            target={"connection_id": "conn-456", "to": "user@example.com"},
+            content=EmailContent(subject="Hello", body="World"),
+            metadata={"execution_id": "exec-789", "flow_id": "flow-abc", "timestamp": "2026-01-15T10:00:00Z"},
+            template_context=wrapped_context,
+        )
+        assert payload.template_context["records"] == list_context
+        assert payload.template_context["first_name"] == "Alice"
+
 
 class TestEmailResult:
     """Test EmailResult model validation."""

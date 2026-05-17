@@ -410,12 +410,17 @@ class ODSExecutor:
             error_message: Optional error summary
             db: Database session for logging
         """
-        if db is None:
-            return  # Can't log without db session
-        
+        if db is None or not execution_id or execution_id == 'unknown':
+            return  # Can't log without db session or actual execution id
+
         try:
+            from app.models.models import ExecutionHistory, NodeExecutionLogs
+            exists = db.query(ExecutionHistory).filter(ExecutionHistory.id == execution_id).first()
+            if not exists:
+                self.logger.warning(f"Execution {execution_id} not found in database. Skipping log.")
+                return
+
             from datetime import datetime
-            from app.models.models import NodeExecutionLogs
             
             log_entry = NodeExecutionLogs(
                 execution_id=execution_id,

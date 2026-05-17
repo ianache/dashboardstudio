@@ -68,7 +68,7 @@ async def _execute_postgres(props: Dict, label: str) -> Dict:
     user = props.get("username", "")
     password = props.get("password", "")
     database = props.get("database", "")
-    schema = props.get("schema", "public")
+    schema = props.get("schema") or "public"
     table = props.get("table", "")
     custom_query = props.get("query", "").strip()
 
@@ -168,11 +168,26 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
                 
                 if not node.get("props"):
                     node["props"] = {}
+                
+                # Capture custom schema if specified in node props
+                custom_schema = str(node["props"].get("schema", "") or "").strip()
+                
                 for cfg_key in ["host", "port", "username", "password", "database", "schema", "url", "email", "api_key", "token", "token_url", "client_id", "client_secret"]:
                     if cfg_key in resolved_cfg:
                         node["props"][cfg_key] = resolved_cfg[cfg_key]
                 if ds.type:
                     node["props"]["connection_type"] = ds.type
+                
+                # Resolve schema hierarchically: Node Value > Connection Value > default
+                conn_type = (node["props"].get("connection_type") or ds.type or "").lower()
+                if custom_schema:
+                    node["props"]["schema"] = custom_schema
+                elif not node["props"].get("schema"):
+                    if conn_type in POSTGRES_TYPES:
+                        node["props"]["schema"] = "public"
+                    else:
+                        node["props"]["schema"] = ""
+                        
                 logger.info(f"[SourceExec] Credenciales resueltas desde DataSource '{ds.name}' para nodo {node['id']}")
 
         # Now decide if we pre-execute

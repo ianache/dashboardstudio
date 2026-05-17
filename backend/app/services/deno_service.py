@@ -543,15 +543,32 @@ class DenoService:
             Dict with execution results
         """
         logger.info(f"Handling EXEC_EMAIL for node {payload.get('node_id')}")
-        
         try:
+            template_context = payload.get('template_context')
+            if isinstance(template_context, list):
+                wrapped_context = {
+                    "records": template_context,
+                    "payload": template_context
+                }
+                # Unpack first element if list contains dictionaries
+                if len(template_context) == 1 and isinstance(template_context[0], dict):
+                    wrapped_context.update(template_context[0])
+                elif len(template_context) > 0 and isinstance(template_context[0], dict):
+                    wrapped_context.update({f"first_{k}": v for k, v in template_context[0].items()})
+                template_context = wrapped_context
+            elif not isinstance(template_context, dict):
+                template_context = {"payload": template_context}
+            else:
+                # Ensure it's not None
+                template_context = template_context or {}
+
             # Parse EmailPayload from dict
             email_payload = EmailPayload(
                 node_id=payload['node_id'],
                 target=payload['target'],
                 content=payload['content'],
                 metadata=payload['metadata'],
-                template_context=payload.get('template_context', {})
+                template_context=template_context
             )
             
             # Execute email sending (email_executor.execute is synchronous)

@@ -1,387 +1,394 @@
-# Technology Stack: ODS Execution Engine
+# Technology Stack: Email Node with Dynamic Templates
 
-**Project:** Dashboard Studio - ODS Execution Engine  
+**Project:** Dashboard Studio - Email Node Implementation  
+**Milestone:** v1.7 Email Node with Dynamic Templates  
 **Researched:** 2026-05-16  
-**Confidence:** HIGH  
+**Confidence:** HIGH
 
 ## Executive Summary
 
-The ODS Execution Engine requires additional Python libraries for efficient PostgreSQL bulk operations and SCD2 (Slowly Changing Dimensions Type 2) support. The existing stack already includes `asyncpg` which is well-suited for the task. No new major dependencies are required - the focus is on utilizing existing libraries more effectively and adding SCD2-specific SQL patterns.
+This document outlines the recommended technology stack additions for implementing an Email Node with dynamic templating support in the existing Dashboard Studio application. The stack builds upon the existing FastAPI backend and DataSource infrastructure (which already supports SMTP connections), adding minimal, well-established libraries for email composition, template rendering, and HTML sanitization.
 
-**Key Decision:** Continue using `asyncpg` (already in dependencies) for all PostgreSQL operations due to its superior async performance and native PostgreSQL protocol implementation. Add `psycopg[binary]` (v3) as a secondary option for COPY operations if needed.
+**Key Decision:** Use standard library `smtplib` + `email.mime` for SMTP (since DataSource already manages connections), Jinja2 with SandboxedEnvironment for templating, and `nh3` for HTML sanitization.
 
 ---
 
-## Recommended Stack Additions
+## Recommended Stack
 
-### Core PostgreSQL Driver (No Change Required)
+### 1. SMTP & Email Composition
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| **asyncpg** | ^0.30.0 | Async PostgreSQL driver | Already in stack; fastest Python PostgreSQL driver; native protocol implementation; excellent for bulk operations via `executemany()` |
-| **psycopg** | ^3.2.0 | Alternative PostgreSQL driver | Consider adding for COPY operations if `COPY FROM` performance becomes critical; has superior COPY API |
+| `smtplib` | Python stdlib | SMTP protocol client | Already available; battle-tested; integrates seamlessly with existing DataSource SMTP connections |
+| `email.mime` | Python stdlib | MIME message construction | Standard library; supports multipart messages (HTML + text); attachments |
+| `aiosmtplib` | ^3.0.0 | Async SMTP (optional upgrade) | Only if async email sending becomes a requirement; otherwise smtplib is sufficient |
 
 **Decision Rationale:**
-- `asyncpg` is already integrated (v0.29.0 in pyproject.toml)
-- Upgrade to v0.30.0 recommended for latest bug fixes and Python 3.13 support
-- Keep `psycopg2-binary` for existing SQLAlchemy sync operations but consider migrating to `psycopg` v3 for new code
-- `asyncpg` outperforms psycopg2 by 2-5x for bulk inserts
 
-### Batch Processing Libraries
+The Connection Management milestone already implemented SMTP DataSource support with connection pooling and credential management. Using `smtplib` directly is the simplest integration path:
 
-| Technology | Version | Purpose | When to Use |
-|------------|---------|---------|-------------|
-| **pandas** | ^2.2.0 | Data manipulation for SCD2 | Required for SCD2 merge operations; efficient column-wise operations |
-| **numpy** | ^2.0.0 | Numerical operations | Comes with pandas; used for efficient data transformations |
+1. **No additional dependencies** - smtplib is part of Python standard library
+2. **Direct DataSource integration** - The existing DataSource system retrieves SMTP credentials; smtplib can use them directly
+3. **Synchronous execution fits the flow runner** - The Python flow runner with APScheduler executes nodes synchronously
+4. **Proven reliability** - smtplib has been part of Python since 1999 and handles all modern SMTP requirements (STARTTLS, AUTH, UTF-8)
 
-**Decision Rationale:**
-- Pandas provides efficient DataFrame operations needed for SCD2 logic (hash comparisons, date range management)
-- For simple Append/Overwrite/Upsert operations, pandas is optional - pure asyncpg is sufficient
-- SCD2 requires detecting changes between incoming and existing data - pandas simplifies this
+**When to consider `aiosmtplib`:**
+- If the flow runner is refactored to async/await
+- If bulk email sending (1000s of emails) becomes a requirement
+- If non-blocking email sending during flow execution is needed
 
-### Connection Pooling
+### 2. Template Engines
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| **asyncpg.Pool** | Built-in | Connection pooling | Native to asyncpg; production-ready; automatic reconnection |
+| `Jinja2` | ^3.1.6 | Primary template engine | Industry standard; SandboxedEnvironment for security; rich feature set; excellent for complex templates with loops/conditionals |
+| `chevron` | ^0.14.0 | Mustache syntax alternative | If strict `{{variable}}` Mustache compatibility is required; lighter weight; logic-less templates |
 
 **Decision Rationale:**
-- No additional pooling library needed (asyncpg has built-in pool)
-- Use `asyncpg.create_pool()` for ODS operations to handle concurrent batch processing
+
+**Jinja2 is the primary recommendation** for the following reasons:
+
+1. **Rich expression support** - Handles complex scenarios like:
+   - Array iteration for table generation: `{% for row in data %}`
+   - Conditionals: `{% if user.is_active %}`
+   - Filters: `{{ name \| title }}`, `{{ date \| format_date }}`
+   - Custom functions for data transformation
+
+2. **Security with SandboxedEnvironment** - Prevents code execution:
+   ```python
+   from jinja2.sandbox import SandboxedEnvironment
+   env = SandboxedEnvironment()
+   template = env.from_string("{{ user.name }}")
+   ```
+
+3. **Familiar syntax** - The `{{expression}}` syntax requested in the milestone is native to Jinja2
+
+4. **Wide adoption** - Used by Flask, Ansible, SaltStack; extensive documentation and community
+
+**Alternative: Chevron (Mustache)**
+- Use if templates should be strictly logic-less (no conditionals/loops in templates)
+- Simpler mental model for non-technical users
+- Less powerful for complex table generation from arrays
+
+**Template Syntax Comparison:**
+
+| Feature | Jinja2 | Chevron (Mustache) |
+|---------|--------|-------------------|
+| Variables | `{{ user.name }}` | `{{ user.name }}` |
+| Loops | `{% for item in items %}` | `{{#items}}` |
+| Conditionals | `{% if condition %}` | Not supported |
+| Filters | `{{ name \| upper }}` | Not supported |
+| Partials | `{% include 'partial' %}` | `{{> partial}}` |
+
+### 3. HTML Sanitization
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `nh3` | ^0.3.5 | HTML sanitization | 20x faster than bleach; actively maintained; Rust-based; strict allow-list approach |
+
+**Decision Rationale:**
+
+**nh3 replaces the deprecated `bleach` library** (officially deprecated as of January 2023). Key advantages:
+
+1. **Performance** - ~20x faster than bleach in benchmarks
+2. **Security** - Rust-based ammonia library under the hood; memory-safe
+3. **Active maintenance** - Regular releases (latest: April 2026)
+4. **Flexible allow-list configuration**:
+   ```python
+   import nh3
+   # Allow only safe email-friendly tags
+   clean_html = nh3.clean(
+       raw_html,
+       tags={"p", "br", "strong", "em", "a", "ul", "ol", "li", "table", "tr", "td", "th"},
+       attributes={"a": {"href"}, "*": {"class"}},
+       url_schemes={"https", "http", "mailto"}
+   )
+   ```
+
+**Security considerations:**
+- Always sanitize HTML body content before sending
+- Prevent XSS in email clients that execute JavaScript
+- Strip potentially dangerous attributes (onerror, onclick, etc.)
+
+### 4. Integration Libraries
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `fastapi-mail` | ^1.6.4 | FastAPI integration (optional) | Only if refactoring to use a higher-level abstraction; currently not needed |
+
+**Decision:** Skip `fastapi-mail` for now. The existing DataSource + smtplib approach is simpler and sufficient. Consider `fastapi-mail` only if:
+- Email sending needs to happen outside the flow runner (direct API endpoints)
+- Built-in template rendering with Jinja2 integration is desired
+- Connection pooling at the email library level becomes necessary
 
 ---
 
-## Integration Patterns
+## Installation
 
-### Deno-to-PPython Communication
-
-Based on existing codebase analysis (`deno_service.py`, `destination_executor.py`):
-
-```
-┌─────────────┐     EXECUTE_FLOW      ┌─────────────────┐
-│   Deno      │ ────────────────────► │  Python         │
-│  Runner     │   (subprocess)        │  ODSExecutor    │
-│             │                       │                 │
-│  • Executes │◄──────────────────────│  • Receives     │
-│    flow     │   NODE_LOG_JSON       │    JSON payload │
-│  • Detects  │   signals             │  • Processes    │
-│    ods_pg   │                       │    batches      │
-│    nodes    │◄──────────────────────│  • Returns      │
-│             │   progress updates    │    status       │
-└─────────────┘                       └─────────────────┘
-```
-
-**Current Pattern (from `deno_service.py`):**
-
-1. Deno runner executes flow via subprocess (`run_flow_stream`)
-2. Python pre-executes source nodes before Deno (`source_executor.py`)
-3. Python post-executes destination nodes after Deno (`destination_executor.py`)
-4. Communication via stdout/stderr with prefixed messages:
-   - `NODE_STATUS:node_id:status`
-   - `NODE_LOG_JSON:{...}`
-   - `FINAL_RESULT:{...}`
-
-**Recommended Extension for ODS:**
-
-Add new signal pattern for real-time ODS delegation:
-
-```
-EXEC_ODS:{
-  "node_id": "...",
-  "connection_config": {...},
-  "operation": "upsert|append|overwrite|merge",
-  "data": [...],
-  "identity_fields": [...],
-  "batch_size": 1000
-}
-```
-
-Python side receives via stdin or websocket and streams back progress:
-```
-ODS_PROGRESS:node_id:batch_num:rows_processed
-ODS_COMPLETE:node_id:total_rows
-ODS_ERROR:node_id:error_message
-```
-
-### Batch Processing Strategy
-
-**For Append/Overwrite Operations:**
-
-```python
-# Using asyncpg executemany (fastest)
-async def batch_append(conn, table, columns, records, batch_size=1000):
-    query = f'INSERT INTO {table} ({cols}) VALUES ({placeholders})'
-    
-    for i in range(0, len(records), batch_size):
-        batch = records[i:i + batch_size]
-        values = [[r[c] for c in columns] for r in batch]
-        await conn.executemany(query, values)
-        yield len(batch)  # Progress update
-```
-
-**For Upsert with Multiple Identity Fields:**
-
-```python
-# Using ON CONFLICT with composite keys
-conflict_cols = ", ".join(f'"{c}"' for c in identity_fields)
-update_cols = ", ".join(f'"{c}" = EXCLUDED."{c}"' for c in columns if c not in identity_fields)
-
-query = f'''
-    INSERT INTO "{schema}"."{table}" ({cols_quoted}) 
-    VALUES ({placeholders}) 
-    ON CONFLICT ({conflict_cols}) 
-    DO UPDATE SET {update_cols}
-'''
-await conn.executemany(query, vals)
-```
-
-**For SCD2 Merge:**
-
-```python
-# Requires multiple steps:
-# 1. Identify existing active records
-# 2. Hash compare with incoming data
-# 3. Close expired records (set end_date)
-# 4. Insert new records with start_date
-
-# Pandas approach for change detection:
-import pandas as pd
-
-existing_df = await fetch_active_records(conn, table, identity_fields)
-incoming_df = pd.DataFrame(records)
-
-# Detect changes
-merged = incoming_df.merge(
-    existing_df, 
-    on=identity_fields, 
-    how='left', 
-    suffixes=('', '_existing')
-)
-
-# Hash comparison for non-key fields
-changes = merged[merged['hash'] != merged['hash_existing']]
-```
-
----
-
-## Architecture Recommendations
-
-### File Structure
-
-```
-backend/app/services/
-├── ods_executor.py          # Main entry point for ODS operations
-├── ods_operations.py        # Operation implementations (Append, Overwrite, Upsert, Merge)
-├── scd2_handler.py          # SCD2-specific logic
-└── batch_processor.py       # Generic batch processing utilities
-```
-
-### Class Design
-
-```python
-# ods_operations.py
-from abc import ABC, abstractmethod
-import asyncpg
-
-class ODSOperation(ABC):
-    def __init__(self, connection_config: dict, batch_size: int = 1000):
-        self.config = connection_config
-        self.batch_size = batch_size
-        self.pool = None
-    
-    async def __aenter__(self):
-        self.pool = await asyncpg.create_pool(
-            host=self.config['host'],
-            port=self.config['port'],
-            user=self.config['username'],
-            password=self.config['password'],
-            database=self.config['database'],
-            min_size=1, max_size=5
-        )
-        return self
-    
-    async def __aexit__(self, *args):
-        await self.pool.close()
-    
-    @abstractmethod
-    async def execute(self, table: str, records: list) -> dict:
-        pass
-
-class AppendOperation(ODSOperation):
-    async def execute(self, schema: str, table: str, records: list) -> dict:
-        # Implementation
-        pass
-
-class UpsertOperation(ODSOperation):
-    def __init__(self, *args, identity_fields: list, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.identity_fields = identity_fields
-    
-    async def execute(self, schema: str, table: str, records: list) -> dict:
-        # Implementation with ON CONFLICT
-        pass
-
-class SCD2MergeOperation(ODSOperation):
-    async def execute(self, schema: str, table: str, records: list) -> dict:
-        # Complex SCD2 logic with transaction
-        pass
-```
-
----
-
-## Performance Characteristics
-
-### Throughput Benchmarks (Estimated)
-
-| Operation | Method | Rows/sec | Notes |
-|-----------|--------|----------|-------|
-| Append | asyncpg executemany | 50K-100K | 1000-row batches optimal |
-| Overwrite | TRUNCATE + executemany | 40K-80K | TRUNCATE is fast, bottleneck is insert |
-| Upsert | ON CONFLICT executemany | 20K-40K | Index lookup overhead |
-| SCD2 Merge | Multi-step pandas | 5K-15K | Complex joins and updates |
-| Bulk Copy | COPY FROM | 100K-500K | If psycopg3 used |
-
-**Recommendations:**
-- Default batch size: **1000 rows** (good balance of memory/speed)
-- For >100K rows: Use streaming/chunking to avoid memory issues
-- For SCD2: Consider staging table approach for very large datasets
-
----
-
-## Implementation Checklist
-
-### Phase 1: Basic Operations (Append, Overwrite, Upsert)
-
-- [ ] Upgrade asyncpg to ^0.30.0
-- [ ] Create `ODSOperation` base class
-- [ ] Implement `AppendOperation` with executemany
-- [ ] Implement `OverwriteOperation` (TRUNCATE + insert)
-- [ ] Implement `UpsertOperation` with ON CONFLICT
-- [ ] Add batch size configuration
-- [ ] Implement progress streaming via stdout
-- [ ] Add error handling with partial batch rollback
-
-### Phase 2: SCD2 Merge
-
-- [ ] Add pandas dependency
-- [ ] Design SCD2 table structure (start_date, end_date, is_current, hash)
-- [ ] Implement hash generation for change detection
-- [ ] Implement staging table approach
-- [ ] Handle transaction boundaries
-- [ ] Add SCD2 metadata columns automatically
-
-### Phase 3: Deno Integration
-
-- [ ] Extend deno runner with `EXEC_ODS` signal
-- [ ] Create Python ODS executor entry point
-- [ ] Implement streaming progress protocol
-- [ ] Add timeout handling for large datasets
-- [ ] Test concurrent ODS operations
-
----
-
-## Dependencies Update
-
-### pyproject.toml Changes
-
-```toml
-[project]
-dependencies = [
-    # ... existing dependencies ...
-    "asyncpg>=0.30.0",        # Upgrade from 0.29.0
-    "psycopg[binary]>=3.2.0", # Optional: for COPY if needed
-    "pandas>=2.2.0",          # Required for SCD2
-    "numpy>=2.0.0",           # Pandas dependency
-]
-```
-
-### Installation Commands
+### Minimal Setup (Recommended)
 
 ```bash
-# Core ODS dependencies
-uv add "asyncpg>=0.30.0"
-uv add "psycopg[binary]>=3.2.0"  # Optional
-uv add "pandas>=2.2.0"
+# Core dependencies (only 2 external packages needed)
+pip install Jinja2==3.1.6 nh3==0.3.5
 ```
+
+### With Optional Async Support
+
+```bash
+# If async SMTP becomes a requirement
+pip install Jinja2==3.1.6 nh3==0.3.5 aiosmtplib==3.0.0
+```
+
+### Requirements.txt Entry
+
+```
+# Email Node Dependencies
+Jinja2>=3.1.6,<4.0.0      # Template engine with sandbox support
+nh3>=0.3.5                # HTML sanitization (replaces deprecated bleach)
+# Note: smtplib and email.mime are part of Python standard library
+```
+
+---
+
+## Architecture Integration
+
+### Existing Infrastructure Leverage
+
+The Email Node will integrate with existing capabilities:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Flow Runner (Python)                      │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
+│  │  Email Node │───▶│   Jinja2    │───▶│  Template Engine │  │
+│  │   Logic     │    │SandboxedEnv │    │  {{expressions}} │  │
+│  └─────────────┘    └─────────────┘    └─────────────────┘  │
+│         │                                                    │
+│         ▼                                                    │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
+│  │ DataSource  │───▶│  smtplib    │───▶│   SMTP Server   │  │
+│  │  (SMTP)     │    │   client    │    │                 │  │
+│  │  Credentials│    └─────────────┘    └─────────────────┘  │
+│  └─────────────┘                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Component Responsibilities
+
+| Component | Responsibility | Input | Output |
+|-----------|---------------|-------|--------|
+| Email Node | Orchestrate sending, validate config | Node config, flow input | Email sent status |
+| Jinja2 Sandbox | Render templates safely | Template string, data context | Rendered text/HTML |
+| nh3 | Sanitize HTML content | Raw HTML | Sanitized HTML |
+| DataSource | Retrieve SMTP credentials | Connection ID | SMTP config dict |
+| smtplib | Send email via SMTP | Message, server config | Delivery status |
+
+---
+
+## Implementation Patterns
+
+### Safe Template Rendering
+
+```python
+from jinja2.sandbox import SandboxedEnvironment
+from jinja2 import UndefinedError
+
+class TemplateEngine:
+    def __init__(self):
+        # SandboxedEnvironment prevents code execution
+        self.env = SandboxedEnvironment(
+            autoescape=True,  # Auto-escape HTML
+            undefined='strict'  # Raise error on undefined variables
+        )
+    
+    def render(self, template_str: str, context: dict) -> str:
+        try:
+            template = self.env.from_string(template_str)
+            return template.render(**context)
+        except UndefinedError as e:
+            # Handle missing variables gracefully
+            raise TemplateRenderError(f"Template variable error: {e}")
+```
+
+### HTML Email Composition
+
+```python
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import nh3
+
+def create_email_message(subject: str, body_html: str, body_text: str, 
+                         from_addr: str, to_addrs: list) -> MIMEMultipart:
+    # Sanitize HTML content
+    safe_html = nh3.clean(
+        body_html,
+        tags={"p", "br", "strong", "em", "a", "ul", "ol", "li", 
+              "table", "tr", "td", "th", "thead", "tbody", "h1", "h2", "h3"},
+        attributes={
+            "*": {"class"},
+            "a": {"href"},
+            "td": {"colspan", "rowspan"},
+            "th": {"colspan", "rowspan"}
+        },
+        url_schemes={"https", "http", "mailto"}
+    )
+    
+    # Create multipart message
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = from_addr
+    msg['To'] = ', '.join(to_addrs)
+    
+    # Attach text and HTML parts
+    msg.attach(MIMEText(body_text, 'plain', 'utf-8'))
+    msg.attach(MIMEText(safe_html, 'html', 'utf-8'))
+    
+    return msg
+```
+
+### SMTP Integration with DataSource
+
+```python
+import smtplib
+from typing import Dict
+
+class EmailSender:
+    def __init__(self, datasource_service):
+        self.datasource = datasource_service
+    
+    def send(self, connection_id: str, message: MIMEMultipart) -> Dict:
+        # Retrieve SMTP config from existing DataSource system
+        smtp_config = self.datasource.get_connection(connection_id)
+        
+        server = smtplib.SMTP(smtp_config['host'], smtp_config['port'])
+        
+        try:
+            # Enable TLS if port is 587
+            if smtp_config['port'] == 587:
+                server.starttls()
+            
+            # Authenticate
+            server.login(smtp_config['username'], smtp_config['password'])
+            
+            # Send message
+            server.send_message(message)
+            
+            return {'success': True, 'message_id': message['Message-ID']}
+        finally:
+            server.quit()
+```
+
+---
+
+## Security Considerations
+
+### Template Security
+
+| Risk | Mitigation | Implementation |
+|------|------------|----------------|
+| Code execution in templates | Use SandboxedEnvironment | `from jinja2.sandbox import SandboxedEnvironment` |
+| Access to private attributes | SandboxedEnvironment blocks `_` and `__` prefixed attrs | Built-in protection |
+| Infinite loops in templates | Set reasonable max template size and render timeout | Monitor template execution time |
+| Data exfiltration | Pass only necessary data to template context | Restrict context to flow input only |
+
+### Email Security
+
+| Risk | Mitigation | Implementation |
+|------|------------|----------------|
+| XSS in email HTML | Sanitize with nh3 | `nh3.clean(html, tags={...}, attributes={...})` |
+| Header injection | Validate email addresses | Regex validation or email-validator library |
+| Open redirect in links | Restrict URL schemes | `url_schemes={"https", "http", "mailto"}` |
+| Information disclosure | Use Bcc for bulk emails | Support Bcc field in configuration |
+
+### SMTP Security
+
+| Risk | Mitigation | Implementation |
+|------|------------|----------------|
+| Credential exposure | Use existing encrypted DataSource storage | Leverage Connection Management milestone |
+| Man-in-the-middle | Enforce TLS/STARTTLS | Port 587 + starttls() or port 465 with SSL |
+| Server spoofing | Validate certificates | Ensure proper SSL context configuration |
 
 ---
 
 ## Alternatives Considered
 
-| Alternative | Pros | Cons | Decision |
-|-------------|------|------|----------|
-| **psycopg3 only** | Unified sync/async API, better COPY | Slower bulk inserts than asyncpg | Not chosen - asyncpg superior for bulk |
-| **SQLAlchemy Core** | ORM consistency, query builder | 2-3x slower than raw asyncpg | Not chosen for bulk ops, keep for metadata |
-| **aiopg** | asyncio support | Unmaintained, slower | Rejected |
-| **pgcopy** | Very fast binary COPY | External dependency, complex | Consider later if needed |
-| **Apache Arrow** | High-performance columnar | Heavy dependency, complex | Overkill for current needs |
+| Category | Recommended | Alternative | Why Not Chosen |
+|----------|-------------|-------------|----------------|
+| SMTP Library | smtplib (stdlib) | fastapi-mail | Adds unnecessary abstraction; DataSource already handles connection management |
+| SMTP Library | smtplib (stdlib) | aiosmtplib | Flow runner is synchronous; async adds complexity without benefit |
+| Template Engine | Jinja2 | Chevron (Mustache) | Jinja2 more powerful for complex table generation; Chevron lacks conditionals/loops |
+| HTML Sanitizer | nh3 | bleach | bleach officially deprecated (Jan 2023); nh3 is 20x faster and actively maintained |
 
 ---
 
-## Risk Assessment
+## Integration Complexity Assessment
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Memory exhaustion with large datasets | Medium | High | Implement streaming/chunking; configurable batch sizes |
-| Deadlocks on Upsert (high concurrency) | Low | High | Use appropriate isolation level; retry logic |
-| SCD2 performance with millions of rows | Medium | Medium | Implement staging table pattern; consider incremental loads |
-| Deno-Python communication failures | Low | High | Add retry logic; fallback to synchronous execution |
-| PostgreSQL connection pool exhaustion | Low | Medium | Proper pool sizing; connection timeouts |
+| Component | Complexity | Effort | Notes |
+|-----------|------------|--------|-------|
+| SMTP DataSource Integration | Low | 1-2 days | Existing Connection Management milestone provides foundation |
+| Template Engine Integration | Low | 1 day | Jinja2 SandboxedEnvironment is drop-in replacement for standard Environment |
+| HTML Sanitization | Low | 0.5 days | nh3 has simple API: `nh3.clean(html, tags={...})` |
+| Email Node UI | Medium | 2-3 days | Property panel for subject, body, template variables; Monaco editor for templates |
+| Testing | Medium | 2 days | Unit tests for template rendering, sanitization, SMTP integration |
+
+**Total Estimated Effort: 1-2 weeks** (including testing and documentation)
 
 ---
 
 ## Sources
 
-### Official Documentation
-
-1. **asyncpg Documentation** - https://magicstack.github.io/asyncpg/current/
-   - HIGH confidence: Native PostgreSQL protocol implementation
-   - Used for: Connection pooling, executemany, transactions
-
-2. **psycopg3 Documentation** - https://www.psycopg.org/psycopg3/docs/
-   - HIGH confidence: Official PostgreSQL adapter for Python
-   - Used for: COPY operations, alternative driver comparison
-
-3. **PostgreSQL INSERT ON CONFLICT** - https://www.postgresql.org/docs/current/sql-insert.html
-   - HIGH confidence: Official PostgreSQL documentation
-   - Used for: Upsert syntax, DO UPDATE SET patterns
-
-4. **SQLAlchemy PostgreSQL Dialect** - https://docs.sqlalchemy.org/en/20/dialects/postgresql.html
-   - HIGH confidence: Authoritative ORM documentation
-   - Used for: Integration patterns, dialect features
-
-### Existing Codebase References
-
-5. **destination_executor.py** - Lines 1-119
-   - Current implementation uses asyncpg executemany
-   - Identity fields handling with ON CONFLICT
-
-6. **source_executor.py** - Lines 1-214
-   - asyncpg connection patterns
-   - Pre-execution flow for data sources
-
-7. **deno_service.py** - Lines 1-250
-   - Subprocess execution patterns
-   - Streaming output protocol
+- **smtplib**: https://docs.python.org/3/library/smtplib.html (Official Python docs - HIGH confidence)
+- **aiosmtplib**: https://aiosmtplib.readthedocs.io/en/stable/ (Official docs - HIGH confidence)
+- **Jinja2**: https://jinja.palletsprojects.com/en/3.1.x/ (Official Pallets project docs - HIGH confidence)
+- **Jinja2 Sandbox**: https://jinja.palletsprojects.com/en/3.1.x/sandbox/ (Official docs - HIGH confidence)
+- **nh3**: https://nh3.readthedocs.io/en/latest/ (Official docs - HIGH confidence)
+- **nh3 PyPI**: https://pypi.org/project/nh3/ (Version 0.3.5, April 2026 - HIGH confidence)
+- **chevron**: https://pypi.org/project/chevron/ (Version 0.14.0 - MEDIUM confidence - last update 2021)
+- **fastapi-mail**: https://pypi.org/project/fastapi-mail/ (Version 1.6.4, May 2026 - HIGH confidence)
+- **email.mime**: https://docs.python.org/3/library/email.mime.html (Official Python docs - HIGH confidence)
+- **bleach deprecation**: https://bleach.readthedocs.io/en/latest/ (Official notice - HIGH confidence)
 
 ---
 
-## Summary for Roadmap
+## Confidence Assessment
 
-**No new stack research required** - All necessary libraries are either:
-1. Already in the project (asyncpg)
-2. Standard choices (pandas for SCD2)
-3. Optional additions (psycopg3 for COPY)
+| Area | Confidence | Reason |
+|------|------------|--------|
+| SMTP Libraries | HIGH | Official Python stdlib documentation; mature and stable |
+| Template Engine | HIGH | Jinja2 is industry standard; official Pallets documentation |
+| HTML Sanitization | HIGH | nh3 is actively maintained; official docs and benchmarks |
+| Integration Approach | HIGH | Builds on existing validated DataSource infrastructure |
+| Security Model | HIGH | SandboxedEnvironment is well-documented and proven |
 
-**Integration complexity: LOW-MEDIUM**
-- Pattern already established (pre/post execution)
-- Only need to extend existing Deno-Python protocol
-- Most complexity is in SQL logic, not stack choices
+---
 
-**Recommended phase order:**
-1. Upgrade asyncpg, implement Append/Overwrite/Upsert (1-2 days)
-2. Implement SCD2 with pandas (2-3 days)
-3. Integrate with Deno runner (1 day)
+## Roadmap Implications
 
-**Dependencies to add:** pandas, optional psycopg3
-**Risk level:** Low - well-established patterns and libraries
+### Phase Ordering Recommendation
+
+1. **Email Node Core** (Week 1)
+   - SMTP DataSource integration using smtplib
+   - Basic email sending (text only)
+   - Integration with flow runner
+
+2. **Template Engine** (Week 1-2)
+   - Jinja2 SandboxedEnvironment integration
+   - Subject and body templating with `{{expression}}` syntax
+   - Context passing from node input
+
+3. **HTML Support** (Week 2)
+   - HTML email composition with email.mime
+   - nh3 sanitization integration
+   - Table generation from arrays using Jinja2 loops
+
+4. **Testing & Polish** (Week 2)
+   - Security testing (template injection, XSS)
+   - SMTP integration testing with various providers (Gmail, Outlook, etc.)
+   - UI/UX refinement
+
+### Defer to Later Milestones
+
+- **Async email sending** - Not needed with current APScheduler flow runner
+- **Email attachments** - Can be added later; requires file storage integration
+- **Email templates library** - Users can save templates in flow configurations
+- **Email tracking** (open rates, click tracking) - Requires external service integration

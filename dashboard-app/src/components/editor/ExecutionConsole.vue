@@ -192,4 +192,8 @@ watch(() => props.logs.length, () => {
   color: #475569;
   font-style: italic;
 }
+
+.msi {
+  font-family: 'Material Symbols Outlined' !important;
+}
 </style>

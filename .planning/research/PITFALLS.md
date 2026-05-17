@@ -1,450 +1,402 @@
-# ODS Execution Engine Pitfalls
+# Domain Pitfalls: Email Node with Dynamic Templates
 
-**Domain:** PostgreSQL ODS Operations with Deno-Python Integration  
-**Project:** Dashboard Studio v1.6 ODS Execution Engine  
+**Domain:** Email Templating & SMTP Delivery  
+**Project:** Dashboard Studio - v1.7 Email Node  
 **Researched:** 2026-05-16  
-**Confidence:** HIGH (based on official PostgreSQL 18, Python 3.14, and Deno 2.x documentation)
-
----
-
-## Executive Summary
-
-The ODS Execution Engine must handle bulk data operations (Append, Overwrite, Upsert, SCD2 Merge) across a Deno-to-Python boundary. This boundary introduces serialization, process management, and timeout risks that compound with PostgreSQL's inherent concurrency complexities. **The most dangerous pitfall is underestimating transaction scope across the Deno-Python boundary**, where a Python executor failure mid-batch can leave PostgreSQL in an inconsistent state with no automated cleanup mechanism.
+**Confidence:** HIGH (based on official OWASP, Python docs, Campaign Monitor, and Litmus sources)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Deadlocks in Concurrent Upsert Operations
+Mistakes that cause security vulnerabilities, delivery failures, or major rewrites.
 
-**What goes wrong:**
-When multiple flows execute concurrent UPSERT operations on the same table with composite keys, PostgreSQL can enter a deadlock condition where two transactions each hold locks the other needs.
+### Pitfall 1: Template Injection & XSS Vulnerabilities
 
-**Why it happens:**
-- Rows are updated in different orders across concurrent transactions
-- `ON CONFLICT DO UPDATE` acquires row-level locks that can conflict
-- Per PostgreSQL documentation: "deadlocks can occur as the result of row-level locks (and thus, they can occur even if explicit locking is not used)"
+**What goes wrong:** Dynamic templates using `{{expression}}` syntax can be exploited if user input is not properly escaped. Attackers can inject malicious HTML/JavaScript that executes when recipients open emails.
+
+**Why it happens:** 
+- Using raw string interpolation without context-aware escaping
+- Allowing HTML in template variables without sanitization
+- Not validating template expressions before evaluation
 
 **Consequences:**
-- PostgreSQL automatically aborts one transaction (unpredictable which one)
-- Flow execution fails with `deadlock detected` error
-- Partial batch writes leave data in inconsistent state
-- Client must retry entire batch
+- Cross-site scripting (XSS) in email clients that support JavaScript
+- Phishing attacks via injected malicious links
+- Data exfiltration from email content
+- Reputation damage if emails contain malware
 
 **Prevention:**
-1. **Always order operations consistently**: Sort input data by conflict keys before upsert
-2. **Use advisory locks** for serialized access to critical sections:
-   ```sql
-   SELECT pg_advisory_xact_lock(hashtext('ods_table_name'));
-   ```
-3. **Implement retry logic** with exponential backoff for deadlock errors (SQLSTATE '40P01')
-4. **Limit batch sizes** to reduce lock contention surface area
+1. **Always escape HTML entities** in template variables: convert `&` to `&amp;`, `<` to `&lt;`, `>` to `&gt;`, `"` to `&quot;`, `'` to `&#x27;`
+2. **Use context-aware encoding** - HTML body context needs different escaping than HTML attribute context
+3. **Validate template expressions** - whitelist allowed characters and patterns in `{{}}` expressions
+4. **Sanitize HTML if allowing rich content** - use libraries like bleach (Python) or DOMPurify (JS)
+5. **Never allow user input directly in dangerous contexts:**
+   - `<script>` tags
+   - Event handlers (`onclick`, `onerror`)
+   - `javascript:` or `data:` URLs
+   - CSS `expression()` or imports
 
-**Phase to address:** Phase 1 (Core Executor) - Implement retry logic and consistent ordering  
-**Severity:** HIGH - Will occur in production with concurrent flows
+**Detection:**
+- Security audits showing unescaped user data in templates
+- Penetration testing reveals script injection in email previews
+- Template variables containing `<`, `>`, or quotes render without encoding
+
+**Recommended Phase:** Phase 1 - Core Template Engine (Must address before any user-facing features)
 
 ---
 
-### Pitfall 2: Transaction Scope Violations Across Deno-Python Boundary
+### Pitfall 2: HTML Email Rendering Inconsistencies
 
-**What goes wrong:**
-A batch operation spans multiple Python subprocess calls, but a failure in the middle leaves PostgreSQL with partial data committed or an orphaned transaction.
+**What goes wrong:** Emails look great in one client but broken in another. Outlook desktop especially uses Word as rendering engine instead of a browser engine.
 
 **Why it happens:**
-- Each Deno `EXEC_ODS` signal spawns a new Python process
-- Python process crash = lost transaction control
-- No distributed transaction coordinator exists between Deno and Python
-- Long-running transactions accumulate locks and WAL
+- Different email clients support different CSS properties
+- Outlook 2007-2019 uses Microsoft Word rendering engine (not WebKit)
+- Gmail strips certain CSS properties and `<style>` blocks
+- Mobile clients have different viewport handling
 
 **Consequences:**
-- Data inconsistency: some batches committed, others lost
-- PostgreSQL locks held indefinitely until `idle_in_transaction_session_timeout` kicks in
-- WAL bloat from uncommitted transactions
-- Subsequent flows may see partial data
+- Broken layouts in major clients (Outlook has 10%+ market share)
+- Unreadable emails on mobile devices
+- Images displaying at wrong sizes
+- Padding/margins ignored
 
 **Prevention:**
-1. **Never span transactions across subprocess calls** - each Python execution must be self-contained
-2. **Use explicit transaction blocks** with proper error handling:
+1. **Use table-based layouts** - `<table>` tags are most reliable across clients; avoid `<div>`-based layouts for Outlook
+2. **Inline CSS only** - many clients strip `<style>` tags; use inline `style=""` attributes
+3. **Include width/height attributes on images** - Outlook ignores CSS dimensions; use HTML attributes
+4. **Use conditional comments for Outlook-specific fixes:**
+   ```html
+   <!--[if mso]>
+     <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+   <![endif]-->
+   ```
+5. **Test across clients** using tools like Litmus or Email on Acid
+6. **Avoid unsupported features:**
+   - Flexbox/Grid layouts (poor Outlook support)
+   - CSS animations (limited support)
+   - Custom fonts (use web-safe fonts as fallbacks)
+   - Background images in Outlook without VML fallbacks
+
+**Detection:**
+- Emails render differently in test vs production
+- Layout breaks when forwarded
+- Images appear at actual size instead of specified dimensions
+- Spacing inconsistency between clients
+
+**Recommended Phase:** Phase 2 - Template Rendering System
+
+---
+
+### Pitfall 3: SMTP Rate Limiting & Delivery Failures
+
+**What goes wrong:** Sending too many emails too quickly triggers rate limits from SMTP providers, causing rejected emails and potential blacklisting.
+
+**Why it happens:**
+- No throttling mechanism for bulk sends
+- Connection pooling not implemented
+- Retry logic absent or poorly implemented
+- Not handling SMTP error codes properly
+
+**Consequences:**
+- Emails silently dropped
+- SMTP account temporarily suspended
+- IP/domain reputation damage
+- Emails marked as spam
+- Permanent blacklisting
+
+**Prevention:**
+1. **Implement rate limiting** - respect provider limits (common: 100-500 emails/hour for shared IPs)
+2. **Use connection pooling** - reuse SMTP connections instead of opening/closing per email
+3. **Implement exponential backoff** for retries:
+   - 1st retry: 5 minutes
+   - 2nd retry: 15 minutes
+   - 3rd retry: 1 hour
+4. **Handle SMTP error codes:**
+   - `421` / `450` / `451` - Temporary failure, retry later
+   - `550` / `551` - Permanent failure, don't retry
+   - `452` - Mailbox full
+   - `4xx` codes generally retryable, `5xx` generally not
+5. **Monitor reputation metrics:**
+   - Bounce rates (keep < 5%)
+   - Complaint rates (keep < 0.1%)
+6. **Use queue-based architecture** - decouple email generation from sending
+
+**Detection:**
+- SMTP error logs showing `421 Service not available`
+- Increasing bounce rates
+- Emails not arriving despite successful API responses
+- SMTP provider warnings about rate limits
+
+**Recommended Phase:** Phase 3 - SMTP Delivery Engine
+
+---
+
+### Pitfall 4: Character Encoding Issues
+
+**What goes wrong:** Special characters (accents, emoji, non-Latin scripts) display incorrectly or cause encoding errors.
+
+**Why it happens:**
+- Not specifying charset in email headers
+- Mixing encodings between template and data
+- Python 2/3 string handling confusion
+- Email clients defaulting to wrong encoding
+
+**Consequences:**
+- Garbled text for international users
+- "Mojibake" ( garbled characters like "Ã©" instead of "é")
+- Email clients showing ??? for special characters
+- Template rendering failures
+
+**Prevention:**
+1. **Always use UTF-8 encoding:**
+   - Set `Content-Type: text/html; charset=utf-8`
+   - Use `email.policy.EmailPolicy(utf8=True)` in Python
+2. **Use Python's email library correctly:**
    ```python
-   try:
-       conn.execute("BEGIN")
-       # ... all operations ...
-       conn.execute("COMMIT")
-   except Exception:
-       conn.execute("ROLLBACK")
-       raise
-   ```
-3. **Set aggressive timeouts**:
-   ```sql
-   SET idle_in_transaction_session_timeout = '30s';
-   SET statement_timeout = '5min';
-   ```
-4. **Implement idempotency** - same batch can be safely retried
-
-**Phase to address:** Phase 1 (Core Executor) - Transaction wrapper design  
-**Severity:** CRITICAL - Can corrupt ODS data
-
----
-
-### Pitfall 3: JSON Serialization Failures in Deno-Python Data Handoff
-
-**What goes wrong:**
-Data from Deno to Python fails to serialize/deserialize correctly, losing precision for special values or causing parse failures.
-
-**Why it happens:**
-- Python `json` module converts `NaN`, `Infinity`, `-Infinity` to JavaScript equivalents by default
-- PostgreSQL `NaN` values become JSON `NaN` which is non-standard
-- Date/time objects have no native JSON representation
-- Large integers (> 2^53) lose precision in JavaScript
-- Per Python docs: "malicious JSON string may cause the decoder to consume considerable CPU and memory"
-
-**Consequences:**
-- `JSONDecodeError` on Python side
-- Silent data corruption for floating-point values
-- Timestamp precision loss
-- Flow execution halts
-
-**Prevention:**
-1. **Strict JSON validation** - use `allow_nan=False` in Python:
-   ```python
-   json.loads(data, parse_constant=lambda x: raise ValueError(f"Invalid: {x}"))
-   ```
-2. **Date serialization standard** - use ISO 8601 strings exclusively:
-   ```typescript
-   // Deno side
-   date.toISOString()  // "2024-01-15T10:30:00.000Z"
-   ```
-3. **BigInt handling** - serialize as strings:
-   ```typescript
-   bigIntValue.toString()  // "9007199254740993"
-   ```
-4. **Null handling** - distinguish between SQL NULL and JSON null
-5. **Size limits** - enforce maximum payload size before parsing
-
-**Phase to address:** Phase 1 (Core Executor) - Data protocol design  
-**Severity:** HIGH - Silent data corruption risk
-
----
-
-### Pitfall 4: Memory Exhaustion with Large Batch Sizes
-
-**What goes wrong:**
-Loading millions of rows into memory for batch processing causes OOM (Out of Memory) errors on either Deno or Python side.
-
-**Why it happens:**
-- `Popen.communicate()` buffers all data in memory per Python docs: "data read is buffered in memory, so do not use this method if the data size is large or unlimited"
-- PostgreSQL `COPY` from stdin requires streaming, not buffering
-- Deno subprocess output buffering has limits
-- Python JSON deserialization creates full object tree
-
-**Consequences:**
-- Process killed by OOM killer
-- Flow execution fails mid-stream
-- Partial data leaves ODS in inconsistent state
-- System instability affecting other flows
-
-**Prevention:**
-1. **Streaming architecture** - use chunked processing:
-   ```python
-   # Process in configurable batches (default 1000 rows)
-   for chunk in pd.read_csv(file, chunksize=batch_size):
-       execute_batch(chunk)
-   ```
-2. **Memory-mapped files** for large data transfers between Deno and Python
-3. **Backpressure handling** - pause Deno output if Python can't keep up
-4. **Configurable batch size** with conservative defaults (1,000 - 10,000 rows)
-5. **Monitor memory usage** and abort before OOM
-
-**Phase to address:** Phase 1 (Core Executor) - Streaming implementation  
-**Severity:** HIGH - Production stability issue
-
----
-
-### Pitfall 5: SCD2 Implementation Errors
-
-**What goes wrong:**
-Slowly Changing Dimension Type 2 implementation creates overlapping date ranges, orphaned records, or incorrect current flags.
-
-**Why it happens:**
-- Race conditions between expire-old and insert-new operations
-- Incorrect date boundary handling (inclusive vs exclusive)
-- Multiple concurrent flows updating same dimension
-- Missing proper transaction isolation
-
-**Consequences:**
-- Query results return multiple "current" records for same entity
-- Historical reporting shows data from wrong time period
-- Data warehouse integrity compromised
-- Complex manual repair required
-
-**Prevention:**
-1. **Atomic SCD2 operation** - do expire and insert in single transaction:
-   ```sql
-   BEGIN;
-   -- Expire existing record
-   UPDATE dim_table 
-   SET valid_to = CURRENT_TIMESTAMP, is_current = false
-   WHERE business_key = %s AND is_current = true;
+   from email.message import EmailMessage
+   from email.policy import EmailPolicy
    
-   -- Insert new record
-   INSERT INTO dim_table (business_key, attributes, valid_from, valid_to, is_current)
-   VALUES (%s, %s, CURRENT_TIMESTAMP, '9999-12-31', true);
-   COMMIT;
+   msg = EmailMessage(policy=EmailPolicy(utf8=True))
+   msg.set_content(body, subtype='html')
    ```
-2. **Use exclusion constraints** to prevent overlaps:
-   ```sql
-   ALTER TABLE dim_table 
-   ADD CONSTRAINT no_overlapping_ranges 
-   EXCLUDE USING gist (business_key WITH =, valid_during WITH &&);
-   ```
-3. **Advisory locks** per business key for serialized updates
-4. **Validate after each batch** - query for overlaps and abort if found
+3. **Encode headers properly** using RFC 2047 for non-ASCII in headers
+4. **Normalize input** - convert all template data to Unicode before processing
+5. **Test with international content** - include é, ñ, 中文, emojis in test cases
 
-**Phase to address:** Phase 2 (SCD2 Merge Mode) - SCD2-specific implementation  
-**Severity:** HIGH - Data integrity risk
+**Detection:**
+- Special characters appear as question marks or boxes
+- Email headers missing charset specification
+- `UnicodeEncodeError` or `UnicodeDecodeError` in logs
+- Different rendering between web preview and actual email
+
+**Recommended Phase:** Phase 1 - Core Template Engine
 
 ---
 
-### Pitfall 6: ON CONFLICT Inference Failures
+### Pitfall 5: Memory Issues with Large Template Data
 
-**What goes wrong:**
-`INSERT ... ON CONFLICT` fails with "there is no unique or exclusion constraint matching the ON CONFLICT specification" even when indexes exist.
+**What goes wrong:** Processing large datasets in templates (e.g., rendering tables with thousands of rows) causes memory exhaustion.
 
 **Why it happens:**
-- Index inference requires exact column match in order
-- Partial indexes require matching WHERE clause in ON CONFLICT
-- Expression indexes need explicit expression specification
-- Concurrent index creation can cause transient failures per PostgreSQL docs: "While CREATE INDEX CONCURRENTLY or REINDEX CONCURRENTLY is running on a unique index, INSERT ... ON CONFLICT statements on the same table may unexpectedly fail"
+- Loading entire datasets into memory for template rendering
+- Recursive template processing without depth limits
+- Creating massive HTML strings without streaming
+- No limits on template output size
 
 **Consequences:**
-- UPSERT falls back to INSERT and throws unique violation
-- Flow execution fails
-- No atomic upsert guarantee
+- Server crashes from OOM (Out of Memory)
+- Slow performance affecting other requests
+- Denial of service vulnerability
+- Timeouts causing email delivery failures
 
 **Prevention:**
-1. **Explicit constraint naming** over inference:
-   ```sql
-   INSERT ... ON CONFLICT ON CONSTRAINT unique_constraint_name DO UPDATE
-   ```
-2. **Validate constraint exists** before execution via metadata query
-3. **Avoid concurrent index creation** during flow execution windows
-4. **Have fallback** to UPDATE-then-INSERT pattern if inference fails
+1. **Implement output size limits** - reject templates generating > 1MB HTML
+2. **Limit iteration depth** - cap loops in templates (max 1000 iterations)
+3. **Use streaming for large data** - process rows in chunks
+4. **Implement pagination helpers** in template engine
+5. **Add resource limits:**
+   - Maximum template execution time (30 seconds)
+   - Maximum memory per template render (50MB)
+   - Maximum number of variables in scope (1000)
+6. **Sample data for preview** - show first 100 rows with "...and 900 more" message
 
-**Phase to address:** Phase 1 (Core Executor) - Upsert implementation  
-**Severity:** MEDIUM - Affects upsert reliability
+**Detection:**
+- Memory usage spikes during email generation
+- Template processing timeouts
+- OOM errors in logs
+- Slow response times on template-heavy flows
+
+**Recommended Phase:** Phase 2 - Template Rendering System
 
 ---
 
-### Pitfall 7: Statement Timeout Cascading Failures
+### Pitfall 6: Email Address Validation Pitfalls
 
-**What goes wrong:**
-A long-running batch operation hits `statement_timeout`, but the error handling doesn't properly clean up, causing subsequent operations to fail.
+**What goes wrong:** Invalid or malformed email addresses cause delivery failures or security issues.
 
 **Why it happens:**
-- Default PostgreSQL `statement_timeout` is 0 (unlimited) - dangerous for production
-- Batch operations with large data take unpredictable time
-- Timeout error may leave transaction in aborted state
-- Connection pool returns aborted transaction to pool
+- Overly strict regex rejecting valid addresses
+- Not normalizing email addresses consistently
+- Case sensitivity issues in local part
+- Not validating domain exists (MX records)
 
 **Consequences:**
-- All subsequent operations on same connection fail with "current transaction is aborted"
-- Flow execution stops
-- Partial batch data committed (if using autocommit per statement)
+- Legitimate users can't receive emails
+- Bounces from invalid addresses hurt sender reputation
+- Account enumeration vulnerabilities
+- Confusion from visually similar addresses (homoglyph attacks)
 
 **Prevention:**
-1. **Explicit timeout configuration** per operation type:
-   ```python
-   timeouts = {
-       'append': '5min',
-       'overwrite': '30min',
-       'upsert': '10min',
-       'merge': '20min'
-   }
-   ```
-2. **Statement-level timeouts** using `SET LOCAL`:
-   ```sql
-   SET LOCAL statement_timeout = '5min';
-   ```
-3. **Proper cleanup on timeout**:
-   ```python
-   try:
-       execute_batch()
-   except psycopg2.errors.QueryCanceled:
-       conn.rollback()  # Must rollback before reusing connection
-       raise BatchTimeoutError()
-   ```
-4. **Monitor and alert** on timeouts per flow
+1. **Use well-tested libraries** instead of custom regex:
+   - Python: `email-validator` library
+   - Avoid overly strict validation
+2. **Normalize consistently:**
+   - Domain part: always lowercase
+   - Local part: preserve case (technically case-sensitive per RFC)
+3. **Check for common issues:**
+   - Multiple @ symbols
+   - Spaces in address
+   - Invalid characters
+4. **Consider MX record validation** (optional, with timeouts)
+5. **Be aware of homoglyph attacks** - Cyrillic а vs Latin a
+6. **Always verify ownership** via confirmation email before trusting address
 
-**Phase to address:** Phase 1 (Core Executor) - Error handling  
-**Severity:** MEDIUM - Operational stability
+**Detection:**
+- High bounce rates from validation bypass
+- Support tickets about "valid email rejected"
+- Users with duplicate accounts due to case differences
+
+**Recommended Phase:** Phase 1 - Core Template Engine (input validation)
 
 ---
 
-### Pitfall 8: Foreign Key Constraint Violations During Bulk Loads
+### Pitfall 7: SPF/DKIM/DMARC Authentication Failures
 
-**What goes wrong:**
-Bulk UPSERT operations fail foreign key checks or cause trigger queue overflow.
+**What goes wrong:** Emails fail authentication checks and go to spam folders.
 
 **Why it happens:**
-- Referenced table doesn't have matching keys for all incoming data
-- Per PostgreSQL docs: "Loading many millions of rows can cause the trigger event queue to overflow available memory, leading to intolerable swapping or even outright failure of the command"
-- FK checks run per-row during INSERT, not deferred to batch end
-- Cascading updates trigger additional checks
+- SPF record doesn't include SMTP server IP
+- DKIM signatures not configured
+- DMARC policy not set
+- "From" domain doesn't match authenticated domain
 
 **Consequences:**
-- Batch operation fails mid-stream
-- Complex partial rollback required
-- Memory pressure on database server
+- Emails consistently land in spam/junk
+- Brand reputation damage
+- Failed authentication visible to recipients
+- Potential domain blacklisting
 
 **Prevention:**
-1. **Pre-validate foreign keys** in Python before database operation:
-   ```python
-   missing_refs = input_data[~input_data['fk_column'].isin(reference_table['id'])]
-   if not missing_refs.empty:
-       raise ForeignKeyViolationError(f"Missing references: {missing_refs['fk_column'].tolist()}")
+1. **Configure SPF record:**
    ```
-2. **Deferrable constraints** where possible:
-   ```sql
-   ALTER TABLE child_table 
-   ALTER CONSTRAINT fk_name DEFERRABLE INITIALLY DEFERRED;
+   v=spf1 include:_spf.google.com include:sendgrid.net ~all
    ```
-3. **Disable triggers temporarily** for known-good data (with caution):
-   ```sql
-   ALTER TABLE target_table DISABLE TRIGGER ALL;
-   -- ... batch operation ...
-   ALTER TABLE target_table ENABLE TRIGGER ALL;
+2. **Enable DKIM signing** through your SMTP provider
+3. **Set up DMARC policy:**
    ```
-4. **Process in smaller batches** to avoid trigger queue overflow
+   _dmarc.example.com TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com"
+   ```
+4. **Ensure "From" domain aligns** with authenticated domain
+5. **Monitor authentication results** via DMARC reports
+6. **Use consistent "From" addresses** - don't spoof different domains
 
-**Phase to address:** Phase 2 (Advanced Features) - Constraint handling  
-**Severity:** MEDIUM - Affects data with FK relationships
+**Detection:**
+- Emails consistently in spam folders
+- Authentication failure headers in received emails
+- DMARC reports showing failures
+- Spam filter testing tools flagging authentication
+
+**Recommended Phase:** Phase 3 - SMTP Delivery Engine (documentation/requirement)
 
 ---
 
-### Pitfall 9: Index Maintenance Overhead During Large Upserts
+### Pitfall 8: Template Syntax Errors & Evaluation Failures
 
-**What goes wrong:**
-UPSERT operations on indexed tables become progressively slower as table grows due to index maintenance overhead.
+**What goes wrong:** Malformed `{{expression}}` syntax or undefined variables cause template rendering to fail.
 
 **Why it happens:**
-- Each INSERT/UPDATE maintains all indexes (B-tree rebalancing)
-- PostgreSQL updates index tuples for HOT (Heap-Only Tuple) updates but not for index key changes
-- Per PostgreSQL docs: "Creating an index on pre-existing data is quicker than updating it incrementally as each row is loaded"
+- No validation of template syntax before saving
+- Missing variables in template context
+- Nested expressions causing infinite recursion
+- Special characters breaking expression parsing
 
 **Consequences:**
-- Operation time increases non-linearly with table size
-- Lock contention increases
-- WAL generation saturates I/O
+- Emails not sent due to render errors
+- Raw template syntax shown to users
+- Missing content in critical emails
+- Unpredictable behavior from partial renders
 
 **Prevention:**
-1. **For bulk loads**: Drop indexes, load data, recreate indexes (for overwrite mode)
-2. **Partial indexes** for hot data only:
-   ```sql
-   CREATE INDEX idx_recent ON table (column) WHERE created_at > '2024-01-01';
-   ```
-3. **Fillfactor tuning** for update-heavy tables:
-   ```sql
-   ALTER TABLE table SET (fillfactor = 70);  -- Leave 30% for HOT updates
-   ```
-4. **Parallel index creation** using `CREATE INDEX CONCURRENTLY` (but see Pitfall 6)
+1. **Validate templates on save** - parse and check syntax before storing
+2. **Implement graceful degradation:**
+   - Undefined variables render as empty string, not error
+   - Invalid expressions show warning, not crash
+3. **Use try/except around template evaluation**
+4. **Provide preview functionality** with sample data
+5. **Limit expression complexity:**
+   - No nested `{{}}` expressions
+   - Restricted operator set
+   - No function calls in expressions (unless explicitly allowed)
+6. **Escape special characters** in template delimiters
 
-**Phase to address:** Phase 3 (Performance Optimization) - Index strategy  
-**Severity:** LOW-MEDIUM - Performance degradation over time
+**Detection:**
+- TemplateSyntaxError exceptions in logs
+- User complaints about "{{variable}} showing in emails"
+- Missing content in generated emails
+- Preview showing errors
+
+**Recommended Phase:** Phase 1 - Core Template Engine
 
 ---
 
-### Pitfall 10: Subprocess Communication Deadlocks
+## Moderate Pitfalls
 
-**What goes wrong:**
-Deno process blocks waiting for Python output, Python blocks waiting for Deno input - classic deadlock.
+### Pitfall 9: Image Display Issues
 
-**Why it happens:**
-- OS pipe buffers have limited size (typically 64KB)
-- If both processes write to pipes without reading, they block
-- Per Python docs: "This will deadlock when using stdout=PIPE or stderr=PIPE and the child process generates enough output to a pipe such that it blocks waiting for the OS pipe buffer to accept more data"
-- Order of stream operations matters
-
-**Consequences:**
-- Both processes hang indefinitely
-- Flow execution never completes
-- Must kill processes externally
+**What goes wrong:** Images don't display or show broken image icons.
 
 **Prevention:**
-1. **Use `communicate()` not direct stream access**:
-   ```python
-   proc = subprocess.Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-   stdout, stderr = proc.communicate(input=data)  # Atomic write+read
-   ```
-2. **Timeout all subprocess operations**:
-   ```python
-   try:
-       stdout, stderr = proc.communicate(input=data, timeout=300)
-   except TimeoutExpired:
-       proc.kill()
-       raise
-   ```
-3. **Stream large data via files** not pipes:
-   ```typescript
-   // Deno: write to temp file
-   await Deno.writeTextFile('/tmp/batch.json', data);
-   
-   // Python: read from file
-   with open('/tmp/batch.json') as f:
-       data = json.load(f)
-   ```
-4. **Async I/O** for non-blocking operations
+- Always include `width` and `height` HTML attributes (not just CSS)
+- Provide `alt` text for accessibility and image blocking
+- Use absolute URLs (not relative) for hosted images
+- Consider image size limits (large images trigger spam filters)
+- Test with images disabled
 
-**Phase to address:** Phase 1 (Core Executor) - Subprocess management  
-**Severity:** HIGH - Will deadlock on large outputs
+**Recommended Phase:** Phase 2 - Template Rendering System
+
+---
+
+### Pitfall 10: Reply-To and Bounce Handling
+
+**What goes wrong:** Replies go to wrong address or bounces aren't handled.
+
+**Prevention:**
+- Set proper `Reply-To` header for user responses
+- Use `Return-Path` for bounce handling
+- Implement VERP (Variable Envelope Return Path) for tracking bounces
+- Monitor bounce rates and suppress invalid addresses
+
+**Recommended Phase:** Phase 3 - SMTP Delivery Engine
+
+---
+
+### Pitfall 11: Email Size Limits
+
+**What goes wrong:** Large emails (big images, attachments) rejected by servers.
+
+**Prevention:**
+- Keep HTML body under 100KB
+- Optimize/compress images before embedding
+- Warn users about attachment size limits (typically 10-25MB)
+- Use links to hosted content instead of attachments when possible
+
+**Recommended Phase:** Phase 2 - Template Rendering System
 
 ---
 
 ## Phase-Specific Warnings
 
-| Phase | Pitfall Risk | Mitigation |
-|-------|--------------|------------|
-| Phase 1: Core Executor | Deadlocks (P1), Transaction scope (P2), JSON serialization (P3), Memory (P4), Subprocess deadlock (P10) | Implement retry logic, transaction wrapper, streaming, proper subprocess handling |
-| Phase 2: SCD2 Merge | SCD2 errors (P5), FK violations (P8) | Atomic operations, exclusion constraints, pre-validation |
-| Phase 3: Performance | Index overhead (P9), Timeout handling (P7) | Index strategy, timeout configuration, fillfactor tuning |
-
----
-
-## Detection Strategies
-
-| Pitfall | Detection Method |
-|---------|------------------|
-| Deadlocks | Monitor PostgreSQL logs for `deadlock detected`, track SQLSTATE 40P01 errors |
-| Transaction scope | Query `pg_stat_activity` for long-running transactions, set `idle_in_transaction_session_timeout` |
-| JSON failures | Schema validation on Python side, strict JSON parsing |
-| Memory exhaustion | Process memory monitoring, batch size metrics |
-| SCD2 errors | Post-batch validation queries for overlaps, multiple current flags |
-| ON CONFLICT failures | Error rate monitoring, constraint validation pre-execution |
-| Timeouts | Query duration histograms, timeout error tracking |
-| FK violations | Referential integrity checks, missing reference detection |
-| Index overhead | Query performance degradation over time, index bloat monitoring |
-| Subprocess deadlocks | Process liveness checks, subprocess timeout enforcement |
-
----
-
-## Testing Recommendations
-
-1. **Concurrency testing**: Run 10+ parallel flows hitting same table with UPSERT
-2. **Large data testing**: Test with 1M+ row datasets
-3. **Failure injection**: Kill Python subprocess mid-batch, verify cleanup
-4. **Data validation**: Verify no precision loss for floats, dates, large integers
-5. **Timeout testing**: Verify graceful handling of statement_timeout
-6. **Memory testing**: Monitor heap usage during large batch operations
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| **Phase 1: Template Engine** | XSS via unescaped variables | Implement auto-escaping by default; require explicit `safe` filter for HTML |
+| **Phase 1: Template Engine** | Character encoding issues | Force UTF-8 throughout; test with international characters |
+| **Phase 1: Template Engine** | Template syntax errors | Validate on save; graceful handling of undefined vars |
+| **Phase 2: Template Rendering** | Large data memory issues | Implement size limits; pagination helpers; streaming |
+| **Phase 2: Template Rendering** | HTML rendering inconsistencies | Use table layouts; inline CSS; test across clients |
+| **Phase 3: SMTP Delivery** | Rate limiting/blacklisting | Implement throttling; exponential backoff; queue-based sending |
+| **Phase 3: SMTP Delivery** | Authentication failures | Document SPF/DKIM requirements; validate From alignment |
+| **Phase 3: SMTP Delivery** | Delivery errors not handled | Implement proper error handling for SMTP codes; retry logic |
 
 ---
 
 ## Sources
 
-- PostgreSQL 18.4 Documentation: Populating a Database (https://www.postgresql.org/docs/current/populate.html)
-- PostgreSQL 18.4 Documentation: INSERT ... ON CONFLICT (https://www.postgresql.org/docs/current/sql-insert.html)
-- PostgreSQL 18.4 Documentation: Transaction Isolation (https://www.postgresql.org/docs/current/transaction-iso.html)
-- PostgreSQL 18.4 Documentation: Explicit Locking (https://www.postgresql.org/docs/current/explicit-locking.html)
-- Python 3.14.5 Documentation: subprocess module (https://docs.python.org/3/library/subprocess.html)
-- Python 3.14.5 Documentation: json module (https://docs.python.org/3/library/json.html)
-- Deno Runtime Documentation: Node Compatibility (https://docs.deno.com/runtime/fundamentals/node/)
-
-**Confidence Level:** HIGH - All findings verified against official documentation from PostgreSQL, Python, and Deno projects.
+- [OWASP Cross-Site Scripting Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) - **HIGH confidence**
+- [OWASP Email Validation and Verification Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Email_Validation_and_Verification_Cheat_Sheet.html) - **HIGH confidence**
+- [Python email module documentation](https://docs.python.org/3/library/email.html) - **HIGH confidence**
+- [Python smtplib documentation](https://docs.python.org/3/library/smtplib.html) - **HIGH confidence**
+- [Campaign Monitor CSS Support Guide](https://www.campaignmonitor.com/css/) - **HIGH confidence**
+- [Litmus Outlook Email Rendering Guide](https://www.litmus.com/blog/a-guide-to-rendering-differences-in-microsoft-outlook-clients) - **HIGH confidence**
+- [OWASP SSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html) - **HIGH confidence** (for URL validation patterns)

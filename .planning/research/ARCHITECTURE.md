@@ -855,3 +855,455 @@ The existing `destination_executor.py` has basic ODS support. Migration strategy
   - `backend/alembic/versions/030_update_ods_pg_tool.py` - ODS node schema
 
 **Confidence Level:** HIGH - Based on direct analysis of existing production codebase.
+
+---
+
+# Appendix: Email Node with Dynamic Templates Architecture
+
+**Milestone:** v1.7 Email Node with Dynamic Templates  
+**Scope:** Integration of full Email Node capabilities with Deno-Python architecture
+
+## Email Node Executive Summary
+
+The Email Node will integrate with the existing Deno-Python hybrid architecture using a **signal-based execution pattern** similar to the ODS PostgreSQL implementation. The Deno runner will emit an `EXEC_EMAIL` signal that the Python backend captures and processes using SMTP credentials from the encrypted DataSource system. Template resolution with `{{expression}}` syntax is already implemented in the Deno runner and will be reused for subject and body rendering.
+
+**Key architectural decisions:**
+1. **Signal-based execution** (not direct Deno SMTP) - credentials stay in Python, templates render in Deno
+2. **HTML + Text dual format** - supporting both HTML emails with table generation and plain text fallback
+3. **Template engine reuse** - leverage existing `resolveString()` in runner.ts
+4. **Security-first** - HTML sanitization in Python before SMTP transmission
+
+---
+
+## Email Integration with Deno Runner
+
+### Current State
+The Deno runner (`backend/app/runtime/runner.ts`) already has an email stub (lines 475-502):
+
+```typescript
+} else if (node.toolType === 'email') {
+  try {
+    const to = node.props?.to || 'admin@company.com';
+    const subject = node.props?.subject || 'Flow Notification';
+    const body = node.props?.body || `Flow execution result: ${JSON.stringify(context.payload, null, 2)}`;
+    const triggerOn = node.props?.trigger_on || 'success';
+    
+    console.log(`[Email] Mock Sending Email...`);
+    // ... mock implementation
+  }
+}
+```
+
+### Proposed EXEC_EMAIL Signal Pattern
+
+Use the **EXEC_ODS signal pattern** as a blueprint:
+
+```
+Deno Runner                              Python Backend
+    |                                         |
+    |-- EXEC_EMAIL:{node_id}:{batch_id} ---->|
+    |-- EXEC_EMAIL_PAYLOAD:{json} ---------->|
+    |                                         |-- Resolve SMTP creds
+    |                                         |-- Render templates
+    |                                         |-- Sanitize HTML
+    |                                         |-- Send via SMTP
+    |<----------------------------------------|-- Return result
+```
+
+### Signal Protocol
+
+```typescript
+// In runner.ts - Email node execution
+const emailPayload = {
+  node_id: node.id,
+  target: {
+    connection_id: props.connection_id,  // SMTP DataSource ID
+    to: resolveString(props.to, context),
+    cc: resolveString(props.cc || '', context),
+    bcc: resolveString(props.bcc || '', context),
+  },
+  content: {
+    subject: resolveString(props.subject, context),
+    body: resolveString(props.body, context),  // HTML or text
+    format: props.format || 'html',  // 'html' | 'text'
+    generate_table: props.generate_table || false,
+  },
+  metadata: {
+    execution_id: flow.execution_id,
+    flow_id: flow.flow_id,
+    node_label: node.label,
+    timestamp: new Date().toISOString()
+  }
+};
+
+console.log(`EXEC_EMAIL:${node.id}:${batchId}`);
+console.log(`EXEC_EMAIL_PAYLOAD:${JSON.stringify(emailPayload)}`);
+```
+
+---
+
+## Email Template Compilation and Rendering Flow
+
+### Existing Template Engine
+
+The runner.ts has `resolveString()` (lines 44-59):
+
+```typescript
+function resolveString(str: string, context: any): string {
+  if (!str || typeof str !== 'string') return str;
+  return str.replace(/\{\{([\s\S]+?)\}\}/g, (match, path) => {
+    const parts = path.trim().split('.');
+    let val: any = context;
+    for (const part of parts) {
+      if (val && typeof val === 'object' && part in val) {
+        val = val[part];
+      } else {
+        return match; // Not found, keep placeholder
+      }
+    }
+    if (val === undefined || val === null) return "";
+    return typeof val === 'object' ? JSON.stringify(val) : String(val);
+  });
+}
+```
+
+### Template Resolution Flow
+
+```
+Upstream Node Output
+[{"customer": "ACME", "amount": 1500}, ...]
+         |
+         | context.payload
+         v
+Email Node Template Resolution
+
+Subject: "Sales Report - {{date}}"
+Body: "<h1>Top Customers</h1>{{table}}"
+
+resolveString() -> "Sales Report - 2026-05-16"
+         |
+         v
+Special Helper: Table Generation
+
+If {{table}} placeholder detected and payload is array:
+Auto-generate HTML table from first object's keys as headers
+         |
+         | EXEC_EMAIL_PAYLOAD
+         v
+Python Backend
+- Resolve SMTP connection from DataSource
+- Sanitize HTML content
+- Send email via smtplib
+```
+
+### Template Syntax Support
+
+| Syntax | Example | Output |
+|--------|---------|--------|
+| Simple property | `{{customer}}` | Value of customer field |
+| Nested property | `{{order.total}}` | Nested object access |
+| Array index | `{{items.0.name}}` | First item's name |
+| Special helpers | `{{table}}` | Auto-generated HTML table |
+| Fallback | `{{name or "Guest"}}` | Default value if undefined |
+
+---
+
+## Email Service Architecture
+
+### New Components for Email
+
+```
+backend/
+├── app/
+│   ├── services/
+│   │   ├── deno_service.py          (MODIFY) - Add EXEC_EMAIL handler
+│   │   ├── email_executor.py        (NEW)    - SMTP execution service
+│   │   └── connection_testing.py    (EXISTS) - Already has SmtpStrategy
+│   ├── schemas/
+│   │   └── email_schemas.py         (NEW)    - Email payload validation
+│   └── runtime/
+│       └── runner.ts                (MODIFY) - EXEC_EMAIL signal emission
+```
+
+### EmailExecutor Service
+
+```python
+# backend/app/services/email_executor.py
+from dataclasses import dataclass
+from typing import List, Optional, Dict, Any
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import formatdate
+
+@dataclass
+class EmailConfig:
+    connection_id: str
+    smtp_host: str
+    smtp_port: int
+    smtp_use_ssl: bool
+    smtp_user: str
+    smtp_password: str
+    from_address: str
+
+@dataclass
+class EmailResult:
+    success: bool
+    message_id: Optional[str]
+    error: Optional[str]
+    recipients_count: int
+    duration_ms: int
+
+class EmailExecutor:
+    async def execute(
+        self,
+        config: EmailConfig,
+        to_addresses: List[str],
+        cc_addresses: List[str],
+        bcc_addresses: List[str],
+        subject: str,
+        body_html: Optional[str],
+        body_text: Optional[str]
+    ) -> EmailResult:
+        """
+        Execute email send via SMTP.
+        - Sends both HTML and text parts (multipart/alternative)
+        - Sanitizes HTML before sending
+        - Handles SMTP authentication
+        """
+        pass
+    
+    def _sanitize_html(self, html: str) -> str:
+        """
+        Sanitize HTML to prevent XSS in email clients.
+        Uses bleach or similar library.
+        """
+        pass
+    
+    def _generate_table(self, data: List[Dict]) -> str:
+        """
+        Generate HTML table from array of objects.
+        Called when {{table}} helper is used.
+        """
+        pass
+
+email_executor = EmailExecutor()
+```
+
+### Signal Handler in DenoService
+
+```python
+# backend/app/services/deno_service.py - Add to run_flow_stream()
+
+# Handle EXEC_EMAIL signal (similar to EXEC_ODS)
+if line.startswith("EXEC_EMAIL:") and i + 1 < len(lines):
+    parts = line.split(":")
+    if len(parts) >= 3:
+        node_id = parts[1]
+        batch_id = parts[2]
+        
+        next_line = lines[i + 1].strip()
+        if next_line.startswith("EXEC_EMAIL_PAYLOAD:"):
+            i += 1
+            try:
+                email_payload = json.loads(next_line[len("EXEC_EMAIL_PAYLOAD:"):])
+                
+                # Yield status update
+                yield {
+                    "type": "node_log",
+                    "node_id": node_id,
+                    "status": "running",
+                    "message": "Sending email..."
+                }
+                
+                # Execute email if db session available
+                if db is not None:
+                    email_result = await self._handle_email_execution(email_payload, db)
+                    
+                    yield {
+                        "type": "email_result",
+                        "node_id": node_id,
+                        "batch_id": batch_id,
+                        "result": email_result
+                    }
+                    
+                    if email_result["success"]:
+                        yield {"type": "node_status", "node_id": node_id, "status": "success"}
+                    else:
+                        yield {"type": "node_status", "node_id": node_id, "status": "error"}
+                else:
+                    yield {
+                        "type": "error",
+                        "message": "No database session available for email execution"
+                    }
+            except Exception as e:
+                logger.error(f"Email execution error: {e}")
+                yield {"type": "error", "message": f"Email execution failed: {e}"}
+```
+
+---
+
+## Email Security Considerations
+
+### HTML Sanitization
+
+**Threat:** HTML email can contain malicious scripts, tracking pixels, or phishing elements.
+
+**Solution:**
+```python
+import bleach
+
+ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'div', 'span', 'pre', 'code', 'blockquote'
+]
+
+ALLOWED_ATTRIBUTES = {
+    'a': ['href', 'title'],
+    'img': ['src', 'alt', 'width', 'height'],
+    'table': ['border', 'cellpadding', 'cellspacing'],
+    'th': ['colspan', 'rowspan'],
+    'td': ['colspan', 'rowspan'],
+}
+
+def sanitize_html(html: str) -> str:
+    return bleach.clean(
+        html,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRIBUTES,
+        strip=True  # Remove disallowed tags completely
+    )
+```
+
+### Template Injection Prevention
+
+**Threat:** Malicious templates with code execution attempts
+
+**Mitigation:**
+- Deno's `resolveString()` only does property access, no code execution
+- Context isolation - template only accesses `context.payload` data
+- No `eval()` or `new Function()` in template resolution
+
+### SMTP Security
+
+**Requirements:**
+- Credentials stored encrypted in DataSource (already implemented)
+- Use TLS/SSL for SMTP connections (`use_ssl` flag in SmtpConfig)
+- Timeout on SMTP operations (10s default)
+- No credential logging
+
+---
+
+## Email Node: New vs Modified Components
+
+### New Components
+
+| Component | Purpose | Lines Est. |
+|-----------|---------|------------|
+| `email_executor.py` | SMTP execution service | ~200 |
+| `email_schemas.py` | Email payload Pydantic models | ~50 |
+| Migration for tool update | Add connection_id, body, format props | ~30 |
+
+### Modified Components
+
+| Component | Changes | Lines Est. |
+|-----------|---------|------------|
+| `runner.ts` | Add EXEC_EMAIL signal emission | ~60 |
+| `deno_service.py` | Add _handle_email_execution() method | ~80 |
+| Tool definition (DB) | Add connection_id, body, format, cc, bcc props | ~20 |
+| FlowEditorCanvas.vue | Add connection selector for email nodes | ~30 |
+
+### No Changes Required
+
+| Component | Why |
+|-----------|-----|
+| `connection_testing.py` | SmtpStrategy already exists |
+| `connection_schemas.py` | SmtpConfig already exists |
+| DataSource system | SMTP connections already supported |
+| Template engine | `resolveString()` already handles `{{}}` syntax |
+
+---
+
+## Email Node Build Order
+
+### Phase 1: Foundation (Week 1)
+
+**Goal:** Get basic email sending working
+
+1. **Update email tool definition** (DB migration)
+   - Add `connection_id` prop (required)
+   - Add `body` prop (textarea, supports HTML)
+   - Add `format` prop (select: 'html' | 'text')
+   - Add `cc`, `bcc` props (optional)
+
+2. **Create email_schemas.py**
+   - EmailPayload model
+   - EmailResult model
+   - EmailConfig model
+
+3. **Create email_executor.py**
+   - Basic SMTP sending
+   - HTML sanitization
+   - Error handling
+
+### Phase 2: Deno Integration (Week 1-2)
+
+**Goal:** Connect Deno runner to Python executor
+
+4. **Update runner.ts**
+   - Add EXEC_EMAIL signal emission
+   - Template resolution for to/subject/body
+
+5. **Update deno_service.py**
+   - Add EXEC_EMAIL signal handler
+   - Integrate with EmailExecutor
+
+### Phase 3: Advanced Features (Week 2)
+
+**Goal:** Add dynamic content generation
+
+6. **Add table generation helper**
+   - Detect `{{table}}` placeholder
+   - Generate HTML table from array payload
+   - Handle empty/null data gracefully
+
+7. **Add FlowEditorCanvas.vue enhancements**
+   - Connection selector for SMTP
+   - Rich text editor for body (optional)
+   - Preview template button
+
+### Phase 4: Testing & Polish (Week 3)
+
+8. **Security hardening**
+   - HTML sanitization tests
+   - Template injection tests
+   - SMTP timeout tests
+
+9. **Error handling**
+   - Invalid connection ID
+   - SMTP authentication failure
+   - Template syntax errors
+
+---
+
+## Email Node Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| SMTP credentials exposure | Low | High | Use existing encrypted DataSource system |
+| HTML injection in emails | Medium | Medium | Bleach sanitization before send |
+| Template syntax errors | High | Low | Graceful fallback (keep placeholder) |
+| SMTP timeouts | Medium | Medium | 10s timeout, async execution |
+| Large payload table generation | Medium | Medium | Limit table rows (100 max) |
+
+---
+
+## Email Node Sources
+
+- `backend/app/runtime/runner.ts` - Deno execution model
+- `backend/app/services/deno_service.py` - Signal handling pattern
+- `backend/app/services/ods_executor.py` - Executor service pattern (follow same structure)
+- `backend/app/services/connection_testing.py` - SMTP connection testing
+- `backend/alembic/versions/008_add_integration_tables.py` - Tool definitions
+- `backend/app/schemas/connection_schemas.py` - SMTP config schema

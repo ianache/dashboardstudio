@@ -450,8 +450,16 @@ domain to lowercase, and filters out invalid addresses.
             # Send via SMTP
             recipients = to_valid + cc_valid + bcc_valid
             
-            with smtplib.SMTP(config.smtp_host, config.smtp_port, timeout=config.timeout) as server:
-                if config.smtp_use_ssl:
+            # Determine if we should use implicit SSL (SMTP_SSL) or STARTTLS
+            # Port 465 is the standard implicit SSL port.
+            if config.smtp_use_ssl and config.smtp_port == 465:
+                smtp_server_class = smtplib.SMTP_SSL
+            else:
+                smtp_server_class = smtplib.SMTP
+
+            with smtp_server_class(config.smtp_host, config.smtp_port, timeout=config.timeout) as server:
+                # For non-465 ports with SSL enabled, we start TLS explicitly (STARTTLS)
+                if config.smtp_use_ssl and config.smtp_port != 465:
                     server.starttls()
                 
                 server.login(config.smtp_user, config.smtp_password)
@@ -531,7 +539,7 @@ domain to lowercase, and filters out invalid addresses.
         try:
             # Import models here to avoid circular imports
             from app.models.models import DataSource
-            from app.services.crypto import process_sensitive_fields
+            from app.core.encryption import process_sensitive_fields
             
             # Resolve DataSource
             connection_id = payload.target.get('connection_id')
@@ -575,9 +583,9 @@ domain to lowercase, and filters out invalid addresses.
                     smtp_host=config_dict.get('host', config_dict.get('smtp_host', '')),
                     smtp_port=int(config_dict.get('port', config_dict.get('smtp_port', 587))),
                     smtp_use_ssl=config_dict.get('use_ssl', config_dict.get('smtp_use_ssl', True)),
-                    smtp_user=config_dict.get('user', config_dict.get('smtp_user', '')),
+                    smtp_user=config_dict.get('user', config_dict.get('smtp_user', config_dict.get('email', ''))),
                     smtp_password=config_dict.get('password', config_dict.get('smtp_password', '')),
-                    from_address=config_dict.get('from_address', config_dict.get('from', config_dict.get('user', ''))),
+                    from_address=config_dict.get('from_address', config_dict.get('from', config_dict.get('user', config_dict.get('email', '')))),
                     timeout=int(config_dict.get('timeout', 30))
                 )
             except Exception as e:

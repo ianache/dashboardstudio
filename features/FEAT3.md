@@ -6,5 +6,4 @@
 
 - Se requiere visualizar el gráfico como componente estandar (FlowEditorCanvas) cuando se seleccone una ejecución del historial de ejecuciones colocando un icono de lupa en la columna "ACCIONES" para cada fila de la tabla de ejecuciones. Modificar el boton actual "Ver" por un icono que represente "details".
 
-- El nodo 'ODS PostgreSQL' debe permitir realizar el upsert, considerando uno o varios campos en la tabla
-   destino seleccionados (solo cuando el modo de escritura sea UPSERT) como los campos de identidad identidad/llave primaria (simple o combinada). El editor de propiedades debiera permitir listar las tablas para el esquema (al costado del editor de 'TABLA DESTINO' que deberá ser un combobox de edición y selección unica) debe colocarse un boton para Refresh que deberá obtener todas las tablas disponibles
+- El nodo 'ODS PostgreSQL' debe permitir realizar el upsert, considerando uno o varios campos en la tabla destino seleccionados (solo cuando el modo de escritura sea UPSERT) como los campos de identidad identidad/llave primaria (simple o combinada). El editor de propiedades debiera permitir listar las tablas para el esquema (al costado del editor de 'TABLA DESTINO' que deberá ser un combobox de edición y selección unica) debe colocarse un boton para Refresh que deberá obtener todas las tablas disponibles
