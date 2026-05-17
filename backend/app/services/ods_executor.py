@@ -220,6 +220,176 @@ class ODSExecutor:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
+    def _validate_config(self, config: ODSConfig) -> None:
+        """Validate ODSConfig (internal hook for validation)."""
+        # Config validates itself in __post_init__, but we keep this for
+        # explicit validation calls and future extension points
+        if not isinstance(config, ODSConfig):
+            raise ValueError(f"config must be an ODSConfig instance, got {type(config)}")
+    
+    def _validate_records(
+        self, 
+        records: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Validate records for JSON serialization safety.
+        
+        Checks:
+        - No NaN or Infinity values
+        - BigInt values converted to strings
+        - Dates are ISO 8601 strings
+        
+        Args:
+            records: List of record dictionaries
+            
+        Returns:
+            Validated/cleaned records
+            
+        Raises:
+            ValueError: If records contain invalid values
+        """
+        import math
+        import datetime
+        
+        validated = []
+        for idx, record in enumerate(records):
+            clean_record = {}
+            for key, value in record.items():
+                # Check for NaN/Infinity
+                if isinstance(value, float):
+                    if math.isnan(value) or math.isinf(value):
+                        raise ValueError(
+                            f"Record {idx} field '{key}' contains invalid float value (NaN or Infinity)"
+                        )
+                    clean_record[key] = value
+                # Convert BigInt to string
+                elif isinstance(value, int) and abs(value) > 2**53:
+                    clean_record[key] = str(value)
+                # Ensure dates are strings
+                elif isinstance(value, (datetime.datetime, datetime.date)):
+                    clean_record[key] = value.isoformat()
+                else:
+                    clean_record[key] = value
+            validated.append(clean_record)
+        
+        return validated
+    
+    async def _validate_table_exists(
+        self, 
+        conn: asyncpg.Connection, 
+        schema: str, 
+        table: str
+    ) -> bool:
+        """
+        Validate that the target schema and table exist.
+        
+        Args:
+            conn: Database connection
+            schema: Schema name
+            table: Table name
+            
+        Returns:
+            True if table exists
+            
+        Raises:
+            ValueError: If schema or table does not exist
+        """
+        # Validate schema exists
+        schema_query = """
+            SELECT EXISTS(
+                SELECT 1 FROM information_schema.schemata 
+                WHERE schema_name = $1
+            )
+        """
+        schema_exists = await conn.fetchval(schema_query, schema)
+        if not schema_exists:
+            raise ValueError(f"Schema '{schema}' does not exist")
+        
+        # Validate table exists
+        table_query = """
+            SELECT EXISTS(
+                SELECT 1 FROM information_schema.tables 
+                WHERE table_schema = $1 AND table_name = $2
+            )
+        """
+        table_exists = await conn.fetchval(table_query, schema, table)
+        if not table_exists:
+            raise ValueError(f"Table '{schema}.{table}' does not exist")
+        
+        return True
+    
+    async def _validate_unique_constraint(
+        self, 
+        conn: asyncpg.Connection, 
+        schema: str, 
+        table: str,
+        identity_fields: List[str]
+    ) -> bool:
+        """
+        Validate that identity fields have a unique constraint.
+        Required for upsert operations to prevent ON CONFLICT failures.
+        
+        Args:
+            conn: Database connection
+            schema: Schema name
+            table: Table name
+            identity_fields: List of identity field names
+            
+        Returns:
+            True if a unique constraint exists on identity_fields
+            
+        Raises:
+            ValueError: If no matching unique constraint found
+        """
+        if not identity_fields:
+            raise ValueError("Identity fields required for upsert validation")
+        
+        # Query for unique constraints that match the identity fields
+        query = """
+            SELECT tc.constraint_name, array_agg(kcu.column_name ORDER BY kcu.ordinal_position) as columns
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu 
+                ON tc.constraint_name = kcu.constraint_name
+                AND tc.table_schema = kcu.table_schema
+            WHERE tc.table_schema = $1
+                AND tc.table_name = $2
+                AND tc.constraint_type = 'UNIQUE'
+            GROUP BY tc.constraint_name
+        """
+        
+        rows = await conn.fetch(query, schema, table)
+        
+        identity_set = set(identity_fields)
+        for row in rows:
+            constraint_columns = set(row['columns'])
+            # Check if identity fields are a subset of constraint columns
+            if identity_set.issubset(constraint_columns):
+                return True
+        
+        # Also check for primary key
+        pk_query = """
+            SELECT array_agg(kcu.column_name ORDER BY kcu.ordinal_position) as columns
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu 
+                ON tc.constraint_name = kcu.constraint_name
+                AND tc.table_schema = kcu.table_schema
+            WHERE tc.table_schema = $1
+                AND tc.table_name = $2
+                AND tc.constraint_type = 'PRIMARY KEY'
+            GROUP BY tc.constraint_name
+        """
+        
+        pk_rows = await conn.fetch(pk_query, schema, table)
+        for row in pk_rows:
+            pk_columns = set(row['columns'])
+            if identity_set.issubset(pk_columns):
+                return True
+        
+        raise ValueError(
+            f"No unique constraint found on '{schema}.{table}' matching identity fields: {identity_fields}. "
+            f"Upsert requires a unique index or primary key on the identity fields."
+        )
+    
     async def execute(
         self,
         config: ODSConfig,
@@ -259,15 +429,25 @@ class ODSExecutor:
         import time
         start_time = time.time()
         
-        # Validate inputs
+        # Validate config
+        self._validate_config(config)
+        
+        # Validate records
+        validated_records = self._validate_records(records)
+        records = validated_records
+        
         if not records:
             raise ValueError("records cannot be empty")
         
-        if not isinstance(config, ODSConfig):
-            raise ValueError(f"config must be an ODSConfig instance, got {type(config)}")
+        # Validate table exists
+        await self._validate_table_exists(connection, config.schema, config.table)
         
-        # Sort records by identity fields for upsert (deadlock prevention)
+        # Validate unique constraint for upsert
         if config.write_mode == WriteMode.UPSERT:
+            await self._validate_unique_constraint(
+                connection, config.schema, config.table, config.identity_fields
+            )
+            # Sort records by identity fields for upsert (deadlock prevention)
             records = self._sort_records_for_upsert(records, config.identity_fields)
         
         # Split records into batches
@@ -363,6 +543,9 @@ class ODSExecutor:
                     break
         
         # All retries exhausted or non-retryable error
+        if last_error is None:
+            # Should not happen, but handle gracefully
+            last_error = Exception("Unknown error occurred")
         error_info = self._classify_error(last_error, batch_number)
         self.logger.error(
             f"Batch {batch_number} failed permanently: {error_info.error_type}: "
