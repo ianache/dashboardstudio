@@ -8,7 +8,7 @@
 | 29. Metadata Inspection API | 2/2 | Complete   | 2026-05-16 |
 | 30. ODS Node UI Enhancement | 1/1 | Complete | 2026-05-16 |
 | 31. ODS Execution Engine | 3/3 | Complete    | 2026-05-17 |
-| 32. Email Node Implementation | 0/3 | Pending | - |
+| 32. Email Node Implementation | 1/3 | In Progress | 2026-05-16 |
 
 ---
 
@@ -137,27 +137,29 @@ Files: `backend/app/services/ods_executor.py`, `backend/app/services/destination
 ### Phase 32: Email Node Implementation
 **Goal**: Implementar el nodo Email con soporte para plantillas dinámicas usando Jinja2, permitiendo el envío de correos con contenido generado dinámicamente desde el input del flujo.
 **Requirements**: EMAIL-01 through EMAIL-24
-**Status**: Pending
+**Status**: In Progress (1/3 plans complete)
 **Plans**: 3 plans in 3 waves
 
 **Phase 32 Details:**
-- [x] 32-01-PLAN.md — Core Email Service (email_executor.py, email_schemas.py, Jinja2 integration)
-- [x] 32-02-PLAN.md — Deno Integration (EXEC_EMAIL signal, runner.ts modifications, deno_service.py handler)
-- [x] 32-03-PLAN.md — UI & Testing (FlowEditorCanvas.vue updates, HTML sanitization, unit tests)
+- [x] 32-01-PLAN.md — Core Email Service (email_executor.py, email_schemas.py, Jinja2 integration) - **COMPLETE**
+- [ ] 32-02-PLAN.md — Deno Integration (EXEC_EMAIL signal, runner.ts modifications, deno_service.py handler)
+- [ ] 32-03-PLAN.md — UI & Testing (FlowEditorCanvas.vue updates, HTML sanitization, unit tests)
 
 **Plan Structure:**
 
-**Plan 32-01: Core Email Service (Wave 1)**
+**Plan 32-01: Core Email Service (Wave 1)** - **COMPLETE**
 Requirements: EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-04, EMAIL-05, EMAIL-06, EMAIL-07, EMAIL-08, EMAIL-09, EMAIL-15, EMAIL-16, EMAIL-17, EMAIL-18, EMAIL-19, EMAIL-20
+Completed: 2026-05-16
 Files: `backend/app/services/email_schemas.py`, `backend/app/services/email_executor.py`, `backend/pyproject.toml`
-- Create EmailSchemas with Pydantic models (EmailPayload, EmailResult, EmailConfig, EmailContent)
-- Create EmailExecutor class with Jinja2 SandboxedEnvironment for secure templating
-- Implement template rendering with {{expression}}, {% for %}, {% if %} syntax
-- Implement HTML sanitization using nh3 library
-- Implement SMTP sending via DataSource connections
-- Auto-escaping for XSS prevention
-- Support for undefined variables (render as empty string)
-- Clear error messages for template syntax errors
+- ✅ Create EmailSchemas with Pydantic models (EmailPayload, EmailResult, EmailConfig, EmailContent)
+- ✅ Create EmailExecutor class with Jinja2 SandboxedEnvironment for secure templating
+- ✅ Implement template rendering with {{expression}}, {% for %}, {% if %} syntax
+- ✅ Implement HTML sanitization using nh3 library
+- ✅ Implement SMTP sending via DataSource connections
+- ✅ Auto-escaping for XSS prevention
+- ✅ Support for undefined variables (render as empty string via UndefinedSilently)
+- ✅ Clear error messages for template syntax errors
+- ✅ Comprehensive unit tests (44 tests passing)
 
 **Plan 32-02: Deno Integration (Wave 2)**
 Requirements: EMAIL-10, EMAIL-11, EMAIL-12, EMAIL-13, EMAIL-14
