@@ -92,7 +92,7 @@ Implementar un configurador de visualizaciones dinámico con:
 
 **Archive:** `.planning/milestones/v1.6-ROADMAP.md`
 
-## Current Milestone: v1.7 Email Node with Dynamic Templates
+## ✅ Milestone: v1.7 Email Node with Dynamic Templates (SHIPPED 2026-05-17)
 **Goal:** Implementar un nodo de tipo Email que permita el envío de correos electrónicos usando conexiones SMTP configuradas, con soporte para plantillas dinámicas usando marcadores `{{expresion}}` en asunto y cuerpo del mensaje.
 
 **Target features:**
@@ -102,6 +102,25 @@ Implementar un configurador de visualizaciones dinámico con:
 - Generación dinámica de contenido complejo (tablas) a partir de arreglos de objetos
 - Motor de templating que evalúe expresiones contra el input del nodo
 - Integración con el sistema existente de conexiones (DataSource) para SMTP
+
+**Key Deliverables:**
+- EmailExecutor con Jinja2 SandboxedEnvironment (630 líneas)
+- EXEC_EMAIL signal protocol (Deno-Python integration)
+- 44 unit tests (26 executor + 18 schema tests)
+- HTML sanitization with nh3 library
+- Template syntax hints in UI
+
+**Archive:** `.planning/milestones/v1.7-ROADMAP.md`
+
+## Current Milestone: v1.8 — Planning Next Features
+**Status:** Defining requirements and scope
+
+**Potential areas:**
+- Advanced templating features (filters, helpers)
+- Email queuing and delivery tracking
+- Additional node types (FTP, HTTP, etc.)
+- Performance optimizations
+- UI/UX improvements
 
 
 
