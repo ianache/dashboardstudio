@@ -6,6 +6,8 @@ import subprocess
 from typing import Optional, Dict, Any
 
 from app.services.ods_executor import ODSExecutor, ODSConfig, WriteMode, ods_executor
+from app.services.email_executor import EmailExecutor, email_executor
+from app.services.email_schemas import EmailPayload
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +76,13 @@ class DenoService:
                         pass
         return result
 
-    async def run_flow_stream(self, flow_data: Dict[str, Any], payload: Optional[Dict] = None, db: Any = None):
+    async def run_flow_stream(
+        self,
+        flow_data: Dict[str, Any],
+        payload: Optional[Dict] = None,
+        db: Any = None,
+        execution_id: Optional[str] = None
+    ):
         """
         Runs a flow in Deno and yields log messages.
         Uses subprocess.run via run_in_executor to avoid SelectorEventLoop
@@ -85,7 +93,13 @@ class DenoService:
             flow_data: Flow configuration with nodes and connections
             payload: Initial payload data
             db: Database session for resolving data source connections (needed for ODS nodes)
+            execution_id: Optional database execution ID to link logs
         """
+        if execution_id:
+            if "metadata" not in flow_data or not flow_data["metadata"]:
+                flow_data["metadata"] = {}
+            flow_data["metadata"]["execution_id"] = execution_id
+
         if not os.path.exists(self.full_runner_path):
             yield {"type": "error", "message": f"Runner script not found at {self.full_runner_path}"}
             return
@@ -173,6 +187,10 @@ class DenoService:
                         i += 1  # Advance to payload line
                         try:
                             ods_payload = json.loads(next_line[len("EXEC_ODS_PAYLOAD:"):])
+                            if execution_id:
+                                if "metadata" not in ods_payload or not ods_payload["metadata"]:
+                                    ods_payload["metadata"] = {}
+                                ods_payload["metadata"]["execution_id"] = execution_id
                             
                             # Yield status update
                             yield {
@@ -184,18 +202,18 @@ class DenoService:
                             
                             # Execute ODS operation if db session available
                             if db is not None:
-                                result = await self._handle_ods_execution(ods_payload, db)
+                                ods_result = await self._handle_ods_execution(ods_payload, db)
                                 
                                 # Yield result
                                 yield {
                                     "type": "ods_result",
                                     "node_id": node_id,
                                     "batch_id": batch_id,
-                                    "result": result
+                                    "result": ods_result
                                 }
                                 
                                 # Update node status
-                                if result["success"]:
+                                if ods_result["success"]:
                                     yield {"type": "node_status", "node_id": node_id, "status": "success"}
                                     nodes_processed.add(node_id)
                                 else:
@@ -218,6 +236,70 @@ class DenoService:
                         except Exception as e:
                             logger.error(f"ODS execution error: {e}")
                             yield {"type": "error", "message": f"ODS execution failed: {e}"}
+                            yield {"type": "node_status", "node_id": node_id, "status": "error"}
+            
+            # Handle EXEC_EMAIL signal (look ahead for payload)
+            elif line.startswith("EXEC_EMAIL:") and i + 1 < len(lines):
+                parts = line.split(":")
+                if len(parts) >= 3:
+                    node_id = parts[1]
+                    batch_id = parts[2]
+                    
+                    # Next line should be EXEC_EMAIL_PAYLOAD
+                    next_line = lines[i + 1].strip()
+                    if next_line.startswith("EXEC_EMAIL_PAYLOAD:"):
+                        i += 1  # Advance to payload line
+                        try:
+                            email_payload = json.loads(next_line[len("EXEC_EMAIL_PAYLOAD:"):])
+                            if execution_id:
+                                if "metadata" not in email_payload or not email_payload["metadata"]:
+                                    email_payload["metadata"] = {}
+                                email_payload["metadata"]["execution_id"] = execution_id
+                            
+                            # Yield status update
+                            yield {
+                                "type": "node_log",
+                                "node_id": node_id,
+                                "status": "running",
+                                "message": "Executing email send operation"
+                            }
+                            
+                            # Execute email operation if db session available
+                            if db is not None:
+                                email_result = await self._handle_email_execution(email_payload, db)
+                                
+                                # Yield result
+                                yield {
+                                    "type": "email_result",
+                                    "node_id": node_id,
+                                    "batch_id": batch_id,
+                                    "result": email_result
+                                }
+                                
+                                # Update node status
+                                if email_result["success"]:
+                                    yield {"type": "node_status", "node_id": node_id, "status": "success"}
+                                    nodes_processed.add(node_id)
+                                else:
+                                    yield {"type": "node_status", "node_id": node_id, "status": "error"}
+                            else:
+                                logger.warning(f"No db session available for email execution on node {node_id}")
+                                yield {
+                                    "type": "error",
+                                    "message": f"No database session available for email execution"
+                                }
+                                yield {"type": "node_status", "node_id": node_id, "status": "error"}
+                            
+                            if total_nodes > 0:
+                                progress = (len(nodes_processed) / total_nodes) * 100
+                                yield {"type": "progress", "progress": round(progress, 2)}
+                                
+                        except json.JSONDecodeError as e:
+                            logger.error(f"Failed to parse EXEC_EMAIL_PAYLOAD: {e}")
+                            yield {"type": "error", "message": f"Invalid EXEC_EMAIL payload: {e}"}
+                        except Exception as e:
+                            logger.error(f"Email execution error: {e}")
+                            yield {"type": "error", "message": f"Email execution failed: {e}"}
                             yield {"type": "node_status", "node_id": node_id, "status": "error"}
             
             # Handle existing signals (NODE_STATUS, NODE_LOG_JSON, FINAL_RESULT)
@@ -352,19 +434,10 @@ class DenoService:
             config_data = payload['config']
             records = payload['data']
             
-            config = ODSConfig(
-                connection_id=target['connection_id'],
-                schema=target['schema'],
-                table=target['table'],
-                write_mode=WriteMode(config_data['write_mode']),
-                identity_fields=config_data.get('identity_fields', []),
-                batch_size=config_data.get('batch_size', 1000)
-            )
-            
             # Resolve connection credentials from database
-            ds = db.query(DataSource).filter(DataSource.id == config.connection_id).first()
+            ds = db.query(DataSource).filter(DataSource.id == target['connection_id']).first()
             if not ds:
-                raise ValueError(f"Connection {config.connection_id} not found")
+                raise ValueError(f"Connection {target['connection_id']} not found")
             
             # Parse connection config
             try:
@@ -373,6 +446,23 @@ class DenoService:
                 raw_config = {"url": ds.connection_url}
             
             config_dict = process_sensitive_fields(raw_config, action="decrypt")
+
+            # Resolve schema: Node Value > Connection Value > 'public'
+            schema = target.get('schema')
+            if not schema:
+                # Try from connection config
+                schema = config_dict.get('schema')
+            if not schema:
+                schema = 'public'
+
+            config = ODSConfig(
+                connection_id=target['connection_id'],
+                schema=schema,
+                table=target['table'],
+                write_mode=WriteMode(config_data['write_mode']),
+                identity_fields=config_data.get('identity_fields', []),
+                batch_size=config_data.get('batch_size', 1000)
+            )
             
             # Build connection string for PostgreSQL
             if config_dict.get('type') == 'database' or 'host' in config_dict:
@@ -434,6 +524,54 @@ class DenoService:
                 "batches_successful": 0,
                 "batches_failed": 0,
                 "errors": [{"error_type": "ExecutionError", "message": str(e)}],
+                "duration_ms": 0
+            }
+
+    async def _handle_email_execution(
+        self, 
+        payload: Dict[str, Any], 
+        db: Any
+    ) -> Dict[str, Any]:
+        """
+        Handle EXEC_EMAIL signal by delegating to EmailExecutor.
+        
+        Args:
+            payload: The EXEC_EMAIL_PAYLOAD JSON data
+            db: Database session for resolving SMTP connection credentials
+            
+        Returns:
+            Dict with execution results
+        """
+        logger.info(f"Handling EXEC_EMAIL for node {payload.get('node_id')}")
+        
+        try:
+            # Parse EmailPayload from dict
+            email_payload = EmailPayload(
+                node_id=payload['node_id'],
+                target=payload['target'],
+                content=payload['content'],
+                metadata=payload['metadata'],
+                template_context=payload.get('template_context', {})
+            )
+            
+            # Execute email sending
+            result = await email_executor.execute(email_payload, db)
+            
+            return {
+                "success": result.success,
+                "message_id": result.message_id,
+                "error": result.error,
+                "recipients_count": result.recipients_count,
+                "duration_ms": result.duration_ms
+            }
+            
+        except Exception as e:
+            logger.error(f"Email execution failed: {e}")
+            return {
+                "success": False,
+                "message_id": None,
+                "error": str(e),
+                "recipients_count": 0,
                 "duration_ms": 0
             }
 
