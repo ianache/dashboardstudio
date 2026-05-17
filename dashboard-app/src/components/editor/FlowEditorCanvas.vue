@@ -556,6 +556,10 @@
 
               <!-- Textarea -->
               <textarea v-else-if="def.type === 'textarea'" v-model="selectedNode.props[key]" class="fec-prop-ta" :rows="def.rows || 3" :placeholder="def.placeholder || ''"></textarea>
+              <p v-if="def.type === 'textarea' && ['subject', 'body'].includes(key)" class="fec-template-hint">
+                <span class="msi" style="font-size:11px">info</span>
+                Supports {"{{"}variable{"}}"} and {"{%"} for {"%}"} template syntax
+              </p>
               
               <!-- Select -->
               <div v-else-if="def.type === 'select'" class="fec-sel-wrap">
@@ -633,6 +637,10 @@
               
               <!-- Default input -->
               <input v-else v-model="selectedNode.props[key]" class="fec-prop-i" :placeholder="def.placeholder || ''" />
+              <p v-if="key === 'subject'" class="fec-template-hint">
+                <span class="msi" style="font-size:11px">info</span>
+                Supports {"{{"}variable{"}}"} template syntax
+              </p>
             </div>
           </template>
 
@@ -2023,7 +2031,7 @@ onMounted(() => { setTimeout(fitView, 80) })
 .fec-bottom--resizing { transition: none !important; }
 
 .fec-resizer-v {
-  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  position: absolute; top: -4px; left: 0; right: 0; height: 8px;
   cursor: row-resize; z-index: 50; transition: background 0.2s;
 }
 .fec-resizer-v:hover { background: rgba(37, 99, 235, 0.2); }
@@ -2184,5 +2192,24 @@ onMounted(() => { setTimeout(fitView, 80) })
   color: #94a3b8;
   font-size: 11px;
   margin-left: 4px;
+}
+
+/* Template syntax hint for email fields */
+.fec-template-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
+}
+
+.fec-template-hint .msi {
+  color: #2563eb;
+  flex-shrink: 0;
 }
 </style>
