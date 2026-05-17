@@ -1,4 +1,29 @@
+"""
+Destination Executor - DEPRECATED for ODS operations.
+
+.. deprecated:: 
+    Use :mod:`app.services.ods_executor` for ODS PostgreSQL operations.
+    This module will be removed in a future version.
+
+MIGRATION GUIDE:
+    Old: destination_executor.post_execute_flow_nodes(flow_data, node_logs, db)
+    New: Use ODSExecutor via Deno signal protocol:
+        
+        from app.services.ods_executor import ods_executor, ODSConfig, WriteMode
+        
+        config = ODSConfig(
+            connection_id='conn-123',
+            schema='public',
+            table='my_table',
+            write_mode=WriteMode.UPSERT,
+            identity_fields=['id'],
+            batch_size=1000
+        )
+        result = await ods_executor.execute(config, records, connection)
+"""
+
 import logging
+import warnings
 from typing import Dict, Any, List
 import asyncpg
 from app.core.database import SessionLocal
@@ -8,11 +33,31 @@ import json
 
 logger = logging.getLogger(__name__)
 
+# Module-level deprecation warning
+warnings.warn(
+    "destination_executor.py is deprecated for ODS operations. "
+    "Use ods_executor.ODSExecutor instead. "
+    "This module will be removed in a future version.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 async def post_execute_flow_nodes(flow_data: Dict[str, Any], node_logs: List[Dict[str, Any]], db):
     """
     Post-execution for destination nodes (like ods_pg) that need Python-side execution
     after the Deno sandbox flow completes.
+    
+    .. deprecated:: 
+        Use :func:`ods_executor.ODSExecutor.execute` instead for ODS PostgreSQL operations.
+        This function is kept for backward compatibility but will be removed in a future version.
     """
+    warnings.warn(
+        "destination_executor.post_execute_flow_nodes is deprecated. "
+        "Use ods_executor.ODSExecutor for ODS PostgreSQL operations.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     nodes = {n["id"]: n for n in flow_data.get("nodes", [])}
     
     for log in node_logs:
