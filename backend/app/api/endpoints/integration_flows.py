@@ -76,7 +76,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
         success = False
 
         log_count = 0
-        async for log in deno_service.run_flow_stream(flow_data, payload):
+        async for log in deno_service.run_flow_stream(flow_data, payload, db=db):
             log_count += 1
             await websocket.send_json(log)
             
