@@ -181,7 +181,7 @@ async function main() {
       // Source nodes resolved by Python before Deno – skip but keep success status
       if ((node as any).__pre_executed) {
         console.log(`[Flow] Nodo pre-ejecutado: ${node.label} (${node.toolType}) — omitiendo`);
-        const prefetched = prefetchedOutputs[node.id] || { rows: [], duration: 0 };
+        const prefetched: any = prefetchedOutputs[node.id] || { rows: [], duration: 0 };
         // Support both old (array) and new (object) format for robustness
         const p = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
         const pythonDuration = Array.isArray(prefetched) ? 0 : (prefetched.duration || 0);
@@ -219,7 +219,7 @@ async function main() {
       emitStatus(node.id, 'running');
       console.log(`[Flow] Executing Node: ${node.label} (${node.toolType})`);
       
-      if (['http_rest', 'graphql_api', 'graphql', 'rest_api', 'http'].includes(node.toolType)) {
+      if (['http_rest', 'graphql_api', 'graphql', 'rest_api', 'http', 'webhook'].includes(node.toolType)) {
         try {
           const rawUrl = node.props?.url || "";
           const url = resolveString(rawUrl, context);
@@ -474,31 +474,92 @@ async function main() {
         }
       } else if (node.toolType === 'email') {
         try {
-          const to = node.props?.to || 'admin@company.com';
-          const subject = node.props?.subject || 'Flow Notification';
-          const body = node.props?.body || `Flow execution result: ${JSON.stringify(context.payload, null, 2)}`;
+          const connectionId = node.props?.connection_id;
+          if (!connectionId) {
+            throw new Error("Email node requires connection_id");
+          }
+
+          // Resolve template strings using context
+          const to = resolveString(node.props?.to || '', context);
+          const cc = resolveString(node.props?.cc || '', context);
+          const bcc = resolveString(node.props?.bcc || '', context);
+          const subject = resolveString(node.props?.subject || 'Flow Notification', context);
+          const body = resolveString(node.props?.body || '', context);
+          const format = node.props?.format || 'html';
           const triggerOn = node.props?.trigger_on || 'success';
 
-          console.log(`[Email] 📧 Mock Sending Email...`);
-          console.log(`[Email] To: ${to}`);
-          console.log(`[Email] Subject: ${subject}`);
-          console.log(`[Email] Trigger Condition: ${triggerOn}`);
+          // Parse recipients (support comma-separated or single)
+          const parseRecipients = (str: string): string[] => {
+            if (!str) return [];
+            return str.split(',').map(s => s.trim()).filter(s => s);
+          };
+
+          // Generate batch ID
+          const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
           
-          // In a real implementation, we would use an SMTP client here.
-          // For now, we log the intent and the payload.
-          console.log(`[Email] Content: ${body.substring(0, 100)}${body.length > 100 ? '...' : ''}`);
+          // Build email payload
+          const emailPayload = {
+            node_id: node.id,
+            target: {
+              connection_id: connectionId,
+              to: parseRecipients(to),
+              cc: parseRecipients(cc),
+              bcc: parseRecipients(bcc)
+            },
+            content: {
+              subject: subject,
+              body: body,
+              format: format
+            },
+            template_context: context.payload || {},
+            metadata: {
+              execution_id: (flow as any).execution_id || 'unknown',
+              flow_id: (flow as any).flow_id || 'unknown',
+              node_label: node.label,
+              timestamp: new Date().toISOString(),
+              trigger_on: triggerOn
+            }
+          };
           
-          console.log(`[Email] ✅ Message delivered to mail queue (simulated)`);
+          // Emit EXEC_EMAIL signal (two lines: header + payload)
+          console.log(`EXEC_EMAIL:${node.id}:${batchId}`);
+          console.log(`EXEC_EMAIL_PAYLOAD:${JSON.stringify(emailPayload)}`);
+          
+          // Mark as delegated - Python will update with actual results
+          context.payload = { 
+            status: 'delegated', 
+            operation: 'send_email',
+            message: 'Email execution delegated to Python backend'
+          };
+          
           const endMs = Date.now();
           const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
+          console.log(`NODE_LOG_JSON:${JSON.stringify({
+            node_id: node.id, 
+            status: 'success', 
+            input: currentPayload, 
+            output: context.payload, 
+            duration: endMs - startMs, 
+            start_time: startTime, 
+            end_time: endTime
+          })}`);
           emitStatus(node.id, 'success');
         } catch (err: any) {
           const endMs = Date.now();
           const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          console.error(`[Email Error] Failed to send: ${err.message}`);
+          console.log(`NODE_LOG_JSON:${JSON.stringify({
+            node_id: node.id, 
+            status: 'error', 
+            input: currentPayload, 
+            output: {}, 
+            duration: endMs - startMs, 
+            start_time: startTime, 
+            end_time: endTime,
+            error: err.message
+          })}`);
+          console.error(`[Email Error] ${err.message}`);
           emitStatus(node.id, 'error');
+          Deno.exit(1);
         }
       } else if (node.toolType === 'sql_source' || node.toolType === 'sql_destination') {
         try {
@@ -532,7 +593,7 @@ async function main() {
         try {
           const props = node.props || {};
           const connectionId = props.connection_id;
-          const schema = props.schema || 'public';
+          const schema = props.schema || '';
           const table = props.table;
           const writeMode = props.write_mode || 'append';
           const identityFields = props.identity_fields || [];
@@ -547,8 +608,16 @@ async function main() {
             throw new Error("Upsert mode requires at least one identity field");
           }
 
-          // Prepare data from upstream
-          const records = Array.isArray(context.payload) ? context.payload : [context.payload];
+          // Prepare data from upstream and flatten if we have nested arrays (multiple inputs)
+          const rawRecords = Array.isArray(context.payload) ? context.payload : [context.payload];
+          const records: any[] = [];
+          for (const item of rawRecords) {
+            if (Array.isArray(item)) {
+              records.push(...item);
+            } else if (item !== null && item !== undefined) {
+              records.push(item);
+            }
+          }
           
           if (records.length === 0) {
             console.log(`[ODS] No data to write for node ${node.id}`);
@@ -556,6 +625,9 @@ async function main() {
           } else {
             // Validate records don't contain NaN/Infinity (Pitfall 3 prevention)
             const validatedRecords = records.map((record, idx) => {
+              if (!record || typeof record !== 'object') {
+                return record;
+              }
               for (const [key, value] of Object.entries(record)) {
                 if (typeof value === 'number') {
                   if (Number.isNaN(value) || !Number.isFinite(value)) {
