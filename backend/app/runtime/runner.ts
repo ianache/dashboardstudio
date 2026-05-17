@@ -528,6 +528,116 @@ async function main() {
           emitStatus(node.id, 'error');
           Deno.exit(1);
         }
+      } else if (node.toolType === 'ods_pg') {
+        try {
+          const props = node.props || {};
+          const connectionId = props.connection_id;
+          const schema = props.schema || 'public';
+          const table = props.table;
+          const writeMode = props.write_mode || 'append';
+          const identityFields = props.identity_fields || [];
+          const batchSize = parseInt(props.batch_size || '1000', 10);
+
+          // Validation
+          if (!connectionId || !table) {
+            throw new Error("ODS PostgreSQL requires connection_id and table");
+          }
+
+          if (writeMode === 'upsert' && identityFields.length === 0) {
+            throw new Error("Upsert mode requires at least one identity field");
+          }
+
+          // Prepare data from upstream
+          const records = Array.isArray(context.payload) ? context.payload : [context.payload];
+          
+          if (records.length === 0) {
+            console.log(`[ODS] No data to write for node ${node.id}`);
+            context.payload = { status: 'skipped', rows: 0, message: 'No data to write' };
+          } else {
+            // Validate records don't contain NaN/Infinity (Pitfall 3 prevention)
+            const validatedRecords = records.map((record, idx) => {
+              for (const [key, value] of Object.entries(record)) {
+                if (typeof value === 'number') {
+                  if (Number.isNaN(value) || !Number.isFinite(value)) {
+                    throw new Error(`Record ${idx} field '${key}' contains invalid number (NaN or Infinity)`);
+                  }
+                }
+                // Convert BigInt to string
+                if (typeof value === 'bigint') {
+                  record[key] = value.toString();
+                }
+              }
+              return record;
+            });
+
+            // Generate batch ID
+            const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Build payload
+            const odsPayload = {
+              node_id: node.id,
+              operation: writeMode,
+              target: { 
+                connection_id: connectionId, 
+                schema, 
+                table 
+              },
+              config: { 
+                write_mode: writeMode, 
+                identity_fields: identityFields, 
+                batch_size: batchSize 
+              },
+              data: validatedRecords,
+              metadata: {
+                execution_id: (flow as any).execution_id || 'unknown',
+                flow_id: (flow as any).flow_id || 'unknown',
+                node_label: node.label,
+                timestamp: new Date().toISOString()
+              }
+            };
+            
+            // Emit EXEC_ODS signal (two lines: header + payload)
+            console.log(`EXEC_ODS:${node.id}:${writeMode}:${connectionId}:${batchId}`);
+            console.log(`EXEC_ODS_PAYLOAD:${JSON.stringify(odsPayload)}`);
+            
+            // Mark as delegated - Python will update with actual results
+            context.payload = { 
+              status: 'delegated', 
+              operation: writeMode, 
+              rows: records.length,
+              message: 'ODS execution delegated to Python backend'
+            };
+          }
+          
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({
+            node_id: node.id, 
+            status: 'success', 
+            input: currentPayload, 
+            output: context.payload, 
+            duration: endMs - startMs, 
+            start_time: startTime, 
+            end_time: endTime
+          })}`);
+          emitStatus(node.id, 'success');
+        } catch (err: any) {
+          const endMs = Date.now();
+          const endTime = new Date(endMs).toISOString();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({
+            node_id: node.id, 
+            status: 'error', 
+            input: currentPayload, 
+            output: {}, 
+            duration: endMs - startMs, 
+            start_time: startTime, 
+            end_time: endTime,
+            error: err.message
+          })}`);
+          console.error(`[ODS Error] ${err.message}`);
+          emitStatus(node.id, 'error');
+          Deno.exit(1);
+        }
       } else {
         console.log(`[Flow Info] Node ${node.label} (${node.toolType}) is a system node. Passing through data.`);
         const endMs = Date.now();
