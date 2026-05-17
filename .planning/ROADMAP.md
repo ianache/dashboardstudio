@@ -7,7 +7,7 @@
 | 1-28. Core & Extensions | 28/28 | Completed | 2026-05-17 |
 | 29. Metadata Inspection API | 2/2 | Complete   | 2026-05-16 |
 | 30. ODS Node UI Enhancement | 1/1 | Complete | 2026-05-16 |
-| 31. ODS Execution Engine | 1/3 | In Progress | 2026-05-17 |
+| 31. ODS Execution Engine | 2/3 | In Progress | 2026-05-17 |
 
 ---
 
@@ -36,7 +36,7 @@
 
 **Plan Structure:**
 - [x] 31-01-PLAN.md — Core ODSExecutor Service (ods_executor.py with Append, Overwrite, Upsert)
-- [ ] 31-02-PLAN.md — Deno Integration & Signal Protocol (runner.ts, deno_service.py)
+- [x] 31-02-PLAN.md — Deno Integration & Signal Protocol (runner.ts, deno_service.py)
 - [ ] 31-03-PLAN.md — Validation, Testing & Hardening (validation, logging, tests, deprecation)
 
 **Wave Structure:**
@@ -66,8 +66,8 @@
 ### Phase 31: ODS Execution Engine
 **Goal**: Implement the actual write/upsert logic in the backend with Deno delegation.
 **Requirements**: FR-05, FR-06, TR-04, EXEC-01 through EXEC-21
-**Status**: Planning
-**Plans**: 1 plan
+**Status**: In Progress (2/3 plans complete)
+**Plans**: 3 plans
 
 **Phase 31 Plan Details:**
 

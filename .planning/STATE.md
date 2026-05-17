@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: ODS Execution Engine
 current_phase: 31
-current_plan: 1
+current_plan: 2
 status: In Progress
-last_updated: "2026-05-17T01:35:00Z"
+last_updated: "2026-05-17T02:00:00Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State: ODS Execution Engine
@@ -30,9 +30,9 @@ progress:
 - [~] Execution in progress (1/3 plans complete)
 
 ## Milestone: v1.6 ODS Execution Engine
-- [~] Phase 31: ODS Execution Engine (1/3 plans)
+- [~] Phase 31: ODS Execution Engine (2/3 plans)
   - [x] Plan 31-01: Core ODSExecutor Service
-  - [ ] Plan 31-02: Deno Integration & Signal Protocol
+  - [x] Plan 31-02: Deno Integration & Signal Protocol
   - [ ] Plan 31-03: Validation, Testing & Hardening
 
 ## Accumulated Context
@@ -66,18 +66,26 @@ progress:
 3. Operation-specific timeouts (5min/30min/10min) basados en expectativa de duración
 4. Retry limitado a errores transitorios (no data errors)
 
+### Recent Decisions (Plan 31-02)
+1. Used existing DataSource model directly for credential resolution instead of creating separate service
+2. Signal protocol uses two-line format (EXEC_ODS header + EXEC_ODS_PAYLOAD JSON) for atomic parsing
+3. Lookahead parsing in run_flow_stream to handle multi-line signals
+4. JSON serialization safety in Deno (NaN/Infinity validation, BigInt conversion) before emission
+
 ### Performance Metrics
 | Plan | Duration | Tasks | Files | Completed |
 |------|----------|-------|-------|-----------|
 | 31-01 | 12min | 3 | 1 | 2026-05-17 |
+| 31-02 | 18min | 3 | 3 | 2026-05-17 |
 
 ### Project Reference
 
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** User can configure and execute integration flows that write data to PostgreSQL ODS with various strategies (append, overwrite, upsert, merge)
-**Current focus:** Plan 31-02 - Deno Integration & Signal Protocol
+**Current focus:** Plan 31-03 - Validation, Testing & Hardening
 **Next steps:**
-1. Modify runner.ts to emit EXEC_ODS signal
-2. Modify deno_service.py to intercept and delegate to ODSExecutor
-3. Stream results back through WebSocket
+1. Integration tests for signal protocol
+2. End-to-end ODS flow testing
+3. Error handling validation
+4. Performance benchmarking
