@@ -5,6 +5,8 @@ import os
 import subprocess
 from typing import Optional, Dict, Any
 
+from app.services.ods_executor import ODSExecutor, ODSConfig, WriteMode, ods_executor
+
 logger = logging.getLogger(__name__)
 
 class DenoService:
@@ -72,12 +74,17 @@ class DenoService:
                         pass
         return result
 
-    async def run_flow_stream(self, flow_data: Dict[str, Any], payload: Optional[Dict] = None):
+    async def run_flow_stream(self, flow_data: Dict[str, Any], payload: Optional[Dict] = None, db: Any = None):
         """
         Runs a flow in Deno and yields log messages.
         Uses subprocess.run via run_in_executor to avoid SelectorEventLoop
         limitations on Windows (asyncio.create_subprocess_exec raises
         NotImplementedError on Windows when uvicorn uses SelectorEventLoop).
+        
+        Args:
+            flow_data: Flow configuration with nodes and connections
+            payload: Initial payload data
+            db: Database session for resolving data source connections (needed for ODS nodes)
         """
         if not os.path.exists(self.full_runner_path):
             yield {"type": "error", "message": f"Runner script not found at {self.full_runner_path}"}
@@ -143,11 +150,78 @@ class DenoService:
         total_nodes = len(flow_data.get("nodes", []))
         nodes_processed = set()
         
-        for line in stdout_text.splitlines():
-            line = line.strip()
+        lines = stdout_text.splitlines()
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
             if not line:
+                i += 1
                 continue
-            if line.startswith("NODE_STATUS:"):
+                
+            # Handle EXEC_ODS signal (look ahead for payload)
+            if line.startswith("EXEC_ODS:") and i + 1 < len(lines):
+                parts = line.split(":")
+                if len(parts) >= 5:
+                    node_id = parts[1]
+                    operation = parts[2]
+                    connection_id = parts[3]
+                    batch_id = parts[4]
+                    
+                    # Next line should be EXEC_ODS_PAYLOAD
+                    next_line = lines[i + 1].strip()
+                    if next_line.startswith("EXEC_ODS_PAYLOAD:"):
+                        i += 1  # Advance to payload line
+                        try:
+                            ods_payload = json.loads(next_line[len("EXEC_ODS_PAYLOAD:"):])
+                            
+                            # Yield status update
+                            yield {
+                                "type": "node_log",
+                                "node_id": node_id,
+                                "status": "running",
+                                "message": f"Executing ODS {operation} operation"
+                            }
+                            
+                            # Execute ODS operation if db session available
+                            if db is not None:
+                                result = await self._handle_ods_execution(ods_payload, db)
+                                
+                                # Yield result
+                                yield {
+                                    "type": "ods_result",
+                                    "node_id": node_id,
+                                    "batch_id": batch_id,
+                                    "result": result
+                                }
+                                
+                                # Update node status
+                                if result["success"]:
+                                    yield {"type": "node_status", "node_id": node_id, "status": "success"}
+                                    nodes_processed.add(node_id)
+                                else:
+                                    yield {"type": "node_status", "node_id": node_id, "status": "error"}
+                            else:
+                                logger.warning(f"No db session available for ODS execution on node {node_id}")
+                                yield {
+                                    "type": "error",
+                                    "message": f"No database session available for ODS execution"
+                                }
+                                yield {"type": "node_status", "node_id": node_id, "status": "error"}
+                            
+                            if total_nodes > 0:
+                                progress = (len(nodes_processed) / total_nodes) * 100
+                                yield {"type": "progress", "progress": round(progress, 2)}
+                                
+                        except json.JSONDecodeError as e:
+                            logger.error(f"Failed to parse EXEC_ODS_PAYLOAD: {e}")
+                            yield {"type": "error", "message": f"Invalid EXEC_ODS payload: {e}"}
+                        except Exception as e:
+                            logger.error(f"ODS execution error: {e}")
+                            yield {"type": "error", "message": f"ODS execution failed: {e}"}
+                            yield {"type": "node_status", "node_id": node_id, "status": "error"}
+            
+            # Handle existing signals (NODE_STATUS, NODE_LOG_JSON, FINAL_RESULT)
+            elif line.startswith("NODE_STATUS:"):
                 parts = line.split(":")
                 if len(parts) >= 3:
                     node_id = parts[1]
@@ -159,6 +233,7 @@ class DenoService:
                         if total_nodes > 0:
                             progress = (len(nodes_processed) / total_nodes) * 100
                             yield {"type": "progress", "progress": round(progress, 2)}
+                            
             elif line.startswith("NODE_LOG_JSON:"):
                 try:
                     data = json.loads(line[len("NODE_LOG_JSON:"):])
@@ -181,6 +256,7 @@ class DenoService:
                             yield {"type": "progress", "progress": round(progress, 2)}
                 except Exception:
                     pass
+                    
             elif line.startswith("FINAL_RESULT:"):
                 try:
                     res = json.loads(line[len("FINAL_RESULT:"):])
@@ -189,6 +265,8 @@ class DenoService:
                     yield {"type": "info", "message": line}
             else:
                 yield {"type": "info", "message": line}
+            
+            i += 1
 
         # Stream stderr lines as error messages to the client
         for line in stderr_text.splitlines():
@@ -245,6 +323,111 @@ class DenoService:
         except Exception as e:
             logger.error(f"Error executing Deno: {str(e)}")
             return {"status": "error", "error": str(e)}
+
+    async def _handle_ods_execution(
+        self, 
+        payload: Dict[str, Any], 
+        db: Any
+    ) -> Dict[str, Any]:
+        """
+        Handle EXEC_ODS signal by delegating to ODSExecutor.
+        
+        Args:
+            payload: The EXEC_ODS_PAYLOAD JSON data
+            db: Database session for resolving connection credentials
+            
+        Returns:
+            Dict with execution results
+        """
+        import asyncpg
+        from app.models.models import DataSource
+        from app.core.encryption import process_sensitive_fields
+        import json
+        
+        logger.info(f"Handling EXEC_ODS for node {payload.get('node_id')}")
+        
+        try:
+            # Extract configuration
+            target = payload['target']
+            config_data = payload['config']
+            records = payload['data']
+            
+            config = ODSConfig(
+                connection_id=target['connection_id'],
+                schema=target['schema'],
+                table=target['table'],
+                write_mode=WriteMode(config_data['write_mode']),
+                identity_fields=config_data.get('identity_fields', []),
+                batch_size=config_data.get('batch_size', 1000)
+            )
+            
+            # Resolve connection credentials from database
+            ds = db.query(DataSource).filter(DataSource.id == config.connection_id).first()
+            if not ds:
+                raise ValueError(f"Connection {config.connection_id} not found")
+            
+            # Parse connection config
+            try:
+                raw_config = json.loads(ds.connection_url)
+            except Exception:
+                raw_config = {"url": ds.connection_url}
+            
+            config_dict = process_sensitive_fields(raw_config, action="decrypt")
+            
+            # Build connection string for PostgreSQL
+            if config_dict.get('type') == 'database' or 'host' in config_dict:
+                host = config_dict.get('host', 'localhost')
+                port = config_dict.get('port', 5432)
+                user = config_dict.get('username', '')
+                password = config_dict.get('password', '')
+                database = config_dict.get('database', '')
+                connection_string = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+            else:
+                raise ValueError(f"Unsupported connection type for ODS: {config_dict.get('type')}")
+            
+            # Execute with connection
+            conn = await asyncpg.connect(dsn=connection_string)
+            try:
+                result = await ods_executor.execute(config, records, conn)
+                
+                return {
+                    "success": result.success,
+                    "complete_success": result.complete_success,
+                    "rows_affected": result.rows_affected,
+                    "rows_inserted": result.rows_inserted,
+                    "rows_updated": result.rows_updated,
+                    "batches_total": result.batches_total,
+                    "batches_successful": result.batches_successful,
+                    "batches_failed": result.batches_failed,
+                    "errors": [
+                        {
+                            "batch_number": e.batch_number,
+                            "error_type": e.error_type,
+                            "message": e.message,
+                            "record_index": e.record_index
+                        }
+                        for e in result.errors
+                    ],
+                    "duration_ms": result.duration_ms
+                }
+            finally:
+                await conn.close()
+                
+        except Exception as e:
+            logger.error(f"ODS execution failed: {e}")
+            return {
+                "success": False,
+                "complete_success": False,
+                "rows_affected": 0,
+                "rows_inserted": 0,
+                "rows_updated": 0,
+                "batches_total": 0,
+                "batches_successful": 0,
+                "batches_failed": 0,
+                "errors": [{"error_type": "ExecutionError", "message": str(e)}],
+                "duration_ms": 0
+            }
+
 
 # Singleton instance
 deno_service = DenoService()
