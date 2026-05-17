@@ -7,7 +7,8 @@
 | 1-28. Core & Extensions | 28/28 | Completed | 2026-05-17 |
 | 29. Metadata Inspection API | 2/2 | Complete   | 2026-05-16 |
 | 30. ODS Node UI Enhancement | 1/1 | Complete | 2026-05-16 |
-| 31. ODS Execution Engine | 2/3 | In Progress | 2026-05-17 |
+| 31. ODS Execution Engine | 3/3 | Complete    | 2026-05-17 |
+| 32. Email Node Implementation | 0/3 | Pending | - |
 
 ---
 
@@ -130,3 +131,89 @@ Files: `backend/app/services/ods_executor.py`, `backend/app/services/destination
 9. Execution results visible in UI with row counts via WebSocket
 10. Legacy destination_executor.py deprecated
 11. Unit tests pass with >80% coverage of ODSExecutor
+
+## Milestone: v1.7 Email Node with Dynamic Templates
+
+### Phase 32: Email Node Implementation
+**Goal**: Implementar el nodo Email con soporte para plantillas dinámicas usando Jinja2, permitiendo el envío de correos con contenido generado dinámicamente desde el input del flujo.
+**Requirements**: EMAIL-01 through EMAIL-24
+**Status**: Pending
+**Plans**: 3 plans in 3 waves
+
+**Phase 32 Details:**
+- [x] 32-01-PLAN.md — Core Email Service (email_executor.py, email_schemas.py, Jinja2 integration)
+- [x] 32-02-PLAN.md — Deno Integration (EXEC_EMAIL signal, runner.ts modifications, deno_service.py handler)
+- [x] 32-03-PLAN.md — UI & Testing (FlowEditorCanvas.vue updates, HTML sanitization, unit tests)
+
+**Plan Structure:**
+
+**Plan 32-01: Core Email Service (Wave 1)**
+Requirements: EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-04, EMAIL-05, EMAIL-06, EMAIL-07, EMAIL-08, EMAIL-09, EMAIL-15, EMAIL-16, EMAIL-17, EMAIL-18, EMAIL-19, EMAIL-20
+Files: `backend/app/services/email_schemas.py`, `backend/app/services/email_executor.py`, `backend/pyproject.toml`
+- Create EmailSchemas with Pydantic models (EmailPayload, EmailResult, EmailConfig, EmailContent)
+- Create EmailExecutor class with Jinja2 SandboxedEnvironment for secure templating
+- Implement template rendering with {{expression}}, {% for %}, {% if %} syntax
+- Implement HTML sanitization using nh3 library
+- Implement SMTP sending via DataSource connections
+- Auto-escaping for XSS prevention
+- Support for undefined variables (render as empty string)
+- Clear error messages for template syntax errors
+
+**Plan 32-02: Deno Integration (Wave 2)**
+Requirements: EMAIL-10, EMAIL-11, EMAIL-12, EMAIL-13, EMAIL-14
+Depends: 32-01
+Files: `backend/app/runtime/runner.ts`, `backend/app/services/deno_service.py`
+- Modify runner.ts to emit EXEC_EMAIL signal when encountering email nodes
+- EXEC_EMAIL payload includes: connection_id, recipients, subject_template, body_template, template_context
+- Modify deno_service.py to intercept EXEC_EMAIL signals
+- Parse EXEC_EMAIL header and EXEC_EMAIL_PAYLOAD JSON
+- Resolve SMTP credentials via DataSource service
+- Delegate execution to EmailExecutor
+- Stream results back through WebSocket (type: "email_result")
+- Template context from upstream nodes passed to executor
+
+**Plan 32-03: UI & Testing (Wave 3)**
+Requirements: EMAIL-21, EMAIL-22, EMAIL-23, EMAIL-24
+Depends: 32-02
+Files: `backend/alembic/versions/032_add_email_tool.py`, `dashboard-app/src/components/editor/FlowEditorCanvas.vue`, `backend/tests/test_email_executor.py`
+- Create database migration for email node tool definition
+- Add connection selector for SMTP DataSource
+- Subject field with template support indicator
+- Body field supporting HTML and text modes
+- Recipients, CC, BCC fields with comma-separated email lists
+- Template syntax hints in UI
+- Comprehensive unit tests for template rendering, sanitization, and validation
+
+**Wave Structure:**
+- Wave 1: 32-01 — Core email service (no dependencies)
+- Wave 2: 32-02 — Deno integration (depends on 32-01)
+- Wave 3: 32-03 — UI & testing (depends on 32-02)
+
+**Implementation Steps:**
+
+**Step 1: Core Email Service**
+- Create `backend/app/services/email_schemas.py` with Pydantic models
+- Create `backend/app/services/email_executor.py` with Jinja2 templating
+- Implement SMTP sending via DataSource connections
+- Add template validation and error handling
+
+**Step 2: Deno Integration**
+- Modify `backend/app/runtime/runner.ts` to emit EXEC_EMAIL signal
+- Modify `backend/app/services/deno_service.py` to intercept EXEC_EMAIL
+- Implement template rendering context from upstream data
+- Stream results back to UI via WebSocket
+
+**Step 3: UI Implementation**
+- Update database tool definition for email node with template fields
+- Add email node properties panel in FlowEditorCanvas.vue
+- Support for subject/body templates with syntax highlighting
+- HTML sanitization with nh3 library
+
+**Success Criteria:**
+1. User can configure email node with SMTP connection
+2. Subject supports {{expression}} template markers
+3. Body supports {{expression}} and {% for %} loops for tables
+4. HTML emails are sanitized before sending
+5. Templates can access input data from upstream nodes
+6. Error messages are clear for template syntax errors
+7. Unit tests cover template rendering and email validation
