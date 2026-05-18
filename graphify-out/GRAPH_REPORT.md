@@ -1,7 +1,7 @@
 # Graph Report - dashboardstudio  (2026-05-17)
 
 ## Corpus Check
-- 204 files · ~213,099 words
+- 203 files · ~200,935 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `51915434`
+- Built from commit: `61decab2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -177,7 +177,8 @@
 - [[_COMMUNITY_Community 168|Community 168]]
 - [[_COMMUNITY_Community 169|Community 169]]
 - [[_COMMUNITY_Community 170|Community 170]]
-- [[_COMMUNITY_Community 176|Community 176]]
+- [[_COMMUNITY_Community 175|Community 175]]
+- [[_COMMUNITY_Community 178|Community 178]]
 - [[_COMMUNITY_Community 179|Community 179]]
 - [[_COMMUNITY_Community 180|Community 180]]
 - [[_COMMUNITY_Community 181|Community 181]]
@@ -193,7 +194,6 @@
 - [[_COMMUNITY_Community 191|Community 191]]
 - [[_COMMUNITY_Community 192|Community 192]]
 - [[_COMMUNITY_Community 193|Community 193]]
-- [[_COMMUNITY_Community 194|Community 194]]
 - [[_COMMUNITY_Community 238|Community 238]]
 - [[_COMMUNITY_Community 239|Community 239]]
 - [[_COMMUNITY_Community 240|Community 240]]
@@ -278,36 +278,36 @@ Cohesion: 0.11
 Nodes (24): flow_logs_websocket(), Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Ejecuta un flujo de integración en el runtime de Deno., Streaming de logs de ejecución vía WebSocket., Ejecuta un flujo de integración en el runtime de Deno. (+16 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.1
-Nodes (15): ODSConfig, Configuration for an ODS execution operation.          Attributes:         conne, Test statement timeout defaults per write mode., Test ODSConfig rejects empty connection_id., Test ODSConfig rejects empty schema., Test ODSConfig rejects empty table., Test ODSConfig requires identity_fields for upsert mode., Test WriteMode enum has expected values. (+7 more)
-
-### Community 14 - "Community 14"
 Cohesion: 0.08
 Nodes (25): code:env (VITE_CUBEJS_API_URL=http://localhost:4000/cubejs-api/v1), code:javascript (const { data, loading, error, lastUpdated, fetchData } =), code:block3 (fetchData()), code:javascript ({), code:javascript (// CubeJS TablePivot → formato interno), code:javascript (buildCubeFilter(filterDef, activeValue)), code:javascript (downloadCSV(data, filename)), code:javascript (// Estructura del meta-schema) (+17 more)
 
+### Community 14 - "Community 14"
+Cohesion: 0.11
+Nodes (14): ODSConfig, Configuration for an ODS execution operation.          Attributes:         conne, Test statement timeout defaults per write mode., Test ODSConfig rejects empty connection_id., Test ODSConfig rejects empty schema., Test ODSConfig rejects empty table., Test ODSConfig requires identity_fields for upsert mode., Test WriteMode enum has expected values. (+6 more)
+
 ### Community 15 - "Community 15"
+Cohesion: 0.12
+Nodes (17): Enum, ExecutionHistory, NodeExecutionLogs, ODSError, ODSExecutor, ODS Executor Service - Core execution engine for PostgreSQL ODS operations.  Thi, Detailed error information for a failed batch or record.          Attributes:, Core executor for PostgreSQL ODS operations.          This class provides method (+9 more)
+
+### Community 16 - "Community 16"
 Cohesion: 0.09
 Nodes (6): activeDashboardPalette, confirmImport(), createDashboard(), saveAndCloseProps(), saveDescription(), saveTitle()
 
-### Community 16 - "Community 16"
+### Community 17 - "Community 17"
 Cohesion: 0.11
 Nodes (22): context, emitStatus(), executeScriptNode(), flow, FlowConnection, FlowData, FlowNode, getTopologicalOrder() (+14 more)
 
-### Community 17 - "Community 17"
+### Community 18 - "Community 18"
 Cohesion: 0.09
 Nodes (22): Arquitectura, code:bash (npm run dev      # Servidor de desarrollo → http://localhost), code:block2 (src/), code:javascript ({), code:javascript ({), code:css (--primary: #1890ff        /* Color principal */), code:env (VITE_CUBEJS_API_URL=http://localhost:4000/cubejs-api/v1), Comandos esenciales (+14 more)
-
-### Community 18 - "Community 18"
-Cohesion: 0.13
-Nodes (21): create_data_source(), DataSourceCreate, DataSourceResponse, DataSourceUpdate, _decrypt_data_source_password(), delete_data_source(), _encrypt_data_source_password(), _gen_id() (+13 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.1
 Nodes (8): lifespan(), # NOTE: We manually add CORS headers here because unhandled exceptions can bypas, # NOTE: We manually add CORS headers here because unhandled exceptions can bypas, run_migration(), BaseSettings, get_settings(), Settings, init_db()
 
 ### Community 20 - "Community 20"
-Cohesion: 0.17
-Nodes (20): Base, ColorPalette, CubeConfig, Currency, Dashboard, DashboardAssignment, DataSource, DataType (+12 more)
+Cohesion: 0.09
+Nodes (12): Tests for validation methods., Test batch size > 10000 is rejected., Test batch size < 1 is rejected., Test valid records pass validation., Test NaN values are rejected., Test positive Infinity values are rejected., Test negative Infinity values are rejected., Test large integers (> 2^53) are converted to strings. (+4 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.09
@@ -319,279 +319,279 @@ Nodes (20): activate_cube_config(), create_cube_config(), _decrypt_config_token(
 
 ### Community 23 - "Community 23"
 Cohesion: 0.1
-Nodes (11): Tests for validation methods., Test batch size < 1 is rejected., Test valid records pass validation., Test NaN values are rejected., Test positive Infinity values are rejected., Test negative Infinity values are rejected., Test large integers (> 2^53) are converted to strings., Test small integers remain as integers. (+3 more)
-
-### Community 24 - "Community 24"
-Cohesion: 0.1
 Nodes (11): Tests for SQL query building methods., Test INSERT query generation., Test INSERT query with empty columns raises error., Test UPSERT query generation., Test UPSERT with composite identity fields., Test UPSERT when all fields are identity fields., Test records are sorted by identity fields., Test sorting empty records returns empty list. (+3 more)
 
-### Community 25 - "Community 25"
+### Community 24 - "Community 24"
 Cohesion: 0.16
 Nodes (17): activeColors, activePaletteId, buildBarOption(), buildBaseOption(), buildCombinedOption(), buildGaugeOption(), buildLineOption(), buildPieOption() (+9 more)
 
-### Community 26 - "Community 26"
+### Community 25 - "Community 25"
 Cohesion: 0.1
 Nodes (19): Acciones, code:javascript (await cubeStore.setConfig('http://localhost:4000/cubejs-api/), code:javascript (await cubeStore.loadMeta()), code:javascript (const resultSet = await cubeStore.executeQuery({), code:javascript (const values = await cubeStore.getDimensionValues('Orders.st), code:javascript ({), code:javascript (// Resultado CubeJS → formato interno), Estado (+11 more)
 
-### Community 27 - "Community 27"
+### Community 26 - "Community 26"
 Cohesion: 0.1
 Nodes (19): 1. Sintaxis Básica de Jinja2, 2. Caso 1: Integración con Nodo "JS Script" (Mensajes de Texto Preformateados), 3. Caso 2: Reporte de Tabla Dinámica (Datos Directos de Base de Datos / ODS), 4. Buenas Prácticas y Seguridad, A. Asunto (Subject), A. Asunto (Subject), B. Cuerpo (Body), B. Cuerpo (Body) en Modo **Plain Text (Texto Plano)** (+11 more)
 
-### Community 28 - "Community 28"
+### Community 27 - "Community 27"
 Cohesion: 0.12
 Nodes (17): add_filter(), assign_dashboard(), create_dashboard(), delete_dashboard(), _generate_id(), list_dashboards(), Delete dashboard (admin/designer only), Assign dashboard to users (admin/designer only) (+9 more)
 
-### Community 29 - "Community 29"
-Cohesion: 0.12
-Nodes (14): ODSExecutor, Core executor for PostgreSQL ODS operations.          This class provides method, Log execution results to NodeExecutionLogs.                  Args:             e, executor(), mock_connection(), Unit tests for ODSExecutor.  Tests cover: - Data model creation (ODSConfig, ODSR, Create a fresh ODSExecutor instance., Create a sample ODSConfig for testing. (+6 more)
+### Community 28 - "Community 28"
+Cohesion: 0.19
+Nodes (17): Base, ColorPalette, CubeConfig, Currency, Dashboard, DashboardAssignment, DataSource, DataType (+9 more)
 
-### Community 30 - "Community 30"
+### Community 29 - "Community 29"
 Cohesion: 0.12
 Nodes (11): authStore, router, routes, keycloak, cubeStore, app, authStore, pinia (+3 more)
 
-### Community 31 - "Community 31"
+### Community 30 - "Community 30"
 Cohesion: 0.11
 Nodes (18): AppLayout.vue, Cierre de dropdowns, code:block1 (┌─────────────────────────────────────────────────┐), code:block2 (─ Inicio                         (todos los roles)), code:javascript (const isModelRoute = computed(() =>), code:block4 (┌──────────────────────────────────────────────────────────┐), Componentes de Layout, Comportamiento (+10 more)
 
-### Community 32 - "Community 32"
+### Community 31 - "Community 31"
 Cohesion: 0.11
 Nodes (18): Acciones, Asignación de usuarios, code:javascript ({), code:javascript ({), code:javascript ({), code:block4 (left  = GAP + x * (colWidth + GAP)), Dashboard, Estado (+10 more)
 
-### Community 33 - "Community 33"
-Cohesion: 0.11
-Nodes (11): ODSResult, Result of an ODS execution operation.          Attributes:         success: True, Test ODSResult dataclass creation., Test ODSResult uses correct defaults., Tests for record batching., Test basic batch splitting., Test batch splitting with exact multiple., Test batch splitting when all fit in one batch. (+3 more)
-
-### Community 34 - "Community 34"
+### Community 32 - "Community 32"
 Cohesion: 0.12
 Nodes (12): DenoService, Check if Deno is installed and accessible., Check if Deno is installed and accessible., Check if Deno is installed and accessible., Handle EXEC_ODS signal by delegating to ODSExecutor.                  Args:, Handle EXEC_ODS signal by delegating to ODSExecutor.                  Args:, Handle EXEC_ODS signal by delegating to ODSExecutor.                  Args:, Handle EXEC_EMAIL signal by delegating to EmailExecutor.                  Args (+4 more)
 
-### Community 35 - "Community 35"
-Cohesion: 0.15
-Nodes (14): create_integration_flow(), delete_integration_flow(), _gen_id(), list_flow_executions(), list_integration_flows(), Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo. (+6 more)
+### Community 33 - "Community 33"
+Cohesion: 0.13
+Nodes (17): _decrypt_data_source_password(), get_data_source(), list_data_sources(), List all data sources., Search data sources by name or type, Get a single data source by ID., Update a data source., Update data source (admin/designer only) (+9 more)
 
-### Community 36 - "Community 36"
+### Community 34 - "Community 34"
+Cohesion: 0.15
+Nodes (14): create_integration_flow(), delete_integration_flow(), _gen_id(), get_execution_logs(), list_integration_flows(), Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica. (+6 more)
+
+### Community 35 - "Community 35"
 Cohesion: 0.12
 Nodes (14): Run Deno with the provided flow data., Run Deno with the provided flow data., Run Deno with the provided flow data., Run Deno with the provided flow data., Run Deno with the provided flow data., Run Deno with the provided flow data., Run Deno with the provided flow data., Run Deno with the provided flow data. (+6 more)
 
-### Community 37 - "Community 37"
+### Community 36 - "Community 36"
 Cohesion: 0.12
 Nodes (8): Email Executor Service - Core execution engine for email node operations.  This, Custom undefined handler that returns empty string silently.          Unlike Str, Return self for any attribute access (handles nested undefined)., Return self for any item access., Return empty iterator for for-loop compatibility., Return empty string for autoescape compatibility., UndefinedSilently, Undefined
 
-### Community 38 - "Community 38"
+### Community 37 - "Community 37"
 Cohesion: 0.12
 Nodes (11): global_exception_handler(), Validate configuration after initialization., Validate ODSConfig (internal hook for validation)., Execute the configured ODS operation on the provided records.                  T, Validate records for JSON serialization safety.                  Checks:, Validate that the target schema and table exist.                  Args:, Validate that identity fields have a unique constraint.         Required for ups, Execute the configured ODS operation on the provided records.                  T (+3 more)
 
-### Community 39 - "Community 39"
+### Community 38 - "Community 38"
 Cohesion: 0.15
 Nodes (13): EmailResult, Result of an email sending operation.          This model captures the outcome o, Test EmailResult model validation., Should require success field., Should create with success status., Should create with all fields., Test EmailResult model validation., Should require success field. (+5 more)
 
-### Community 40 - "Community 40"
+### Community 39 - "Community 39"
 Cohesion: 0.12
 Nodes (15): ApiError, apiRequest(), cubeConfigApi, currenciesApi, dashboardApi, dataSourcesApi, diagramTypesApi, dimensionalModelApi (+7 more)
 
-### Community 41 - "Community 41"
-Cohesion: 0.13
-Nodes (15): create_knowledge_space(), delete_knowledge_space(), _generate_id(), get_knowledge_space(), get_knowledge_space_by_name(), list_knowledge_spaces(), Search knowledge spaces by name or description, Update knowledge space (admin/designer only) (+7 more)
-
-### Community 42 - "Community 42"
-Cohesion: 0.12
-Nodes (9): Tests for error classification and retry logic., Test connection errors are classified correctly., Test unique violation errors are classified correctly., Test deadlock errors are classified correctly., Test timeout errors are classified correctly., Test unknown errors are classified as UNKNOWN., Test retry logic is triggered on deadlock., Test no retry on unique violation (non-retryable error). (+1 more)
-
-### Community 43 - "Community 43"
+### Community 40 - "Community 40"
 Cohesion: 0.12
 Nodes (9): Tests for async operation execution., Test append operation with mocked connection., Test overwrite operation calls TRUNCATE on first batch., Test upsert operation validates unique constraint., Test execute raises error for empty records., Test execute validates table existence., Test records are processed in batches., Test statement timeout is set per operation. (+1 more)
 
-### Community 44 - "Community 44"
-Cohesion: 0.14
-Nodes (11): Enum, ODSError, ODS Executor Service - Core execution engine for PostgreSQL ODS operations.  Thi, Detailed error information for a failed batch or record.          Attributes:, Supported write modes for ODS operations.          - APPEND: Insert records with, WriteMode, Test ODSError dataclass creation., Tests for SQL identifier quoting. (+3 more)
+### Community 41 - "Community 41"
+Cohesion: 0.12
+Nodes (9): Tests for error classification and retry logic., Test connection errors are classified correctly., Test unique violation errors are classified correctly., Test deadlock errors are classified correctly., Test timeout errors are classified correctly., Test unknown errors are classified as UNKNOWN., Test retry logic is triggered on deadlock., Test no retry on unique violation (non-retryable error). (+1 more)
 
-### Community 45 - "Community 45"
+### Community 42 - "Community 42"
 Cohesion: 0.17
 Nodes (10): EmailPayload, Payload for email node execution.          This model represents the complete in, Should accept template context data., Should handle template_context when preprocessed as a list., Test EmailPayload model validation., Should require node_id, target, content, metadata., Should create with all required fields., Should support cc and bcc recipients. (+2 more)
 
-### Community 46 - "Community 46"
+### Community 43 - "Community 43"
 Cohesion: 0.12
 Nodes (9): Test template rendering functionality., Should render {{variable}} syntax., Should handle {{user.profile.name}} nested access., Should support {% for %} loops., Should support {% if %}/{% else %} conditionals., Should return empty string for undefined variables., Should auto-escape HTML to prevent XSS., Should raise clear error for invalid template syntax. (+1 more)
 
-### Community 47 - "Community 47"
+### Community 44 - "Community 44"
 Cohesion: 0.12
 Nodes (13): columns, currentPage, PAGE_SIZES, pagedRows, pageSize, props, rangeEnd, rangeStart (+5 more)
 
-### Community 48 - "Community 48"
+### Community 45 - "Community 45"
 Cohesion: 0.12
 Nodes (15): API Endpoints, BI Portal Backend, code:bash (cp .env.example .env), code:bash (cd backend), code:bash (uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8), code:bash (uv run alembic revision --autogenerate -m "create users tabl), code:bash (uv sync), code:block6 (backend/) (+7 more)
 
-### Community 49 - "Community 49"
+### Community 46 - "Community 46"
 Cohesion: 0.12
 Nodes (15): 📌 Cambios Implementados, 📌 Cambios Implementados, 📌 Cambios Implementados, 📌 Cambios Implementados, Interfaz del Modal de Asistente IA, Lógica Refactorizada, 📌 Modificaciones Ejecutadas, 📌 Modificaciones Ejecutadas (+7 more)
 
-### Community 50 - "Community 50"
+### Community 47 - "Community 47"
+Cohesion: 0.18
+Nodes (14): create_data_source(), delete_data_source(), _encode_config(), _encrypt_data_source_password(), _gen_id(), _generate_id(), get_data_source_by_name(), Create a new data source. (+6 more)
+
+### Community 48 - "Community 48"
+Cohesion: 0.16
+Nodes (9): ensure_user_exists(), get_current_user(), get_jwks(), Ensure user exists in database, create if not, verify_token(), create_diagram_type(), list_diagram_types(), list_knowledge_spaces() (+1 more)
+
+### Community 49 - "Community 49"
 Cohesion: 0.13
 Nodes (11): Test EmailConfig model validation., Should require connection_id, smtp_host, smtp_port, smtp_user, smtp_password, fr, Should create with all SMTP settings., Test EmailConfig model validation., Should require connection_id, smtp_host, smtp_port, smtp_user, smtp_password, fr, Should allow overriding ssl option., Should create with all SMTP settings., Should allow overriding timeout. (+3 more)
 
-### Community 51 - "Community 51"
+### Community 50 - "Community 50"
 Cohesion: 0.13
 Nodes (13): comparisonValue, formattedComparison, formattedValue, hasTrend, isGood, isMaterialIcon, kpiIcon, label (+5 more)
 
-### Community 52 - "Community 52"
+### Community 51 - "Community 51"
 Cohesion: 0.13
 Nodes (14): Arquitectura, code:block1 (src/), code:block2 (App.vue), code:block3 (┌───────────────────────────────────────────────────────────), code:css (--primary: #1890ff         /* Color principal */), Convenciones de código, Estructura de directorios, Flujo de datos (+6 more)
 
-### Community 53 - "Community 53"
+### Community 52 - "Community 52"
 Cohesion: 0.13
 Nodes (14): Build de producción, code:bash (# Clonar repositorio), code:env (VITE_CUBEJS_API_URL=http://localhost:4000/cubejs-api/v1), code:bash (npm run build    # Genera dist/), code:javascript (// En la consola del navegador), Conexion con Keycloak, Configuración de CubeJS (opcional), Credenciales de demo (+6 more)
 
-### Community 54 - "Community 54"
+### Community 53 - "Community 53"
 Cohesion: 0.13
 Nodes (14): Acciones, code:javascript (await authStore.login('admin@demo.com', 'admin123')), code:javascript ({), Estado, Getters, `getUserById(id)`, `initFromStorage()`, `login(email, password)` (+6 more)
 
-### Community 55 - "Community 55"
+### Community 54 - "Community 54"
 Cohesion: 0.15
 Nodes (13): create_model(), delete_model(), _generate_id(), get_model(), list_models(), Update dimensional model (admin/designer only), Delete dimensional model (admin/designer only), Set model as global (admin/designer only) (+5 more)
 
+### Community 55 - "Community 55"
+Cohesion: 0.15
+Nodes (13): create_knowledge_space(), delete_knowledge_space(), _generate_id(), get_knowledge_space(), get_knowledge_space_by_name(), Search knowledge spaces by name or description, Update knowledge space (admin/designer only), Delete knowledge space (admin/designer only) (+5 more)
+
 ### Community 56 - "Community 56"
+Cohesion: 0.14
+Nodes (11): executor(), mock_connection(), Unit tests for ODSExecutor.  Tests cover: - Data model creation (ODSConfig, ODSR, Create a fresh ODSExecutor instance., Create a sample ODSConfig for testing., Create a mock asyncpg connection., Tests for SQL identifier quoting., Test quoting valid identifiers. (+3 more)
+
+### Community 57 - "Community 57"
 Cohesion: 0.15
 Nodes (10): collapsed, connCount, copiedIdx, error, generate(), LANG_META, loading, nodeCount (+2 more)
 
-### Community 57 - "Community 57"
+### Community 58 - "Community 58"
 Cohesion: 0.18
 Nodes (7): buildCubeFilter(), normalizeMember(), useCubeQuery(), dimValuesCache, dimValuesLoading, useCubeStore, useVisualizationConfiguratorStore
 
-### Community 58 - "Community 58"
+### Community 59 - "Community 59"
 Cohesion: 0.14
 Nodes (13): Añadir tipo, code:html (<select v-model="field.dataType">), code:javascript (function pgTypeForCol(field) {), Descripción general, Editar tipo, Eliminar tipo, Feature: Tipos de Datos, Integración con el editor de modelos (+5 more)
 
-### Community 59 - "Community 59"
+### Community 60 - "Community 60"
 Cohesion: 0.14
 Nodes (13): Acciones, code:javascript (uiStore.setBreadcrumbs(['Modelos', 'Editor'])), code:javascript (uiStore.notify({ message: 'Modelo guardado', type: 'success'), `dismissAlert(id)`, Estado, Getters, `notify({ message, type, duration? })`, `openDropdownMenu(id)` / `closeDropdown()` (+5 more)
 
-### Community 60 - "Community 60"
+### Community 61 - "Community 61"
 Cohesion: 0.14
 Nodes (13): 1. Delimitación de Responsabilidades (Pure Rendering), 2. Desacoplamiento de Estado (Dependency Injection), 3. Layout Flexible (Multi-Position Filters), 4. Seguridad y Embebido, Arquitectura de Componentes, code:mermaid (graph TD), Decisiones Arquitecturales, Estructura del Componente (+5 more)
 
-### Community 61 - "Community 61"
+### Community 62 - "Community 62"
+Cohesion: 0.18
+Nodes (8): mock_get_current_user(), get_mock_db(), mock_get_current_user(), MockDS, TokenData, DataSourceCreate, DataSourceResponse, DataSourceUpdate
+
+### Community 63 - "Community 63"
 Cohesion: 0.17
 Nodes (11): create_palette(), delete_palette(), _generate_id(), list_palettes(), Update palette (admin/designer only), Delete palette (admin/designer only), Set palette as default (admin/designer only), Create a new color palette (admin/designer only) (+3 more)
 
-### Community 62 - "Community 62"
-Cohesion: 0.19
-Nodes (7): ensure_user_exists(), get_current_user(), get_jwks(), Ensure user exists in database, create if not, verify_token(), create_diagram_type(), list_diagram_types()
-
-### Community 63 - "Community 63"
+### Community 64 - "Community 64"
 Cohesion: 0.15
 Nodes (7): Render a Jinja2 template string with the given context.                  Uses Sa, Validate and normalize email addresses.                  Validates each email ag, Sanitize HTML content using nh3.                  Removes dangerous tags and att, Create plain text fallback from HTML content.                  Simple conversion, Send an email using SMTP.                  Renders templates, sanitizes HTML, cr, Execute email sending from node payload.                  Main entry point for e, Execute email sending from node payload.                  Main entry point for e
 
-### Community 64 - "Community 64"
+### Community 65 - "Community 65"
 Cohesion: 0.15
 Nodes (12): Acciones, code:javascript ({), code:json ({), code:block3 (widget.colorPalette === 'none'  →  sin paleta (usa colores p), Estado, Estructura `Palette`, Getters, Lógica de herencia de paleta en widgets (+4 more)
 
-### Community 65 - "Community 65"
+### Community 66 - "Community 66"
 Cohesion: 0.15
 Nodes (12): Acciones, code:javascript ({), code:javascript (sqlTypeString({ baseType: 'VARCHAR', size: 100 })   // → 'VA), Estado, Función `sqlTypeString(dt)`, Getters, Modelo de tipo de dato, Persistencia (+4 more)
 
-### Community 66 - "Community 66"
+### Community 67 - "Community 67"
 Cohesion: 0.15
 Nodes (12): 1. Objective, 2. Technical Stack, 3. Functional Requirements, 4. Security & Constraints (Non-Functional), 5. Implementation Tasks (Steps for Gemini), FR1: Secure Embedding (Iframe), FR2: Pop-out Window (Independent View), FR3: Real-time State Sync (Pinia + BroadcastChannel) (+4 more)
 
-### Community 67 - "Community 67"
+### Community 68 - "Community 68"
 Cohesion: 0.18
 Nodes (11): create_or_update_llm_config(), delete_all_llm_configs(), delete_llm_config(), _generate_id(), get_llm_providers(), list_llm_configs(), Delete LLM configuration for a provider (admin/designer only)., Delete all LLM configurations for current user (admin/designer only). (+3 more)
 
-### Community 68 - "Community 68"
+### Community 69 - "Community 69"
+Cohesion: 0.17
+Nodes (7): Tests for record batching., Test basic batch splitting., Test batch splitting with exact multiple., Test batch splitting when all fit in one batch., Test batch splitting with empty records., Test batch splitting with invalid batch size., TestBatchSplitting
+
+### Community 71 - "Community 71"
 Cohesion: 0.17
 Nodes (7): Should normalize domain to lowercase., Should filter out invalid emails and log warning., Should handle empty email list., Test email address validation., Should accept valid email addresses., Should accept multiple valid emails., TestValidateEmailAddresses
 
-### Community 70 - "Community 70"
+### Community 72 - "Community 72"
 Cohesion: 0.17
 Nodes (11): 1. `dim_empleado`, 1. `fact_headcount_mensual` (Snapshot Mensual), 2. `dim_departamento`, 2. `fact_ausentismo`, 3. `dim_rol`, 3. `fact_reclutamiento`, 4. `dim_tiempo`, Contexto del Modelo (+3 more)
 
-### Community 71 - "Community 71"
+### Community 73 - "Community 73"
 Cohesion: 0.25
 Nodes (10): decrypt_value(), encrypt_value(), _get_fernet(), process_sensitive_fields(), Encryption utilities for sensitive data like API tokens., Get Fernet instance with key derived from settings., Encrypt a string value.      Args:         value: The string to encrypt, Decrypt a string value that was encrypted with encrypt_value.      Args: (+2 more)
 
-### Community 72 - "Community 72"
+### Community 74 - "Community 74"
 Cohesion: 0.18
 Nodes (10): get_current_user_info(), get_user(), list_users(), provision_users(), List all users (admin/designer only), Update user (admin only), Upsert user records from Keycloak data (admin/designer only).     Creates a stu, Get current authenticated user info - auto-creates user if not exists (+2 more)
 
-### Community 73 - "Community 73"
+### Community 75 - "Community 75"
 Cohesion: 0.2
 Nodes (9): create_widget(), delete_widget(), _generate_id(), list_widgets(), Delete widget (admin/designer only), Create a new widget in a dashboard (admin/designer only), List all widgets in a dashboard, Update widget (admin/designer only) (+1 more)
 
-### Community 74 - "Community 74"
-Cohesion: 0.18
-Nodes (9): Execute a single batch with retry logic.                  Args:             conf, Execute a single batch with retry logic.                  Args:             conf, Execute a single batch with retry logic.                  Args:             conf, Execute a single batch with retry logic.                  Args:             conf, Classify an exception into an ODSError.                  Maps asyncpg exceptions, Quote a SQL identifier (table/column name) safely.                  Validates th, Classify an exception into an ODSError.                  Maps asyncpg exceptions, Classify an exception into an ODSError.                  Maps asyncpg exceptions (+1 more)
-
-### Community 75 - "Community 75"
+### Community 76 - "Community 76"
 Cohesion: 0.18
 Nodes (9): Execute upsert (INSERT ON CONFLICT DO UPDATE) for a batch.                  Args, Build INSERT ON CONFLICT DO UPDATE query.                  Args:             con, Execute upsert (INSERT ON CONFLICT DO UPDATE) for a batch.                  Args, Build INSERT ON CONFLICT DO UPDATE query.                  Args:             con, Execute upsert (INSERT ON CONFLICT DO UPDATE) for a batch.                  Args, Execute upsert (INSERT ON CONFLICT DO UPDATE) for a batch.                  Args, Build INSERT ON CONFLICT DO UPDATE query.                  Args:             con, Build INSERT ON CONFLICT DO UPDATE query.                  Args:             con (+1 more)
 
-### Community 76 - "Community 76"
-Cohesion: 0.18
-Nodes (10): 1. Objetivo del Módulo, 2. Descripción de la Interfaz (UI/UX), 3. Requerimientos Funcionales (RF), 4. Requerimientos No Funcionales (RNF), 5. Casos de Uso Principales, A. Panel de Origen (Izquierda), B. Panel de Configuración (Centro - Barra Plegable), C. Panel de Preview (Derecha) (+2 more)
-
 ### Community 77 - "Community 77"
 Cohesion: 0.18
-Nodes (10): code:block1 (1. ¿La ruta es pública? → Pasar), code:javascript (// Ejemplos comunes en los views), code:javascript ({), Definición de rutas (`src/router/index.js`), Guards de navegación, Módulo de layout, Meta de rutas, Navegación programática (+2 more)
+Nodes (9): Execute a single batch with retry logic.                  Args:             conf, Execute a single batch with retry logic.                  Args:             conf, Execute a single batch with retry logic.                  Args:             conf, Execute a single batch with retry logic.                  Args:             conf, Classify an exception into an ODSError.                  Maps asyncpg exceptions, Quote a SQL identifier (table/column name) safely.                  Validates th, Classify an exception into an ODSError.                  Maps asyncpg exceptions, Classify an exception into an ODSError.                  Maps asyncpg exceptions (+1 more)
 
 ### Community 78 - "Community 78"
 Cohesion: 0.18
-Nodes (11): 10. Widget: KPI — `kpi`, code:block12 (tendencia (%) = ((valor_actual - valor_anterior) / |valor_an), code:json ({), code:block14 (┌──────────────────────────────────────────┐), code:json ({), Colores del badge de tendencia, Diseño visual, Ejemplo completo (+3 more)
+Nodes (10): 1. Objetivo del Módulo, 2. Descripción de la Interfaz (UI/UX), 3. Requerimientos Funcionales (RF), 4. Requerimientos No Funcionales (RNF), 5. Casos de Uso Principales, A. Panel de Origen (Izquierda), B. Panel de Configuración (Centro - Barra Plegable), C. Panel de Preview (Derecha) (+2 more)
 
 ### Community 79 - "Community 79"
 Cohesion: 0.18
-Nodes (10): 1. Capa de Presentación (Frontend), 2. Capa de API Gateway y Lógica de Negocio (Backend), 3. Entorno de Ejecución Seguro (Sandbox), 4. Capa de Servicios Externos y Almacenamiento, 🏛️ Análisis de Arquitectura Global: DashboardStudio, 🎯 Beneficios y Propuesta de Valor de esta Arquitectura, code:mermaid (sequenceDiagram), 🧭 Desglose por Capas Arquitectónicas (+2 more)
+Nodes (10): code:block1 (1. ¿La ruta es pública? → Pasar), code:javascript (// Ejemplos comunes en los views), code:javascript ({), Definición de rutas (`src/router/index.js`), Guards de navegación, Módulo de layout, Meta de rutas, Navegación programática (+2 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.24
-Nodes (5): mock_get_current_user(), get_mock_db(), mock_get_current_user(), MockDS, TokenData
+Cohesion: 0.18
+Nodes (11): 10. Widget: KPI — `kpi`, code:block12 (tendencia (%) = ((valor_actual - valor_anterior) / |valor_an), code:json ({), code:block14 (┌──────────────────────────────────────────┐), code:json ({), Colores del badge de tendencia, Diseño visual, Ejemplo completo (+3 more)
 
 ### Community 81 - "Community 81"
+Cohesion: 0.18
+Nodes (10): 1. Capa de Presentación (Frontend), 2. Capa de API Gateway y Lógica de Negocio (Backend), 3. Entorno de Ejecución Seguro (Sandbox), 4. Capa de Servicios Externos y Almacenamiento, 🏛️ Análisis de Arquitectura Global: DashboardStudio, 🎯 Beneficios y Propuesta de Valor de esta Arquitectura, code:mermaid (sequenceDiagram), 🧭 Desglose por Capas Arquitectónicas (+2 more)
+
+### Community 82 - "Community 82"
 Cohesion: 0.22
 Nodes (7): create_data_type(), delete_data_type(), _generate_id(), Delete data type (admin/designer only), Create a new data type (admin/designer only), Update data type (admin/designer only), update_data_type()
 
-### Community 82 - "Community 82"
+### Community 83 - "Community 83"
 Cohesion: 0.2
 Nodes (10): Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow., Save diagram data (nodes + connections + metadata) for a flow. (+2 more)
 
-### Community 83 - "Community 83"
+### Community 84 - "Community 84"
 Cohesion: 0.2
 Nodes (8): Execute overwrite (TRUNCATE + INSERT) operation for a batch.                  On, Quote a SQL identifier (table/column name) safely.                  Validates th, Execute overwrite (TRUNCATE + INSERT) operation for a batch.                  On, Execute overwrite (TRUNCATE + INSERT) operation for a batch.                  On, Execute overwrite (TRUNCATE + INSERT) operation for a batch.                  On, Quote a SQL identifier (table/column name) safely.                  Validates th, Quote a SQL identifier (table/column name) safely.                  Validates th, Quote a SQL identifier (table/column name) safely.                  Validates th
 
-### Community 84 - "Community 84"
+### Community 85 - "Community 85"
 Cohesion: 0.2
 Nodes (8): Execute append (INSERT) operation for a batch.                  Args:, Build INSERT query with proper quoting.                  Args:             confi, Execute append (INSERT) operation for a batch.                  Args:, Execute append (INSERT) operation for a batch.                  Args:, Execute append (INSERT) operation for a batch.                  Args:, Build INSERT query with proper quoting.                  Args:             confi, Build INSERT query with proper quoting.                  Args:             confi, Build INSERT query with proper quoting.                  Args:             confi
 
-### Community 85 - "Community 85"
+### Community 86 - "Community 86"
 Cohesion: 0.2
 Nodes (6): Tests for email_schemas.py - Email service Pydantic models.  TDD RED phase: Test, Test EmailContent model validation., Should require subject and body., Should create with subject and body., Should validate format field., TestEmailContent
 
-### Community 86 - "Community 86"
+### Community 87 - "Community 87"
 Cohesion: 0.2
 Nodes (6): Test HTML sanitization., Should remove script tags., Should allow safe HTML tags., Should allow table elements., Should allow anchor tags with href., TestSanitizeHtml
 
-### Community 87 - "Community 87"
+### Community 88 - "Community 88"
 Cohesion: 0.22
 Nodes (9): _decode_config(), get_data_source_columns(), get_data_source_tables(), Test a data source connection., List tables in a data source., List columns in a specific table of a data source., Deserialise + decrypt connection_config stored in connection_url., Test a data source connection (+1 more)
 
-### Community 88 - "Community 88"
+### Community 89 - "Community 89"
 Cohesion: 0.22
 Nodes (7): Test relationships between models., EmailPayload should contain EmailContent., All models should inherit from Pydantic BaseModel., Test relationships between models., EmailPayload should contain EmailContent., All models should inherit from Pydantic BaseModel., TestModelRelationships
 
-### Community 89 - "Community 89"
+### Community 90 - "Community 90"
 Cohesion: 0.25
 Nodes (7): defaultOptions, editorRef, emit, handleChange(), internalValue, mergedOptions, props
 
-### Community 90 - "Community 90"
+### Community 91 - "Community 91"
 Cohesion: 0.22
 Nodes (8): Milestone: Integration Flow Execution Visualizer (Popup), Phase 18: Frontend - Execution Visualizer Popup, Phase 18: Frontend - Execution Visualizer Popup, Phase 19: Integration & Data Wiring, Phase 19: Integration & Data Wiring, Phase Details, Progress Table, Project Roadmap: Integration Flow Execution Visualizer
 
-### Community 91 - "Community 91"
+### Community 92 - "Community 92"
 Cohesion: 0.22
 Nodes (9): 11. Personalización avanzada con `chartOptions`, Casos de uso frecuentes, code:json ({), code:json ({), code:json ({), code:json ({), code:json ({), IA Assist (+1 more)
-
-### Community 92 - "Community 92"
-Cohesion: 0.25
-Nodes (8): get_data_source(), list_data_sources(), List all data sources., Get a single data source by ID., List all data sources, Convert a DataSource ORM object to a response dict., Get data source by ID, _to_response()
 
 ### Community 93 - "Community 93"
 Cohesion: 0.25
@@ -643,27 +643,27 @@ Nodes (5): downgrade(), add email tool  Revision ID: 032 Revises: 202fd2be6265 C
 
 ### Community 105 - "Community 105"
 Cohesion: 0.33
-Nodes (6): get_execution_logs(), Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica., Obtiene los logs y resultados de una ejecución específica.
+Nodes (6): list_flow_executions(), Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo., Lista las últimas ejecuciones de un flujo.
 
 ### Community 106 - "Community 106"
 Cohesion: 0.33
-Nodes (5): Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult
+Nodes (4): ODSResult, Result of an ODS execution operation.          Attributes:         success: True, Test ODSResult dataclass creation., Test ODSResult uses correct defaults.
 
 ### Community 107 - "Community 107"
 Cohesion: 0.33
-Nodes (5): Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:
+Nodes (5): Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult, Sort records by identity fields to prevent deadlocks.                  When mult
 
 ### Community 108 - "Community 108"
 Cohesion: 0.33
-Nodes (3): CONN_DEFAULTS, CONN_META, CONN_TYPES
+Nodes (5): Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:, Split records into batches of specified size.                  Args:
 
 ### Community 109 - "Community 109"
-Cohesion: 0.4
-Nodes (5): diagramData, doSave(), flowName, handleSave(), toolsForDiagram
+Cohesion: 0.33
+Nodes (3): CONN_DEFAULTS, CONN_META, CONN_TYPES
 
 ### Community 110 - "Community 110"
-Cohesion: 0.33
-Nodes (6): 2. Configuración de Medidas (Measures), code:json ({), Parámetros de Dimensión de Tiempo (`timeDimension`), Parámetros de Dimensiones, Parámetros de Filtros, Parámetros de una Medida
+Cohesion: 0.4
+Nodes (5): diagramData, doSave(), flowName, handleSave(), toolsForDiagram
 
 ### Community 111 - "Community 111"
 Cohesion: 0.33
@@ -671,19 +671,19 @@ Nodes (5): 12. Paletas de colores, 13. Datos de demostración (`useMockData`), c
 
 ### Community 112 - "Community 112"
 Cohesion: 0.33
-Nodes (6): 4. Widget: Líneas — `line`, code:json ({ "series": [{ "areaStyle": null }] }), Comportamiento predeterminado, Fuente de datos, Parámetros configurables, Para eliminar el área rellena
+Nodes (6): 3. Widget: Barras — `bar`, code:json ({), Comportamiento predeterminado, Ejemplo mínimo, Fuente de datos, Parámetros configurables
 
 ### Community 113 - "Community 113"
 Cohesion: 0.33
-Nodes (6): 3. Widget: Barras — `bar`, code:json ({), Comportamiento predeterminado, Ejemplo mínimo, Fuente de datos, Parámetros configurables
+Nodes (6): 2. Configuración de Medidas (Measures), code:json ({), Parámetros de Dimensión de Tiempo (`timeDimension`), Parámetros de Dimensiones, Parámetros de Filtros, Parámetros de una Medida
 
 ### Community 114 - "Community 114"
 Cohesion: 0.33
-Nodes (5): Arquitectura de la Solución: Ejecución Delegada de Flujos, code:mermaid (sequenceDiagram), 🛠️ Componentes Clave de la Solución, 🔄 Diagrama de Flujo y Secuencia (Mermaid), 🖼️ Infografía de Arquitectura Premium
+Nodes (6): 4. Widget: Líneas — `line`, code:json ({ "series": [{ "areaStyle": null }] }), Comportamiento predeterminado, Fuente de datos, Parámetros configurables, Para eliminar el área rellena
 
 ### Community 115 - "Community 115"
-Cohesion: 0.4
-Nodes (5): _encode_config(), Update a data source., Update data source (admin/designer only), Encrypt sensitive keys then JSON-serialise into connection_url., update_data_source()
+Cohesion: 0.33
+Nodes (5): Arquitectura de la Solución: Ejecución Delegada de Flujos, code:mermaid (sequenceDiagram), 🛠️ Componentes Clave de la Solución, 🔄 Diagrama de Flujo y Secuencia (Mermaid), 🖼️ Infografía de Arquitectura Premium
 
 ### Community 116 - "Community 116"
 Cohesion: 0.4
@@ -699,7 +699,7 @@ Nodes (4): data, existing, toAdd, toReplace
 
 ### Community 120 - "Community 120"
 Cohesion: 0.4
-Nodes (5): 9. Widget: Tabla — `table`, Construcción de columnas, Fuente de datos, Funciones interactivas, Parámetros configurables
+Nodes (5): 7. Widget: Radar — `radar`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
 
 ### Community 121 - "Community 121"
 Cohesion: 0.4
@@ -711,7 +711,7 @@ Nodes (5): 6. Widget: Gauge — `gauge`, code:json ({), Comportamiento predeterm
 
 ### Community 123 - "Community 123"
 Cohesion: 0.4
-Nodes (5): 7. Widget: Radar — `radar`, code:json ({), Comportamiento predeterminado, Fuente de datos, Personalización avanzada
+Nodes (5): 9. Widget: Tabla — `table`, Construcción de columnas, Fuente de datos, Funciones interactivas, Parámetros configurables
 
 ### Community 124 - "Community 124"
 Cohesion: 0.67
@@ -741,12 +741,12 @@ Nodes (3): Mejoras, Objetivo, Requerimientos
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DenoService` connect `Community 34` to `Community 36`, `Community 6`, `Community 44`, `Community 13`, `Community 45`, `Community 20`, `Community 29`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `process_sensitive_fields()` connect `Community 71` to `Community 34`, `Community 12`, `Community 115`, `Community 87`, `Community 63`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Why does `ensure_user_exists()` connect `Community 62` to `Community 97`, `Community 35`, `Community 67`, `Community 105`, `Community 41`, `Community 73`, `Community 92`, `Community 18`, `Community 22`, `Community 55`, `Community 28`, `Community 61`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+- **Why does `DenoService` connect `Community 32` to `Community 35`, `Community 6`, `Community 42`, `Community 14`, `Community 15`, `Community 28`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `process_sensitive_fields()` connect `Community 73` to `Community 32`, `Community 64`, `Community 12`, `Community 47`, `Community 88`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `ensure_user_exists()` connect `Community 48` to `Community 33`, `Community 97`, `Community 34`, `Community 68`, `Community 105`, `Community 75`, `Community 47`, `Community 55`, `Community 54`, `Community 22`, `Community 27`, `Community 63`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
 - **Are the 38 inferred relationships involving `EmailExecutor` (e.g. with `DenoService` and `EmailConfig`) actually correct?**
   _`EmailExecutor` has 38 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 13 inferred relationships involving `ODSExecutor` (e.g. with `DenoService` and `ExecutionHistory`) actually correct?**
