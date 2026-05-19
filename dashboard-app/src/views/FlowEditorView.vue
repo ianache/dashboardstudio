@@ -50,8 +50,13 @@
           title="AI Code Assist">
           <span class="msi">auto_awesome</span>AI Assist
         </button>
-        <button class="fe-tbr-btn" @click="canvasRef?.centerView()" title="Centrar diagrama" :disabled="loading">
-          <span class="msi">center_focus_strong</span>
+
+        <button
+          v-if="canUndo"
+          class="fe-tbr-btn fe-tbr-btn--undo"
+          @click="handleUndo()"
+          title="Deshacer eliminación">
+          <span class="msi">undo</span>Deshacer
         </button>
         <button
           class="fe-tbr-btn fe-tbr-btn--save"
@@ -83,6 +88,7 @@
       :diagram-data="diagramData"
       :flow-id="flowId"
       @dirty-change="isDirty = $event"
+      @undo-state-change="canUndo = $event"
     />
 
     <!-- AI Code Assist modal -->
@@ -139,6 +145,7 @@ const flowStore = useIntegrationsStore()
 const uiStore   = useUIStore()
 const canvasRef = ref(null)
 const fileInputRef = ref(null)
+const canUndo = ref(false)
 const loading      = ref(true)
 const showAiAssist = ref(false)
 
@@ -319,6 +326,10 @@ function handleImportFile(event) {
   reader.readAsText(file)
 }
 
+function handleUndo() {
+  canvasRef.value?.undoDeletion()
+}
+
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 onMounted(async () => {
@@ -403,6 +414,21 @@ onMounted(async () => {
 }
 .fe-tbr-btn--import:disabled {
   opacity: 0.6;
+}
+.fe-tbr-btn--undo {
+  color: #ea580c;
+  border-color: #ffedd5;
+  background: #fff7ed;
+  font-weight: 600;
+  animation: fe-bounce 0.5s ease-out;
+}
+.fe-tbr-btn--undo:hover {
+  background: #ffedd5;
+  border-color: #fed7aa;
+}
+@keyframes fe-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 .fe-tbr-btn--run:hover:not(:disabled) {
   background: #dcfce7;

@@ -726,7 +726,7 @@ const props = defineProps({
   readOnly:      { type: Boolean, default: false },
   executionData: { type: Object,  default: null }
 })
-const emit = defineEmits(['save', 'dirty-change'])
+const emit = defineEmits(['save', 'dirty-change', 'undo-state-change'])
 
 const vFocus = {
   mounted: (el) => el.focus()
@@ -1112,8 +1112,20 @@ watch(() => props.diagramData, (data) => {
   })
 }, { immediate: true })
 
+const undoState = ref(null)
+let isDeletingNode = false
+
+watch(undoState, (val) => {
+  emit('undo-state-change', !!val)
+})
+
 watch([nodes, connections, notes, metadata], () => {
   if (initializingFromProp) return
+  
+  if (!isDeletingNode) {
+    undoState.value = null
+  }
+  
   const dirty = takeSnapshot() !== savedSnapshot
   emit('dirty-change', dirty)
 }, { deep: true })
@@ -1406,6 +1418,7 @@ function runFlow() {
 
 onBeforeUnmount(() => {
   if (ws) ws.close()
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 function toggleCat(key) { openCats.value[key] = !openCats.value[key] }
@@ -1592,17 +1605,78 @@ function selectNote(note) {
 function deleteSelectedNode() {
   if (props.readOnly) return
   if (!selectedNode.value) return
+  
+  undoState.value = {
+    nodes: JSON.parse(JSON.stringify(nodes.value)),
+    connections: JSON.parse(JSON.stringify(connections.value)),
+    notes: JSON.parse(JSON.stringify(notes.value)),
+    metadata: JSON.parse(JSON.stringify(metadata.value))
+  }
+  isDeletingNode = true
+  
   const id = selectedNode.value.id
   nodes.value = nodes.value.filter(n => n.id !== id)
   connections.value = connections.value.filter(c => c.from !== id && c.to !== id)
   selectedNode.value = null
+  
+  nextTick(() => {
+    isDeletingNode = false
+  })
 }
+
 function deleteSelectedNote() {
   if (props.readOnly) return
   if (!selectedNote.value) return
+  
+  undoState.value = {
+    nodes: JSON.parse(JSON.stringify(nodes.value)),
+    connections: JSON.parse(JSON.stringify(connections.value)),
+    notes: JSON.parse(JSON.stringify(notes.value)),
+    metadata: JSON.parse(JSON.stringify(metadata.value))
+  }
+  isDeletingNode = true
+  
   const id = selectedNote.value.id
   notes.value = notes.value.filter(n => n.id !== id)
   selectedNote.value = null
+  
+  nextTick(() => {
+    isDeletingNode = false
+  })
+}
+
+function undoDeletion() {
+  if (!undoState.value) return
+  
+  initializingFromProp = true
+  
+  nodes.value       = JSON.parse(JSON.stringify(undoState.value.nodes))
+  connections.value = JSON.parse(JSON.stringify(undoState.value.connections))
+  notes.value       = JSON.parse(JSON.stringify(undoState.value.notes))
+  metadata.value    = JSON.parse(JSON.stringify(undoState.value.metadata))
+  
+  undoState.value = null
+  
+  nextTick(() => {
+    initializingFromProp = false
+    const dirty = takeSnapshot() !== savedSnapshot
+    emit('dirty-change', dirty)
+  })
+}
+
+function handleKeyDown(e) {
+  const tag = e.target.tagName?.toLowerCase()
+  if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable || e.target.closest('.monaco-editor')) {
+    return
+  }
+  
+  if (e.key === 'Delete' || e.key === 'Del') {
+    if (selectedNode.value) {
+      deleteSelectedNode()
+    } else if (selectedNote.value) {
+      deleteSelectedNote()
+    }
+  }
 }
 
 // ─── Port events ──────────────────────────────────────────────────────────────
@@ -1728,9 +1802,12 @@ function loadImportedDiagram(data) {
   })
 }
 
-defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView, runFlow, execStatus, loadImportedDiagram })
+defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView, runFlow, execStatus, loadImportedDiagram, undoDeletion })
 
-onMounted(() => { setTimeout(fitView, 80) })
+onMounted(() => {
+  setTimeout(fitView, 80)
+  window.addEventListener('keydown', handleKeyDown)
+})
 </script>
 
 <style scoped>
