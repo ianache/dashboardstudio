@@ -19,6 +19,20 @@
       </div>
       <div class="fe-topbar-r">
         <button
+          class="fe-tbr-btn fe-tbr-btn--export"
+          :disabled="loading"
+          @click="handleExport()"
+          title="Exportar diseño como JSON">
+          <span class="msi">download</span>Exportar
+        </button>
+        <button
+          class="fe-tbr-btn fe-tbr-btn--import"
+          :disabled="loading"
+          @click="triggerImportFile()"
+          title="Importar diseño desde JSON">
+          <span class="msi">upload</span>Importar
+        </button>
+        <button
           class="fe-tbr-btn fe-tbr-btn--run"
           :disabled="loading || canvasRef?.execStatus === 'running'"
           @click="handleRunFlow()"
@@ -96,6 +110,15 @@
       @accept="onLeaveSave"
     />
 
+    <!-- Hidden input file for importing -->
+    <input 
+      type="file" 
+      ref="fileInputRef" 
+      accept=".json" 
+      @change="handleImportFile" 
+      style="display: none;" 
+    />
+
   </div>
 </template>
 
@@ -115,6 +138,7 @@ const catalog   = useToolCatalogStore()
 const flowStore = useIntegrationsStore()
 const uiStore   = useUIStore()
 const canvasRef = ref(null)
+const fileInputRef = ref(null)
 const loading      = ref(true)
 const showAiAssist = ref(false)
 
@@ -208,6 +232,93 @@ async function handleRunFlow() {
   canvasRef.value?.runFlow()
 }
 
+function handleExport() {
+  const data = canvasRef.value?.getCurrentDiagramData()
+  if (!data) {
+    uiStore.addAlert({ type: 'warning', message: 'No hay datos de diagrama para exportar' })
+    return
+  }
+  
+  const exportData = {
+    version: '1.0.0', // portal version to ensure future compatibility
+    metadata: data.metadata || {},
+    nodes: data.nodes || [],
+    connections: data.connections || [],
+    notes: data.notes || []
+  }
+  
+  try {
+    const jsonStr = JSON.stringify(exportData, null, 2)
+    const blob = new Blob([jsonStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const flowNameStr = flowStore.currentFlow?.name || 'diagram'
+    const safeName = flowNameStr.toLowerCase().replace(/[^a-z0-9_-]/gi, '_')
+    a.href = url
+    a.download = `${safeName}_export.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    uiStore.addAlert({ type: 'success', message: 'Diagrama exportado exitosamente' })
+  } catch (err) {
+    uiStore.addAlert({ type: 'error', message: 'Error al exportar diagrama: ' + err.message })
+  }
+}
+
+function triggerImportFile() {
+  fileInputRef.value?.click()
+}
+
+function handleImportFile(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result)
+      
+      // Validation of basic fields
+      if (!parsed.version) {
+        uiStore.addAlert({ type: 'error', message: 'El archivo JSON no tiene un campo de versión' })
+        return
+      }
+      
+      // Simple version check
+      const versionParts = parsed.version.split('.')
+      if (parseInt(versionParts[0]) > 1) {
+        uiStore.addAlert({ 
+          type: 'warning', 
+          message: `El archivo tiene una versión superior (${parsed.version}) a la soportada por el portal. Se intentará procesar.` 
+        })
+      }
+      
+      if (!parsed.nodes && !parsed.connections) {
+        uiStore.addAlert({ type: 'error', message: 'El archivo JSON no parece ser un diagrama válido (faltan nodos o conexiones)' })
+        return
+      }
+      
+      // Load the imported diagram into canvas
+      canvasRef.value?.loadImportedDiagram({
+        metadata: parsed.metadata || {},
+        nodes: parsed.nodes || [],
+        connections: parsed.connections || [],
+        notes: parsed.notes || []
+      })
+      
+      isDirty.value = true
+      uiStore.addAlert({ type: 'success', message: 'Diagrama importado exitosamente. No te olvides de guardar tus cambios.' })
+      
+      // Reset input value to allow importing the same file again
+      event.target.value = ''
+    } catch (err) {
+      uiStore.addAlert({ type: 'error', message: 'Error al leer el archivo JSON: ' + err.message })
+    }
+  }
+  reader.readAsText(file)
+}
+
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 onMounted(async () => {
@@ -266,6 +377,32 @@ onMounted(async () => {
   border-color: #bbf7d0;
   color: #16a34a;
   font-weight: 600;
+}
+.fe-tbr-btn--export {
+  color: #0284c7;
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  font-weight: 600;
+}
+.fe-tbr-btn--export:hover:not(:disabled) {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+}
+.fe-tbr-btn--export:disabled {
+  opacity: 0.6;
+}
+.fe-tbr-btn--import {
+  color: #4f46e5;
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  font-weight: 600;
+}
+.fe-tbr-btn--import:hover:not(:disabled) {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+}
+.fe-tbr-btn--import:disabled {
+  opacity: 0.6;
 }
 .fe-tbr-btn--run:hover:not(:disabled) {
   background: #dcfce7;

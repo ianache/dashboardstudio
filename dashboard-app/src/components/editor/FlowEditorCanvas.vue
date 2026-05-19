@@ -1688,7 +1688,47 @@ function save() {
   markSaved()
 }
 
-defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView, runFlow, execStatus })
+function loadImportedDiagram(data) {
+  initializingFromProp = true
+  
+  const rawNodes = data?.nodes ? JSON.parse(JSON.stringify(data.nodes)) : []
+  const parsedNodes = rawNodes.filter(n => n.category?.toLowerCase() !== 'annotations')
+  const legacyNotes = rawNodes.filter(n => n.category?.toLowerCase() === 'annotations')
+
+  connections.value = data?.connections ? JSON.parse(JSON.stringify(data.connections)) : []
+  notes.value       = data?.notes       ? JSON.parse(JSON.stringify(data.notes))       : []
+  
+  if (legacyNotes.length > 0) {
+    notes.value.push(...legacyNotes)
+  }
+
+  metadata.value    = data?.metadata    ? JSON.parse(JSON.stringify(data.metadata))    : {}
+  
+  // Merge node props with tool defaults
+  for (const node of parsedNodes) {
+    const tool = props.tools.find(t => t.type === node.toolType)
+    if (tool?.default_props) {
+      const defaults = typeof tool.default_props === 'string' 
+        ? JSON.parse(tool.default_props) 
+        : tool.default_props
+      
+      if (!node.props) node.props = {}
+      for (const [key, value] of Object.entries(defaults)) {
+        if (!(key in node.props)) {
+          node.props[key] = value
+        }
+      }
+    }
+  }
+  nodes.value = parsedNodes
+  
+  nextTick(() => {
+    initializingFromProp = false
+    emit('dirty-change', true)
+  })
+}
+
+defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView, runFlow, execStatus, loadImportedDiagram })
 
 onMounted(() => { setTimeout(fitView, 80) })
 </script>
