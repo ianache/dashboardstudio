@@ -24,7 +24,6 @@
         <div v-if="!leftCollapsed" class="fec-left-head">
           <span class="msi" style="font-size:15px;color:#2563eb">widgets</span>
           <span class="fec-panel-label">Componentes</span>
-          <span class="fec-diagram-tag">{{ diagramTypeLabel }}</span>
         </div>
 
         <template v-for="cat in toolsByCategory" :key="cat.key">
