@@ -1804,7 +1804,10 @@ function loadImportedDiagram(data) {
 defineExpose({ save, getCurrentDiagramData, markSaved, fitView, centerView, runFlow, execStatus, loadImportedDiagram, undoDeletion })
 
 onMounted(() => {
-  setTimeout(fitView, 80)
+  setTimeout(() => {
+    fitView()
+    centerView()
+  }, 80)
   window.addEventListener('keydown', handleKeyDown)
 })
 </script>
