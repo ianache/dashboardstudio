@@ -556,10 +556,6 @@
 
               <!-- Textarea -->
               <textarea v-else-if="def.type === 'textarea'" v-model="selectedNode.props[key]" class="fec-prop-ta" :rows="def.rows || 3" :placeholder="def.placeholder || ''"></textarea>
-              <p v-if="def.type === 'textarea' && ['subject', 'body'].includes(key)" class="fec-template-hint">
-                <span class="msi" style="font-size:11px">info</span>
-                Supports {"{{"}variable{"}}"} and {"{%"} for {"%}"} template syntax
-              </p>
               
               <!-- Select -->
               <div v-else-if="def.type === 'select'" class="fec-sel-wrap">
@@ -640,6 +636,10 @@
               <p v-if="key === 'subject'" class="fec-template-hint">
                 <span class="msi" style="font-size:11px">info</span>
                 Supports {"{{"}variable{"}}"} template syntax
+              </p>
+              <p v-if="def.type === 'textarea' && ['subject', 'body'].includes(key)" class="fec-template-hint">
+                <span class="msi" style="font-size:11px">info</span>
+                Supports {"{{"}variable{"}}"} and {"{%"} for {"%}"} template syntax
               </p>
             </div>
           </template>
