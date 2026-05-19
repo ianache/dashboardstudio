@@ -122,9 +122,13 @@ function getTopologicalOrder(nodes: FlowNode[], connections: FlowConnection[]): 
     inDegree.set(n.id, 0);
   });
 
+  const nodeIds = new Set(nodes.map(n => n.id));
+
   connections.forEach(c => {
-    adj.get(c.from)?.push(c.to);
-    inDegree.set(c.to, (inDegree.get(c.to) || 0) + 1);
+    if (nodeIds.has(c.from) && nodeIds.has(c.to)) {
+      adj.get(c.from)?.push(c.to);
+      inDegree.set(c.to, (inDegree.get(c.to) || 0) + 1);
+    }
   });
 
   const queue: string[] = [];
@@ -146,79 +150,63 @@ function getTopologicalOrder(nodes: FlowNode[], connections: FlowConnection[]): 
   return order.map(id => nodes.find(n => n.id === id)!).filter(Boolean) as FlowNode[];
 }
 
-async function main() {
-  try {
-    const input = await readStdin();
-    if (!input) {
-      console.error("No input received");
-      Deno.exit(1);
-    }
+function getSubgraphNodes(
+  startId: string, 
+  endId: string, 
+  nodes: FlowNode[], 
+  connections: FlowConnection[]
+): { subNodes: FlowNode[], subConnections: FlowConnection[] } {
+  const reachableFromStart = new Set<string>();
+  const queue = [startId];
+  while (queue.length > 0) {
+    const curr = queue.shift()!;
+    connections
+      .filter(c => c.from === curr && c.to !== endId)
+      .forEach(c => {
+        if (!reachableFromStart.has(c.to) && c.to !== startId) {
+          reachableFromStart.add(c.to);
+          queue.push(c.to);
+        }
+      });
+  }
 
-    const flow: FlowData = JSON.parse(input);
+  const canReachEnd = new Set<string>();
+  const queue2 = [endId];
+  while (queue2.length > 0) {
+    const curr = queue2.shift()!;
+    connections
+      .filter(c => c.to === curr && c.from !== startId)
+      .forEach(c => {
+        if (!canReachEnd.has(c.from) && c.from !== endId) {
+          canReachEnd.add(c.from);
+          queue2.push(c.from);
+        }
+      });
+  }
 
-    if (flow.test_mode) {
-      console.log("Deno Runtime: OK");
-      console.log(`Deno Version: ${Deno.version.deno}`);
-      if (flow.payload?.script) {
-        const result = await executeScriptNode(flow.payload.script, "", { payload: flow.payload.data || {} });
-        console.log("Execution Result:", JSON.stringify(result));
-      }
-      return;
-    }
+  const intermediateIds = new Set(
+    [...reachableFromStart].filter(id => canReachEnd.has(id))
+  );
 
-    console.log(`Starting flow execution. Nodes: ${flow.nodes.length}`);
-    
-    const sortedNodes = getTopologicalOrder(flow.nodes, flow.connections);
-    const prefetchedOutputs = flow.prefetched_outputs || {};
-    let currentPayload = flow.payload || {};
-    const nodeOutputs = new Map<string, any>();
-    const context = { payload: currentPayload, variables: {} };
+  const subNodes = nodes.filter(n => intermediateIds.has(n.id));
+  const subConnections = connections.filter(
+    c => (intermediateIds.has(c.from) || c.from === startId) && 
+         (intermediateIds.has(c.to) || c.to === endId)
+  );
 
-    for (const node of sortedNodes) {
-      const startMs = Date.now();
-      const startTime = new Date(startMs).toISOString();
+  return { subNodes, subConnections };
+}
 
-      // Source nodes resolved by Python before Deno – skip but keep success status
-      if ((node as any).__pre_executed) {
-        console.log(`[Flow] Nodo pre-ejecutado: ${node.label} (${node.toolType}) — omitiendo`);
-        const prefetched: any = prefetchedOutputs[node.id] || { rows: [], duration: 0 };
-        // Support both old (array) and new (object) format for robustness
-        const p = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
-        const pythonDuration = Array.isArray(prefetched) ? 0 : (prefetched.duration || 0);
-
-        nodeOutputs.set(node.id, p);
-        currentPayload = p;
-        
-        const endMs = Date.now();
-        const endTime = new Date(endMs).toISOString();
-        const totalDuration = pythonDuration + (endMs - startMs);
-
-        // Emit status AND log json so history catches it
-        console.log(`NODE_LOG_JSON:${JSON.stringify({
-          node_id: node.id, 
-          status: 'success', 
-          input: {}, 
-          output: p, 
-          duration: totalDuration, 
-          start_time: startTime, 
-          end_time: endTime
-        })}`);
-        emitStatus(node.id, 'success');
-        continue;
-      }
-
-      // Gather inputs from incoming connections
-      const incoming = flow.connections.filter(c => c.to === node.id);
-      if (incoming.length === 1) {
-        currentPayload = nodeOutputs.get(incoming[0].from) || [];
-      } else if (incoming.length > 1 && node.toolType !== 'join') {
-        currentPayload = incoming.map(c => nodeOutputs.get(c.from) || []);
-      }
-      context.payload = currentPayload;
-
-      emitStatus(node.id, 'running');
-      console.log(`[Flow] Executing Node: ${node.label} (${node.toolType})`);
-      
+async function runNodeExecution(
+  node: FlowNode,
+  context: any,
+  currentPayload: any,
+  incoming: FlowConnection[],
+  nodeOutputs: Map<string, any>,
+  startMs: number,
+  startTime: string,
+  flow: FlowData
+): Promise<void> {
       if (['http_rest', 'graphql_api', 'graphql', 'rest_api', 'http', 'webhook'].includes(node.toolType)) {
         try {
           const rawUrl = node.props?.url || "";
@@ -717,6 +705,221 @@ async function main() {
         console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
         emitStatus(node.id, 'success');
       }
+}
+
+async function main() {
+  try {
+    const input = await readStdin();
+    if (!input) {
+      console.error("No input received");
+      Deno.exit(1);
+    }
+
+    const flow: FlowData = JSON.parse(input);
+
+    if (flow.test_mode) {
+      console.log("Deno Runtime: OK");
+      console.log(`Deno Version: ${Deno.version.deno}`);
+      if (flow.payload?.script) {
+        const result = await executeScriptNode(flow.payload.script, "", { payload: flow.payload.data || {} });
+        console.log("Execution Result:", JSON.stringify(result));
+      }
+      return;
+    }
+
+    console.log(`Starting flow execution. Nodes: ${flow.nodes.length}`);
+    
+    const sortedNodes = getTopologicalOrder(flow.nodes, flow.connections);
+    const prefetchedOutputs = flow.prefetched_outputs || {};
+    let currentPayload = flow.payload || {};
+    const nodeOutputs = new Map<string, any>();
+    const context = { payload: currentPayload, variables: {} };
+
+    const skippedNodes = new Set<string>();
+
+    for (const node of sortedNodes) {
+      if (skippedNodes.has(node.id)) {
+        continue;
+      }
+      const startMs = Date.now();
+      const startTime = new Date(startMs).toISOString();
+
+      // Source nodes resolved by Python before Deno – skip but keep success status
+      if ((node as any).__pre_executed) {
+        console.log(`[Flow] Nodo pre-ejecutado: ${node.label} (${node.toolType}) — omitiendo`);
+        const prefetched: any = prefetchedOutputs[node.id] || { rows: [], duration: 0 };
+        // Support both old (array) and new (object) format for robustness
+        const p = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
+        const pythonDuration = Array.isArray(prefetched) ? 0 : (prefetched.duration || 0);
+
+        nodeOutputs.set(node.id, p);
+        currentPayload = p;
+        
+        const endMs = Date.now();
+        const endTime = new Date(endMs).toISOString();
+        const totalDuration = pythonDuration || (endMs - startMs);
+        const nodeStartTime = prefetched.start_utc || startTime;
+        const nodeEndTime = prefetched.end_utc || endTime;
+
+        // Emit status AND log json so history catches it
+        console.log(`NODE_LOG_JSON:${JSON.stringify({
+          node_id: node.id, 
+          status: 'success', 
+          input: {}, 
+          output: p, 
+          duration: totalDuration, 
+          start_time: nodeStartTime, 
+          end_time: nodeEndTime
+        })}`);
+        emitStatus(node.id, 'success');
+        continue;
+      }
+
+      // Gather inputs from incoming connections
+      const incoming = flow.connections.filter(c => c.to === node.id);
+      if (incoming.length === 1) {
+        currentPayload = nodeOutputs.get(incoming[0].from) || [];
+      } else if (incoming.length > 1 && node.toolType !== 'join') {
+        currentPayload = incoming.map(c => nodeOutputs.get(c.from) || []);
+      }
+      context.payload = currentPayload;
+
+      if (node.toolType === 'dsplit') {
+        emitStatus(node.id, 'running');
+        console.log(`[Flow] Executing Split Node: ${node.label} (${node.toolType})`);
+        
+        let inputList: any[] = [];
+        if (context.payload && typeof context.payload === 'object' && Array.isArray(context.payload.payload)) {
+          inputList = context.payload.payload;
+        } else if (Array.isArray(context.payload)) {
+          inputList = context.payload;
+        } else if (context.payload && typeof context.payload === 'object' && Array.isArray(context.payload.data)) {
+          inputList = context.payload.data;
+        } else {
+          inputList = [context.payload];
+        }
+        const total = inputList.length;
+        
+        const djoinNode = flow.nodes.find(n => n.toolType === 'djoin' && n.props?.dsplit_pair_id === node.id);
+        if (!djoinNode) {
+          throw new Error(`No se encontro el nodo DJoin pareja para ${node.label}`);
+        }
+        
+        const pairedSplitId = djoinNode.props?.dsplit_pair_id;
+        if (!pairedSplitId) {
+          throw new Error(`DJoin ${djoinNode.label} no tiene asignado un nodo DSplit pareja`);
+        }
+        if (pairedSplitId !== node.id) {
+          throw new Error(`DJoin ${djoinNode.label} esta emparejado con ${pairedSplitId} pero recibio un flujo de DSplit ${node.id}`);
+        }
+        
+        const { subNodes, subConnections } = getSubgraphNodes(node.id, djoinNode.id, flow.nodes, flow.connections);
+        
+        subNodes.forEach(sn => skippedNodes.add(sn.id));
+        skippedNodes.add(djoinNode.id);
+        
+        const sortedSubNodes = getTopologicalOrder(subNodes, subConnections);
+        const splitMode = node.props?.split_mode || 'parallel';
+        const djoinOutputs: any[] = [];
+        
+        const runBranch = async (item: any, idx: number) => {
+          const branchStartMs = Date.now();
+          const branchStartTime = new Date(branchStartMs).toISOString();
+
+          emitStatus(node.id, 'running');
+
+          const branchContext = {
+            payload: item,
+            variables: { ...context.variables },
+            split: {
+              fragment_index: idx,
+              total_fragments: total,
+              dsplit_node_id: node.id
+            }
+          };
+          
+          const branchOutputs = new Map<string, any>();
+          branchOutputs.set(node.id, item);
+
+          const branchEndMs = Date.now();
+          console.log(`NODE_LOG_JSON:${JSON.stringify({
+            node_id: node.id,
+            status: 'success',
+            input: currentPayload,
+            output: item,
+            duration: branchEndMs - branchStartMs,
+            start_time: branchStartTime,
+            end_time: new Date(branchEndMs).toISOString()
+          })}`);
+          emitStatus(node.id, 'success');
+          
+          for (const sn of sortedSubNodes) {
+            const snStartMs = Date.now();
+            const snStartTime = new Date(snStartMs).toISOString();
+            
+            const snIncoming = subConnections.filter(c => c.to === sn.id);
+            let snPayload: any = [];
+            if (snIncoming.length === 1) {
+              snPayload = branchOutputs.get(snIncoming[0].from) || [];
+            } else if (snIncoming.length > 1) {
+              snPayload = snIncoming.map(c => branchOutputs.get(c.from) || []);
+            }
+            
+            branchContext.payload = snPayload;
+            emitStatus(sn.id, 'running');
+            
+            await runNodeExecution(sn, branchContext, snPayload, snIncoming, branchOutputs, snStartMs, snStartTime, flow);
+            branchOutputs.set(sn.id, branchContext.payload);
+          }
+          
+          const djoinIncoming = subConnections.filter(c => c.to === djoinNode.id);
+          if (djoinIncoming.length > 0) {
+            const lastOut = branchOutputs.get(djoinIncoming[0].from);
+            djoinOutputs.push(lastOut);
+          } else {
+            djoinOutputs.push(item);
+          }
+        };
+
+        if (splitMode === 'parallel') {
+          const promises = inputList.map((item, idx) => runBranch(item, idx));
+          await Promise.all(promises);
+        } else {
+          for (let idx = 0; idx < inputList.length; idx++) {
+            await runBranch(inputList[idx], idx);
+          }
+        }
+        
+        emitStatus(djoinNode.id, 'running');
+        const joinStartMs = Date.now();
+        const joinStartTime = new Date(joinStartMs).toISOString();
+        
+        const aggregatedPayload = djoinOutputs.flat();
+        
+        context.payload = aggregatedPayload;
+        nodeOutputs.set(djoinNode.id, aggregatedPayload);
+        
+        const joinEndMs = Date.now();
+        const joinEndTime = new Date(joinEndMs).toISOString();
+        console.log(`NODE_LOG_JSON:${JSON.stringify({
+          node_id: djoinNode.id,
+          status: 'success',
+          input: djoinOutputs,
+          output: aggregatedPayload,
+          duration: joinEndMs - joinStartMs,
+          start_time: joinStartTime,
+          end_time: joinEndTime
+        })}`);
+        emitStatus(djoinNode.id, 'success');
+        nodeOutputs.set(node.id, inputList);
+        currentPayload = aggregatedPayload;
+        continue;
+      }
+
+      emitStatus(node.id, 'running');
+      console.log(`[Flow] Executing Node: ${node.label} (${node.toolType})`);
+
+      await runNodeExecution(node, context, currentPayload, incoming, nodeOutputs, startMs, startTime, flow);
 
       // Save output for downstream nodes
       nodeOutputs.set(node.id, context.payload);

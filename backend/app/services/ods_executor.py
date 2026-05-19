@@ -420,14 +420,17 @@ class ODSExecutor:
                 self.logger.warning(f"Execution {execution_id} not found in database. Skipping log.")
                 return
 
-            from datetime import datetime
+            from datetime import datetime, timedelta
+            
+            now_time = datetime.utcnow()
+            start_time = now_time - timedelta(milliseconds=result.duration_ms or 0)
             
             log_entry = NodeExecutionLogs(
                 execution_id=execution_id,
                 node_id=node_id,
                 status=status,
-                start_time=datetime.utcnow(),  # Approximate - should track actual start
-                end_time=datetime.utcnow(),
+                start_time=start_time,
+                end_time=now_time,
                 duration=result.duration_ms,
                 output_data={
                     "rows_affected": result.rows_affected,

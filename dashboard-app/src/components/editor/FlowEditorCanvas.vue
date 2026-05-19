@@ -911,6 +911,17 @@ function getSelectOptions(def) {
       .filter(ds => !def.filter_by_type || ds.type === def.filter_by_type)
       .map(ds => ({ value: ds.id, label: ds.name }))
   }
+  if (def.options_source === 'dsplit_nodes') {
+    const assignedDSplitIds = new Set(
+      nodes.value
+        .filter(n => n.toolType === 'djoin' && n.id !== selectedNode.value?.id)
+        .map(n => n.props?.dsplit_pair_id)
+        .filter(Boolean)
+    );
+    return nodes.value
+      .filter(n => n.toolType === 'dsplit' && !assignedDSplitIds.has(n.id))
+      .map(n => ({ value: n.id, label: `${n.name || 'DSplit'} (${n.id})` }))
+  }
   return def.options || []
 }
 
@@ -1734,6 +1745,20 @@ function onDrop(e) {
     if (!newItem.props.height) newItem.props.height = 120
     notes.value.push(newItem)
   } else {
+    if (newItem.toolType === 'djoin') {
+      const assignedDSplitIds = new Set(
+        nodes.value
+          .filter(n => n.toolType === 'djoin')
+          .map(n => n.props?.dsplit_pair_id)
+          .filter(Boolean)
+      );
+      const unassignedDSplitNodes = nodes.value.filter(
+        n => n.toolType === 'dsplit' && !assignedDSplitIds.has(n.id)
+      );
+      if (unassignedDSplitNodes.length === 1) {
+        newItem.props.dsplit_pair_id = unassignedDSplitNodes[0].id;
+      }
+    }
     nodes.value.push(newItem)
   }
   

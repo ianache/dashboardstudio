@@ -46,13 +46,31 @@ async def run_integration_flow(flow_id: str):
         # Trigger execution via Deno service
         async for log in deno_service.run_flow_stream(flow_data, {}):
             if log["type"] == "node_log":
+                start_dt = None
+                if log.get("start_time"):
+                    try:
+                        iso_str = log.get("start_time").replace("Z", "+00:00")
+                        start_dt = datetime.fromisoformat(iso_str)
+                    except Exception:
+                        pass
+                
+                end_dt = None
+                if log.get("end_time"):
+                    try:
+                        iso_str = log.get("end_time").replace("Z", "+00:00")
+                        end_dt = datetime.fromisoformat(iso_str)
+                    except Exception:
+                        pass
+
                 node_log = NodeExecutionLogs(
                     execution_id=execution_id,
                     node_id=log["node_id"],
                     status=log["status"],
                     input_data=log["input"],
                     output_data=log["output"],
-                    duration=log["duration"]
+                    duration=log["duration"],
+                    start_time=start_dt or datetime.utcnow(),
+                    end_time=end_dt
                 )
                 db.add(node_log)
             elif log["type"] == "status":

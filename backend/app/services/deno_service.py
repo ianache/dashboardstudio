@@ -328,7 +328,9 @@ class DenoService:
                         "status": status,
                         "input": data.get("input"),
                         "output": data.get("output"),
-                        "duration": data.get("duration", 0)
+                        "duration": data.get("duration", 0),
+                        "start_time": data.get("start_time"),
+                        "end_time": data.get("end_time")
                     }
                     
                     if status in ["success", "error"]:

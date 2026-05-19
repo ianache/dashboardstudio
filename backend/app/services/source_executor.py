@@ -202,14 +202,19 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
             await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "running"})
             await websocket.send_json({"type": "info", "message": f"[Fuente] Ejecutando '{node.get('label', node['id'])}' ..."})
 
+        from datetime import datetime
         start_time = time.perf_counter()
+        start_utc = datetime.utcnow().isoformat() + "Z"
         result = await execute_source_node(node)
         duration_ms = int((time.perf_counter() - start_time) * 1000)
+        end_utc = datetime.utcnow().isoformat() + "Z"
 
         if result["success"]:
             prefetched_outputs[node["id"]] = {
                 "rows": result["rows"],
-                "duration": duration_ms
+                "duration": duration_ms,
+                "start_utc": start_utc,
+                "end_utc": end_utc
             }
             node["__pre_executed"] = True
             if websocket:

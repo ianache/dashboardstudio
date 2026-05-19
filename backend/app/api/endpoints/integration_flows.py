@@ -121,6 +121,22 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
                 execution_record.duration = duration_ms
             
             for nl in node_logs:
+                start_dt = None
+                if nl.get("start_time"):
+                    try:
+                        iso_str = nl.get("start_time").replace("Z", "+00:00")
+                        start_dt = datetime.fromisoformat(iso_str)
+                    except Exception:
+                        pass
+                
+                end_dt = None
+                if nl.get("end_time"):
+                    try:
+                        iso_str = nl.get("end_time").replace("Z", "+00:00")
+                        end_dt = datetime.fromisoformat(iso_str)
+                    except Exception:
+                        pass
+
                 db_nl = models.NodeExecutionLogs(
                     execution_id=exec_id,
                     node_id=nl.get("node_id"),
@@ -128,8 +144,8 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
                     input_data=nl.get("input"),
                     output_data=nl.get("output"),
                     duration=nl.get("duration"),
-                    start_time=nl.get("start_time"),
-                    end_time=nl.get("end_time")
+                    start_time=start_dt or datetime.utcnow(),
+                    end_time=end_dt
                 )
                 db.add(db_nl)
             
@@ -292,13 +308,31 @@ async def run_integration_flow(
     db.add(execution)
     
     for nl in node_logs:
+        start_dt = None
+        if nl.get("start_time"):
+            try:
+                iso_str = nl.get("start_time").replace("Z", "+00:00")
+                start_dt = datetime.fromisoformat(iso_str)
+            except Exception:
+                pass
+        
+        end_dt = None
+        if nl.get("end_time"):
+            try:
+                iso_str = nl.get("end_time").replace("Z", "+00:00")
+                end_dt = datetime.fromisoformat(iso_str)
+            except Exception:
+                pass
+
         db_nl = models.NodeExecutionLogs(
             execution_id=exec_id,
             node_id=nl.get("node_id"),
             status=nl.get("status"),
             input_data=nl.get("input"),
             output_data=nl.get("output"),
-            duration=nl.get("duration", 0)
+            duration=nl.get("duration", 0),
+            start_time=start_dt or datetime.utcnow(),
+            end_time=end_dt
         )
         db.add(db_nl)
     

@@ -1,7 +1,7 @@
 import json
 from typing import Optional, List, Any
-from pydantic import BaseModel, ConfigDict, field_validator
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict, field_validator, field_serializer
+from datetime import datetime, timezone
 
 
 class UserBase(BaseModel):
@@ -506,6 +506,21 @@ class NodeExecutionLogResponse(BaseModel):
     duration: Optional[int] = None
     input_data: Optional[Any] = None
     output_data: Optional[Any] = None
+    node_title: Optional[str] = None
+
+    @field_serializer('start_time')
+    def serialize_start_time(self, start_time: datetime, _info):
+        if start_time.tzinfo is None:
+            return start_time.replace(tzinfo=timezone.utc).isoformat()
+        return start_time.isoformat()
+
+    @field_serializer('end_time')
+    def serialize_end_time(self, end_time: Optional[datetime], _info):
+        if end_time is None:
+            return None
+        if end_time.tzinfo is None:
+            return end_time.replace(tzinfo=timezone.utc).isoformat()
+        return end_time.isoformat()
 
 class ExecutionHistoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -515,6 +530,20 @@ class ExecutionHistoryResponse(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     duration: Optional[int] = None
+
+    @field_serializer('start_time')
+    def serialize_start_time(self, start_time: datetime, _info):
+        if start_time.tzinfo is None:
+            return start_time.replace(tzinfo=timezone.utc).isoformat()
+        return start_time.isoformat()
+
+    @field_serializer('end_time')
+    def serialize_end_time(self, end_time: Optional[datetime], _info):
+        if end_time is None:
+            return None
+        if end_time.tzinfo is None:
+            return end_time.replace(tzinfo=timezone.utc).isoformat()
+        return end_time.isoformat()
 
 class ExecutionDetailResponse(ExecutionHistoryResponse):
     node_logs: List[NodeExecutionLogResponse] = []
