@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div class="aca-overlay" @click.self="$emit('close')">
+    <div class="aca-overlay">
       <div class="aca-modal">
 
         <!-- ── Header ─────────────────────────────────────────────── -->
@@ -252,27 +252,30 @@ function langStyle(lang) {
   white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; flex-shrink: 0;
 }
 
-/* Overlay */
+/* Overlay — non-blocking panel anchored to the right, below topbar */
 .aca-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(15, 23, 42, 0.5);
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
+  position: fixed;
+  top: 52px; right: 12px; bottom: 12px;
+  width: 800px; max-width: calc(100vw - 24px);
+  z-index: 500;
+  pointer-events: none;
+  display: flex; align-items: flex-start; justify-content: flex-end;
   animation: aca-fade 0.15s ease;
 }
 @keyframes aca-fade { from { opacity: 0 } to { opacity: 1 } }
 
 /* Modal */
 .aca-modal {
+  pointer-events: auto;
   background: #fff; border-radius: 14px;
   box-shadow: 0 32px 64px -12px rgba(0,0,0,0.3);
-  width: 100%; max-width: 780px;
-  max-height: calc(100vh - 40px);
+  width: 100%;
+  height: 100%;
   display: flex; flex-direction: column;
   overflow: hidden;
   animation: aca-slide 0.18s ease;
 }
-@keyframes aca-slide { from { transform: translateY(-16px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes aca-slide { from { transform: translateX(16px); opacity: 0 } to { transform: none; opacity: 1 } }
 
 /* Header */
 .aca-header {

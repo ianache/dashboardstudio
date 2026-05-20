@@ -24,6 +24,10 @@ interface FlowData {
   nodes: FlowNode[];
   connections: FlowConnection[];
   notes?: any[]; // New separate layer for documentation
+  metadata?: {
+    variables?: Array<{ name: string; type: string; value: any }>;
+    [key: string]: any;
+  };
   test_mode?: boolean;
   payload?: any;
   prefetched_outputs?: Record<string, any[]>;
@@ -733,7 +737,25 @@ async function main() {
     const prefetchedOutputs = flow.prefetched_outputs || {};
     let currentPayload = flow.payload || {};
     const nodeOutputs = new Map<string, any>();
-    const context = { payload: currentPayload, variables: {} };
+    
+    // ─── Initialize Context Variables from Metadata ─────────────────────────
+    const variables: Record<string, any> = {};
+    if (flow.metadata?.variables && Array.isArray(flow.metadata.variables)) {
+      for (const v of flow.metadata.variables) {
+        if (!v.name) continue;
+        let val = v.value;
+        try {
+          if (v.type === 'number') val = Number(v.value);
+          else if (v.type === 'boolean') val = (String(v.value).toLowerCase() === 'true');
+          else if (v.type === 'json' && typeof v.value === 'string') val = JSON.parse(v.value);
+        } catch (e: any) {
+          console.warn(`[Runner] Failed to parse variable ${v.name}: ${e.message}`);
+        }
+        variables[v.name] = val;
+      }
+    }
+
+    const context = { payload: currentPayload, variables };
 
     const skippedNodes = new Set<string>();
 

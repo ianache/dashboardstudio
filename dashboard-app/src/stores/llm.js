@@ -76,6 +76,12 @@ export const LLM_OPERATIONS = [
     label: 'IA Assist — Modelado Dimensional',
     description: 'Diseña tablas de hechos y dimensiones con sus campos',
     defaultModel: 'anthropic:claude-sonnet-4-6'
+  },
+  {
+    id: 'codeAssist',
+    label: 'IA Assist — Coding',
+    description: 'Asistente de programación para nodos de script (JS, Python, TS)',
+    defaultModel: 'gemini:gemini-2.5-flash'
   }
 ]
 

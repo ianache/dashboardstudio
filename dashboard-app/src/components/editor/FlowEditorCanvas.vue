@@ -341,6 +341,9 @@
           <button class="fec-tab" :class="{ active: rightTab === 'props' }" @click="rightTab = 'props'">
             <span class="msi" style="font-size:16px">settings</span>Propiedades
           </button>
+          <button class="fec-tab" :class="{ active: rightTab === 'variables' }" @click="rightTab = 'variables'">
+            <span class="msi" style="font-size:16px">variable_insert</span>Variables
+          </button>
           <button class="fec-tab" :class="{ active: rightTab === 'history' }" @click="loadHistory">
             <span class="msi" style="font-size:16px">history</span>Historial
           </button>
@@ -405,6 +408,45 @@
               :hide-graph-button="true"
               @view-graph="$emit('view-graph', $event)" 
             />
+          </div>
+        </template>
+
+        <!-- ── Variables ── -->
+        <template v-if="!selectedNode && rightTab === 'variables'">
+          <div class="fec-props-hdr">
+            <span class="msi" style="font-size:20px;color:#2563eb">variable_insert</span>
+            <div>
+              <p class="fec-props-title">Variables de Integración</p>
+              <p class="fec-props-sub">Disponibles en ctx.variables</p>
+            </div>
+          </div>
+
+          <div class="fec-vars-list">
+            <div v-for="(v, idx) in metadata.variables" :key="idx" class="fec-var-item">
+              <div class="fec-var-row">
+                <input v-model="v.name" class="fec-prop-i fec-var-name" placeholder="Nombre" @input="checkDirty" />
+                <select v-model="v.type" class="fec-prop-sel fec-var-type" @change="checkDirty">
+                  <option value="string">String</option>
+                  <option value="number">Number</option>
+                  <option value="boolean">Boolean</option>
+                  <option value="json">JSON</option>
+                </select>
+                <button class="fec-var-del" @click="removeVar(idx)" title="Eliminar variable_insert">
+                  <span class="msi">delete</span>
+                </button>
+              </div>
+              <div class="fec-var-row">
+                <input v-if="v.type !== 'boolean'" v-model="v.value" class="fec-prop-i" :placeholder="v.type === 'json' ? '{ key: val }' : 'Valor'" @input="checkDirty" />
+                <select v-else v-model="v.value" class="fec-prop-sel" @change="checkDirty">
+                  <option :value="true">True</option>
+                  <option :value="false">False</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="fec-add-var-btn" @click="addVar">
+              <span class="msi">add</span> Añadir variable_insert
+            </button>
           </div>
         </template>
 
@@ -538,6 +580,8 @@
                 v-model="selectedNode.props[key]"
                 :language="def.language || 'javascript'"
                 height="320px"
+                @change="checkDirty"
+                @update:model-value="checkDirty"
               />
 
               <!-- Textarea -->
@@ -621,11 +665,11 @@
               <input v-else v-model="selectedNode.props[key]" class="fec-prop-i" :placeholder="def.placeholder || ''" />
               <p v-if="key === 'subject'" class="fec-template-hint">
                 <span class="msi" style="font-size:11px">info</span>
-                Supports {"{{"}variable{"}}"} template syntax
+                Supports {"{{"}variable_insert{"}}"} template syntax
               </p>
               <p v-if="def.type === 'textarea' && ['subject', 'body'].includes(key)" class="fec-template-hint">
                 <span class="msi" style="font-size:11px">info</span>
-                Supports {"{{"}variable{"}}"} and {"{%"} for {"%}"} template syntax
+                Supports {"{{"}variable_insert{"}}"} and {"{%"} for {"%}"} template syntax
               </p>
             </div>
           </template>
@@ -928,7 +972,7 @@ function canFetchDynamic(def) {
 }
 
 /**
- * Build endpoint URL with variable substitution
+ * Build endpoint URL with variable_insert substitution
  */
 function buildEndpoint(def) {
   if (!def.fetch_endpoint || !selectedNode.value) return null
@@ -1069,6 +1113,11 @@ function takeSnapshot() {
   return JSON.stringify({ nodes: nodes.value, connections: connections.value, notes: notes.value, metadata: metadata.value })
 }
 
+function checkDirty() {
+  const dirty = takeSnapshot() !== savedSnapshot
+  emit('dirty-change', dirty)
+}
+
 // Initialize from prop
 watch(() => props.diagramData, (data) => {
   initializingFromProp = true
@@ -1086,6 +1135,7 @@ watch(() => props.diagramData, (data) => {
   }
 
   metadata.value    = data?.metadata    ? JSON.parse(JSON.stringify(data.metadata))    : {}
+  if (!metadata.value.variables) metadata.value.variables = []
   
   // Merge node props with tool defaults for backward compatibility
   for (const node of parsedNodes) {
@@ -1654,6 +1704,17 @@ function undoDeletion() {
   })
 }
 
+function addVar() {
+  if (!metadata.value.variables) metadata.value.variables = []
+  metadata.value.variables.push({ name: '', type: 'string', value: '' })
+  checkDirty()
+}
+
+function removeVar(idx) {
+  metadata.value.variables.splice(idx, 1)
+  checkDirty()
+}
+
 function copyToClipboard() {
   if (selectedNode.value) {
     integrationsStore.setClipboard('node', selectedNode.value)
@@ -1815,6 +1876,7 @@ function loadImportedDiagram(data) {
   }
 
   metadata.value    = data?.metadata    ? JSON.parse(JSON.stringify(data.metadata))    : {}
+  if (!metadata.value.variables) metadata.value.variables = []
   
   // Merge node props with tool defaults
   for (const node of parsedNodes) {
@@ -2351,6 +2413,33 @@ onMounted(() => {
   font-size: 11px;
   margin-left: 4px;
 }
+
+/* ── Variables Tab Styles ───────────────────────────────────────── */
+.fec-vars-list { display: flex; flex-direction: column; gap: 12px; }
+.fec-var-item { 
+  display: flex; flex-direction: column; gap: 6px; 
+  padding: 10px; border: 1px solid #f1f5f9; border-radius: 10px; background: #fcfcfc;
+}
+.fec-var-row { display: flex; gap: 6px; align-items: center; }
+.fec-var-name { flex: 2; }
+.fec-var-type { flex: 1; min-width: 90px; }
+.fec-var-del {
+  width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent;
+  color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.fec-var-del:hover { background: #fef2f2; color: #dc2626; }
+.fec-var-del .msi { font-size: 16px; }
+
+.fec-add-var-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 10px; margin-top: 8px;
+  background: #fff; border: 1.5px dashed #cbd5e1; border-radius: 10px;
+  color: #64748b; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s;
+}
+.fec-add-var-btn:hover { background: #f8fafc; border-color: #2563eb; color: #2563eb; }
+.fec-add-var-btn .msi { font-size: 18px; }
 
 /* Template syntax hint for email fields */
 .fec-template-hint {

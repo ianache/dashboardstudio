@@ -195,6 +195,7 @@ const diagramData = computed(() => {
   if (!f) return { metadata: {}, nodes: [], connections: [], notes: [] }
   return {
     metadata: {
+      ...(f.flow_metadata || {}),
       name: f.name, description: f.description, status: f.status,
       type: f.flow_type, cron_expression: f.cron_expression, log_level: f.log_level,
       source: f.source_system, target: f.target_system,
