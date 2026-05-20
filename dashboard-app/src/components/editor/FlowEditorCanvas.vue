@@ -398,26 +398,12 @@
 
         <!-- ── History ── -->
         <template v-if="!selectedNode && rightTab === 'history'">
-          <div class="fec-history">
-            <div v-if="historyLoading" class="fec-history-loading">
-              <span class="msi spin">sync</span> Cargando historial...
-            </div>
-            <div v-else-if="history.length === 0" class="fec-history-empty">
-              No hay ejecuciones registradas.
-            </div>
-            <div v-else class="fec-history-list">
-              <div v-for="exec in history" :key="exec.id" class="fec-history-item" @click="loadExecutionLogs(exec.id)">
-                <div class="fec-hi-header">
-                  <span class="fec-hi-status" :class="`fec-hi-status--${exec.status}`"></span>
-                  <span class="fec-hi-date">{{ formatDateTime(exec.created_at) }}</span>
-                  <span class="fec-hi-duration">{{ exec.duration_ms }}ms</span>
-                </div>
-                <div class="fec-hi-footer">
-                  <span class="fec-hi-id">{{ exec.id }}</span>
-                  <span class="msi" style="font-size:14px">chevron_right</span>
-                </div>
-              </div>
-            </div>
+          <div class="fec-history" style="height: 100%; overflow: hidden; padding: 16px;">
+            <ExecutionHistoryPanel 
+              :flow-id="flowId" 
+              :flow-name="metadata.name"
+              @view-graph="$emit('view-graph', $event)" 
+            />
           </div>
         </template>
 
@@ -676,6 +662,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useIntegrationsStore } from '@/stores/integrations'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
+import ExecutionHistoryPanel from '@/components/executions/ExecutionHistoryPanel.vue'
 import { dataSourcesApi } from '@/services/api'
 import keycloak from '@/services/keycloak'
 import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
@@ -726,7 +713,7 @@ const props = defineProps({
   readOnly:      { type: Boolean, default: false },
   executionData: { type: Object,  default: null }
 })
-const emit = defineEmits(['save', 'dirty-change', 'undo-state-change'])
+const emit = defineEmits(['save', 'dirty-change', 'undo-state-change', 'view-graph'])
 
 const vFocus = {
   mounted: (el) => el.focus()
@@ -1301,23 +1288,10 @@ function formatDuration(ms) {
 }
 
 const rightTab       = ref('props') // props, history
-const history        = ref([])
-const historyLoading = ref(false)
 
-async function loadHistory() {
+function loadHistory() {
   if (!props.flowId) return
   rightTab.value = 'history'
-  historyLoading.value = true
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/integration-flows/${props.flowId}/executions`, {
-      headers: { 'Authorization': `Bearer ${window.keycloak?.token}` }
-    })
-    history.value = await response.json()
-  } catch (e) {
-    console.error('Failed to load history:', e)
-  } finally {
-    historyLoading.value = false
-  }
 }
 
 async function loadExecutionLogs(execId) {
