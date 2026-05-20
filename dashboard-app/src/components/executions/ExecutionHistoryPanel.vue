@@ -22,7 +22,7 @@
               <button class="btn-icon" @click="selectExecution(ex)" title="Ver detalles">
                 <span class="material-symbols-outlined">description</span>
               </button>
-              <button class="btn-icon" @click="showGraph(ex)" title="Ver gráfico">
+              <button v-if="!hideGraphButton" class="btn-icon" @click="showGraph(ex)" title="Ver gráfico">
                 <span class="material-symbols-outlined">search</span>
               </button>
             </td>
@@ -103,6 +103,10 @@ const props = defineProps({
   flowName: {
     type: String,
     default: ''
+  },
+  hideGraphButton: {
+    type: Boolean,
+    default: false
   }
 })
 const emit = defineEmits(['view-graph'])

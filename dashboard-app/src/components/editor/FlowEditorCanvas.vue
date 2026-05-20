@@ -402,6 +402,7 @@
             <ExecutionHistoryPanel 
               :flow-id="flowId" 
               :flow-name="metadata.name"
+              :hide-graph-button="true"
               @view-graph="$emit('view-graph', $event)" 
             />
           </div>
