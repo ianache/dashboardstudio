@@ -7,7 +7,7 @@
             <th>Estado</th>
             <th>Inicio</th>
             <th>Duración</th>
-            <th>Acciones</th>
+            <th style="text-align: center;">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -151,7 +151,7 @@ onMounted(fetchHistory)
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
 .selected { background: #eff6ff; }
-.actions-cell { display: flex; gap: 8px; align-items: center; }
+.actions-cell { display: flex; gap: 8px; align-items: center; justify-content: center; }
 .btn-icon { 
   background: transparent; border: none; padding: 4px; border-radius: 4px; 
   cursor: pointer; color: #64748b; display: inline-flex; transition: all 0.2s;
