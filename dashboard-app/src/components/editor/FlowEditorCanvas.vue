@@ -673,6 +673,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { CAT_META } from '@/stores/toolCatalog'
 import { useAuthStore } from '@/stores/auth'
+import { useIntegrationsStore } from '@/stores/integrations'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
 import { dataSourcesApi } from '@/services/api'
@@ -732,6 +733,7 @@ const vFocus = {
 }
 
 const authStore = useAuthStore()
+const integrationsStore = useIntegrationsStore()
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CANVAS_W = 4000
@@ -1674,6 +1676,34 @@ function undoDeletion() {
   })
 }
 
+function copyToClipboard() {
+  if (selectedNode.value) {
+    integrationsStore.setClipboard('node', selectedNode.value)
+  } else if (selectedNote.value) {
+    integrationsStore.setClipboard('note', selectedNote.value)
+  }
+}
+
+function pasteFromClipboard() {
+  const cb = integrationsStore.clipboard
+  if (!cb.data) return
+
+  const offset = 40
+  const newItem = JSON.parse(JSON.stringify(cb.data))
+  const rand = Math.floor(Math.random() * 10000)
+  newItem.id = (cb.type === 'node' ? 'n' : 'note') + Date.now() + rand
+  newItem.x += offset
+  newItem.y += offset
+
+  if (cb.type === 'node') {
+    nodes.value.push(newItem)
+    nextTick(() => selectNode(newItem))
+  } else {
+    notes.value.push(newItem)
+    nextTick(() => selectNote(newItem))
+  }
+}
+
 function handleKeyDown(e) {
   const tag = e.target.tagName?.toLowerCase()
   if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable || e.target.closest('.monaco-editor')) {
@@ -1685,6 +1715,12 @@ function handleKeyDown(e) {
       deleteSelectedNode()
     } else if (selectedNote.value) {
       deleteSelectedNote()
+    }
+  } else if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'c' || e.key === 'C') {
+      copyToClipboard()
+    } else if (e.key === 'v' || e.key === 'V') {
+      pasteFromClipboard()
     }
   }
 }

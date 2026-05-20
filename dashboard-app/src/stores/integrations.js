@@ -8,6 +8,10 @@ export const useIntegrationsStore = defineStore('integrations', {
     currentFlow: null,
     loading: false,
     error: null,
+    clipboard: {
+      type: null, // 'node' | 'note'
+      data: null
+    },
   }),
 
   getters: {
@@ -18,9 +22,13 @@ export const useIntegrationsStore = defineStore('integrations', {
     activeCount:    (state) => state.flows.filter(f => f.status === 'active').length,
     errorCount:     (state) => state.flows.filter(f => f.status === 'error').length,
     scheduledCount: (state) => state.flows.filter(f => f.status === 'scheduled').length,
+    hasClipboard:   (state) => !!state.clipboard.data,
   },
 
   actions: {
+    setClipboard(type, data) {
+      this.clipboard = { type, data: JSON.parse(JSON.stringify(data)) }
+    },
     updateProgress(id, progress) {
       this.progressMap = { ...this.progressMap, [id]: progress }
     },
