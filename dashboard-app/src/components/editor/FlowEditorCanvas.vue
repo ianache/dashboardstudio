@@ -1152,10 +1152,12 @@ let isInitializingNodeSelection = false
 
 function onResizeMousedown(e) {
   isResizingRight.value = true
+  document.body.style.userSelect = 'none'
 }
 
 function onResizeBottomMousedown(e) {
   isResizingBottom.value = true
+  document.body.style.userSelect = 'none'
 }
 
 function onNoteResizeStart(e, note) {
@@ -1544,6 +1546,7 @@ function onGlobalMousemove(e) {
   }
 }
 function onGlobalMouseup() {
+  document.body.style.userSelect = ''
   isResizingRight.value = false
   isResizingBottom.value = false
   isResizingNote.value = false
