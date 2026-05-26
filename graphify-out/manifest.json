@@ -11,6 +11,42 @@
     "mtime": 1778905350.9071262,
     "hash": "141e979c92f70098abf7bc9abfa6e2ea"
   },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_find_canvas_listeners.py": {
+    "mtime": 1779171207.864081,
+    "hash": "e65ccdf868d2c9c3b190f472c778ca5f"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_find_export.py": {
+    "mtime": 1779171151.5471005,
+    "hash": "7d50dfd3b2d997bdfec9dd26da5ce6b6"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_find_export_vue.py": {
+    "mtime": 1779171159.328354,
+    "hash": "779d091313e18baad750335c92b278ec"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_find_expose.py": {
+    "mtime": 1779171188.3070102,
+    "hash": "60abe2993e575b995949ebafcbbdfc82"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_find_node_add.py": {
+    "mtime": 1779171195.6356375,
+    "hash": "8ac1909d02af1237de7c0b87b6a029d4"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_find_selected_node.py": {
+    "mtime": 1779171180.8406174,
+    "hash": "d03f68dc94313f608920e3b502e793a5"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_search_dirty.py": {
+    "mtime": 1779191028.9500477,
+    "hash": "2789af83a12ba21ce933f465cd58b4e3"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_view_flow_script.py": {
+    "mtime": 1779171173.680521,
+    "hash": "681835ace09a9c20dadd5c56a19c3e1c"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\scratch_view_flow_view.py": {
+    "mtime": 1779171166.4238038,
+    "hash": "da1f541e77f9891e9eca1dad781cd779"
+  },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\seed_note_tool.py": {
     "mtime": 1778959640.0322177,
     "hash": "88b7e4f742973d231727e7e5e00c3961"
@@ -156,12 +192,12 @@
     "hash": "704928e8c33fc2316f211b7b43365ffe"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\api\\endpoints\\execution_history.py": {
-    "mtime": 1778865615.2758534,
-    "hash": "11300462921c6e26dc1602bade6b0605"
+    "mtime": 1779166941.2995358,
+    "hash": "a9384975dd2d668336b107a766c42442"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\api\\endpoints\\integration_flows.py": {
-    "mtime": 1778985770.2915616,
-    "hash": "ca2ccf0b6eea17cf8ce6cca2a3db1e85"
+    "mtime": 1779167316.359532,
+    "hash": "1775f92148565a8830ed3b391c0e096b"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\api\\endpoints\\knowledge_spaces.py": {
     "mtime": 1777350390.5795538,
@@ -212,24 +248,24 @@
     "hash": "5eb0c4d4236008718031fc1a684f12ee"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\runtime\\runner.ts": {
-    "mtime": 1778991467.0503364,
-    "hash": "936357fbf5df7c406bfabef0857ce670"
+    "mtime": 1779309353.4635086,
+    "hash": "b65c8ef90bc37c2bdf5af3b283b47b29"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\schemas\\connection_schemas.py": {
     "mtime": 1778826035.4139836,
     "hash": "360343b34c69aa0d1af79ead179435c5"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\schemas\\schemas.py": {
-    "mtime": 1778958942.2394645,
-    "hash": "a24445319f20b79bda5a5ef409ecb41b"
+    "mtime": 1779170778.0247033,
+    "hash": "3f2e1e3decb28580be14f7c3c104db48"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\connection_testing.py": {
     "mtime": 1778902242.4623036,
     "hash": "cda4e1a5614e84287533ef3130e3787a"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\deno_service.py": {
-    "mtime": 1778993435.985087,
-    "hash": "7ebb8bba2cd2d968ca1eba76d112cace"
+    "mtime": 1779167302.124843,
+    "hash": "31fda9e50cb7d9492d0fe5ff8ce18a09"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\destination_executor.py": {
     "mtime": 1778983100.1753838,
@@ -248,16 +284,16 @@
     "hash": "77f6f035448cabd16cd05a4e740b16ca"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\ods_executor.py": {
-    "mtime": 1778985786.1795611,
-    "hash": "49ca7ba630cc4b92c47d47c24edd09ce"
+    "mtime": 1779167330.1021502,
+    "hash": "8a8aa2b57cf4870321d09ab71acd7fe4"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\scheduler.py": {
-    "mtime": 1778900374.467973,
-    "hash": "263a6726b3476ce4da50ea80639c3544"
+    "mtime": 1779167321.9564693,
+    "hash": "bb9cbb6b8e7e42ce58b513db3aa81f3e"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\app\\services\\source_executor.py": {
-    "mtime": 1778984228.6596394,
-    "hash": "8cd663bfbcebfcdf1db1514e242650dd"
+    "mtime": 1779170516.5320163,
+    "hash": "a8fff5567e5a7dfaa7e03d0b66eec0bf"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\install\\Scripts\\Activate.ps1": {
     "mtime": 1748544601.312243,
@@ -284,8 +320,8 @@
     "hash": "041cda470881030cae00f46ffe6b84f3"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\App.vue": {
-    "mtime": 1777350392.3886032,
-    "hash": "6eb5b4ae12bc9c1bda1732d0186be69b"
+    "mtime": 1779310490.2819269,
+    "hash": "95302debf269ed873a02768dd81caacd"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\main.js": {
     "mtime": 1777350392.808179,
@@ -380,28 +416,36 @@
     "hash": "e98a0bb549f666a214f8e26af188e802"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\editor\\AiCodeAssist.vue": {
-    "mtime": 1777437937.7990541,
-    "hash": "9f090f1154d09edfc15bb6beded2e9ec"
+    "mtime": 1779310271.6756103,
+    "hash": "9340b26c9768fb2f9924a81a0396d525"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\editor\\CodeAiAssist.vue": {
+    "mtime": 1779310497.10082,
+    "hash": "9fa4690544358ed13ef77e49591feafa"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\editor\\CodeEditor.vue": {
-    "mtime": 1778826035.4527342,
-    "hash": "5936af5a0291e5d9334aa1859805decf"
+    "mtime": 1779298748.4141977,
+    "hash": "e4b246ea8c91264ea59dcbdb057278cc"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\editor\\ExecutionConsole.vue": {
     "mtime": 1778983541.4251258,
     "hash": "bbf129c61c1183023ec6468f6a3864d1"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\editor\\FlowEditorCanvas.vue": {
-    "mtime": 1778991977.6050136,
-    "hash": "18a737bc9f25befcee4db0733a9865cb"
+    "mtime": 1779309349.0645406,
+    "hash": "d2993749f63f550f8ec65cf7cb932b28"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\editor\\PropDefsTable.vue": {
     "mtime": 1777397900.830921,
     "hash": "044bd4efc011a69fce450a7d2067ccdf"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\executions\\ExecutionHistoryModal.vue": {
-    "mtime": 1778955675.378165,
-    "hash": "6375af8497eae1e71677bd36ac480d61"
+    "mtime": 1779296435.6091561,
+    "hash": "0df7163dfc04eada4032b6f7204ebdc4"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\executions\\ExecutionHistoryPanel.vue": {
+    "mtime": 1779297273.0654182,
+    "hash": "0417752860824890c23dcb1b8d649e43"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\components\\executions\\FlowExecutionPopup.vue": {
     "mtime": 1778955686.8499951,
@@ -480,16 +524,16 @@
     "hash": "df39fc6d7ba614a9e8db74231a6b33c3"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\stores\\integrations.js": {
-    "mtime": 1778886157.1441038,
-    "hash": "9dc76171cba9528322dbe938f2741844"
+    "mtime": 1779254508.2380288,
+    "hash": "06e46b4a3821978e2010ad40f86b5922"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\stores\\knowledgeSpaces.js": {
     "mtime": 1777350393.1512103,
     "hash": "aaf51818d157a350e07dfaafd1056d1d"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\stores\\llm.js": {
-    "mtime": 1777350393.1799726,
-    "hash": "fe2f64234ab0978bc76527ead7ca9ae8"
+    "mtime": 1779297938.2739637,
+    "hash": "983490452011ab3fb46a4e5119ee13d1"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\stores\\toolCatalog.js": {
     "mtime": 1778959845.9761114,
@@ -532,8 +576,8 @@
     "hash": "11db1e365e13bc92af289143f7495e92"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\views\\FlowEditorView.vue": {
-    "mtime": 1778983513.0174322,
-    "hash": "43b7e4277422451c493f34bcb7525634"
+    "mtime": 1779304374.0119722,
+    "hash": "4d763d35b43bb8c3eeb3b3c50deaae3e"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\views\\HomeView.vue": {
     "mtime": 1778826035.5030124,
@@ -642,6 +686,10 @@
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\environment\\initdb\\04_data.sql": {
     "mtime": 1774924614.441837,
     "hash": "22547678f55aadee598932d3065f96b1"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\GEMINI.md": {
+    "mtime": 1779295697.0538788,
+    "hash": "6da4e243f7f22c16aee4ebe08248db16"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\PRD.md": {
     "mtime": 1777350389.8416684,
@@ -847,6 +895,10 @@
     "mtime": 1777350392.3720763,
     "hash": "fab7fdf6ee3ed408c4049cce42d23e34"
   },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\design\\architecture_proposal_plan_and_execute.md": {
+    "mtime": 1779156069.2896507,
+    "hash": "6e88a3a29f7eca623c29ec3e1d898356"
+  },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\design\\arquitectura_global_dashboardstudio.md": {
     "mtime": 1778995897.8500922,
     "hash": "248e68deb1e46f27c85d63630a7696fd"
@@ -859,9 +911,17 @@
     "mtime": 1778995180.5804217,
     "hash": "99d1107e5bc44bd5f41d3fbe4b95b7b8"
   },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\design\\nodes_IO.md": {
+    "mtime": 1779169841.1207972,
+    "hash": "61dce974351458b9a4902d5f2bc8ae5b"
+  },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\design\\organismo_dashboardruntime.md": {
     "mtime": 1778826035.520587,
     "hash": "88f4d24aeac3251bc5f2e5efc8657464"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\design\\telemetry_design_proposal.md": {
+    "mtime": 1779159808.3790352,
+    "hash": "870bd64bdbc92c7510761567acc4f2b3"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\design\\ux-ui\\asignar-roles.html": {
     "mtime": 1777350393.5858214,

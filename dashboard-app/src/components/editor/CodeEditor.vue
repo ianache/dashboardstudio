@@ -53,9 +53,14 @@ const showAi = ref(false)
 const autoHeight = ref(150)
 const isManualResize = ref(false)
 
+const isFixedHeight = computed(() => props.height !== 'auto')
+
 const containerStyle = computed(() => {
+  if (isFixedHeight.value) {
+    return { height: props.height }
+  }
   if (isManualResize.value) {
-    return { minHeight: '150px' } // Let CSS resize take over
+    return { minHeight: '150px' }
   }
   return { height: autoHeight.value + 'px' }
 })
@@ -80,7 +85,10 @@ const defaultOptions = {
 
 const mergedOptions = computed(() => ({
   ...defaultOptions,
-  ...props.options
+  ...props.options,
+  scrollbar: isFixedHeight.value
+    ? { vertical: 'auto', horizontal: 'auto', ...(props.options.scrollbar || {}) }
+    : { vertical: 'hidden', horizontal: 'hidden', ...(props.options.scrollbar || {}) }
 }))
 
 watch(() => props.modelValue, (newVal) => {
@@ -95,7 +103,7 @@ function handleChange(value) {
 }
 
 function updateHeight() {
-  if (!editorRef.value || isManualResize.value) return
+  if (!editorRef.value || isManualResize.value || isFixedHeight.value) return
   const contentHeight = editorRef.value.getContentHeight()
   autoHeight.value = Math.max(150, contentHeight + 40)
 }
@@ -103,22 +111,21 @@ function updateHeight() {
 function handleMount(editor) {
   editorRef.value = editor
 
-  editor.onDidContentSizeChange(() => {
-    updateHeight()
-  })
-
-  // Initial height
-  nextTick(() => {
-    updateHeight()
-  })
+  if (!isFixedHeight.value) {
+    editor.onDidContentSizeChange(() => {
+      updateHeight()
+    })
+    nextTick(() => {
+      updateHeight()
+    })
+  }
 }
 
 function handleMouseDown(e) {
-  // Check if click is near the bottom-right corner (resize handle area)
+  if (isFixedHeight.value) return
   const rect = e.currentTarget.getBoundingClientRect()
   const isNearBottom = e.clientY > rect.bottom - 20
   const isNearRight = e.clientX > rect.right - 20
-  
   if (isNearBottom && isNearRight) {
     isManualResize.value = true
   }

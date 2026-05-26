@@ -575,11 +575,11 @@
               </label>
               
               <!-- Code Editor -->
-              <CodeEditor 
+              <CodeEditor
                 v-if="def.type === 'code'"
                 v-model="selectedNode.props[key]"
                 :language="def.language || 'javascript'"
-                height="320px"
+                height="413px"
                 @change="checkDirty"
                 @update:model-value="checkDirty"
               />
