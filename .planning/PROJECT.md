@@ -112,15 +112,18 @@ Implementar un configurador de visualizaciones dinámico con:
 
 **Archive:** `.planning/milestones/v1.7-ROADMAP.md`
 
-## Current Milestone: v1.8 — Planning Next Features
-**Status:** Defining requirements and scope
+## Current Milestone: v1.8 — BFF Service Architecture
 
-**Potential areas:**
-- Advanced templating features (filters, helpers)
-- Email queuing and delivery tracking
-- Additional node types (FTP, HTTP, etc.)
-- Performance optimizations
-- UI/UX improvements
+**Goal:** Introducir una capa BFF (Backend for Frontend) en Node.js + Express que se ubique entre dashboard-app y los servicios backend/CubeJS, concentrando la autenticación Keycloak, gestión de sesiones server-side y el proxy de todas las rutas de API en un único punto de entrada.
+
+**Target features:**
+- Servicio BFF en Node.js + Express en el directorio `bff/`
+- Flujos Keycloak: login, logout, callback OIDC, refresh de sesión
+- Sesiones server-side con cookie segura (express-session)
+- Proxy completo de todas las rutas del backend FastAPI
+- Proxy de CubeJS (token gestionado server-side en el BFF)
+- Limpieza del backend: eliminar lógica de auth, solo lógica de negocio pura
+- Actualización del frontend: llamar al BFF en lugar de backend/Keycloak directamente
 
 
 

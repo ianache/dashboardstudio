@@ -1,66 +1,57 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: ODS Execution Engine
-current_phase: 32
+milestone: v1.8
+milestone_name: BFF Service Architecture
+current_phase: 33
 current_plan: Not started
-status: completed
-last_updated: "2026-05-17T05:32:23.503Z"
+status: defining_requirements
+last_updated: "2026-05-28T00:00:00.000Z"
 progress:
-  total_phases: 31
-  completed_phases: 19
-  total_plans: 52
-  completed_plans: 34
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
-# Project State: Email Node with Dynamic Templates
+# Project State: BFF Service Architecture
 
-- **Status:** v1.7 milestone complete
-- **Current Phase:** 32
-- **Current Plan:** Not started
-- **Last Action:** Completed Plan 03 - Email node UI with SMTP selector and template hints
+- **Status:** Defining requirements
+- **Current Phase:** Not started
+- **Last Action:** Milestone v1.8 started — BFF Service Architecture
 
 ## Workflow Status
 - [x] Config defined
 - [x] Context created
-- [x] Research completed
-- [x] Requirements finalized
-- [x] Roadmap structured
-- [x] Execution complete (3/3 plans complete)
+- [ ] Research completed
+- [ ] Requirements finalized
+- [ ] Roadmap structured
+- [ ] Execution complete
 
-## Milestone: v1.7 Email Node with Dynamic Templates
-- [x] Phase 32: Email Node Implementation (3/3 plans complete)
+## Milestone: v1.8 BFF Service Architecture
+- [ ] Phase 33+: TBD after roadmap
 
 ## Accumulated Context
+
 ### Milestone Goals
-- Implementar nodo Email para envío de correos electrónicos
-- Soporte para plantillas dinámicas con marcadores {{expresion}}
-- Generación de contenido HTML/texto enriquecido
-- Generación dinámica de tablas desde arreglos de objetos
-- Integración con sistema de conexiones SMTP existente
+- Crear servicio BFF en Node.js + Express en `bff/`
+- BFF maneja autenticación Keycloak (login, logout, callback OIDC, refresh)
+- Sesiones server-side con express-session y cookie segura
+- BFF proxea todas las rutas del backend FastAPI
+- BFF proxea CubeJS (token gestionado server-side)
+- Backend cleanup: eliminar lógica de auth, solo lógica de negocio pura
+- Frontend actualizado para llamar al BFF en lugar de backend/Keycloak directamente
 
 ### Technical Context
-- **Milestone anterior completado:** ODS Execution Engine (Phase 31)
-- **Infraestructura existente:** Sistema de conexiones (DataSource), Deno runner, Python services
-- **Soporte SMTP ya existe:** Connection Management milestone implementó SMTP como tipo de conexión
-- **Base de datos:** PostgreSQL para almacenar configuraciones
-- **Frontend:** Vue 3 con sistema de nodos de flujo existente
-
-### Decisions Made
-- **Templating Engine:** Jinja2 with SandboxedEnvironment for security
-- **Content Types:** Soporte para text/plain y text/html
-- **Expression Syntax:** Marcadores {{expresion}} para evaluación dinámica
-- **Table Generation:** Iteración sobre arrays para generar filas de tablas HTML
-- **Integration Pattern:** Similar a nodos existentes (connection_id, propiedades configurables)
-- **HTML Sanitization:** nh3 library (replacing deprecated bleach)
-- **XSS Prevention:** Jinja2 auto-escaping enabled by default
-- **Signal Pattern:** EXEC_EMAIL follows EXEC_ODS pattern for architectural consistency
-- **Template Resolution:** Template strings resolved in Deno runner before payload construction
-- **Execution Model:** _handle_email_execution is synchronous (email_executor.execute blocks on SMTP)
+- **Milestone anterior completado:** Email Node with Dynamic Templates (Phase 32)
+- **Arquitectura actual:** dashboard-app → backend (FastAPI) directamente; Keycloak SDK en frontend
+- **Nueva arquitectura objetivo:** dashboard-app → BFF (Express) → backend (FastAPI) + CubeJS
+- **BFF stack:** Node.js + Express, keycloak-connect, express-session
+- **Session strategy:** Server-side sessions, secure cookie al browser
+- **Frontend:** Vue 3, actualmente usa Keycloak JS adapter directamente
 
 ### Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-17)
+See: .planning/PROJECT.md (updated 2026-05-28)
 
-**Core value:** User can send emails from integration flows with dynamic content generated from templates and input data
-**Current focus:** Phase 32 - Building Email Node with template support
+**Core value:** BFF concentra auth y session management, expone API unificada al frontend
+**Current focus:** Defining requirements for v1.8 BFF Service Architecture
