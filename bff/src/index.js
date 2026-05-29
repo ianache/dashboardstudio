@@ -47,8 +47,22 @@ async function startServer() {
     // Phase 34: Initialize OIDC Discovery
     await initOIDC();
 
-    app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
       console.log(`BFF listening on :${config.port}`);
+    });
+
+    // Handle WebSocket upgrades for proxies
+    server.on('upgrade', (req, socket, head) => {
+      console.log(`[BFF WS Upgrade] Original URL: ${req.url}`);
+      if (req.url.startsWith('/bff/api')) {
+        req.url = req.url.replace('/bff/api', '');
+        console.log(`[BFF WS Upgrade] Rewrote to FastAPI: ${req.url}`);
+        fastapiProxy.upgrade(req, socket, head);
+      } else if (req.url.startsWith('/bff/cubejs')) {
+        req.url = req.url.replace('/bff/cubejs', '');
+        console.log(`[BFF WS Upgrade] Rewrote to CubeJS: ${req.url}`);
+        cubejsProxy.upgrade(req, socket, head);
+      }
     });
   } catch (error) {
     console.error('BFF failed to start:', error);

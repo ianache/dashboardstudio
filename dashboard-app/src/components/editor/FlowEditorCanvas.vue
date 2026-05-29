@@ -1375,6 +1375,7 @@ function runFlow() {
       .replace('http://', '')
       .replace('https://', '')
       .replace('/api/v1', '')
+      .replace('/api', '')
     
     // Ensure no trailing slash
     if (host.endsWith('/')) host = host.slice(0, -1)

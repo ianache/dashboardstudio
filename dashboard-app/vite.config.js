@@ -39,7 +39,8 @@ export default defineConfig({
       },
       '/bff': {
         target: 'http://127.0.0.1:3001',
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       }
     }
   }

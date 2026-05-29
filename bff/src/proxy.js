@@ -13,6 +13,7 @@ import { signCubeToken } from './cubeToken.js';
 export const fastapiProxy = createProxyMiddleware({
   target: config.backendUrl,
   changeOrigin: true,
+  ws: true,
   pathRewrite: {
     '^/': '/api/', // Prepends '/api' since '/bff/api' is already stripped by Express mount
   },
