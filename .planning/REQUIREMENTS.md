@@ -25,15 +25,15 @@ Requirements for the BFF Service Architecture milestone. Each maps to roadmap ph
 ### Proxy
 
 - [ ] **PROXY-01**: All FastAPI backend routes are accessible via BFF at `/bff/api/*` with Bearer token injected from session
-- [ ] **PROXY-02**: CubeJS queries are proxied via BFF at `/bff/cubejs/*` with per-request HS256 JWT signed server-side (token never reaches browser)
+- [x] **PROXY-02**: CubeJS queries are proxied via BFF at `/bff/cubejs/*` with per-request HS256 JWT signed server-side (token never reaches browser)
 - [ ] **PROXY-03**: CORS is handled exclusively by BFF; upstream CORS headers from FastAPI are stripped on proxy response
 
 ### Frontend Migration
 
 - [ ] **FE-01**: Frontend no longer uses `keycloak-js` adapter; `keycloak.js` service deleted, Keycloak init removed from `main.js`
-- [ ] **FE-02**: Frontend API calls (`api.js`) route through BFF base URL with `credentials: 'include'` for session cookie transmission
-- [ ] **FE-03**: Frontend CubeJS store (`cubejs.js`) no longer manages tokens; queries proxied through BFF
-- [ ] **FE-04**: Frontend auth store uses `authStore.initialized` flag with `/bff/auth/me` session check; router guards updated accordingly
+- [x] **FE-02**: Frontend API calls (`api.js`) route through BFF base URL with `credentials: 'include'` for session cookie transmission
+- [x] **FE-03**: Frontend CubeJS store (`cubejs.js`) no longer manages tokens; queries proxied through BFF
+- [x] **FE-04**: Frontend auth store uses `authStore.initialized` flag with `/bff/auth/me` session check; router guards updated accordingly
 
 ### Backend Cleanup
 
@@ -78,12 +78,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROXY-01 | Phase 35 | Pending |
 | PROXY-03 | Phase 35 | Pending |
 | BE-01 | Phase 35 | Pending |
-| PROXY-02 | Phase 36 | Pending |
+| PROXY-02 | Phase 36 | Complete |
 | BE-02 | Phase 36 | Pending |
 | FE-01 | Phase 37 | Pending |
-| FE-02 | Phase 37 | Pending |
-| FE-03 | Phase 37 | Pending |
-| FE-04 | Phase 37 | Pending |
+| FE-02 | Phase 37 | Complete |
+| FE-03 | Phase 37 | Complete |
+| FE-04 | Phase 37 | Complete |
 
 **Coverage:**
 - v1.8 requirements: 18 total

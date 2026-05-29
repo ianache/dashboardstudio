@@ -1,16 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.8
-milestone_name: BFF Service Architecture
-current_phase: 33
-current_plan: Not started
-status: ready_to_plan
-last_updated: "2026-05-28T00:00:00.000Z"
+milestone: v1.6
+milestone_name: ODS Execution Engine
+status: unknown
+last_updated: "2026-05-29T03:18:06.764Z"
 progress:
-  total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 36
+  completed_phases: 21
+  total_plans: 64
+  completed_plans: 42
 ---
 
 # Project State: Dashboard Studio v1.8
@@ -20,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-28)
 
 **Core value:** BFF concentra auth y session management, expone API unificada al frontend — el browser nunca ve tokens
-**Current focus:** Phase 33 — BFF Foundation (ready to plan)
+**Current focus:** Phase 37 — Frontend Migration
 
 ## Current Position
 
-Phase: 33 of 37 (BFF Foundation)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-28 — Roadmap created for v1.8 BFF Service Architecture (phases 33-37)
+Phase: 37 of 37 (Frontend Migration)
+Plan: 02
+Status: In progress
+Last activity: 2026-05-29 — Phase 37-01 completed (Refactor Auth, API, and CubeJS)
 
-Progress: [░░░░░░░░░░] 0% (0/5 phases complete)
+Progress: [▓▓▓▓░░░░░░] 80% (4/5 phases complete)
 
 ## Performance Metrics
 
@@ -42,6 +40,8 @@ Progress: [░░░░░░░░░░] 0% (0/5 phases complete)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 33-37 | TBD | - | - |
+| Phase 36 | 2 | 7 tasks | 7 files |
+| Phase 37 P01 | 15m | 4 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -51,6 +51,12 @@ Progress: [░░░░░░░░░░] 0% (0/5 phases complete)
 - **Session store:** PostgreSQL via connect-pg-simple (reuses existing DB; Redis deferred to scaling phase).
 - **Build order:** Phase 33 (scaffold) → 34 (auth) → 35 (FastAPI proxy) → 36 (CubeJS proxy) → 37 (FE migration). Order is non-negotiable; 37 is a one-way door.
 - **CORS ownership:** BFF is the sole CORS handler. FastAPI CORSMiddleware must be removed in Phase 35.
+- [Phase 36]: Use HS256 for CubeJS token signing.
+- [Phase 36]: WebSocket support enabled in CubeJS proxy.
+- [Phase 36]: Backend and CubeJS services isolated from public network by removing Traefik labels and ports.
+- [Phase 37]: Migrated auth from client-side Keycloak to BFF-side session management.
+- [Phase 37]: Used initialized flag in auth store to handle async session check.
+- [Phase 37]: Enforced credentials: 'include' for all network requests to support HttpOnly cookies.
 
 ### Blockers/Concerns
 
@@ -61,5 +67,5 @@ Progress: [░░░░░░░░░░] 0% (0/5 phases complete)
 ### Session Continuity
 
 Last session: 2026-05-28
-Stopped at: Roadmap written — 5 phases defined, 18 requirements mapped, files written
+Stopped at: Phase 36 Completed
 Resume file: None

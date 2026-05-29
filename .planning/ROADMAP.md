@@ -15,11 +15,12 @@
 | 30. ODS Node UI Enhancement | v1.6 | 1/1 | Complete | 2026-05-16 |
 | 31. ODS Execution Engine | v1.6 | 3/3 | Complete | 2026-05-17 |
 | 32. Email Node Implementation | v1.7 | 3/3 | Complete | 2026-05-17 |
-| 33. BFF Foundation | v1.8 | 0/TBD | Not started | - |
-| 34. Keycloak Auth Flow | v1.8 | 0/TBD | Not started | - |
-| 35. FastAPI Proxy + CORS | v1.8 | 0/TBD | Not started | - |
-| 36. CubeJS Proxy + Network Isolation | v1.8 | 0/TBD | Not started | - |
-| 37. Frontend Migration | v1.8 | 0/TBD | Not started | - |
+| 33. BFF Foundation | v1.8 | 3/3 | Complete | 2026-05-28 |
+| 34. Keycloak Auth Flow | v1.8 | 3/3 | Complete | 2026-05-28 |
+| 35. FastAPI Proxy + CORS | v1.8 | 2/2 | Complete | 2026-05-28 |
+| 36. CubeJS Proxy + Network Isolation | v1.8 | 2/2 | Complete | 2026-05-28 |
+| 37. Frontend Migration | 1/2 | In Progress|  | - |
+
 
 ---
 
@@ -86,10 +87,10 @@
 
 ## Phases
 
-- [ ] **Phase 33: BFF Foundation** - BFF service scaffolded, containerized, and connected to PostgreSQL session store
-- [ ] **Phase 34: Keycloak Auth Flow** - Full OIDC Authorization Code + PKCE cycle working end-to-end server-side
-- [ ] **Phase 35: FastAPI Proxy + CORS Consolidation** - All backend routes accessible via BFF; CORS owned exclusively by BFF
-- [ ] **Phase 36: CubeJS Proxy + Network Isolation** - CubeJS queries proxied with server-side JWT signing; backend removed from public network
+- [x] **Phase 33: BFF Foundation** - BFF service scaffolded, containerized, and connected to Redis session store
+- [x] **Phase 34: Keycloak Auth Flow** - Full OIDC Authorization Code + PKCE cycle working end-to-end server-side
+- [x] **Phase 35: FastAPI Proxy + CORS Consolidation** - All backend routes accessible via BFF; CORS owned exclusively by BFF
+- [x] **Phase 36: CubeJS Proxy + Network Isolation** - CubeJS queries proxied with server-side JWT signing; backend removed from public network
 - [ ] **Phase 37: Frontend Migration** - Vue 3 SPA removes keycloak-js entirely; all calls routed through BFF
 
 ## Phase Details
@@ -99,16 +100,16 @@
 **Depends on**: Phase 32 (existing project infrastructure)
 **Requirements**: BFF-01, BFF-02, BFF-03, BFF-04
 **Success Criteria** (what must be TRUE):
-  1. Running `docker-compose up bff` starts the BFF container without errors and it responds to requests
-  2. Session data written by the BFF is visible in the PostgreSQL `session` table after a request
+  1. Running `docker-compose up bff` starts the BFF and Redis containers without errors and the BFF responds to requests
+  2. Session data written by the BFF is visible in Redis after a request (e.g., using `redis-cli keys '*'`)
   3. The BFF reads Keycloak URLs, client credentials, session secret, and CubeJS secret from environment variables with no hardcoded values
   4. The BFF is listed in the `backends` and `frontends` Docker networks alongside `backend` and `cubejs` services
 **Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] 33-01-PLAN.md — BFF Express 5 scaffold: package.json, Dockerfile, config.js, health route
-- [ ] 33-02-PLAN.md — Infrastructure config: docker-compose bff service, .env-bff.example, .gitignore update
-- [ ] 33-03-PLAN.md — Session store: connect-pg-simple wired to biportal.session, HttpOnly cookie, human verify
+- [x] 33-01-PLAN.md — BFF Express 5 scaffold: package.json, Dockerfile, config.js, health route
+- [x] 33-02-PLAN.md — Infrastructure config: docker-compose bff + redis service, .env-bff.example, .gitignore update
+- [x] 33-03-PLAN.md — Session store: connect-redis wired to redis service, HttpOnly cookie, human verify
 
 ### Phase 34: Keycloak Auth Flow
 **Goal**: Users can log in via Keycloak through the BFF, have their session established server-side, check their session state via `/bff/auth/me`, get tokens silently refreshed, and log out completely — all without the browser ever receiving a token.
@@ -120,11 +121,12 @@ Plans:
   3. `GET /bff/auth/me` returns `{ sub, email, name, roles }` for an authenticated session and 401 for an unauthenticated request
   4. Access tokens are refreshed server-side before expiry with no visible interruption to the user
   5. `GET /bff/auth/logout` destroys the session, clears the cookie, and redirects to the Keycloak end-session endpoint
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 34-01: OIDC client — openid-client v6 discovery, login redirect, callback exchange with state/nonce/PKCE validation
-- [ ] 34-02: Session middleware + auth routes — requireSession guard, /me endpoint, token refresh middleware, logout
+- [x] 34-01: ESM Migration & OIDC Client Setup — convert to ESM, install openid-client v6, discovery setup
+- [x] 34-02: Auth routes — login, callback, me, logout endpoints
+- [x] 34-03: Token Management & Refresh — tokenRefresh middleware for automatic lifecycle management
 
 ### Phase 35: FastAPI Proxy + CORS Consolidation
 **Goal**: All FastAPI routes are accessible at `/bff/api/*` with Bearer tokens injected from the session; CORS is handled exclusively by the BFF and FastAPI no longer adds CORS headers.
@@ -135,11 +137,11 @@ Plans:
   2. FastAPI responses do not contain `Access-Control-*` headers; the BFF is the sole source of those headers
   3. FastAPI `CORSMiddleware` targeting the SPA origin is removed from `backend/app/main.py`
   4. Unauthenticated requests to `/bff/api/*` return 401 before reaching the backend
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 35-01: FastAPI proxy — http-proxy-middleware setup, Bearer injection in onProxyReq, CORS header stripping in onProxyRes, path rewrite /bff/api → /api
-- [ ] 35-02: Backend CORS cleanup — remove CORSMiddleware from main.py, verify no duplicate headers in browser DevTools
+- [x] 35-01: FastAPI proxy — http-proxy-middleware setup, Bearer injection in onProxyReq, CORS header stripping in onProxyRes, path rewrite /bff/api → /api
+- [x] 35-02: Backend CORS cleanup — remove CORSMiddleware from main.py, verify no duplicate headers in browser DevTools
 
 ### Phase 36: CubeJS Proxy + Network Isolation
 **Goal**: All CubeJS queries are proxied through the BFF at `/bff/cubejs/*` with a freshly signed server-side JWT per request containing user context; the backend service is unreachable from outside the internal Docker network.
@@ -149,11 +151,11 @@ Plans:
   1. A CubeJS query sent to `/bff/cubejs/v1/load` reaches the CubeJS service with a valid HS256 JWT signed by the BFF containing `sub` and `roles` from the Keycloak session
   2. The CubeJS JWT is never present in browser network traffic — only the session cookie travels to the BFF
   3. The `backend` service has no Traefik-exposed port and is only reachable from the `bff` service within the internal Docker network
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 36-01: CubeJS proxy — cubeToken.js HS256 signer, http-proxy-middleware to cubejs service, per-request JWT signing with user context
-- [ ] 36-02: Backend network isolation — update docker-compose.yaml to remove public port exposure for backend; verify backend is unreachable from host
+- [x] 36-01: CubeJS proxy — cubeToken.js HS256 signer, http-proxy-middleware to cubejs service, per-request JWT signing with user context
+- [x] 36-02: Backend network isolation — update docker-compose.yaml to remove public port exposure for backend; verify backend is unreachable from host
 
 ### Phase 37: Frontend Migration
 **Goal**: The Vue 3 SPA operates without keycloak-js; auth state is driven by `/bff/auth/me`; all API and CubeJS calls route through BFF; no token ever appears in browser storage or network traffic to backend services.
@@ -174,3 +176,4 @@ Plans:
 
 *For detailed milestone history, see .planning/milestones/*
 *Last updated: 2026-05-28*
+8*
