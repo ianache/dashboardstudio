@@ -66,30 +66,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BFF-01 | TBD | Pending |
-| BFF-02 | TBD | Pending |
-| BFF-03 | TBD | Pending |
-| BFF-04 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| AUTH-04 | TBD | Pending |
-| AUTH-05 | TBD | Pending |
-| PROXY-01 | TBD | Pending |
-| PROXY-02 | TBD | Pending |
-| PROXY-03 | TBD | Pending |
-| FE-01 | TBD | Pending |
-| FE-02 | TBD | Pending |
-| FE-03 | TBD | Pending |
-| FE-04 | TBD | Pending |
-| BE-01 | TBD | Pending |
-| BE-02 | TBD | Pending |
+| BFF-01 | Phase 33 | Pending |
+| BFF-02 | Phase 33 | Pending |
+| BFF-03 | Phase 33 | Pending |
+| BFF-04 | Phase 33 | Pending |
+| AUTH-01 | Phase 34 | Pending |
+| AUTH-02 | Phase 34 | Pending |
+| AUTH-03 | Phase 34 | Pending |
+| AUTH-04 | Phase 34 | Pending |
+| AUTH-05 | Phase 34 | Pending |
+| PROXY-01 | Phase 35 | Pending |
+| PROXY-03 | Phase 35 | Pending |
+| BE-01 | Phase 35 | Pending |
+| PROXY-02 | Phase 36 | Pending |
+| BE-02 | Phase 36 | Pending |
+| FE-01 | Phase 37 | Pending |
+| FE-02 | Phase 37 | Pending |
+| FE-03 | Phase 37 | Pending |
+| FE-04 | Phase 37 | Pending |
 
 **Coverage:**
 - v1.8 requirements: 18 total
-- Mapped to phases: 0 (TBD — roadmap pending)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18/18 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-28*
-*Last updated: 2026-05-28 after initial v1.8 milestone definition*
+*Last updated: 2026-05-28 — traceability filled after roadmap creation*
