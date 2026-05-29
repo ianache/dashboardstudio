@@ -103,11 +103,12 @@
   2. Session data written by the BFF is visible in the PostgreSQL `session` table after a request
   3. The BFF reads Keycloak URLs, client credentials, session secret, and CubeJS secret from environment variables with no hardcoded values
   4. The BFF is listed in the `backends` and `frontends` Docker networks alongside `backend` and `cubejs` services
-**Plans**: TBD
+**Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] 33-01: BFF scaffold — Express 5 app structure, package.json, Dockerfile, docker-compose integration
-- [ ] 33-02: Session store — connect-pg-simple setup, session table migration, HttpOnly cookie configuration
+- [ ] 33-01-PLAN.md — BFF Express 5 scaffold: package.json, Dockerfile, config.js, health route
+- [ ] 33-02-PLAN.md — Infrastructure config: docker-compose bff service, .env-bff.example, .gitignore update
+- [ ] 33-03-PLAN.md — Session store: connect-pg-simple wired to biportal.session, HttpOnly cookie, human verify
 
 ### Phase 34: Keycloak Auth Flow
 **Goal**: Users can log in via Keycloak through the BFF, have their session established server-side, check their session state via `/bff/auth/me`, get tokens silently refreshed, and log out completely — all without the browser ever receiving a token.
