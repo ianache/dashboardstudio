@@ -12,6 +12,13 @@ import { initOIDC } from './oidc.js';
 
 const app = express();
 
+console.log('--- BFF CONFIG DIAGNOSTICS ---');
+console.log('Active BFF Client ID:', config.keycloakClientId);
+console.log('Active BFF Keycloak URL:', config.keycloakUrl);
+console.log('Active BFF Callback URL:', config.callbackUrl);
+console.log('Active BFF Port:', config.port);
+console.log('------------------------------');
+
 // CORS configuration - BFF is the sole owner
 app.use(cors({
   origin: config.spaOrigins,

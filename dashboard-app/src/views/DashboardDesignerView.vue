@@ -528,7 +528,6 @@ import MIcon from '@/components/common/MIcon.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
 import { usersApi } from '@/services/api'
-import keycloak from '@/services/keycloak'
 import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
@@ -780,21 +779,8 @@ async function openAssignModal(db) {
   searchError.value = null
   allBackendUsers.value = []
 
-  // Load full profiles for already-assigned users from Keycloak
-  if (selectedUsers.value.length > 0) {
-    try {
-      try { await keycloak.updateToken(30) } catch (e) { console.warn('Token refresh failed:', e) }
-      const userPromises = selectedUsers.value.map(id =>
-        fetch(`/keycloak/admin/realms/${kcRealm}/users/${id}`, {
-          headers: { Authorization: `Bearer ${keycloak.token}` }
-        }).then(r => r.ok ? r.json() : null)
-      )
-      const results = await Promise.all(userPromises)
-      assignedUsersFull.value = results.filter(Boolean).map(_mapKcUser)
-    } catch (err) {
-      console.error('No se pudieron cargar perfiles de los usuarios asignados', err)
-    }
-  }
+  // Feature temporarily disabled during BFF migration
+  console.warn('User search and assignment is being migrated to BFF.')
 }
 
 function _applyUserFilter(q) {
@@ -832,29 +818,8 @@ async function searchUsers() {
     return
   }
   isSearchingUsers.value = true
-  searchError.value = null
-  try {
-    try { await keycloak.updateToken(30) } catch (e) { console.warn('Token refresh failed:', e) }
-    const url = `/keycloak/admin/realms/${kcRealm}/users?search=${encodeURIComponent(userSearchQuery.value.trim())}&max=20`
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${keycloak.token}` }
-    })
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Sesión expirada o no autorizada (401)')
-      if (response.status === 403) throw new Error('Sin permiso de búsqueda en Keycloak (requiere rol view-users)')
-      throw new Error(`Error al conectar con Keycloak (HTTP ${response.status})`)
-    }
-    const json = await response.json()
-    // Exclude already-assigned users from results
-    userSearchResults.value = json
-      .filter(u => !selectedUsers.value.includes(u.id))
-      .map(_mapKcUser)
-  } catch (err) {
-    searchError.value = err.message
-    userSearchResults.value = []
-  } finally {
-    isSearchingUsers.value = false
-  }
+  searchError.value = 'La búsqueda de usuarios en Keycloak está siendo migrada al BFF.'
+  isSearchingUsers.value = false
 }
 
 function toggleUserFromSearch(user) {

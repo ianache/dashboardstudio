@@ -127,10 +127,9 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // If after initialization we still have no user and route requires auth, 
-  // authStore.initialize() should have already redirected. This is a safety catch.
+  // redirect to BFF login.
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    const bffUrl = import.meta.env.VITE_BFF_URL || ''
-    window.location.href = `${bffUrl}/bff/auth/login`
+    authStore.login()
     return
   }
 

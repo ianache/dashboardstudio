@@ -61,6 +61,8 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async initialize() {
+      if (this.initialized) return true
+      
       const bffUrl = import.meta.env.VITE_BFF_URL || ''
       try {
         const response = await fetch(`${bffUrl}/bff/auth/me`, {
@@ -70,17 +72,24 @@ export const useAuthStore = defineStore('auth', {
         if (response.ok) {
           const bffUser = await response.json()
           this.user = mapBffUser(bffUser)
+          this.initialized = true
+          return true
         } else {
           this.user = null
-          window.location.href = `${bffUrl}/bff/auth/login`
+          this.initialized = true
+          return false
         }
       } catch (error) {
         console.error('Auth initialization failed:', error)
         this.user = null
-        window.location.href = `${bffUrl}/bff/auth/login`
-      } finally {
         this.initialized = true
+        return false
       }
+    },
+
+    login() {
+      const bffUrl = import.meta.env.VITE_BFF_URL || ''
+      window.location.href = `${bffUrl}/bff/auth/login`
     },
 
     logout() {

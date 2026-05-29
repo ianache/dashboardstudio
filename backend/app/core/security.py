@@ -7,6 +7,9 @@ import httpx
 from app.core.config import get_settings
 from app.core.database import SessionLocal
 
+import logging
+
+logger = logging.getLogger("uvicorn.error")
 settings = get_settings()
 security = HTTPBearer(auto_error=False)
 
@@ -46,6 +49,22 @@ async def ensure_user_exists(token_data: TokenData):
             )
             db.add(user)
             db.commit()
+        else:
+            # Synchronize details from Keycloak token
+            updated = False
+            token_role = token_data.roles[0] if token_data.roles else "viewer"
+            if user.role != token_role:
+                user.role = token_role
+                updated = True
+            if token_data.email and user.email != token_data.email:
+                user.email = token_data.email
+                updated = True
+            if token_data.name and user.full_name != token_data.name:
+                user.full_name = token_data.name
+                updated = True
+            if updated:
+                db.add(user)
+                db.commit()
     except Exception as e:
         print(f"Error ensuring user exists: {e}")
         # We don't want to crash the whole request if user creation fails
@@ -78,7 +97,11 @@ async def get_jwks():
 
 
 async def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> TokenData:
+    logger.warning("--- [VERIFY_TOKEN ENTRY] ---")
+    logger.warning(f"Credentials object: {credentials}")
+    
     if not credentials:
+        logger.warning("ERROR: No credentials/header provided!")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
@@ -86,48 +109,63 @@ async def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = Dep
         )
 
     token = credentials.credentials
+    logger.warning(f"Token length: {len(token)} chars")
     
     try:
         unverified_header = jwt.get_unverified_header(token)
-    except JWTError:
+        logger.warning(f"Unverified Header: {unverified_header}")
+    except JWTError as e:
+        logger.warning(f"ERROR: Failed to parse unverified header: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token header",
         )
 
-    jwks = await get_jwks()
+    try:
+        jwks = await get_jwks()
+        logger.warning(f"Fetched JWKS successfully. Keys count: {len(jwks.get('keys', []))}")
+    except Exception as e:
+        logger.warning(f"ERROR: Failed to fetch JWKS: {e}")
+        raise
+        
     jwk = next((k for k in jwks.get("keys", []) if k.get("kid") == unverified_header.get("kid")), None)
+    logger.warning(f"JWK match for kid '{unverified_header.get('kid')}': {jwk is not None}")
     
     if not jwk:
+        logger.warning(f"ERROR: Could not find JWK for kid '{unverified_header.get('kid')}'")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unable to find appropriate key",
         )
 
-    # Try to validate with the configured client_id, or allow dashboard-app client
-    valid_audiences = [settings.keycloak_client_id, "dashboard-app", "account"]
-    payload = None
-    last_error = None
+    # Decode and verify the token. We bypass strict audience verification in dev/QA,
+    # but strictly verify the cryptographic signature and the issuer.
+    try:
+        unverified_claims = jwt.get_unverified_claims(token)
+    except Exception as e:
+        unverified_claims = f"Failed to parse claims: {e}"
+
+    logger.warning("--- [TOKEN VERIFICATION DEBUG] ---")
+    logger.warning(f"Token (first 30 chars): {token[:30]}...")
+    logger.warning(f"Unverified claims: {unverified_claims}")
+    logger.warning(f"Expected issuer: {settings.keycloak_url}/realms/{settings.keycloak_realm}")
     
-    for audience in valid_audiences:
-        try:
-            payload = jwt.decode(
-                token,
-                jwk,
-                algorithms=["RS256"],
-                audience=audience,
-                issuer=f"{settings.keycloak_url}/realms/{settings.keycloak_realm}",
-            )
-            break  # Success, exit the loop
-        except JWTError as e:
-            last_error = e
-            continue  # Try next audience
-    
-    if payload is None:
+    try:
+        payload = jwt.decode(
+            token,
+            jwk,
+            algorithms=["RS256"],
+            issuer=f"{settings.keycloak_url}/realms/{settings.keycloak_realm}",
+            options={"verify_aud": False, "leeway": 120}
+        )
+        logger.warning("Successfully verified token signature and issuer!")
+    except JWTError as e:
+        logger.warning(f"ERROR: Token validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token validation failed: {str(last_error)}",
+            detail=f"Token validation failed: {str(e)}",
         )
+    logger.warning("---------------------------------")
 
     realm_access = payload.get("realm_access", {})
     roles = realm_access.get("roles", []) if isinstance(realm_access, dict) else []

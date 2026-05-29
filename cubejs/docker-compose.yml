@@ -24,10 +24,10 @@ services:
   cube_api:
     #image: cubejs/cube:${CUBE_VERSION} #:-latest
     image: comsatel/cubejs-cube:${CUBE_VERSION}
-    ports:
-      - "3001:3000"
-      - "4000:4000"
-      - "15432:15432"
+    #ports:
+    #  - "3001:3000"
+    #  - "4000:4000"
+    #  - "15432:15432"
     env_file:
       - .env.cube
     environment:
@@ -57,11 +57,6 @@ services:
     networks:
     - frontends
     - backends
-    labels:
-      traefik.enable: true
-      traefik.http.routers.cubeapi.rule: Host(`cubeapi.${DOMAIN:-pm.comsatel.com.pe}`)
-      traefik.http.routers.cubeapi.entrypoints: web
-      traefik.http.services.cubeapi.loadbalancer.server.port: 4000
 
   #
   ## Refresher

@@ -21,12 +21,14 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import keycloak from '@/services/keycloak'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 onMounted(() => {
-  // If somehow this page is reached and Keycloak is not authenticated, redirect to Keycloak login
-  if (!keycloak.authenticated) {
-    keycloak.login()
+  // If somehow this page is reached and BFF session is not active, redirect to BFF login
+  if (!authStore.isAuthenticated) {
+    authStore.login()
   }
 })
 </script>

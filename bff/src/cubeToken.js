@@ -17,7 +17,7 @@ export const signCubeToken = (user) => {
   const payload = {
     sub: user.sub,
     name: user.name || user.preferred_username || user.sub,
-    roles: user.realm_access?.roles || [],
+    roles: user.roles || user.realm_access?.roles || [],
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
   };

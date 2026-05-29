@@ -1,0 +1,6 @@
+node_modules/
+.env-bff
+npm-debug.log
+*.md
+.git/
+.gitignore

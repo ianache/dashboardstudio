@@ -1,6 +1,7 @@
 'use strict';
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 
 const required = (key) => {
   const value = process.env[key];
@@ -22,6 +23,8 @@ const config = {
   cubejsSecret: required('BFF_CUBEJS_SECRET'),
   backendUrl: process.env.BFF_BACKEND_URL || 'http://backend:8000',
   spaOrigins: (process.env.BFF_SPA_ORIGINS || 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173').split(','),
+  cookieDomain: process.env.BFF_COOKIE_DOMAIN || undefined,
+  cookieSecure: process.env.BFF_COOKIE_SECURE === 'true',
   redis: {
     url: process.env.BFF_REDIS_URL || 'redis://192.168.100.254:6379',
     password: process.env.BFF_REDIS_PASSWORD || 'eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81',

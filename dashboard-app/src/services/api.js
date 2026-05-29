@@ -5,7 +5,7 @@
 
 // Use the BFF URL from env or default to empty (relative)
 const BFF_URL = import.meta.env.VITE_BFF_URL || ''
-const API_BASE_URL = `${BFF_URL}/bff/api`
+const API_BASE_URL = `${BFF_URL}/bff`
 
 class ApiError extends Error {
   constructor(message, status, data) {

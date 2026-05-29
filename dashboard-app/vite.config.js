@@ -36,6 +36,10 @@ export default defineConfig({
         target: 'https://oauth2.qa.comsatel.com.pe',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/keycloak/, '')
+      },
+      '/bff': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true
       }
     }
   }

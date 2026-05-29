@@ -69,7 +69,11 @@ const authStore = useAuthStore()
 
 // Initialize auth from BFF session before mounting to avoid UI flickering
 authStore.initialize()
-  .then(() => {
+  .then((success) => {
+    if (!success) {
+      authStore.login()
+      return
+    }
     app.use(router)
     app.component('v-chart', ECharts)
     app.mount('#app')

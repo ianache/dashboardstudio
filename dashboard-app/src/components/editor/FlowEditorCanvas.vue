@@ -709,7 +709,6 @@ import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
 import ExecutionHistoryPanel from '@/components/executions/ExecutionHistoryPanel.vue'
 import { dataSourcesApi } from '@/services/api'
-import keycloak from '@/services/keycloak'
 import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
 
 // ─── Markdown Configuration ───────────────────────────────────────────────────
@@ -1025,29 +1024,11 @@ async function fetchDynamicOptions(def, key) {
   const endpoint = buildEndpoint(def)
   if (!endpoint) return
   
-  // Check if keycloak is initialized and has a token
-  if (!keycloak.token) {
-    console.error(`Cannot fetch options for ${key}: No authentication token available`)
-    dynamicOptionsCache.value[endpoint] = []
-    return
-  }
-  
-  // Refresh token if it will expire in less than 30 seconds
-  if (keycloak.isTokenExpired(30)) {
-    try {
-      await keycloak.updateToken(30)
-    } catch (err) {
-      console.error('Failed to refresh token:', err)
-      dynamicOptionsCache.value[endpoint] = []
-      return
-    }
-  }
-  
   dynamicLoading.value[key] = true
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+      credentials: 'include',
       headers: { 
-        'Authorization': `Bearer ${keycloak.token}`,
         'Content-Type': 'application/json'
       }
     })
@@ -1354,7 +1335,7 @@ async function loadExecutionLogs(execId) {
   
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/integration-flows/executions/${execId}/logs`, {
-      headers: { 'Authorization': `Bearer ${window.keycloak?.token}` }
+      credentials: 'include'
     })
     const data = await response.json()
     execLogs.value = data.logs.map(l => ({ ...l, timestamp: new Date(data.created_at) }))
