@@ -6,10 +6,39 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
-      - ./backend/.env
-    ports:
-      - "8000:8000"
+      - ./.env-backend
+    #ports:
+    #  - "8002:8000"
     restart: unless-stopped
+    networks:
+      - frontends
+      - backends
+
+  bff:
+    build:
+      context: ./bff
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env-bff
+    restart: unless-stopped
+    depends_on:
+      - redis
+    labels:
+      traefik.enable: true
+      traefik.http.routers.bff.rule: Host(`dashboard-bff.pm.comsatel.com.pe`)
+      traefik.http.routers.bff.entrypoints: web-secure
+      traefik.http.routers.bff.tls: true
+      traefik.http.services.bff.loadbalancer.server.port: 3001
+    networks:
+      - frontends
+      - backends
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - backends
 
   frontend-app:
     build:
@@ -20,5 +49,20 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+      - bff
     volumes:
-      - ./dashboard-app/.env:/app/.env:ro
+      - ./.env:/app/.env:ro
+    labels:
+      traefik.enable: true
+      traefik.http.routers.dashboard.rule: Host(`dashboard.pm.comsatel.com.pe`)
+      traefik.http.routers.dashboard.entrypoints: web-secure
+      traefik.http.routers.dashboard.tls: true
+      traefik.http.services.dashboard.loadbalancer.server.port: 80
+    networks:
+      - frontends
+      - backends
+networks:
+  backends:
+    external: true
+  frontends:
+    external: true
