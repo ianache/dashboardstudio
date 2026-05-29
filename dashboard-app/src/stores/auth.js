@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia'
 
-// Keycloak instance stored outside Pinia to avoid deep reactivity overhead
-let _keycloak = null
-
 // App-side dashboard assignments persist in localStorage keyed by user ID
-// (Keycloak manages identity; the app manages which dashboards each user can see)
 function loadAssignedDashboards(userId) {
   try {
     const stored = localStorage.getItem(`assignedDashboards_${userId}`)
@@ -18,86 +14,82 @@ function saveAssignedDashboards(userId, dashboardIds) {
   localStorage.setItem(`assignedDashboards_${userId}`, JSON.stringify(dashboardIds))
 }
 
-function buildUserFromToken(keycloak) {
-  const parsed = keycloak.tokenParsed
-  if (!parsed) return null
+function mapBffUser(bffUser) {
+  if (!bffUser) return null
 
   // Roles defined in Keycloak realm: admin, designer, viewer
-  const realmRoles = parsed.realm_access?.roles ?? []
-  const appRoles = realmRoles.filter(r => ['admin', 'designer', 'viewer'].includes(r))
+  const allRoles = bffUser.roles || []
+  const appRoles = allRoles.filter(r => ['admin', 'designer', 'viewer'].includes(r))
 
   // Priority: admin > designer > viewer
   const role = appRoles.includes('admin') ? 'admin'
              : appRoles.includes('designer') ? 'designer'
              : 'viewer'
 
-  const name = parsed.name || parsed.preferred_username || 'Usuario'
+  const name = bffUser.name || 'Usuario'
   const parts = name.trim().split(' ')
   const avatar = parts.length >= 2
     ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
     : name.substring(0, 2).toUpperCase()
 
   return {
-    id: parsed.sub,
+    id: bffUser.sub,
     name,
-    email: parsed.email || '',
-    username: parsed.preferred_username || '',
+    email: bffUser.email || '',
+    username: bffUser.name || '',
     roles: appRoles,
     role,
     avatar,
-    assignedDashboards: loadAssignedDashboards(parsed.sub)
+    assignedDashboards: loadAssignedDashboards(bffUser.sub)
   }
 }
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null
+    user: null,
+    initialized: false
   }),
 
   getters: {
     isAuthenticated: (state) => !!state.user,
-    // admin has all designer capabilities
     isAdmin: (state) => state.user?.role === 'admin',
     isDesigner: (state) => ['admin', 'designer'].includes(state.user?.role),
     isViewer: (state) => state.user?.role === 'viewer',
     currentUser: (state) => state.user,
-    // Token for API calls (CubeJS, LLM, etc.)
-    token: () => _keycloak?.token ?? null,
-    // NOTE: user listing requires Keycloak Admin API — not available client-side.
-    // Dashboard assignment UI should use Keycloak Admin API or a backend service.
     viewers: () => []
   },
 
   actions: {
-    initFromKeycloak(keycloak) {
-      _keycloak = keycloak
-      this.user = buildUserFromToken(keycloak)
-    },
-
-    logout() {
-      const kc = _keycloak
-      this.user = null
-      _keycloak = null
-      // Clear persisted tokens so the next page load does not rehydrate the session
-      sessionStorage.removeItem('kc_token')
-      sessionStorage.removeItem('kc_refresh')
-      sessionStorage.removeItem('kc_id')
-      kc?.logout({ redirectUri: window.location.origin })
-    },
-
-    // Called by main.js when the token is refreshed
-    onTokenRefreshed() {
-      if (_keycloak) {
-        this.user = buildUserFromToken(_keycloak)
+    async initialize() {
+      const bffUrl = import.meta.env.VITE_BFF_URL || ''
+      try {
+        const response = await fetch(`${bffUrl}/bff/auth/me`, {
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const bffUser = await response.json()
+          this.user = mapBffUser(bffUser)
+        } else {
+          this.user = null
+          window.location.href = `${bffUrl}/bff/auth/login`
+        }
+      } catch (error) {
+        console.error('Auth initialization failed:', error)
+        this.user = null
+        window.location.href = `${bffUrl}/bff/auth/login`
+      } finally {
+        this.initialized = true
       }
     },
 
-    getToken() {
-      return _keycloak?.token
+    logout() {
+      const bffUrl = import.meta.env.VITE_BFF_URL || ''
+      this.user = null
+      window.location.href = `${bffUrl}/bff/auth/logout`
     },
 
     getUserById(id) {
-      // Only the current user is available client-side
       return this.user?.id === id ? this.user : null
     },
 
