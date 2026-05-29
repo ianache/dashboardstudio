@@ -7,9 +7,9 @@ const dimValuesLoading = new Map()
 
 export const useCubeStore = defineStore('cubejs', {
   state: () => ({
-    // Primary source is now backend - start empty and load from API
-    apiUrl: import.meta.env.VITE_CUBEJS_API_URL || 'http://localhost:4000/cubejs-api/v1',
-    token: import.meta.env.VITE_CUBEJS_TOKEN || '',
+    // Primary source is now BFF proxy
+    apiUrl: (import.meta.env.VITE_BFF_URL || '') + '/bff/cubejs',
+    token: 'dummy-token', // Auth handled by session cookie in BFF
     // Backend config info
     configId: null,
     configName: 'Default',
@@ -26,7 +26,11 @@ export const useCubeStore = defineStore('cubejs', {
   getters: {
     client: (state) => {
       if (!state.token || !state.apiUrl) return null
-      return cubejs(state.token, { apiUrl: state.apiUrl })
+      // Pass credentials: 'include' to ensure session cookie is sent to BFF
+      return cubejs(state.token, { 
+        apiUrl: state.apiUrl,
+        httpOptions: { credentials: 'include' }
+      })
     },
 
     cubes: (state) => state.meta?.cubes || [],
