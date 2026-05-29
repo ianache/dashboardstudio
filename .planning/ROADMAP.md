@@ -19,7 +19,7 @@
 | 34. Keycloak Auth Flow | v1.8 | 3/3 | Complete | 2026-05-28 |
 | 35. FastAPI Proxy + CORS | v1.8 | 2/2 | Complete | 2026-05-28 |
 | 36. CubeJS Proxy + Network Isolation | v1.8 | 2/2 | Complete | 2026-05-28 |
-| 37. Frontend Migration | 1/2 | In Progress|  | - |
+| 37. Frontend Migration | 2/2 | Complete   | 2026-05-29 | - |
 
 
 ---
@@ -91,7 +91,7 @@
 - [x] **Phase 34: Keycloak Auth Flow** - Full OIDC Authorization Code + PKCE cycle working end-to-end server-side
 - [x] **Phase 35: FastAPI Proxy + CORS Consolidation** - All backend routes accessible via BFF; CORS owned exclusively by BFF
 - [x] **Phase 36: CubeJS Proxy + Network Isolation** - CubeJS queries proxied with server-side JWT signing; backend removed from public network
-- [ ] **Phase 37: Frontend Migration** - Vue 3 SPA removes keycloak-js entirely; all calls routed through BFF
+- [x] **Phase 37: Frontend Migration** - Vue 3 SPA removes keycloak-js entirely; all calls routed through BFF (completed 2026-05-29)
 
 ## Phase Details
 
