@@ -3,11 +3,6 @@ import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
-    // Keycloak redirect callback — handled automatically by keycloak-js
-    path: '/auth/callback',
-    redirect: '/'
-  },
-  {
     path: '/',
     component: () => import('@/components/layout/AppLayout.vue'),
     meta: { requiresAuth: true },
@@ -122,13 +117,24 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  // App only mounts after Keycloak authentication, so isAuthenticated should always be true.
-  // This guard handles role-based route protection.
-  if (!authStore.isAuthenticated) return next('/')
+  // App only mounts after BFF session is verified in main.js.
+  // If we reach this guard and not initialized, it means something bypassed the main.js flow.
+  if (!authStore.initialized) {
+    await authStore.initialize()
+  }
 
+  // If after initialization we still have no user and route requires auth, 
+  // authStore.initialize() should have already redirected. This is a safety catch.
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    const bffUrl = import.meta.env.VITE_BFF_URL || ''
+    window.location.href = `${bffUrl}/bff/auth/login`
+    return
+  }
+
+  // Role-based protection
   if (to.meta.requiresDesigner && !authStore.isDesigner) {
     return next('/')
   }
