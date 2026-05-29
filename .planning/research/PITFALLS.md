@@ -1,402 +1,440 @@
-# Domain Pitfalls: Email Node with Dynamic Templates
+# Pitfalls Research: BFF Service Architecture
 
-**Domain:** Email Templating & SMTP Delivery  
-**Project:** Dashboard Studio - v1.7 Email Node  
-**Researched:** 2026-05-16  
-**Confidence:** HIGH (based on official OWASP, Python docs, Campaign Monitor, and Litmus sources)
+**Domain:** BFF (Backend for Frontend) — Keycloak OIDC / Express Session / Proxy layer
+**Project:** Dashboard Studio — v1.8 BFF Service Architecture
+**Researched:** 2026-05-28
+**Confidence:** HIGH (based on direct codebase analysis + well-established patterns in OIDC/BFF literature)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause security vulnerabilities, delivery failures, or major rewrites.
+### Pitfall 1: CSRF via Missing State Parameter Validation in the OIDC Callback
 
-### Pitfall 1: Template Injection & XSS Vulnerabilities
+**What goes wrong:**
+The BFF generates the authorization URL with a `state` parameter to prevent CSRF, but never verifies that the `state` returned by Keycloak in the callback matches what was stored in the session. An attacker who can trick a user's browser into hitting `/auth/callback?code=...&state=attacker-controlled` can hijack the code exchange.
 
-**What goes wrong:** Dynamic templates using `{{expression}}` syntax can be exploited if user input is not properly escaped. Attackers can inject malicious HTML/JavaScript that executes when recipients open emails.
+**Why it happens:**
+Developers focus on getting the happy path working (redirect → callback → token exchange → session write) and add state validation "later." Libraries like `openid-client` validate state automatically, but if you call `issuer.grant()` or raw `axios.post(tokenUrl)` manually, nothing validates it for you.
 
-**Why it happens:** 
-- Using raw string interpolation without context-aware escaping
-- Allowing HTML in template variables without sanitization
-- Not validating template expressions before evaluation
+**How to avoid:**
+1. Before redirecting to Keycloak, generate a cryptographically random `state` value: `crypto.randomUUID()` or `crypto.randomBytes(32).toString('hex')`.
+2. Store it in `req.session.oidcState` **before** the redirect and call `req.session.save()` — do not rely on the session being auto-saved before the response is sent.
+3. In the callback handler, reject immediately (HTTP 400) if `req.query.state !== req.session.oidcState`.
+4. Delete `req.session.oidcState` after a successful validation to prevent replay.
 
-**Consequences:**
-- Cross-site scripting (XSS) in email clients that support JavaScript
-- Phishing attacks via injected malicious links
-- Data exfiltration from email content
-- Reputation damage if emails contain malware
+**Warning signs:**
+- The callback route does not read `req.session.oidcState` at all.
+- No `state` parameter included in the authorization redirect URL.
+- Using `crypto.randomBytes` but not storing the result before redirect.
 
-**Prevention:**
-1. **Always escape HTML entities** in template variables: convert `&` to `&amp;`, `<` to `&lt;`, `>` to `&gt;`, `"` to `&quot;`, `'` to `&#x27;`
-2. **Use context-aware encoding** - HTML body context needs different escaping than HTML attribute context
-3. **Validate template expressions** - whitelist allowed characters and patterns in `{{}}` expressions
-4. **Sanitize HTML if allowing rich content** - use libraries like bleach (Python) or DOMPurify (JS)
-5. **Never allow user input directly in dangerous contexts:**
-   - `<script>` tags
-   - Event handlers (`onclick`, `onerror`)
-   - `javascript:` or `data:` URLs
-   - CSS `expression()` or imports
-
-**Detection:**
-- Security audits showing unescaped user data in templates
-- Penetration testing reveals script injection in email previews
-- Template variables containing `<`, `>`, or quotes render without encoding
-
-**Recommended Phase:** Phase 1 - Core Template Engine (Must address before any user-facing features)
+**Phase to address:** Phase 1 — Keycloak OIDC Authorization Code Flow
 
 ---
 
-### Pitfall 2: HTML Email Rendering Inconsistencies
+### Pitfall 2: Nonce Not Validated Against the ID Token Claim
 
-**What goes wrong:** Emails look great in one client but broken in another. Outlook desktop especially uses Word as rendering engine instead of a browser engine.
+**What goes wrong:**
+The `nonce` parameter is included in the authorization request (good), but the BFF never checks that the `nonce` claim inside the received `id_token` matches the value stored in the session. An attacker who replays an old ID token (obtained via MITM or token leak) can bypass freshness guarantees.
 
 **Why it happens:**
-- Different email clients support different CSS properties
-- Outlook 2007-2019 uses Microsoft Word rendering engine (not WebKit)
-- Gmail strips certain CSS properties and `<style>` blocks
-- Mobile clients have different viewport handling
+Nonce validation is not enforced by Keycloak itself — it is the client's responsibility. When using `openid-client`, nonce checking happens automatically if you pass the nonce to `callbackParams`. When rolling a manual token exchange, the nonce is ignored.
 
-**Consequences:**
-- Broken layouts in major clients (Outlook has 10%+ market share)
-- Unreadable emails on mobile devices
-- Images displaying at wrong sizes
-- Padding/margins ignored
+**How to avoid:**
+1. Generate a separate nonce alongside the state: `crypto.randomBytes(32).toString('hex')`.
+2. Store it in `req.session.oidcNonce` before the redirect.
+3. After the token exchange, decode the `id_token` payload (without full verification — just `Buffer.from(parts[1], 'base64').toString()`) and assert `payload.nonce === req.session.oidcNonce`.
+4. Reject if they differ.
+5. Use `openid-client` (the `openid-client` npm package) rather than raw HTTP calls: it validates state, nonce, iss, aud, exp, iat automatically.
 
-**Prevention:**
-1. **Use table-based layouts** - `<table>` tags are most reliable across clients; avoid `<div>`-based layouts for Outlook
-2. **Inline CSS only** - many clients strip `<style>` tags; use inline `style=""` attributes
-3. **Include width/height attributes on images** - Outlook ignores CSS dimensions; use HTML attributes
-4. **Use conditional comments for Outlook-specific fixes:**
-   ```html
-   <!--[if mso]>
-     <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-   <![endif]-->
+**Warning signs:**
+- Token exchange is done via a raw `fetch` or `axios.post` to Keycloak's token endpoint rather than through `openid-client`.
+- No `nonce` key is ever read from `req.session` in the callback handler.
+
+**Phase to address:** Phase 1 — Keycloak OIDC Authorization Code Flow
+
+---
+
+### Pitfall 3: express-session Not Persisting Before the Keycloak Redirect
+
+**What goes wrong:**
+The OIDC state and nonce are written to `req.session` before calling `res.redirect(authorizationUrl)`. Because `express-session` saves sessions **after the response is sent** (lazy save), the state has not yet been written to the session store when Keycloak redirects the browser back to the callback. The callback reads an empty session and the state check fails, causing every login attempt to return HTTP 400.
+
+**Why it happens:**
+`express-session` by default uses `saveUninitialized: false` and saves at response-end. A redirect is a response, so the write happens — but only if the store's I/O is synchronous (memory store). With Redis or Postgres stores, the async write may not complete before the TCP FIN goes out. More critically, if the session was already existing and only partially modified, some stores with `resave: false` will not save at all.
+
+**How to avoid:**
+1. After writing state/nonce to the session, explicitly call `req.session.save(err => { if (err) next(err); else res.redirect(authorizationUrl); })`.
+2. Set `saveUninitialized: true` only during the OAuth flow routes, or create a new session with `req.session.regenerate` before writing the OIDC values.
+3. With Redis as session store, verify the `connect-redis` store's `disableTouch` option is not set to `true` for OIDC routes.
+
+**Warning signs:**
+- Login succeeds on the first browser tab but fails on subsequent attempts.
+- `req.session.oidcState` is `undefined` in the callback handler.
+- Tests pass with the default `MemoryStore` but break in production with Redis.
+
+**Phase to address:** Phase 1 — Keycloak OIDC Authorization Code Flow
+
+---
+
+### Pitfall 4: Session Cookie Not Sent by the SPA Due to Wrong CORS or Cookie Configuration
+
+**What goes wrong:**
+The SPA (Vue 3 on `dashboard.pm.comsatel.com.pe`) makes API calls to the BFF, but the session cookie is never sent. All BFF endpoints see an unauthenticated session. This is the single most common failure mode when migrating from Bearer tokens to session cookies.
+
+**Why it happens:**
+Three independent settings must all be correct simultaneously:
+1. **SPA side:** `fetch` (or axios) must include `credentials: 'include'` (or `withCredentials: true`).
+2. **BFF CORS:** The Express CORS middleware must be configured with `origin: 'https://dashboard.pm.comsatel.com.pe'` (exact string, not `*`) and `credentials: true`.
+3. **Cookie flags:** The session cookie must have `SameSite: 'None'` and `Secure: true` when the SPA and BFF are on different origins (even different subdomains). With `SameSite: 'Strict'` or `SameSite: 'Lax'`, cross-origin `fetch` calls will not send the cookie.
+
+Currently, `api.js` uses plain `fetch` without `credentials: 'include'`. This must be changed globally.
+
+**How to avoid:**
+1. Set `cookie: { sameSite: 'none', secure: true, httpOnly: true }` in `express-session` options when BFF and SPA are on different subdomains.
+2. Set `sameSite: 'lax'` only if BFF and SPA are served from the exact same domain and port (not applicable here — Traefik routes separate them).
+3. Add to every `fetch` call in `api.js`: `credentials: 'include'`.
+4. If using axios globally: `axios.defaults.withCredentials = true`.
+5. CORS origin must be an exact string (no trailing slash). Wildcards (`*`) with `credentials: true` are rejected by browsers.
+6. In development (http), use `secure: false` and `sameSite: 'lax'` or `'strict'` to avoid the HTTPS requirement, but document that production requires HTTPS.
+
+**Warning signs:**
+- Browser DevTools Network tab shows the cookie is set in the `/auth/callback` response, but is absent in subsequent API requests.
+- CORS preflight response is missing `Access-Control-Allow-Credentials: true`.
+- Session cookie has `SameSite=Strict` but the SPA and BFF are on different subdomains.
+
+**Phase to address:** Phase 2 — express-session & Secure Cookie Setup
+
+---
+
+### Pitfall 5: CORS Double-Handling When the BFF Proxies to FastAPI
+
+**What goes wrong:**
+The existing FastAPI backend already has `CORSMiddleware` configured to allow the SPA origin. When the BFF proxies requests to FastAPI, FastAPI adds `Access-Control-Allow-Origin: https://dashboard.pm.comsatel.com.pe` to the response. The BFF also adds its own CORS headers for the SPA. The browser receives duplicate `Access-Control-Allow-Origin` headers, which some browsers treat as a CORS error (the header value contains two values separated by a comma, which is invalid per the spec).
+
+**Why it happens:**
+`http-proxy-middleware` forwards the response as-is, including all headers. The BFF adds CORS headers on top. Result: two CORS headers for the same response.
+
+**How to avoid:**
+1. Strip CORS headers from upstream (FastAPI) responses in the proxy `onProxyRes` hook:
+   ```js
+   onProxyRes(proxyRes) {
+     delete proxyRes.headers['access-control-allow-origin'];
+     delete proxyRes.headers['access-control-allow-credentials'];
+     delete proxyRes.headers['access-control-allow-headers'];
+     delete proxyRes.headers['access-control-allow-methods'];
+   }
    ```
-5. **Test across clients** using tools like Litmus or Email on Acid
-6. **Avoid unsupported features:**
-   - Flexbox/Grid layouts (poor Outlook support)
-   - CSS animations (limited support)
-   - Custom fonts (use web-safe fonts as fallbacks)
-   - Background images in Outlook without VML fallbacks
+2. After the BFF is introduced, remove `CORSMiddleware` from FastAPI entirely — FastAPI will only be called by the BFF (a server-to-server request), which does not need CORS.
+3. Add a Traefik rule or network policy to block direct browser access to `dashboard-api.pm.comsatel.com.pe` so the migration is complete.
 
-**Detection:**
-- Emails render differently in test vs production
-- Layout breaks when forwarded
-- Images appear at actual size instead of specified dimensions
-- Spacing inconsistency between clients
+**Warning signs:**
+- CORS errors in the browser despite having seemingly correct CORS configuration.
+- DevTools shows `Access-Control-Allow-Origin` with two values: `https://dashboard.pm.comsatel.com.pe, https://dashboard.pm.comsatel.com.pe`.
+- FastAPI logs show requests from the BFF's IP, confirming they arrive server-to-server.
 
-**Recommended Phase:** Phase 2 - Template Rendering System
+**Phase to address:** Phase 3 — BFF Proxy to FastAPI
 
 ---
 
-### Pitfall 3: SMTP Rate Limiting & Delivery Failures
+### Pitfall 6: `Authorization` Header Not Forwarded to FastAPI After BFF Takeover
 
-**What goes wrong:** Sending too many emails too quickly triggers rate limits from SMTP providers, causing rejected emails and potential blacklisting.
-
-**Why it happens:**
-- No throttling mechanism for bulk sends
-- Connection pooling not implemented
-- Retry logic absent or poorly implemented
-- Not handling SMTP error codes properly
-
-**Consequences:**
-- Emails silently dropped
-- SMTP account temporarily suspended
-- IP/domain reputation damage
-- Emails marked as spam
-- Permanent blacklisting
-
-**Prevention:**
-1. **Implement rate limiting** - respect provider limits (common: 100-500 emails/hour for shared IPs)
-2. **Use connection pooling** - reuse SMTP connections instead of opening/closing per email
-3. **Implement exponential backoff** for retries:
-   - 1st retry: 5 minutes
-   - 2nd retry: 15 minutes
-   - 3rd retry: 1 hour
-4. **Handle SMTP error codes:**
-   - `421` / `450` / `451` - Temporary failure, retry later
-   - `550` / `551` - Permanent failure, don't retry
-   - `452` - Mailbox full
-   - `4xx` codes generally retryable, `5xx` generally not
-5. **Monitor reputation metrics:**
-   - Bounce rates (keep < 5%)
-   - Complaint rates (keep < 0.1%)
-6. **Use queue-based architecture** - decouple email generation from sending
-
-**Detection:**
-- SMTP error logs showing `421 Service not available`
-- Increasing bounce rates
-- Emails not arriving despite successful API responses
-- SMTP provider warnings about rate limits
-
-**Recommended Phase:** Phase 3 - SMTP Delivery Engine
-
----
-
-### Pitfall 4: Character Encoding Issues
-
-**What goes wrong:** Special characters (accents, emoji, non-Latin scripts) display incorrectly or cause encoding errors.
+**What goes wrong:**
+Currently the SPA sends `Authorization: Bearer <keycloak_token>` and FastAPI validates it. After the BFF takes over, the BFF must inject the Keycloak access token (stored in the session) as the `Authorization` header on every proxied request to FastAPI. If the BFF proxies the raw client request without adding this header, FastAPI receives unauthenticated requests and returns HTTP 401.
 
 **Why it happens:**
-- Not specifying charset in email headers
-- Mixing encodings between template and data
-- Python 2/3 string handling confusion
-- Email clients defaulting to wrong encoding
+The proxy is configured for routing (URL rewrite) but not for header injection. Developers focus on getting the proxy path working and forget that the session contains the credentials that must be forwarded.
 
-**Consequences:**
-- Garbled text for international users
-- "Mojibake" ( garbled characters like "Ã©" instead of "é")
-- Email clients showing ??? for special characters
-- Template rendering failures
-
-**Prevention:**
-1. **Always use UTF-8 encoding:**
-   - Set `Content-Type: text/html; charset=utf-8`
-   - Use `email.policy.EmailPolicy(utf8=True)` in Python
-2. **Use Python's email library correctly:**
-   ```python
-   from email.message import EmailMessage
-   from email.policy import EmailPolicy
-   
-   msg = EmailMessage(policy=EmailPolicy(utf8=True))
-   msg.set_content(body, subtype='html')
+**How to avoid:**
+1. In `http-proxy-middleware`'s `onProxyReq` hook, inject the access token:
+   ```js
+   onProxyReq(proxyReq, req) {
+     const token = req.session?.accessToken;
+     if (token) {
+       proxyReq.setHeader('Authorization', `Bearer ${token}`);
+     }
+   }
    ```
-3. **Encode headers properly** using RFC 2047 for non-ASCII in headers
-4. **Normalize input** - convert all template data to Unicode before processing
-5. **Test with international content** - include é, ñ, 中文, emojis in test cases
+2. Also strip the incoming cookie from the proxied request (`proxyReq.removeHeader('Cookie')`) to avoid leaking the session cookie to FastAPI.
+3. Ensure the session always stores the latest access token, updated after each refresh.
 
-**Detection:**
-- Special characters appear as question marks or boxes
-- Email headers missing charset specification
-- `UnicodeEncodeError` or `UnicodeDecodeError` in logs
-- Different rendering between web preview and actual email
+**Warning signs:**
+- FastAPI logs show `401 Unauthorized` for every proxied request.
+- The BFF session contains `accessToken` but FastAPI still rejects the request.
+- FastAPI logs show no `Authorization` header in incoming requests.
 
-**Recommended Phase:** Phase 1 - Core Template Engine
+**Phase to address:** Phase 3 — BFF Proxy to FastAPI
 
 ---
 
-### Pitfall 5: Memory Issues with Large Template Data
+### Pitfall 7: CubeJS Token Expiry Not Synchronized With Keycloak Session
 
-**What goes wrong:** Processing large datasets in templates (e.g., rendering tables with thousands of rows) causes memory exhaustion.
+**What goes wrong:**
+The BFF generates a CubeJS JWT on login and stores it in the session. CubeJS tokens expire (typically 1h–24h depending on configuration). When the CubeJS token expires mid-session, CubeJS returns HTTP 403. The BFF does not detect this and continues forwarding the expired token, causing all chart queries to silently fail.
 
 **Why it happens:**
-- Loading entire datasets into memory for template rendering
-- Recursive template processing without depth limits
-- Creating massive HTML strings without streaming
-- No limits on template output size
+CubeJS token expiry is independent of Keycloak's access token expiry. Developers track Keycloak token refresh but forget to re-generate the CubeJS token when it expires.
 
-**Consequences:**
-- Server crashes from OOM (Out of Memory)
-- Slow performance affecting other requests
-- Denial of service vulnerability
-- Timeouts causing email delivery failures
+**How to avoid:**
+1. Store the CubeJS token alongside its `iat` (issued-at) timestamp in the session: `req.session.cubeToken` and `req.session.cubeTokenIssuedAt`.
+2. Before every proxied CubeJS request, check if the token is within `CUBE_TOKEN_LIFETIME - 60s`. If expired, regenerate it from the Keycloak access token before forwarding.
+3. Set CubeJS token lifetime to match or exceed Keycloak's session lifetime. A reasonable approach: generate a new CubeJS token on each Keycloak token refresh event.
+4. Return a specific error code (e.g., `session_expired`) to the SPA on CubeJS 403, triggering a full re-login.
 
-**Prevention:**
-1. **Implement output size limits** - reject templates generating > 1MB HTML
-2. **Limit iteration depth** - cap loops in templates (max 1000 iterations)
-3. **Use streaming for large data** - process rows in chunks
-4. **Implement pagination helpers** in template engine
-5. **Add resource limits:**
-   - Maximum template execution time (30 seconds)
-   - Maximum memory per template render (50MB)
-   - Maximum number of variables in scope (1000)
-6. **Sample data for preview** - show first 100 rows with "...and 900 more" message
+**Warning signs:**
+- Dashboard widgets stop loading after ~1 hour without page reload.
+- CubeJS logs show `403 Forbidden` with "JWT expired" in the error body.
+- No CubeJS token refresh logic exists in the BFF.
 
-**Detection:**
-- Memory usage spikes during email generation
-- Template processing timeouts
-- OOM errors in logs
-- Slow response times on template-heavy flows
-
-**Recommended Phase:** Phase 2 - Template Rendering System
+**Phase to address:** Phase 4 — CubeJS Token Management
 
 ---
 
-### Pitfall 6: Email Address Validation Pitfalls
+### Pitfall 8: Multi-Tenant User Context Not Included in CubeJS Token
 
-**What goes wrong:** Invalid or malformed email addresses cause delivery failures or security issues.
+**What goes wrong:**
+CubeJS uses security context (claims inside the JWT) to filter data per user or tenant (via `queryRewrite` in `cube.js` schema). If the BFF generates a generic CubeJS token without embedding the Keycloak user's `sub`, roles, or tenant ID, all users see all data — the multi-tenant isolation is silently broken.
 
 **Why it happens:**
-- Overly strict regex rejecting valid addresses
-- Not normalizing email addresses consistently
-- Case sensitivity issues in local part
-- Not validating domain exists (MX records)
+The current `cubejs.js` store uses a static token from `VITE_CUBEJS_TOKEN` env var (or the backend's active config). This static token approach provides no user context. The BFF may replicate this anti-pattern if the developer treats CubeJS token generation as just "sign anything with the secret."
 
-**Consequences:**
-- Legitimate users can't receive emails
-- Bounces from invalid addresses hurt sender reputation
-- Account enumeration vulnerabilities
-- Confusion from visually similar addresses (homoglyph attacks)
+**How to avoid:**
+1. When generating the CubeJS token in the BFF, include the Keycloak user's claims:
+   ```js
+   const cubeToken = jwt.sign({
+     sub: session.userId,
+     roles: session.roles,
+     iat: Math.floor(Date.now() / 1000)
+   }, process.env.CUBEJS_API_SECRET, { expiresIn: '1h' });
+   ```
+2. In the `cube.js` schema, use `queryRewrite` to apply row-level filters based on `securityContext.roles` or `securityContext.sub`.
+3. Verify the current Cube.js deployment's `queryRewrite` configuration — if it is missing, add it as part of this milestone.
 
-**Prevention:**
-1. **Use well-tested libraries** instead of custom regex:
-   - Python: `email-validator` library
-   - Avoid overly strict validation
-2. **Normalize consistently:**
-   - Domain part: always lowercase
-   - Local part: preserve case (technically case-sensitive per RFC)
-3. **Check for common issues:**
-   - Multiple @ symbols
-   - Spaces in address
-   - Invalid characters
-4. **Consider MX record validation** (optional, with timeouts)
-5. **Be aware of homoglyph attacks** - Cyrillic а vs Latin a
-6. **Always verify ownership** via confirmation email before trusting address
+**Warning signs:**
+- All users (regardless of role — designer, viewer, admin) see identical data in charts.
+- CubeJS `queryRewrite` function exists but always receives an empty `securityContext`.
+- The CubeJS JWT payload contains only `iat` and `exp` with no user claims.
 
-**Detection:**
-- High bounce rates from validation bypass
-- Support tickets about "valid email rejected"
-- Users with duplicate accounts due to case differences
-
-**Recommended Phase:** Phase 1 - Core Template Engine (input validation)
+**Phase to address:** Phase 4 — CubeJS Token Management
 
 ---
 
-### Pitfall 7: SPF/DKIM/DMARC Authentication Failures
+### Pitfall 9: Vue Router Guard Breaks During Migration — App Renders Before BFF Session Check
 
-**What goes wrong:** Emails fail authentication checks and go to spam folders.
+**What goes wrong:**
+The current `main.js` initializes Keycloak synchronously before mounting the Vue app. The router guard then checks `authStore.isAuthenticated`. After the BFF migration, the app mounts first and makes an async call to `GET /auth/me` to hydrate the auth store. During this async gap, Vue Router may redirect unauthenticated users to `/` (the default guard behavior) before the session check completes, causing a flash of the wrong page or a redirect loop.
 
 **Why it happens:**
-- SPF record doesn't include SMTP server IP
-- DKIM signatures not configured
-- DMARC policy not set
-- "From" domain doesn't match authenticated domain
+The current design is synchronous: Keycloak JS resolves authentication before `app.mount()`. The new BFF model is async: the app mounts, then discovers its auth status. The router guard code `if (!authStore.isAuthenticated) return next('/')` is still pointing to a synchronous assumption.
 
-**Consequences:**
-- Emails consistently land in spam/junk
-- Brand reputation damage
-- Failed authentication visible to recipients
-- Potential domain blacklisting
+**How to avoid:**
+1. Add an `authStore.initialized` boolean flag (default `false`). Set it to `true` after the `/auth/me` check resolves (success or 401).
+2. In the router's `beforeEach` guard, await initialization:
+   ```js
+   router.beforeEach(async (to, from, next) => {
+     if (!authStore.initialized) await authStore.init(); // calls GET /auth/me
+     if (!authStore.isAuthenticated && to.meta.requiresAuth) return next('/login');
+     next();
+   });
+   ```
+3. Show a global loading spinner (not a blank page) while `authStore.initialized === false`.
+4. Remove the `keycloak.init(...)` block in `main.js` entirely once the BFF handles authentication — do not leave both systems active simultaneously.
 
-**Prevention:**
-1. **Configure SPF record:**
-   ```
-   v=spf1 include:_spf.google.com include:sendgrid.net ~all
-   ```
-2. **Enable DKIM signing** through your SMTP provider
-3. **Set up DMARC policy:**
-   ```
-   _dmarc.example.com TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com"
-   ```
-4. **Ensure "From" domain aligns** with authenticated domain
-5. **Monitor authentication results** via DMARC reports
-6. **Use consistent "From" addresses** - don't spoof different domains
+**Warning signs:**
+- The app briefly shows a blank page or `/` before settling on the correct route after login.
+- Router guard triggers a redirect to `/` for authenticated users because `authStore.isAuthenticated` is `false` at guard execution time.
+- Browser DevTools shows `GET /auth/me` completing after the router navigation has already committed.
 
-**Detection:**
-- Emails consistently in spam folders
-- Authentication failure headers in received emails
-- DMARC reports showing failures
-- Spam filter testing tools flagging authentication
-
-**Recommended Phase:** Phase 3 - SMTP Delivery Engine (documentation/requirement)
+**Phase to address:** Phase 5 — Frontend Migration (Remove Keycloak JS Adapter)
 
 ---
 
-### Pitfall 8: Template Syntax Errors & Evaluation Failures
+### Pitfall 10: Keycloak Refresh Token Stored in the BFF Session Without a Rotation Strategy
 
-**What goes wrong:** Malformed `{{expression}}` syntax or undefined variables cause template rendering to fail.
+**What goes wrong:**
+The BFF stores the Keycloak `refresh_token` in `req.session` indefinitely. If the session store is compromised (Redis dump, memory store leak, debug logging that prints session contents), an attacker gets a long-lived refresh token that works until it is explicitly revoked in Keycloak.
 
 **Why it happens:**
-- No validation of template syntax before saving
-- Missing variables in template context
-- Nested expressions causing infinite recursion
-- Special characters breaking expression parsing
+Refresh tokens are needed to silently extend the session, so storing them server-side in the session is correct. The mistake is not implementing refresh token rotation: Keycloak returns a new refresh token on every use, but developers keep using the old one.
 
-**Consequences:**
-- Emails not sent due to render errors
-- Raw template syntax shown to users
-- Missing content in critical emails
-- Unpredictable behavior from partial renders
+**How to avoid:**
+1. Every time `POST /token` is called with `grant_type: refresh_token`, store the **new** refresh token from the response — do not re-use the original.
+2. Enable Keycloak's built-in refresh token rotation: in the realm settings, set "Revoke Refresh Token" = ON and "Refresh Token Max Reuse" = 0.
+3. Implement a session expiry policy: destroy the session if the refresh token exchange returns `invalid_grant` (Keycloak's response when refresh token is expired or revoked).
+4. Never log the session contents in production — mask `accessToken`, `refreshToken`, `idToken` fields.
 
-**Prevention:**
-1. **Validate templates on save** - parse and check syntax before storing
-2. **Implement graceful degradation:**
-   - Undefined variables render as empty string, not error
-   - Invalid expressions show warning, not crash
-3. **Use try/except around template evaluation**
-4. **Provide preview functionality** with sample data
-5. **Limit expression complexity:**
-   - No nested `{{}}` expressions
-   - Restricted operator set
-   - No function calls in expressions (unless explicitly allowed)
-6. **Escape special characters** in template delimiters
+**Warning signs:**
+- Session store contains the same `refreshToken` value for hours or days without change.
+- Keycloak's "Revoke Refresh Token" setting is disabled.
+- Application logs print `req.session` in error handlers.
 
-**Detection:**
-- TemplateSyntaxError exceptions in logs
-- User complaints about "{{variable}} showing in emails"
-- Missing content in generated emails
-- Preview showing errors
-
-**Recommended Phase:** Phase 1 - Core Template Engine
+**Phase to address:** Phase 1 — Keycloak OIDC Authorization Code Flow (security foundation)
 
 ---
 
-## Moderate Pitfalls
+### Pitfall 11: PKCE Code Verifier Lost Between Redirect and Callback
 
-### Pitfall 9: Image Display Issues
+**What goes wrong:**
+PKCE (S256) requires the BFF to generate a `code_verifier`, store it, hash it into a `code_challenge` for the authorization request, and then send the original `code_verifier` in the token exchange. If the `code_verifier` is stored in `req.session` but the session is not saved before the redirect (same root cause as Pitfall 3), the token exchange fails with `invalid_grant: PKCE verification failed`.
 
-**What goes wrong:** Images don't display or show broken image icons.
+**Why it happens:**
+This is the same session persistence race condition as Pitfall 3, but the failure is attributed to PKCE rather than state validation, making it confusing to debug.
 
-**Prevention:**
-- Always include `width` and `height` HTML attributes (not just CSS)
-- Provide `alt` text for accessibility and image blocking
-- Use absolute URLs (not relative) for hosted images
-- Consider image size limits (large images trigger spam filters)
-- Test with images disabled
+**How to avoid:**
+1. Store `state`, `nonce`, and `code_verifier` in a single `req.session.oidcPending` object.
+2. Always call `req.session.save()` before redirecting — this ensures all three are persisted atomically.
+3. Verify PKCE support in the Keycloak client configuration: the client must have "PKCE Code Challenge Method" set to `S256`.
+4. Use `openid-client` which handles PKCE generation and verification automatically.
 
-**Recommended Phase:** Phase 2 - Template Rendering System
+**Warning signs:**
+- Keycloak returns `error: invalid_grant` during the token exchange.
+- The BFF never successfully completes a login in a new Redis session (works fine with MemoryStore because writes are synchronous).
+- Keycloak logs show "PKCE code verifier does not match."
 
----
-
-### Pitfall 10: Reply-To and Bounce Handling
-
-**What goes wrong:** Replies go to wrong address or bounces aren't handled.
-
-**Prevention:**
-- Set proper `Reply-To` header for user responses
-- Use `Return-Path` for bounce handling
-- Implement VERP (Variable Envelope Return Path) for tracking bounces
-- Monitor bounce rates and suppress invalid addresses
-
-**Recommended Phase:** Phase 3 - SMTP Delivery Engine
+**Phase to address:** Phase 1 — Keycloak OIDC Authorization Code Flow
 
 ---
 
-### Pitfall 11: Email Size Limits
+## Technical Debt Patterns
 
-**What goes wrong:** Large emails (big images, attachments) rejected by servers.
+Shortcuts that seem reasonable but create long-term problems.
 
-**Prevention:**
-- Keep HTML body under 100KB
-- Optimize/compress images before embedding
-- Warn users about attachment size limits (typically 10-25MB)
-- Use links to hosted content instead of attachments when possible
-
-**Recommended Phase:** Phase 2 - Template Rendering System
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Using `MemoryStore` for `express-session` in production | Zero setup time | All sessions are lost on BFF restart; not horizontally scalable | Never in production — dev only |
+| Storing `accessToken` in a cookie instead of session store | No need for a session store | Token is visible in DevTools and subject to XSS leaks (even httpOnly mitigates but does not fully eliminate risk) | Never — defeats the BFF security model |
+| Leaving Keycloak JS adapter active alongside the BFF | Gradual migration, no big-bang cutover | Dual auth systems cause split brain: some routes use cookies, others use Bearer tokens; impossible to audit | Acceptable for 1 sprint max, must be removed |
+| Static CubeJS token (global, no user context) | Simple to implement | All users see all data; breaks multi-tenant isolation silently | Only acceptable if CubeJS has no `queryRewrite` and data is intentionally shared |
+| Proxying CubeJS with `changeOrigin: true` but no token injection | Proxy works for connectivity | CubeJS receives no user context; requests unauthenticated | Never — CubeJS must receive a per-user JWT |
+| Not implementing logout at the Keycloak level (just destroying the local session) | Simple logout implementation | The Keycloak session remains alive; user can get a new session via SSO without re-entering credentials | Never — incomplete logout is a security vulnerability |
 
 ---
 
-## Phase-Specific Warnings
+## Integration Gotchas
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| **Phase 1: Template Engine** | XSS via unescaped variables | Implement auto-escaping by default; require explicit `safe` filter for HTML |
-| **Phase 1: Template Engine** | Character encoding issues | Force UTF-8 throughout; test with international characters |
-| **Phase 1: Template Engine** | Template syntax errors | Validate on save; graceful handling of undefined vars |
-| **Phase 2: Template Rendering** | Large data memory issues | Implement size limits; pagination helpers; streaming |
-| **Phase 2: Template Rendering** | HTML rendering inconsistencies | Use table layouts; inline CSS; test across clients |
-| **Phase 3: SMTP Delivery** | Rate limiting/blacklisting | Implement throttling; exponential backoff; queue-based sending |
-| **Phase 3: SMTP Delivery** | Authentication failures | Document SPF/DKIM requirements; validate From alignment |
-| **Phase 3: SMTP Delivery** | Delivery errors not handled | Implement proper error handling for SMTP codes; retry logic |
+Common mistakes when connecting to external services.
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Keycloak OIDC | Using the `implicit` grant (returning tokens in URL hash) instead of authorization code flow | Always use `authorization_code` + PKCE for BFF; never put tokens in URLs |
+| Keycloak OIDC | Hard-coding the token endpoint URL instead of using OIDC discovery | Fetch `/.well-known/openid-configuration` and cache the endpoints |
+| Keycloak OIDC | Trusting the `state` parameter from query string before checking session | Validate `req.query.state === req.session.oidcState` as first line of the callback handler |
+| express-session + Redis | Not setting `prefix` in `connect-redis`, causing session key collisions if Redis is shared with other services | Set `prefix: 'dashboardstudio:sess:'` |
+| express-session + Redis | Not configuring `ttl` in `connect-redis`, so sessions never expire in Redis | Set `ttl` equal to `cookie.maxAge / 1000` (in seconds) |
+| http-proxy-middleware to FastAPI | Forgetting to set `xfwd: true` so FastAPI sees `X-Forwarded-For` with the real client IP | Pass `{ xfwd: true }` in proxy options |
+| http-proxy-middleware to FastAPI | Proxy path includes `/api/v1` prefix and FastAPI also prefixes routes — results in double prefix | Carefully align `pathRewrite` options with FastAPI route definitions |
+| CubeJS proxy | Forwarding the browser's cookie to CubeJS | Strip `Cookie` header in `onProxyReq`; CubeJS authenticates via JWT, not cookies |
+| CubeJS proxy | Not proxying WebSocket connections when CubeJS uses real-time features | Add `ws: true` to `http-proxy-middleware` options for `/cubejs-api` route |
+| Vue auth store | Calling `getMe()` in `app.use(pinia)` before the store is ready | Call `authStore.init()` from `main.js` after `app.use(pinia)` resolves |
+
+---
+
+## Performance Traps
+
+Patterns that work at small scale but fail as usage grows.
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Refreshing Keycloak token on every BFF request | Each API call adds ~100ms for the Keycloak token endpoint call | Only refresh when `accessToken` is within 60s of expiry; cache `expiresAt` in session | At ~50 concurrent users with rapid clicking |
+| Generating a new CubeJS JWT on every request | CubeJS request latency doubles due to JWT signing overhead | Cache the CubeJS token in the session; regenerate only on expiry | At ~20 concurrent users hitting chart widgets |
+| Redis session store with no connection pooling | BFF hangs when Redis is briefly unavailable | Configure `connect-redis` with retry strategy and pool size | First Redis blip in production |
+| Not compressing proxied responses | Large CubeJS result payloads (for dashboard with 10+ widgets) hit Traefik's response buffer limits | Enable `compression()` middleware in Express before proxy routes | Dashboard with >8 widgets each querying large datasets |
+
+---
+
+## Security Mistakes
+
+Domain-specific security issues beyond general web security.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Allowing `redirect_uri` to be passed as a query parameter by the SPA | Open redirect attack — attacker redirects callback to attacker-controlled site | Hard-code the `redirect_uri` in BFF configuration; never accept it from the client |
+| Reflecting the full error from Keycloak's token endpoint to the SPA | Information disclosure — Keycloak error messages reveal realm configuration details | Log the full error server-side; return a generic `Authentication failed` message to the SPA |
+| Using `httpOnly: false` on the session cookie | XSS can steal the session cookie directly from JavaScript | Always use `httpOnly: true` — the SPA has no legitimate reason to read the session cookie |
+| Logging `req.session` in error handlers or debug middleware | Access tokens and refresh tokens appear in log files | Mask or omit session token fields in all logging; use a `sanitize(session)` helper |
+| Not rotating the express-session `secret` periodically | Old `secret` values can be used to forge sessions if they leak | Support an array of secrets in `express-session`: `secret: [newSecret, oldSecret]` allows graceful rotation |
+| Trusting the `X-Forwarded-For` header from any source when inside Traefik | IP spoofing | Set `app.set('trust proxy', 1)` to trust only Traefik (one hop); do not set it higher |
+| CubeJS API secret visible in BFF environment variables without restricted access | CubeJS secret leaked = anyone can forge tokens with admin access to all data | Use Docker secrets or a secrets manager (HashiCorp Vault); never embed in `docker-compose.yaml` plaintext |
+
+---
+
+## UX Pitfalls
+
+Common user experience mistakes specific to this BFF migration.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Showing a blank page during the async `/auth/me` check on app load | Users see a flash of white before the app renders | Show a branded loading state (`<div class="app-loading">`) while `authStore.initialized === false` |
+| Redirecting to Keycloak on every hard refresh even for active sessions | Users are forced through a redirect on F5 | The BFF's `/auth/me` endpoint returns 200 with user data if the session is valid; the SPA checks this before triggering login |
+| Not preserving the original URL through the login redirect | After login, users land on `/` instead of the page they were trying to access | Store `req.query.returnTo` (or use session) before the Keycloak redirect; redirect to it after callback |
+| No logout confirmation or feedback | User clicks logout, is redirected to Keycloak, then back — with no indication the logout succeeded | Show a transient "You have been logged out" notification after the post-logout redirect |
+| CubeJS 403 errors rendered as generic "Error loading chart" with no recovery action | Users see broken charts with no way to recover without a full page reload | Intercept 403 from CubeJS proxy in the SPA; trigger a session refresh call (`GET /auth/refresh`) and retry the chart query once |
+
+---
+
+## "Looks Done But Isn't" Checklist
+
+Things that appear complete but are missing critical pieces.
+
+- [ ] **Keycloak Login Flow:** PKCE code verifier is generated and stored — verify it survives a session save/load cycle in Redis, not just MemoryStore.
+- [ ] **CSRF Protection:** `state` parameter is stored before redirect — verify `req.session.save()` is called explicitly before `res.redirect()`.
+- [ ] **Cookie Configuration:** Session cookie appears in DevTools — verify it is sent on cross-origin `fetch` calls (check that `credentials: 'include'` and `SameSite=None; Secure` are both set).
+- [ ] **FastAPI Proxy:** Routes respond correctly — verify the `Authorization` header with the Keycloak token is being injected (FastAPI should log it; check with a 401 test on the backend if the header is removed).
+- [ ] **CORS Cleanup:** No browser CORS errors — verify FastAPI's `CORSMiddleware` is removed or restricted to internal-only origins after the BFF is live.
+- [ ] **CubeJS Proxy:** CubeJS queries work — verify the CubeJS JWT contains `sub` and `roles` claims from the authenticated Keycloak user (decode the token in CubeJS logs).
+- [ ] **Logout:** Local session is destroyed — verify Keycloak logout (`/protocol/openid-connect/logout`) is also called so the upstream session is terminated.
+- [ ] **Token Refresh:** Short-lived Keycloak tokens are refreshed — verify behavior after the access token expires (set token lifespan to 1 minute in Keycloak realm settings for testing).
+- [ ] **Vue Router Guard:** Auth guard works — verify that a hard-refresh on a protected route does not flash a redirect to `/` before `/auth/me` resolves.
+- [ ] **Keycloak JS Adapter Removed:** Old `keycloak.js` service and `main.js` init block are fully removed — verify no `import keycloak from '@/services/keycloak'` references remain in any Vue component or store.
+
+---
+
+## Recovery Strategies
+
+When pitfalls occur despite prevention, how to recover.
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| CSRF state mismatch causing all logins to fail | LOW | Add explicit `req.session.save()` before redirect; redeploy BFF |
+| Cookie not sent (SameSite misconfiguration) | LOW | Fix `sameSite: 'none'` and `credentials: 'include'` on both sides; no data migration needed |
+| CORS double-header breaking API calls | LOW | Add `delete proxyRes.headers['access-control-allow-origin']` in proxy `onProxyRes`; redeploy |
+| CubeJS token without user context (all users see all data) | MEDIUM | Generate per-user CubeJS tokens; update `queryRewrite` in CubeJS schema; flush cached dimension values |
+| MemoryStore used in production and sessions lost on restart | MEDIUM | Add Redis, configure `connect-redis`, roll BFF; users must re-login once |
+| Keycloak JS adapter not fully removed (dual auth system) | MEDIUM | Audit all `import keycloak` usages; remove auth store's `_keycloak` reference; test all routes |
+| Refresh token not rotated (stale refresh token in session) | HIGH | Enable Keycloak refresh token rotation in realm settings; force all users to re-login (session flush); audit logs for anomalous refresh attempts |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Missing state/nonce validation | Phase 1 — OIDC Auth Code Flow | Integration test: callback with wrong `state` returns 400 |
+| Session not saved before redirect | Phase 1 — OIDC Auth Code Flow | Test with Redis store (not MemoryStore) in dev environment |
+| PKCE verifier lost | Phase 1 — OIDC Auth Code Flow | Complete login flow test in Redis-backed session environment |
+| Refresh token not rotated | Phase 1 — OIDC Auth Code Flow | Keycloak realm has "Revoke Refresh Token" ON; verify new token on each refresh |
+| Cookie not sent by SPA | Phase 2 — Session & Cookie Setup | Browser test: check `credentials: 'include'` in all `fetch` calls; cookie present in request headers |
+| CORS double-handling | Phase 3 — FastAPI Proxy | Response headers contain single `Access-Control-Allow-Origin`; no duplicate |
+| Authorization header not forwarded | Phase 3 — FastAPI Proxy | FastAPI access log shows `Authorization: Bearer ...` on proxied requests |
+| CubeJS token expiry unhandled | Phase 4 — CubeJS Token Management | Charts still load after 1h without refresh (simulate with short token TTL) |
+| CubeJS missing user context | Phase 4 — CubeJS Token Management | Viewer user only sees their permitted data; designer sees all |
+| Router guard race condition | Phase 5 — Frontend Migration | Hard-refresh on protected route shows loading state, then correct page (no flash redirect) |
+| Keycloak JS adapter not removed | Phase 5 — Frontend Migration | `grep -r "keycloak-js" src/` returns no results |
 
 ---
 
 ## Sources
 
-- [OWASP Cross-Site Scripting Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) - **HIGH confidence**
-- [OWASP Email Validation and Verification Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Email_Validation_and_Verification_Cheat_Sheet.html) - **HIGH confidence**
-- [Python email module documentation](https://docs.python.org/3/library/email.html) - **HIGH confidence**
-- [Python smtplib documentation](https://docs.python.org/3/library/smtplib.html) - **HIGH confidence**
-- [Campaign Monitor CSS Support Guide](https://www.campaignmonitor.com/css/) - **HIGH confidence**
-- [Litmus Outlook Email Rendering Guide](https://www.litmus.com/blog/a-guide-to-rendering-differences-in-microsoft-outlook-clients) - **HIGH confidence**
-- [OWASP SSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html) - **HIGH confidence** (for URL validation patterns)
+- Direct codebase analysis: `dashboard-app/src/main.js`, `src/services/keycloak.js`, `src/services/api.js`, `src/stores/auth.js`, `src/stores/cubejs.js`, `src/router/index.js` — **HIGH confidence**
+- OIDC Core specification (RFC 6749, OpenID Connect Core 1.0) — state/nonce/PKCE requirements — **HIGH confidence**
+- RFC 7636 — PKCE (Proof Key for Code Exchange) specification — **HIGH confidence**
+- OWASP Session Management Cheat Sheet — cookie flag requirements, session fixation — **HIGH confidence**
+- OWASP CSRF Prevention Cheat Sheet — state parameter validation — **HIGH confidence**
+- MDN Web Docs: Fetch API, `credentials: 'include'`, SameSite cookie attribute — **HIGH confidence**
+- `express-session` npm package documentation — `saveUninitialized`, `resave`, `save()` behavior — **HIGH confidence**
+- `http-proxy-middleware` GitHub documentation — `onProxyReq`, `onProxyRes` hooks — **HIGH confidence**
+- CubeJS Security documentation — `securityContext`, `queryRewrite`, JWT payload claims — **HIGH confidence**
+
+---
+*Pitfalls research for: BFF Service Architecture (v1.8) — Keycloak OIDC / Express Session / Proxy*
+*Researched: 2026-05-28*

@@ -1,1309 +1,656 @@
-# ODS Execution Engine Architecture
+# Architecture Research
 
-**Project:** Dashboard Studio - ODS Execution Engine  
-**Researched:** 2026-05-16  
-**Confidence:** HIGH (based on existing codebase analysis)
-
-## Executive Summary
-
-The ODS Execution Engine extends the existing Deno-Python flow execution architecture to support real-time PostgreSQL write operations. The design leverages the established signal-based communication pattern while introducing a dedicated Python executor service for database operations.
-
-**Key Design Decision:** Use a hybrid execution model where Deno continues to orchestrate flow control but delegates actual database writes to Python via a new `EXEC_ODS` signal. This maintains sandbox security while enabling efficient batch processing.
+**Domain:** BFF Service Architecture — Dashboard Studio v1.8
+**Researched:** 2026-05-28
+**Confidence:** HIGH (based on direct codebase analysis)
 
 ---
 
-## 1. Integration with Existing Deno Runner
+## Standard Architecture
 
-### Current Signal Types
-The Deno runner (`runner.ts`) currently emits these signals via `console.log`:
+### System Overview
 
-| Signal | Format | Purpose |
-|--------|--------|---------|
-| `NODE_STATUS` | `NODE_STATUS:{node_id}:{status}` | Real-time execution status |
-| `NODE_LOG_JSON` | `NODE_LOG_JSON:{json}` | Structured execution logs |
-| `FINAL_RESULT` | `FINAL_RESULT:{json}` | Final flow output |
-| `EXEC_SQL` | `EXEC_SQL:{conn_id}:{query}` | SQL execution request (placeholder) |
-
-### New Signal: EXEC_ODS
-
-**Format:**
 ```
-EXEC_ODS:{node_id}:{operation}:{connection_id}:{batch_id}
+CURRENT (v1.7)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────┐     Bearer <kc_token>     ┌──────────────────────┐
+  │  dashboard-app       │ ─────────────────────────► │  backend FastAPI     │
+  │  Vue 3 (port 3000)   │                            │  (port 8000, Traefik)│
+  │                      │   Keycloak JS adapter      │                      │
+  │  keycloak.js         │◄───────────────────────────│  security.py:        │
+  │  stores tokens in    │      redirect flows        │  verify_token()      │
+  │  sessionStorage      │                            │  fetches JWKS        │
+  │                      │                            └──────────────────────┘
+  │  cubejs.js           │   Bearer <cube_jwt>        ┌──────────────────────┐
+  │  token from DB via   │ ─────────────────────────► │  CubeJS              │
+  │  FastAPI             │                            │  (port 4000, ext.)   │
+  └──────────────────────┘                            └──────────────────────┘
+             │                                                   ▲
+             │ OIDC redirect                          Static JWT from DB
+             ▼                                        (cube_config table)
+  ┌──────────────────────┐
+  │  Keycloak            │
+  │  (ext. OIDC server)  │
+  └──────────────────────┘
+
+
+TARGET (v1.8)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────┐   httpOnly cookie session  ┌──────────────────────┐
+  │  dashboard-app       │ ─────────────────────────► │  BFF                 │
+  │  Vue 3 (port 3000)   │                            │  Node.js + Express   │
+  │                      │   /bff/auth/login          │  (port 3001)         │
+  │  NO keycloak-js      │   /bff/api/v1/...          │                      │
+  │  NO token in browser │   /bff/cubejs/...          │  Session store       │
+  │                      │◄──────────────────────────  │  OIDC client         │
+  │  api.js points to    │   Set-Cookie: session=...  │  http-proxy-mw       │
+  │  BFF base URL        │                            └──────────┬───────────┘
+  └──────────────────────┘                                       │
+                                                                 │ Bearer <kc_token> (forwarded)
+                                                                 ▼
+                                            ┌───────────────────────────────────────┐
+                                            │                                       │
+                               ┌────────────▼──────────┐   ┌──────────────────────┐│
+                               │  backend FastAPI       │   │  CubeJS              ││
+                               │  (port 8000, internal) │   │  (port 4000, int.)   ││
+                               │                        │   │                      ││
+                               │  security.py:          │   │  JWT signed by BFF   ││
+                               │  verify_token()        │   │  (shared secret)     ││
+                               │  unchanged             │   └──────────────────────┘│
+                               └────────────────────────┘                           │
+                                            │                                       │
+                                            └───────────────────────────────────────┘
+                                                         ▲
+                                            ┌────────────┴──────────┐
+                                            │  Keycloak             │
+                                            │  (ext. OIDC server)   │
+                                            │  JWKS, token endpoint │
+                                            └───────────────────────┘
 ```
 
-**Payload Structure (JSON following signal):**
-```json
-{
-  "node_id": "node-123",
-  "operation": "upsert",
-  "target": {
-    "connection_id": "conn-456",
-    "schema": "ods",
-    "table": "fact_sales"
-  },
-  "config": {
-    "write_mode": "upsert",
-    "identity_fields": ["id", "date"],
-    "batch_size": 1000
-  },
-  "data": [...],
-  "metadata": {
-    "execution_id": "exec-789",
-    "flow_id": "flow-abc",
-    "timestamp": "2026-05-16T12:00:00Z"
+### Component Responsibilities
+
+| Component | Responsibility | Change in v1.8 |
+|-----------|----------------|----------------|
+| dashboard-app | Vue 3 SPA, renders UI, calls APIs | Remove keycloak-js; point api.js to BFF |
+| BFF | Auth flows, session management, proxy to backend + CubeJS | NEW service |
+| backend FastAPI | Business logic only, CRUD, flow execution | Keep verify_token; add internal-only CORS |
+| CubeJS | Semantic layer for analytical queries | Unchanged; JWT now signed server-side |
+| Keycloak | External OIDC identity provider | Unchanged; BFF becomes the OIDC relying party |
+
+---
+
+## Port Layout
+
+| Service | Dev port | Docker-internal | Production (Traefik) |
+|---------|----------|-----------------|----------------------|
+| dashboard-app (Nginx) | 3000 | 80 | dashboard.pm.comsatel.com.pe |
+| BFF (Express) | 3001 | 3001 | dashboard-bff.pm.comsatel.com.pe (or same domain, /bff) |
+| backend (FastAPI) | 8000 | 8000 | dashboard-api.pm.comsatel.com.pe (restrict to internal) |
+| CubeJS | 4000 | 4000 | (internal only — never exposed to public) |
+
+**Recommendation:** Use a single external hostname and path-prefix routing via Traefik or an upstream Nginx in the frontend image:
+- `dashboard.pm.comsatel.com.pe/bff/*` → BFF:3001
+- BFF:3001 proxies internally to backend:8000 and cubejs:4000
+
+This avoids CORS headaches because frontend and BFF share the same origin. The httpOnly session cookie has `SameSite=Lax` and `Secure`, which works cross-origin if needed but is simpler at the same origin.
+
+---
+
+## Recommended Project Structure
+
+```
+bff/                              # New top-level service
+├── package.json
+├── Dockerfile
+├── .env.example
+└── src/
+    ├── index.js                  # Express app entry point, port 3001
+    ├── config.js                 # Env-driven config (Keycloak, backend URL, CubeJS URL)
+    ├── middleware/
+    │   ├── session.js            # express-session + connect-pg-simple or memorystore
+    │   └── requireSession.js     # Guard: 401 if no active session
+    ├── routes/
+    │   ├── auth.js               # GET /bff/auth/login, /bff/auth/callback, /bff/auth/logout
+    │   │                         # POST /bff/auth/refresh, GET /bff/auth/me
+    │   ├── api.js                # ALL /bff/api/* → http-proxy-middleware → FastAPI
+    │   └── cubejs.js             # ALL /bff/cubejs/* → http-proxy-middleware → CubeJS
+    └── lib/
+        ├── oidcClient.js         # openid-client: discovery, authorizationUrl, callback
+        └── cubeToken.js          # jsonwebtoken.sign() with CUBEJS_API_SECRET
+```
+
+---
+
+## Architectural Patterns
+
+### Pattern 1: Server-Side Session with httpOnly Cookie
+
+**What:** BFF stores Keycloak access token and refresh token in a server-side session. The browser receives only an opaque session ID cookie. No tokens are ever sent to the browser.
+
+**When to use:** Required when the goal is to prevent token theft via XSS. The Keycloak `frame-ancestors 'self'` CSP already blocks the silent iframe refresh; this pattern eliminates client-side token entirely.
+
+**Trade-offs:** Statefulness on the BFF. The session store must survive BFF restarts (use Redis or PostgreSQL-backed sessions in production; in-memory is acceptable for single-instance dev).
+
+**Implementation sketch:**
+```javascript
+// src/middleware/session.js
+import session from 'express-session'
+
+export default session({
+  secret: process.env.SESSION_SECRET,
+  name: 'dsid',               // cookie name — opaque, not "connect.sid"
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',  // HTTPS in prod
+    sameSite: 'lax',
+    maxAge: 8 * 60 * 60 * 1000  // 8 hours — matches Keycloak SSO session
   }
+})
+```
+
+**Session payload (stored server-side, never in cookie):**
+```javascript
+req.session.tokens = {
+  accessToken: '...',          // Keycloak access JWT
+  refreshToken: '...',
+  idToken: '...',
+  expiresAt: Date.now() + 300_000  // ms
+}
+req.session.user = {
+  sub: '...',
+  email: '...',
+  name: '...',
+  roles: ['designer']
 }
 ```
 
-### Deno Runner Modification Points
+### Pattern 2: OIDC Authorization Code Flow (Server-Side)
 
-**File:** `backend/app/runtime/runner.ts`
+**What:** BFF initiates and completes the OIDC Authorization Code + PKCE flow on behalf of the SPA. The frontend redirects to `GET /bff/auth/login` instead of calling `keycloak.login()`.
 
-Add new node handler in the main execution loop (around line 503):
+**When to use:** Required when removing keycloak-js from the browser.
 
-```typescript
-} else if (node.toolType === 'ods_pg') {
-  try {
-    const props = node.props || {};
-    const connectionId = props.connection_id;
-    const schema = props.schema || 'public';
-    const table = props.table;
-    const writeMode = props.write_mode || 'append';
-    const identityFields = props.identity_fields || [];
-    const batchSize = parseInt(props.batch_size || '1000', 10);
+**Trade-offs:** BFF must be a registered OIDC client in Keycloak with its own `client_id` and `client_secret` (confidential client). The existing `dashboard-app` public client in Keycloak can be retired or kept for fallback.
 
-    if (!connectionId || !table) {
-      throw new Error("ODS PostgreSQL requiere connection_id y table");
-    }
+**Keycloak client required:**
+- Client ID: `dashboard-bff`
+- Client type: Confidential
+- Valid Redirect URIs: `https://dashboard.pm.comsatel.com.pe/bff/auth/callback`
+- Service accounts: not needed
 
-    // Prepare data from upstream
-    const records = Array.isArray(context.payload) ? context.payload : [context.payload];
-    
-    if (records.length === 0) {
-      console.log(`[ODS] No data to write for node ${node.id}`);
-      context.payload = { status: 'skipped', rows: 0 };
-    } else {
-      // Emit signal for Python to handle execution
-      const batchId = `batch-${Date.now()}`;
-      const odsPayload = {
-        node_id: node.id,
-        operation: writeMode,
-        target: { connection_id: connectionId, schema, table },
-        config: { write_mode: writeMode, identity_fields: identityFields, batch_size: batchSize },
-        data: records,
-        metadata: {
-          execution_id: flow.execution_id, // needs to be passed in flow data
-          flow_id: flow.flow_id,
-          timestamp: new Date().toISOString()
-        }
-      };
-      
-      console.log(`EXEC_ODS:${node.id}:${writeMode}:${connectionId}:${batchId}`);
-      console.log(`EXEC_ODS_PAYLOAD:${JSON.stringify(odsPayload)}`);
-      
-      // Python will process and return result via a response mechanism
-      // For now, we mark as delegated
-      context.payload = { status: 'delegated', operation: writeMode, rows: records.length };
-    }
-    
-    const endMs = Date.now();
-    const endTime = new Date(endMs).toISOString();
-    console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-    emitStatus(node.id, 'success');
-  } catch (err: any) {
-    // Error handling...
-  }
+**Flow:**
+```
+Browser            BFF                    Keycloak
+  |                 |                        |
+  |--GET /bff/auth/login-->                  |
+  |                 |--302 redirect-------->  |
+  |<--------302 to Keycloak login----------  |
+  |                 |                        |
+  |--POST credentials (user types)---------> |
+  |<--------302 to /bff/auth/callback------  |
+  |                 |                        |
+  |--GET /bff/auth/callback?code=xxx-------> |
+  |                 |--exchange code-------> |
+  |                 |<--tokens (access+refresh+id)--|
+  |                 |--store in session       |
+  |<--Set-Cookie: dsid=xxx; redirect to /   |
+```
+
+**openid-client usage:**
+```javascript
+// src/lib/oidcClient.js
+import { Issuer } from 'openid-client'
+
+let _client = null
+
+export async function getOidcClient() {
+  if (_client) return _client
+  const issuer = await Issuer.discover(
+    `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`
+  )
+  _client = new issuer.Client({
+    client_id: process.env.KEYCLOAK_CLIENT_ID,       // dashboard-bff
+    client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+    redirect_uris: [process.env.BFF_CALLBACK_URL],   // /bff/auth/callback
+    response_types: ['code'],
+  })
+  return _client
 }
 ```
 
----
-
-## 2. Python Service Architecture
-
-### New Component: `ods_executor.py`
-
-**Location:** `backend/app/services/ods_executor.py`
-
-**Responsibilities:**
-1. Process EXEC_ODS signals from Deno
-2. Manage database connections via asyncpg
-3. Execute batch operations (Append, Overwrite, Upsert, Merge SCD2)
-4. Handle transactions and rollback
-5. Report progress and errors back to orchestrator
-
-**Class Structure:**
-
-```python
-import asyncpg
-import logging
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass
-from enum import Enum
-
-logger = logging.getLogger(__name__)
-
-class WriteMode(Enum):
-    APPEND = "append"
-    OVERWRITE = "overwrite"
-    UPSERT = "upsert"
-    MERGE_SCD2 = "merge"
-
-@dataclass
-class ODSConfig:
-    connection_id: str
-    schema: str
-    table: str
-    write_mode: WriteMode
-    identity_fields: List[str]
-    batch_size: int
-
-@dataclass
-class ODSResult:
-    success: bool
-    rows_affected: int
-    rows_inserted: int
-    rows_updated: int
-    errors: List[str]
-    duration_ms: int
-
-class ODSExecutor:
-    """
-    Executes ODS PostgreSQL operations with batch processing,
-    transaction management, and error handling.
-    """
-    
-    def __init__(self):
-        self._connection_cache: Dict[str, asyncpg.Connection] = {}
-    
-    async def execute(
-        self, 
-        config: ODSConfig, 
-        records: List[Dict[str, Any]],
-        db_session
-    ) -> ODSResult:
-        """Main entry point for ODS execution."""
-        pass
-    
-    async def _execute_append(self, conn: asyncpg.Connection, config: ODSConfig, records: List[Dict]) -> int:
-        """Execute append operation."""
-        pass
-    
-    async def _execute_overwrite(self, conn: asyncpg.Connection, config: ODSConfig, records: List[Dict]) -> int:
-        """Execute overwrite operation (truncate + insert)."""
-        pass
-    
-    async def _execute_upsert(self, conn: asyncpg.Connection, config: ODSConfig, records: List[Dict]) -> Dict[str, int]:
-        """Execute upsert with conflict resolution."""
-        pass
-    
-    async def _execute_merge_scd2(self, conn: asyncpg.Connection, config: ODSConfig, records: List[Dict]) -> Dict[str, int]:
-        """Execute SCD Type 2 merge."""
-        pass
-
-# Singleton instance
-ods_executor = ODSExecutor()
-```
-
-### Integration with DenoService
-
-**File:** `backend/app/services/deno_service.py`
-
-Modify `run_flow_stream` to capture and process EXEC_ODS signals:
-
-```python
-async def run_flow_stream(self, flow_data: Dict[str, Any], payload: Optional[Dict] = None):
-    # ... existing setup ...
-    
-    ods_results = {}  # Track ODS execution results
-    
-    for line in stdout_text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-            
-        # Handle EXEC_ODS signal
-        if line.startswith("EXEC_ODS:"):
-            parts = line.split(":")
-            if len(parts) >= 5:
-                node_id = parts[1]
-                operation = parts[2]
-                connection_id = parts[3]
-                batch_id = parts[4]
-                
-                # Next line should contain payload
-                # (This requires buffering or lookahead)
-                
-        elif line.startswith("EXEC_ODS_PAYLOAD:"):
-            try:
-                ods_payload = json.loads(line[len("EXEC_ODS_PAYLOAD:"):])
-                # Execute ODS operation
-                result = await self._handle_ods_execution(ods_payload, db)
-                ods_results[ods_payload['node_id']] = result
-                
-                # Emit result back to stream
-                yield {"type": "ods_result", "node_id": ods_payload['node_id'], "result": result}
-            except Exception as e:
-                logger.error(f"ODS execution failed: {e}")
-                yield {"type": "error", "message": f"ODS execution failed: {e}"}
-                
-        # ... existing handlers ...
-
-async def _handle_ods_execution(self, payload: Dict, db) -> Dict:
-    """Delegate to ods_executor."""
-    from app.services.ods_executor import ODSExecutor, ODSConfig, WriteMode
-    
-    config = ODSConfig(
-        connection_id=payload['target']['connection_id'],
-        schema=payload['target']['schema'],
-        table=payload['target']['table'],
-        write_mode=WriteMode(payload['config']['write_mode']),
-        identity_fields=payload['config']['identity_fields'],
-        batch_size=payload['config']['batch_size']
-    )
-    
-    executor = ODSExecutor()
-    result = await executor.execute(config, payload['data'], db)
-    
-    return {
-        "success": result.success,
-        "rows_affected": result.rows_affected,
-        "duration_ms": result.duration_ms,
-        "errors": result.errors
-    }
-```
-
----
-
-## 3. Data Flow Architecture
-
-### Execution Flow Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         FLOW EXECUTION LIFECYCLE                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-1. TRIGGER (WebSocket / Scheduler / API)
-   │
-   ▼
-┌─────────────────┐
-│  Flow Endpoint  │  ← Load flow definition from DB
-│  /scheduler     │
-└────────┬────────┘
-         │
-         ▼
-┌──────────────────────────┐
-│  Source Executor         │  ← Pre-execute source nodes (PostgreSQL, MySQL)
-│  (source_executor.py)    │     Fetches data, resolves credentials
-└────────┬─────────────────┘
-         │
-         ▼
-┌──────────────────────────┐     Signals: NODE_STATUS, NODE_LOG_JSON
-│  Deno Runner             │ ──────────────────────────────────────────► UI
-│  (runner.ts)             │
-│                          │     EXEC_ODS:node-id:upsert:conn-123:batch-1
-│  Processes nodes         │ ──────────────────────────────────────────┐
-│  sequentially...         │                                         │
-└────────┬─────────────────┘                                         │
-         │                                                            │
-         │ ODS Node Encountered                                       │
-         ▼                                                            ▼
-┌──────────────────────────┐                          ┌────────────────────────┐
-│  Emit EXEC_ODS signal    │                          │  DenoService           │
-│  with payload            │─────────────────────────►│  (deno_service.py)     │
-│                          │   Intercept signal       │                        │
-└──────────────────────────┘                          │  Parse EXEC_ODS        │
-                                                      │  Delegate to executor  │
-                                                      └────────┬───────────────┘
-                                                               │
-                                                               ▼
-                                                      ┌────────────────────────┐
-                                                      │  ODS Executor          │
-                                                      │  (ods_executor.py)     │
-                                                      │                        │
-                                                      │  • Connect to PG       │
-                                                      │  • Batch processing    │
-                                                      │  • Transaction mgmt    │
-                                                      │  • Error handling      │
-                                                      └────────┬───────────────┘
-                                                               │
-                                                               ▼
-                                                      ┌────────────────────────┐
-                                                      │  PostgreSQL ODS        │
-                                                      │  (Target Database)     │
-                                                      └────────────────────────┘
-                                                               │
-                                                               │ Result
-                                                               ▼
-┌──────────────────────────┐                          ┌────────────────────────┐
-│  Continue flow with      │◄─────────────────────────│  Return result to      │
-│  result in context       │   Yield ods_result       │  DenoService           │
-│  payload                 │                          │                        │
-└────────┬─────────────────┘                          └────────────────────────┘
-         │
-         ▼
-┌──────────────────────────┐
-│  Flow completes          │
-│  FINAL_RESULT emitted    │
-└────────┬─────────────────┘
-         │
-         ▼
-┌──────────────────────────┐
-│  Save Execution History  │
-│  (ExecutionHistory,      │
-│   NodeExecutionLogs)     │
-└──────────────────────────┘
-```
-
-### Data Flow: Upstream → ODS Executor → PostgreSQL
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                        DATA FLOW DETAIL                                     │
-└────────────────────────────────────────────────────────────────────────────┘
-
-UPSTREAM NODE OUTPUT
-│
-│  Array of records: [{"id": 1, "name": "A", "value": 100}, ...]
-│
-▼
-┌────────────────────────────────┐
-│  Deno Runner Context           │
-│  context.payload = records     │
-└────────┬───────────────────────┘
-         │
-         │ ODS Node Execution
-         ▼
-┌────────────────────────────────┐
-│  Prepare ODS Payload           │
-│  • Extract records             │
-│  • Resolve node props          │
-│  • Build metadata              │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  Emit EXEC_ODS Signal          │
-│  console.log("EXEC_ODS:...")   │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  DenoService Interception      │
-│  • Parse signal                │
-│  • Extract payload             │
-│  • Call ODSExecutor            │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  ODSExecutor.execute()         │
-│  • Validate records            │
-│  • Get connection config       │
-│  • Split into batches          │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  Batch Processing Loop         │
-│  for batch in batches:         │
-│    • Begin transaction         │
-│    • Execute write operation   │
-│    • Commit / Rollback         │
-│    • Log progress              │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  PostgreSQL asyncpg            │
-│  • executemany() for batches   │
-│  • Conflict resolution         │
-│  • RETURNING clause support    │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  Return ODSResult              │
-│  • rows_affected               │
-│  • success/failure             │
-│  • errors[]                    │
-└────────┬───────────────────────┘
-         │
-         ▼
-┌────────────────────────────────┐
-│  Yield to WebSocket Stream     │
-│  {"type": "ods_result", ...}   │
-└────────────────────────────────┘
-```
-
----
-
-## 4. Transaction and Error Handling Strategy
-
-### Transaction Management
-
-**Per-Batch Transactions (Recommended):**
-
-```python
-async def _execute_batch_with_transaction(
-    self, 
-    conn: asyncpg.Connection, 
-    query: str, 
-    batch: List[tuple],
-    batch_number: int
-) -> Dict[str, Any]:
-    """
-    Execute a single batch within a transaction.
-    
-    Strategy:
-    - Each batch is atomic
-    - Failed batch rolls back independently
-    - Other batches continue processing
-    - Partial success is possible
-    """
-    async with conn.transaction():
-        try:
-            result = await conn.executemany(query, batch)
-            return {
-                "batch": batch_number,
-                "success": True,
-                "rows_affected": result
-            }
-        except asyncpg.UniqueViolationError as e:
-            logger.warning(f"Batch {batch_number}: Unique violation - {e}")
-            raise  # Will rollback
-        except asyncpg.ForeignKeyViolationError as e:
-            logger.error(f"Batch {batch_number}: FK violation - {e}")
-            raise  # Will rollback
-        except Exception as e:
-            logger.error(f"Batch {batch_number}: Unexpected error - {e}")
-            raise  # Will rollback
-```
-
-**All-or-Nothing Transaction (Alternative):**
-
-```python
-async def _execute_all_or_nothing(
-    self,
-    conn: asyncpg.Connection,
-    config: ODSConfig,
-    records: List[Dict]
-) -> ODSResult:
-    """
-    Execute all records in a single transaction.
-    
-    Strategy:
-    - Entire operation is atomic
-    - Any failure rolls back everything
-    - Suitable for small datasets or when consistency is critical
-    """
-    async with conn.transaction():
-        # Truncate if overwrite mode
-        if config.write_mode == WriteMode.OVERWRITE:
-            await conn.execute(f'TRUNCATE TABLE "{config.schema}"."{config.table}"')
-        
-        # Process all batches
-        for i, batch in enumerate(batches):
-            await self._execute_batch(conn, config, batch)
-        
-        # Single commit at end
-```
-
-### Error Handling Strategy
-
-**Error Classification:**
-
-| Error Type | Action | Retry? | Log Level |
-|------------|--------|--------|-----------|
-| Connection Error | Abort all, notify | Yes (3x) | ERROR |
-| Unique Violation | Skip record, continue | No | WARNING |
-| FK Violation | Skip record, continue | No | ERROR |
-| Type Mismatch | Skip record, continue | No | ERROR |
-| Timeout | Retry batch | Yes (3x) | WARNING |
-| Unknown | Abort batch, continue | No | ERROR |
-
-**Error Response Structure:**
-
-```python
-@dataclass
-class ODSError:
-    batch_number: int
-    error_type: str
-    message: str
-    record_index: Optional[int]  # Index within batch
-    record_preview: Optional[Dict]  # First few fields for identification
-    
-@dataclass
-class ODSResult:
-    success: bool  # True if at least one batch succeeded
-    complete_success: bool  # True if all batches succeeded
-    rows_affected: int
-    rows_inserted: int
-    rows_updated: int
-    batches_total: int
-    batches_successful: int
-    batches_failed: int
-    errors: List[ODSError]
-    duration_ms: int
-```
-
-### Rollback Strategy
-
-**Automatic (Transaction-Level):**
-- Each batch runs in its own transaction
-- Failed batch automatically rolls back
-- Other batches unaffected
-
-**Manual (Overwrite Mode):**
-- For overwrite operations, truncation happens in transaction
-- If subsequent insert fails, entire operation rolls back
-- Preserves original table data
-
-**Checkpoint Strategy (Future Enhancement):**
-```python
-# For very large datasets, implement checkpoints
-async def _execute_with_checkpoints(...):
-    checkpoint_every = 10  # batches
-    for i, batch in enumerate(batches):
-        await self._execute_batch(...)
-        
-        if i > 0 and i % checkpoint_every == 0:
-            # Log checkpoint for potential resume
-            await self._save_checkpoint(execution_id, i, conn)
-```
-
----
-
-## 5. New Components vs Modifications
-
-### New Components (Create)
-
-| Component | File | Purpose |
-|-----------|------|---------|
-| ODSExecutor | `backend/app/services/ods_executor.py` | Core execution engine for ODS operations |
-| ODSResult | `backend/app/services/ods_executor.py` | Result data structure |
-| ODSError | `backend/app/services/ods_executor.py` | Error data structure |
-| WriteMode | `backend/app/services/ods_executor.py` | Enum for write modes |
-
-### Modified Components (Update)
-
-| Component | File | Changes |
-|-----------|------|---------|
-| Deno Runner | `backend/app/runtime/runner.ts` | Add `ods_pg` node handler, emit EXEC_ODS signal |
-| DenoService | `backend/app/services/deno_service.py` | Capture EXEC_ODS, delegate to ODSExecutor |
-| Destination Executor | `backend/app/services/destination_executor.py` | Deprecate or redirect to ODSExecutor |
-| Scheduler | `backend/app/services/scheduler.py` | Ensure ODS execution in scheduled flows |
-| Integration Flows API | `backend/app/api/endpoints/integration_flows.py` | Handle ODS results in WebSocket stream |
-
-### Unchanged Components
-
-| Component | Reason |
-|-----------|--------|
-| MetadataService | Already supports PostgreSQL schema inspection |
-| SourceExecutor | Source nodes remain unchanged |
-| Models | ODS node already defined in editor_tools |
-| Frontend ODS Node UI | Already implemented in Phase 30 |
-
----
-
-## 6. Suggested Build Order
-
-### Phase 1: Foundation (Week 1)
-
-**Objective:** Core ODSExecutor with basic operations
-
-**Tasks:**
-1. Create `ods_executor.py` with:
-   - Class structure and data models
-   - Database connection management
-   - Append operation implementation
-   - Basic error handling
-
-2. Write unit tests for ODSExecutor:
-   - Mock PostgreSQL with testing.postgresql
-   - Test append operation
-   - Test error scenarios
-
-**Deliverable:** ODSExecutor service with append operation working
-
-### Phase 2: Deno Integration (Week 1-2)
-
-**Objective:** Connect Deno runner to ODSExecutor
-
-**Tasks:**
-1. Modify `runner.ts`:
-   - Add `ods_pg` node handler
-   - Emit EXEC_ODS signal
-   - Format payload correctly
-
-2. Modify `deno_service.py`:
-   - Parse EXEC_ODS signal
-   - Extract and validate payload
-   - Call ODSExecutor
-   - Yield results back to stream
-
-3. Integration test:
-   - End-to-end flow with simple append
-   - WebSocket streaming verification
-
-**Deliverable:** Full flow execution from Deno through to PostgreSQL
-
-### Phase 3: Advanced Operations (Week 2)
-
-**Objective:** Complete write mode implementations
-
-**Tasks:**
-1. Implement overwrite operation
-2. Implement upsert with composite keys
-3. Implement Merge SCD2 (if time permits, else Phase 4)
-
-4. Enhance transaction management:
-   - Per-batch transactions
-   - All-or-nothing option
-   - Rollback testing
-
-**Deliverable:** All write modes functional
-
-### Phase 4: Error Handling & Polish (Week 3)
-
-**Objective:** Production-ready error handling and monitoring
-
-**Tasks:**
-1. Comprehensive error classification
-2. Retry logic with backoff
-3. Detailed logging per batch
-4. Progress reporting for large datasets
-5. Update ExecutionHistory with ODS-specific metadata
-
-6. Deprecate legacy destination_executor.py
-
-**Deliverable:** Production-ready ODS Execution Engine
-
-### Phase 5: Performance & Scale (Future)
-
-**Objective:** Handle large datasets efficiently
-
-**Tasks:**
-1. Connection pooling
-2. Parallel batch processing
-3. Checkpoint/resume capability
-4. Streaming for very large datasets
-
----
-
-## 7. API Contract
-
-### Deno → Python (EXEC_ODS Signal)
-
-**Signal Format:**
-```
-EXEC_ODS:{node_id}:{operation}:{connection_id}:{batch_id}
-EXEC_ODS_PAYLOAD:{json_payload}
-```
-
-**Payload Schema:**
-```typescript
-interface ODSExecutionPayload {
-  node_id: string;
-  operation: 'append' | 'overwrite' | 'upsert' | 'merge';
-  target: {
-    connection_id: string;
-    schema: string;
-    table: string;
-  };
-  config: {
-    write_mode: string;
-    identity_fields: string[];
-    batch_size: number;
-  };
-  data: any[];
-  metadata: {
-    execution_id: string;
-    flow_id: string;
-    timestamp: string;
-  };
-}
-```
-
-### Python → UI (WebSocket Response)
-
-**Success Response:**
-```json
-{
-  "type": "ods_result",
-  "node_id": "node-123",
-  "result": {
-    "success": true,
-    "complete_success": true,
-    "rows_affected": 5000,
-    "rows_inserted": 3000,
-    "rows_updated": 2000,
-    "batches_total": 5,
-    "batches_successful": 5,
-    "batches_failed": 0,
-    "errors": [],
-    "duration_ms": 1250
-  }
-}
-```
-
-**Partial Success Response:**
-```json
-{
-  "type": "ods_result",
-  "node_id": "node-123",
-  "result": {
-    "success": true,
-    "complete_success": false,
-    "rows_affected": 4800,
-    "batches_total": 5,
-    "batches_successful": 4,
-    "batches_failed": 1,
-    "errors": [
-      {
-        "batch_number": 3,
-        "error_type": "UniqueViolationError",
-        "message": "duplicate key value violates unique constraint",
-        "record_count": 200
+### Pattern 3: Token Forwarding to FastAPI (Transparent Proxy)
+
+**What:** BFF reads `req.session.tokens.accessToken` and attaches it as `Authorization: Bearer <token>` on every proxied request to FastAPI. FastAPI's existing `security.py` (`verify_token`, JWKS validation) is completely unchanged.
+
+**When to use:** This is the minimal-change option for the backend. FastAPI keeps validating Keycloak JWTs — it just receives them from the BFF instead of from the browser.
+
+**Trade-offs:** FastAPI still hits Keycloak JWKS on every token KID lookup (cached hourly in memory). If the BFF later rotates to service-account tokens instead, FastAPI would need no change there either.
+
+**Token refresh before proxy:**
+```javascript
+// src/middleware/requireSession.js
+export async function withTokenRefresh(req, res, next) {
+  if (!req.session.tokens) return res.status(401).json({ detail: 'Not authenticated' })
+
+  const { expiresAt, refreshToken } = req.session.tokens
+  // Refresh if token expires within 60 seconds
+  if (Date.now() > expiresAt - 60_000) {
+    try {
+      const client = await getOidcClient()
+      const refreshed = await client.refresh(refreshToken)
+      req.session.tokens = {
+        accessToken: refreshed.access_token,
+        refreshToken: refreshed.refresh_token ?? refreshToken,
+        idToken: refreshed.id_token,
+        expiresAt: Date.now() + (refreshed.expires_in * 1000)
       }
-    ]
+    } catch {
+      req.session.destroy()
+      return res.status(401).json({ detail: 'Session expired' })
+    }
   }
+  next()
 }
 ```
 
----
+**http-proxy-middleware setup:**
+```javascript
+// src/routes/api.js
+import { createProxyMiddleware } from 'http-proxy-middleware'
+import { withTokenRefresh } from '../middleware/requireSession.js'
 
-## 8. Testing Strategy
-
-### Unit Tests
-
-```python
-# Test ODSExecutor operations
-async def test_ods_executor_append():
-    executor = ODSExecutor()
-    config = ODSConfig(...)
-    records = [{"id": 1, "name": "test"}]
-    
-    result = await executor.execute(config, records, mock_db)
-    
-    assert result.success
-    assert result.rows_affected == 1
-```
-
-### Integration Tests
-
-```python
-# Test end-to-end flow execution
-async def test_flow_with_ods_node():
-    flow_data = {
-        "nodes": [
-            {"id": "source-1", "toolType": "sql_source", ...},
-            {"id": "ods-1", "toolType": "ods_pg", ...}
-        ],
-        "connections": [{"from": "source-1", "to": "ods-1"}]
+const apiProxy = createProxyMiddleware({
+  target: process.env.BACKEND_URL,  // http://backend:8000
+  changeOrigin: true,
+  pathRewrite: { '^/bff/api': '/api' },
+  on: {
+    proxyReq: (proxyReq, req) => {
+      // Inject the stored Keycloak access token
+      proxyReq.setHeader('Authorization', `Bearer ${req.session.tokens.accessToken}`)
     }
-    
-    async for log in deno_service.run_flow_stream(flow_data):
-        if log["type"] == "ods_result":
-            assert log["result"]["success"]
+  }
+})
+
+router.use('/*', withTokenRefresh, apiProxy)
+```
+
+### Pattern 4: CubeJS JWT Generated Server-Side
+
+**What:** CubeJS requires a signed JWT to authorize queries. Currently the token is stored (encrypted) in FastAPI's `cube_config` table and sent to the browser via `/api/v1/cube-config/active`. With the BFF, the BFF fetches the `CUBEJS_API_SECRET` from env and signs a JWT server-side on each request or on session creation. The browser never sees the secret or the signed token.
+
+**When to use:** Always preferred over exposing CUBEJS_API_SECRET to the frontend.
+
+**CubeJS JWT structure:**
+```javascript
+// src/lib/cubeToken.js
+import jwt from 'jsonwebtoken'
+
+export function signCubeToken(userRoles = []) {
+  return jwt.sign(
+    {
+      // Claims that CubeJS security context can read for row-level security
+      roles: userRoles,
+      iat: Math.floor(Date.now() / 1000),
+    },
+    process.env.CUBEJS_API_SECRET,
+    { expiresIn: '1h', algorithm: 'HS256' }
+  )
+}
+```
+
+**CubeJS proxy:**
+```javascript
+// src/routes/cubejs.js
+const cubeProxy = createProxyMiddleware({
+  target: process.env.CUBEJS_URL,   // http://cubejs:4000
+  changeOrigin: true,
+  pathRewrite: { '^/bff/cubejs': '/cubejs-api' },
+  on: {
+    proxyReq: (proxyReq, req) => {
+      const token = signCubeToken(req.session.user?.roles ?? [])
+      proxyReq.setHeader('Authorization', `Bearer ${token}`)
+    }
+  }
+})
+router.use('/*', withTokenRefresh, cubeProxy)
+```
+
+**Frontend change:** `cubejs.js` store changes `apiUrl` to `/bff/cubejs/v1` and removes the `token` field (token is injected server-side, browser sends cookies only).
+
+---
+
+## Data Flow
+
+### Request Flow (Authenticated API Call)
+
+```
+[User action in Vue component]
+         |
+         | fetch('/bff/api/v1/dashboards/')
+         | + Cookie: dsid=abc123 (automatic, no JS required)
+         v
+[BFF Express]
+  - requireSession: lookup session by dsid
+  - withTokenRefresh: token still valid? skip / refresh
+  - http-proxy-middleware → http://backend:8000/api/v1/dashboards/
+  + Authorization: Bearer <keycloak_access_token>
+         |
+         v
+[FastAPI backend]
+  - verify_token() unchanged: validates Keycloak JWT via JWKS
+  - returns JSON
+         |
+         v
+[BFF] → forwards response body unchanged → [Browser]
+```
+
+### Auth Flow (Login)
+
+```
+[Browser visits /]
+  → authStore detects no session (GET /bff/auth/me returns 401)
+  → redirect to /bff/auth/login
+         |
+[BFF] generates state + PKCE verifier, stores in req.session
+  → 302 redirect to Keycloak /auth endpoint
+         |
+[Keycloak] user logs in → 302 to /bff/auth/callback?code=xxx
+         |
+[BFF /auth/callback]
+  → exchange code for tokens (openid-client)
+  → store tokens in session
+  → 302 redirect to '/'
+         |
+[Browser loads app] → GET /bff/auth/me → { sub, email, name, roles }
+  → authStore.initFromBff(userInfo)
+```
+
+### CubeJS Query Flow
+
+```
+[Vue cubejs store]
+  cubejs('@COOKIE_BASED@', { apiUrl: '/bff/cubejs/v1' })
+  → HTTP GET /bff/cubejs/v1/meta  + Cookie: dsid=abc123
+         |
+[BFF /bff/cubejs/*]
+  → signCubeToken(session.user.roles)
+  → proxy to http://cubejs:4000/cubejs-api/v1/meta
+  + Authorization: Bearer <signed_cube_jwt>
+         |
+[CubeJS] validates JWT with CUBEJS_API_SECRET → returns meta
 ```
 
 ---
 
-## 9. Security Considerations
+## Integration Points
 
-1. **SQL Injection Prevention:**
-   - Use asyncpg parameterized queries exclusively
-   - Quote identifiers using asyncpg's built-in methods
-   - Never interpolate table/column names without validation
+### BFF ↔ Frontend (dashboard-app)
 
-2. **Credential Security:**
-   - Credentials resolved via existing DataSource mechanism
-   - Decryption happens in source_executor.py pattern
-   - No credentials in Deno payload
+| Concern | Current | After BFF |
+|---------|---------|-----------|
+| Login | keycloak.login() in main.js | redirect to GET /bff/auth/login |
+| Auth state | keycloak.tokenParsed | GET /bff/auth/me → JSON user object |
+| Token refresh | keycloak.updateToken() in api.js | Transparent — BFF handles in proxy |
+| Logout | keycloak.logout() in authStore | POST /bff/auth/logout → destroy session → redirect to Keycloak logout |
+| API base URL | VITE_API_URL (port 8000) | /bff/api (same origin, no VITE needed) |
+| CubeJS URL | VITE_CUBEJS_API_URL + VITE_CUBEJS_TOKEN | /bff/cubejs/v1 (no token, cookie only) |
+| Role guards | parsed from keycloak.tokenParsed | parsed from /bff/auth/me response |
 
-3. **Resource Limits:**
-   - Batch size limits (max 10,000)
-   - Connection timeouts (15s default)
-   - Query timeout configuration
+**Files to modify in dashboard-app:**
+- `src/main.js` — remove keycloak init, replace with /bff/auth/me fetch
+- `src/services/keycloak.js` — can be deleted entirely
+- `src/services/api.js` — change `API_BASE_URL` to `/bff/api`; remove `getAuthHeaders()`; use plain `fetch` with `credentials: 'include'`
+- `src/stores/auth.js` — replace `initFromKeycloak()` with `initFromBff(userInfo)`; remove `_keycloak` reference
+- `src/stores/cubejs.js` — remove `token` field; set `apiUrl` to `/bff/cubejs/v1`; remove `loadConfigFromBackend` for token (URL still comes from backend or env)
+
+### BFF ↔ Backend (FastAPI)
+
+| Concern | Detail |
+|---------|--------|
+| Token mechanism | BFF forwards the original Keycloak access token in `Authorization: Bearer` header |
+| No backend changes required | `security.py` verify_token() and get_current_user() are completely unchanged |
+| CORS change needed | FastAPI CORS `origins` list should remove `localhost:3000` and add `localhost:3001` (BFF origin) for dev; in prod, backend can restrict to the BFF internal hostname only |
+| User provisioning | `POST /api/v1/users/provision-batch` stays as-is; BFF proxies it transparently |
+| JWKS caching | Stays in FastAPI security.py in-memory cache; no change |
+
+**Files to modify in backend:**
+- `app/main.py` — update CORS `origins` list to include BFF dev port and restrict to internal network in prod; the exception handler's allowed list also needs updating
+
+### BFF ↔ CubeJS
+
+| Concern | Detail |
+|---------|--------|
+| Token mechanism | BFF signs a fresh JWT per-request using `CUBEJS_API_SECRET` |
+| CubeJS configuration | Unchanged — CubeJS is already running as an internal service |
+| Security context | BFF can embed user roles in JWT payload for CubeJS row-level security |
+| Frontend CubeJS client | `@cubejs-client/core` connects to `/bff/cubejs/v1` without a token; session cookie is sent automatically |
+
+### BFF ↔ Keycloak
+
+| Concern | Detail |
+|---------|--------|
+| New Keycloak client needed | Register `dashboard-bff` as a **confidential** client with PKCE |
+| Redirect URI | `https://dashboard.pm.comsatel.com.pe/bff/auth/callback` |
+| Old client | `dashboard-app` public client can be kept (for legacy dev) or retired |
+| Token storage | BFF stores tokens server-side; Keycloak never sees the browser again after callback |
+| Session logout | On `/bff/auth/logout`, BFF destroys session then redirects to Keycloak's end-session endpoint |
 
 ---
 
-## 10. Migration Path
+## Docker Compose Changes
 
-### From Legacy destination_executor.py
+The existing `docker-compose.yaml` has two services (`backend`, `frontend-app`). The BFF becomes a third service:
 
-The existing `destination_executor.py` has basic ODS support. Migration strategy:
+```yaml
+# Addition to docker-compose.yaml
 
-1. **Phase 1:** Keep destination_executor.py, add ods_executor.py alongside
-2. **Phase 2:** Update deno_service.py to use ODSExecutor instead
-3. **Phase 3:** Deprecate destination_executor.py ODS logic
-4. **Phase 4:** Remove or repurpose destination_executor.py
+  bff:
+    build:
+      context: ./bff
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env-bff           # New env file with BFF-specific config
+    # ports:
+    #   - "3001:3001"        # Expose locally for dev; Traefik routes in prod
+    restart: unless-stopped
+    depends_on:
+      - backend
+    labels:
+      traefik.enable: true
+      traefik.http.routers.dashboard-bff.rule: Host(`dashboard.pm.comsatel.com.pe`) && PathPrefix(`/bff`)
+      traefik.http.routers.dashboard-bff.entrypoints: web-secure
+      traefik.http.routers.dashboard-bff.tls: true
+      traefik.http.services.dashboard-bff.loadbalancer.server.port: 3001
+    networks:
+      - frontends
+      - backends
+```
+
+**New `.env-bff` file contents:**
+```env
+NODE_ENV=production
+PORT=3001
+SESSION_SECRET=<random-256-bit>
+KEYCLOAK_URL=https://oauth2.qa.comsatel.com.pe
+KEYCLOAK_REALM=Apps
+KEYCLOAK_CLIENT_ID=dashboard-bff
+KEYCLOAK_CLIENT_SECRET=<from-keycloak-admin>
+BFF_CALLBACK_URL=https://dashboard.pm.comsatel.com.pe/bff/auth/callback
+BACKEND_URL=http://backend:8000
+CUBEJS_URL=http://cubejs:4000
+CUBEJS_API_SECRET=<same-secret-used-by-cubejs-container>
+FRONTEND_URL=https://dashboard.pm.comsatel.com.pe
+```
+
+**Network topology:** Both `backend` and `bff` need to be on the `backends` network so BFF can reach `http://backend:8000`. The `frontend-app` only needs `frontends` (it serves static files). BFF needs both `frontends` (Traefik routes to it) and `backends` (to reach FastAPI and CubeJS).
+
+---
+
+## New Components vs. Modified Components
+
+### New Components (Create from Scratch)
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| BFF Express app | `bff/src/index.js` | Entry point, Express setup |
+| OIDC client wrapper | `bff/src/lib/oidcClient.js` | openid-client Keycloak integration |
+| CubeJS token signer | `bff/src/lib/cubeToken.js` | jsonwebtoken.sign() for CubeJS |
+| Session middleware | `bff/src/middleware/session.js` | express-session configuration |
+| Auth guard | `bff/src/middleware/requireSession.js` | 401 guard + token refresh |
+| Auth routes | `bff/src/routes/auth.js` | /login, /callback, /logout, /me |
+| API proxy routes | `bff/src/routes/api.js` | Proxy all /bff/api/* to FastAPI |
+| CubeJS proxy routes | `bff/src/routes/cubejs.js` | Proxy all /bff/cubejs/* to CubeJS |
+| BFF Dockerfile | `bff/Dockerfile` | Node.js Alpine image |
+| BFF env example | `bff/.env.example` | Documentation for env vars |
+
+### Modified Components (Update Existing)
+
+| Component | File | Scope of Change |
+|-----------|------|----------------|
+| Main app bootstrap | `dashboard-app/src/main.js` | Remove keycloak init (60+ lines); replace with /bff/auth/me fetch; mount app on success |
+| Auth store | `dashboard-app/src/stores/auth.js` | Replace initFromKeycloak(); remove _keycloak reference; add initFromBff() |
+| API client | `dashboard-app/src/services/api.js` | Change base URL; remove getAuthHeaders(); add credentials:'include' to fetch |
+| CubeJS store | `dashboard-app/src/stores/cubejs.js` | Remove token field from state/config; set apiUrl to /bff/cubejs/v1 |
+| FastAPI CORS | `backend/app/main.py` | Add BFF origin to allowed origins list; update exception handler list |
+| docker-compose | `docker-compose.yaml` | Add `bff` service block |
+
+### Deleted Components
+
+| Component | File | Reason |
+|-----------|------|--------|
+| Keycloak JS service | `dashboard-app/src/services/keycloak.js` | Auth moved to BFF entirely |
+
+---
+
+## Suggested Build Order
+
+Building the BFF in this order respects dependencies and allows incremental validation:
+
+### Phase 1 — BFF Foundation (no frontend changes yet)
+
+Build the BFF service with auth and session, but leave the frontend untouched. Test auth flows with browser directly hitting `/bff/auth/login`.
+
+1. `bff/` scaffolding: `package.json`, `Dockerfile`, `src/index.js`, `config.js`
+2. Session middleware (`express-session`)
+3. OIDC client (`openid-client`) + auth routes (`/login`, `/callback`, `/logout`, `/me`)
+4. Verify: browser hits `/bff/auth/login` → Keycloak → `/bff/auth/callback` → session set → `/bff/auth/me` returns user JSON
+5. Add to `docker-compose.yaml` with correct networks
+
+### Phase 2 — API Proxy
+
+Add the FastAPI proxy. Keep CORS open temporarily to allow direct frontend testing.
+
+6. `requireSession` middleware with token refresh
+7. `http-proxy-middleware` for `/bff/api/*` → FastAPI
+8. Inject `Authorization: Bearer` from session
+9. Update FastAPI CORS to add BFF port
+10. Verify: curl/Postman with session cookie proxied to FastAPI returns data
+
+### Phase 3 — CubeJS Proxy
+
+11. `cubeToken.js` JWT signer
+12. `http-proxy-middleware` for `/bff/cubejs/*` → CubeJS
+13. Inject signed cube JWT per request
+14. Verify: `/bff/cubejs/v1/meta` returns cube schema
+
+### Phase 4 — Frontend Migration
+
+Only after BFF is confirmed working end-to-end with curl.
+
+15. Update `api.js`: change base URL to `/bff/api`, remove auth headers, add `credentials: 'include'`
+16. Update `cubejs.js` store: remove token, set apiUrl to `/bff/cubejs/v1`
+17. Update `main.js`: remove keycloak init; replace with fetch(`/bff/auth/me`) + mount
+18. Update `auth.js` store: replace `initFromKeycloak()` with `initFromBff()`
+19. Delete `keycloak.js` service
+20. Update `main.py` CORS origins
+21. End-to-end smoke test: full login flow in browser, API calls, CubeJS queries
+
+---
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Storing Keycloak Tokens in the BFF's Memory Only
+
+**What people do:** Skip a real session store; keep tokens in a `Map` in process memory keyed by session ID.
+
+**Why it's wrong:** BFF restart loses all sessions, forcing all users to re-login. Unacceptable in production, and cannot scale to multiple BFF replicas.
+
+**Do this instead:** Use `express-session` backed by a persistent store. For single-replica deployments, `connect-pg-simple` (same PostgreSQL already used by FastAPI) is simplest. For multi-replica, use `connect-redis`.
+
+### Anti-Pattern 2: Generating One CubeJS Token Per Session (Long-Lived)
+
+**What people do:** Sign a cube JWT at login time and store it in the session alongside the Keycloak tokens.
+
+**Why it's wrong:** CubeJS tokens have a fixed expiry. If the BFF signs a 1-hour token at login and the session lasts 8 hours, queries will fail silently after the first hour.
+
+**Do this instead:** Sign a fresh CubeJS JWT on each proxied request to CubeJS (`signCubeToken()` in the proxy middleware). `jwt.sign()` with HS256 is synchronous and costs ~0.1ms. No caching needed.
+
+### Anti-Pattern 3: Making FastAPI Call Keycloak Userinfo to Validate BFF Requests
+
+**What people do:** Add a new auth mode to FastAPI where requests from BFF include a custom `X-BFF-Token` header, and FastAPI validates it by calling Keycloak `/userinfo`.
+
+**Why it's wrong:** Unnecessary coupling, adds latency, and the simpler solution (forwarding the original Keycloak JWT) already works with the existing `verify_token()` with zero backend changes.
+
+**Do this instead:** BFF forwards the original Keycloak access token as `Authorization: Bearer`. FastAPI validates it with JWKS as before. No new auth mode needed.
+
+### Anti-Pattern 4: Stripping Authentication from FastAPI Entirely
+
+**What people do:** Plan to "clean up" FastAPI by removing all Keycloak auth checks since "the BFF handles it now."
+
+**Why it's wrong:** FastAPI would then be an unauthenticated service on the internal network. Any service on the Docker network (including other containers or a compromised container) could call it without authentication. Defense in depth requires the backend to still validate tokens.
+
+**Do this instead:** Keep `verify_token()` and all `Depends(get_current_user)` decorators in FastAPI unchanged. The BFF is the public entry point but FastAPI is not blind.
+
+---
+
+## Scaling Considerations
+
+| Scale | Architecture Adjustments |
+|-------|--------------------------|
+| 1-10 concurrent users | In-memory session store acceptable; single BFF instance |
+| 10-500 users | connect-pg-simple (reuse existing PG); single BFF instance |
+| 500+ users | Redis session store; BFF can be horizontally scaled (stateless once session is in Redis) |
+
+The BFF is naturally the first bottleneck for session throughput. Because Keycloak access tokens are forwarded and FastAPI validates independently, the backend is not affected by BFF scaling choices.
+
+---
+
+## Integration Points Summary Table
+
+| Touchpoint | Protocol | Auth Mechanism | Change Required |
+|------------|----------|----------------|-----------------|
+| Frontend → BFF | HTTP + httpOnly cookie | Session ID in cookie | Frontend: remove keycloak-js; update base URLs |
+| BFF → FastAPI | HTTP (internal Docker network) | Bearer <Keycloak JWT> forwarded | FastAPI: CORS origin update only |
+| BFF → CubeJS | HTTP (internal Docker network) | Bearer <BFF-signed HS256 JWT> | None in CubeJS config |
+| BFF → Keycloak | OIDC Authorization Code + PKCE | client_id + client_secret | Register new confidential client |
+| FastAPI → Keycloak | JWKS fetch (cached 1h) | N/A (reads public keys) | None |
 
 ---
 
 ## Sources
 
-- Existing codebase analysis:
-  - `backend/app/runtime/runner.ts` - Deno runner
-  - `backend/app/services/deno_service.py` - Python Deno integration
-  - `backend/app/services/source_executor.py` - Source node execution pattern
-  - `backend/app/services/destination_executor.py` - Existing destination logic
-  - `backend/app/services/metadata_service.py` - PostgreSQL connection pattern
-  - `backend/app/api/endpoints/integration_flows.py` - Flow execution API
-  - `backend/app/services/scheduler.py` - Background execution
-  - `backend/alembic/versions/030_update_ods_pg_tool.py` - ODS node schema
-
-**Confidence Level:** HIGH - Based on direct analysis of existing production codebase.
-
----
-
-# Appendix: Email Node with Dynamic Templates Architecture
-
-**Milestone:** v1.7 Email Node with Dynamic Templates  
-**Scope:** Integration of full Email Node capabilities with Deno-Python architecture
-
-## Email Node Executive Summary
-
-The Email Node will integrate with the existing Deno-Python hybrid architecture using a **signal-based execution pattern** similar to the ODS PostgreSQL implementation. The Deno runner will emit an `EXEC_EMAIL` signal that the Python backend captures and processes using SMTP credentials from the encrypted DataSource system. Template resolution with `{{expression}}` syntax is already implemented in the Deno runner and will be reused for subject and body rendering.
-
-**Key architectural decisions:**
-1. **Signal-based execution** (not direct Deno SMTP) - credentials stay in Python, templates render in Deno
-2. **HTML + Text dual format** - supporting both HTML emails with table generation and plain text fallback
-3. **Template engine reuse** - leverage existing `resolveString()` in runner.ts
-4. **Security-first** - HTML sanitization in Python before SMTP transmission
+- Direct analysis of codebase (HIGH confidence):
+  - `dashboard-app/src/main.js` — keycloak-js init pattern, PKCE, sessionStorage tokens
+  - `dashboard-app/src/services/keycloak.js` — Keycloak client config
+  - `dashboard-app/src/services/api.js` — Bearer token injection, API endpoint inventory
+  - `dashboard-app/src/stores/auth.js` — role extraction from tokenParsed
+  - `dashboard-app/src/stores/cubejs.js` — CubeJS token loaded from backend DB
+  - `backend/app/core/security.py` — JWKS-based verify_token, get_current_user
+  - `backend/app/core/config.py` — Keycloak URLs, CORS origins setting
+  - `backend/app/main.py` — CORS middleware configuration
+  - `backend/app/api/router.py` — full API surface (15 route groups)
+  - `docker-compose.yaml` — Traefik labels, network topology
+- openid-client library: https://github.com/panva/node-openid-client (MEDIUM confidence — widely used, well maintained)
+- http-proxy-middleware: https://github.com/chimurai/http-proxy-middleware (HIGH confidence — de facto standard for Express proxying)
+- express-session: https://github.com/expressjs/session (HIGH confidence — official Express ecosystem)
+- CubeJS JWT auth: https://cube.dev/docs/product/auth (MEDIUM confidence — based on training data, verify HS256 secret name matches running CubeJS container env)
 
 ---
 
-## Email Integration with Deno Runner
-
-### Current State
-The Deno runner (`backend/app/runtime/runner.ts`) already has an email stub (lines 475-502):
-
-```typescript
-} else if (node.toolType === 'email') {
-  try {
-    const to = node.props?.to || 'admin@company.com';
-    const subject = node.props?.subject || 'Flow Notification';
-    const body = node.props?.body || `Flow execution result: ${JSON.stringify(context.payload, null, 2)}`;
-    const triggerOn = node.props?.trigger_on || 'success';
-    
-    console.log(`[Email] Mock Sending Email...`);
-    // ... mock implementation
-  }
-}
-```
-
-### Proposed EXEC_EMAIL Signal Pattern
-
-Use the **EXEC_ODS signal pattern** as a blueprint:
-
-```
-Deno Runner                              Python Backend
-    |                                         |
-    |-- EXEC_EMAIL:{node_id}:{batch_id} ---->|
-    |-- EXEC_EMAIL_PAYLOAD:{json} ---------->|
-    |                                         |-- Resolve SMTP creds
-    |                                         |-- Render templates
-    |                                         |-- Sanitize HTML
-    |                                         |-- Send via SMTP
-    |<----------------------------------------|-- Return result
-```
-
-### Signal Protocol
-
-```typescript
-// In runner.ts - Email node execution
-const emailPayload = {
-  node_id: node.id,
-  target: {
-    connection_id: props.connection_id,  // SMTP DataSource ID
-    to: resolveString(props.to, context),
-    cc: resolveString(props.cc || '', context),
-    bcc: resolveString(props.bcc || '', context),
-  },
-  content: {
-    subject: resolveString(props.subject, context),
-    body: resolveString(props.body, context),  // HTML or text
-    format: props.format || 'html',  // 'html' | 'text'
-    generate_table: props.generate_table || false,
-  },
-  metadata: {
-    execution_id: flow.execution_id,
-    flow_id: flow.flow_id,
-    node_label: node.label,
-    timestamp: new Date().toISOString()
-  }
-};
-
-console.log(`EXEC_EMAIL:${node.id}:${batchId}`);
-console.log(`EXEC_EMAIL_PAYLOAD:${JSON.stringify(emailPayload)}`);
-```
-
----
-
-## Email Template Compilation and Rendering Flow
-
-### Existing Template Engine
-
-The runner.ts has `resolveString()` (lines 44-59):
-
-```typescript
-function resolveString(str: string, context: any): string {
-  if (!str || typeof str !== 'string') return str;
-  return str.replace(/\{\{([\s\S]+?)\}\}/g, (match, path) => {
-    const parts = path.trim().split('.');
-    let val: any = context;
-    for (const part of parts) {
-      if (val && typeof val === 'object' && part in val) {
-        val = val[part];
-      } else {
-        return match; // Not found, keep placeholder
-      }
-    }
-    if (val === undefined || val === null) return "";
-    return typeof val === 'object' ? JSON.stringify(val) : String(val);
-  });
-}
-```
-
-### Template Resolution Flow
-
-```
-Upstream Node Output
-[{"customer": "ACME", "amount": 1500}, ...]
-         |
-         | context.payload
-         v
-Email Node Template Resolution
-
-Subject: "Sales Report - {{date}}"
-Body: "<h1>Top Customers</h1>{{table}}"
-
-resolveString() -> "Sales Report - 2026-05-16"
-         |
-         v
-Special Helper: Table Generation
-
-If {{table}} placeholder detected and payload is array:
-Auto-generate HTML table from first object's keys as headers
-         |
-         | EXEC_EMAIL_PAYLOAD
-         v
-Python Backend
-- Resolve SMTP connection from DataSource
-- Sanitize HTML content
-- Send email via smtplib
-```
-
-### Template Syntax Support
-
-| Syntax | Example | Output |
-|--------|---------|--------|
-| Simple property | `{{customer}}` | Value of customer field |
-| Nested property | `{{order.total}}` | Nested object access |
-| Array index | `{{items.0.name}}` | First item's name |
-| Special helpers | `{{table}}` | Auto-generated HTML table |
-| Fallback | `{{name or "Guest"}}` | Default value if undefined |
-
----
-
-## Email Service Architecture
-
-### New Components for Email
-
-```
-backend/
-├── app/
-│   ├── services/
-│   │   ├── deno_service.py          (MODIFY) - Add EXEC_EMAIL handler
-│   │   ├── email_executor.py        (NEW)    - SMTP execution service
-│   │   └── connection_testing.py    (EXISTS) - Already has SmtpStrategy
-│   ├── schemas/
-│   │   └── email_schemas.py         (NEW)    - Email payload validation
-│   └── runtime/
-│       └── runner.ts                (MODIFY) - EXEC_EMAIL signal emission
-```
-
-### EmailExecutor Service
-
-```python
-# backend/app/services/email_executor.py
-from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.utils import formatdate
-
-@dataclass
-class EmailConfig:
-    connection_id: str
-    smtp_host: str
-    smtp_port: int
-    smtp_use_ssl: bool
-    smtp_user: str
-    smtp_password: str
-    from_address: str
-
-@dataclass
-class EmailResult:
-    success: bool
-    message_id: Optional[str]
-    error: Optional[str]
-    recipients_count: int
-    duration_ms: int
-
-class EmailExecutor:
-    async def execute(
-        self,
-        config: EmailConfig,
-        to_addresses: List[str],
-        cc_addresses: List[str],
-        bcc_addresses: List[str],
-        subject: str,
-        body_html: Optional[str],
-        body_text: Optional[str]
-    ) -> EmailResult:
-        """
-        Execute email send via SMTP.
-        - Sends both HTML and text parts (multipart/alternative)
-        - Sanitizes HTML before sending
-        - Handles SMTP authentication
-        """
-        pass
-    
-    def _sanitize_html(self, html: str) -> str:
-        """
-        Sanitize HTML to prevent XSS in email clients.
-        Uses bleach or similar library.
-        """
-        pass
-    
-    def _generate_table(self, data: List[Dict]) -> str:
-        """
-        Generate HTML table from array of objects.
-        Called when {{table}} helper is used.
-        """
-        pass
-
-email_executor = EmailExecutor()
-```
-
-### Signal Handler in DenoService
-
-```python
-# backend/app/services/deno_service.py - Add to run_flow_stream()
-
-# Handle EXEC_EMAIL signal (similar to EXEC_ODS)
-if line.startswith("EXEC_EMAIL:") and i + 1 < len(lines):
-    parts = line.split(":")
-    if len(parts) >= 3:
-        node_id = parts[1]
-        batch_id = parts[2]
-        
-        next_line = lines[i + 1].strip()
-        if next_line.startswith("EXEC_EMAIL_PAYLOAD:"):
-            i += 1
-            try:
-                email_payload = json.loads(next_line[len("EXEC_EMAIL_PAYLOAD:"):])
-                
-                # Yield status update
-                yield {
-                    "type": "node_log",
-                    "node_id": node_id,
-                    "status": "running",
-                    "message": "Sending email..."
-                }
-                
-                # Execute email if db session available
-                if db is not None:
-                    email_result = await self._handle_email_execution(email_payload, db)
-                    
-                    yield {
-                        "type": "email_result",
-                        "node_id": node_id,
-                        "batch_id": batch_id,
-                        "result": email_result
-                    }
-                    
-                    if email_result["success"]:
-                        yield {"type": "node_status", "node_id": node_id, "status": "success"}
-                    else:
-                        yield {"type": "node_status", "node_id": node_id, "status": "error"}
-                else:
-                    yield {
-                        "type": "error",
-                        "message": "No database session available for email execution"
-                    }
-            except Exception as e:
-                logger.error(f"Email execution error: {e}")
-                yield {"type": "error", "message": f"Email execution failed: {e}"}
-```
-
----
-
-## Email Security Considerations
-
-### HTML Sanitization
-
-**Threat:** HTML email can contain malicious scripts, tracking pixels, or phishing elements.
-
-**Solution:**
-```python
-import bleach
-
-ALLOWED_TAGS = [
-    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'ul', 'ol', 'li', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
-    'div', 'span', 'pre', 'code', 'blockquote'
-]
-
-ALLOWED_ATTRIBUTES = {
-    'a': ['href', 'title'],
-    'img': ['src', 'alt', 'width', 'height'],
-    'table': ['border', 'cellpadding', 'cellspacing'],
-    'th': ['colspan', 'rowspan'],
-    'td': ['colspan', 'rowspan'],
-}
-
-def sanitize_html(html: str) -> str:
-    return bleach.clean(
-        html,
-        tags=ALLOWED_TAGS,
-        attributes=ALLOWED_ATTRIBUTES,
-        strip=True  # Remove disallowed tags completely
-    )
-```
-
-### Template Injection Prevention
-
-**Threat:** Malicious templates with code execution attempts
-
-**Mitigation:**
-- Deno's `resolveString()` only does property access, no code execution
-- Context isolation - template only accesses `context.payload` data
-- No `eval()` or `new Function()` in template resolution
-
-### SMTP Security
-
-**Requirements:**
-- Credentials stored encrypted in DataSource (already implemented)
-- Use TLS/SSL for SMTP connections (`use_ssl` flag in SmtpConfig)
-- Timeout on SMTP operations (10s default)
-- No credential logging
-
----
-
-## Email Node: New vs Modified Components
-
-### New Components
-
-| Component | Purpose | Lines Est. |
-|-----------|---------|------------|
-| `email_executor.py` | SMTP execution service | ~200 |
-| `email_schemas.py` | Email payload Pydantic models | ~50 |
-| Migration for tool update | Add connection_id, body, format props | ~30 |
-
-### Modified Components
-
-| Component | Changes | Lines Est. |
-|-----------|---------|------------|
-| `runner.ts` | Add EXEC_EMAIL signal emission | ~60 |
-| `deno_service.py` | Add _handle_email_execution() method | ~80 |
-| Tool definition (DB) | Add connection_id, body, format, cc, bcc props | ~20 |
-| FlowEditorCanvas.vue | Add connection selector for email nodes | ~30 |
-
-### No Changes Required
-
-| Component | Why |
-|-----------|-----|
-| `connection_testing.py` | SmtpStrategy already exists |
-| `connection_schemas.py` | SmtpConfig already exists |
-| DataSource system | SMTP connections already supported |
-| Template engine | `resolveString()` already handles `{{}}` syntax |
-
----
-
-## Email Node Build Order
-
-### Phase 1: Foundation (Week 1)
-
-**Goal:** Get basic email sending working
-
-1. **Update email tool definition** (DB migration)
-   - Add `connection_id` prop (required)
-   - Add `body` prop (textarea, supports HTML)
-   - Add `format` prop (select: 'html' | 'text')
-   - Add `cc`, `bcc` props (optional)
-
-2. **Create email_schemas.py**
-   - EmailPayload model
-   - EmailResult model
-   - EmailConfig model
-
-3. **Create email_executor.py**
-   - Basic SMTP sending
-   - HTML sanitization
-   - Error handling
-
-### Phase 2: Deno Integration (Week 1-2)
-
-**Goal:** Connect Deno runner to Python executor
-
-4. **Update runner.ts**
-   - Add EXEC_EMAIL signal emission
-   - Template resolution for to/subject/body
-
-5. **Update deno_service.py**
-   - Add EXEC_EMAIL signal handler
-   - Integrate with EmailExecutor
-
-### Phase 3: Advanced Features (Week 2)
-
-**Goal:** Add dynamic content generation
-
-6. **Add table generation helper**
-   - Detect `{{table}}` placeholder
-   - Generate HTML table from array payload
-   - Handle empty/null data gracefully
-
-7. **Add FlowEditorCanvas.vue enhancements**
-   - Connection selector for SMTP
-   - Rich text editor for body (optional)
-   - Preview template button
-
-### Phase 4: Testing & Polish (Week 3)
-
-8. **Security hardening**
-   - HTML sanitization tests
-   - Template injection tests
-   - SMTP timeout tests
-
-9. **Error handling**
-   - Invalid connection ID
-   - SMTP authentication failure
-   - Template syntax errors
-
----
-
-## Email Node Risk Assessment
-
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| SMTP credentials exposure | Low | High | Use existing encrypted DataSource system |
-| HTML injection in emails | Medium | Medium | Bleach sanitization before send |
-| Template syntax errors | High | Low | Graceful fallback (keep placeholder) |
-| SMTP timeouts | Medium | Medium | 10s timeout, async execution |
-| Large payload table generation | Medium | Medium | Limit table rows (100 max) |
-
----
-
-## Email Node Sources
-
-- `backend/app/runtime/runner.ts` - Deno execution model
-- `backend/app/services/deno_service.py` - Signal handling pattern
-- `backend/app/services/ods_executor.py` - Executor service pattern (follow same structure)
-- `backend/app/services/connection_testing.py` - SMTP connection testing
-- `backend/alembic/versions/008_add_integration_tables.py` - Tool definitions
-- `backend/app/schemas/connection_schemas.py` - SMTP config schema
+*Architecture research for: BFF Service Architecture (v1.8)*
+*Researched: 2026-05-28*

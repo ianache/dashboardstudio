@@ -1,394 +1,235 @@
-# Technology Stack: Email Node with Dynamic Templates
+# Stack Research: BFF Service Architecture
 
-**Project:** Dashboard Studio - Email Node Implementation  
-**Milestone:** v1.7 Email Node with Dynamic Templates  
-**Researched:** 2026-05-16  
-**Confidence:** HIGH
+**Project:** Dashboard Studio — v1.8 BFF Service  
+**Milestone:** BFF (Backend for Frontend) in Node.js + Express  
+**Researched:** 2026-05-28  
+**Confidence:** HIGH (versions verified via npm registry; package choices verified against known architectural patterns for OIDC BFF with Keycloak)
 
-## Executive Summary
+---
 
-This document outlines the recommended technology stack additions for implementing an Email Node with dynamic templating support in the existing Dashboard Studio application. The stack builds upon the existing FastAPI backend and DataSource infrastructure (which already supports SMTP connections), adding minimal, well-established libraries for email composition, template rendering, and HTML sanitization.
+## Context
 
-**Key Decision:** Use standard library `smtplib` + `email.mime` for SMTP (since DataSource already manages connections), Jinja2 with SandboxedEnvironment for templating, and `nh3` for HTML sanitization.
+This document covers exclusively the new `bff/` service. The existing stack (FastAPI backend, Vue 3 frontend, Keycloak, CubeJS, Deno) is already validated and is NOT re-researched here. The BFF concentrates Keycloak OIDC auth, server-side session management, and reverse proxy of all API routes into a single Node.js service.
 
 ---
 
 ## Recommended Stack
 
-### 1. SMTP & Email Composition
+### Core Technologies
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `smtplib` | Python stdlib | SMTP protocol client | Already available; battle-tested; integrates seamlessly with existing DataSource SMTP connections |
-| `email.mime` | Python stdlib | MIME message construction | Standard library; supports multipart messages (HTML + text); attachments |
-| `aiosmtplib` | ^3.0.0 | Async SMTP (optional upgrade) | Only if async email sending becomes a requirement; otherwise smtplib is sufficient |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `express` | **5.2.1** | HTTP server framework | Express 5 (released Oct 2024) is stable, drops legacy middleware quirks, and has native async error handling — no more `try/catch` in every route handler. The BFF is a thin layer, so Express is appropriate over Fastify/Koa. |
+| `openid-client` | **6.8.4** | Keycloak OIDC integration (server-side) | The only fully RFC-compliant OIDC client maintained by the OpenID Foundation itself. v6 is a complete rewrite (2024) with native ESM, Web Crypto API, and no external dependencies. Preferred over `keycloak-connect` (see below). |
+| `express-session` | **1.19.0** | Server-side session management | Official Express team package. Provides `req.session` with pluggable stores. Cookie is httpOnly + SameSite=Strict, token never leaves the server. |
+| `http-proxy-middleware` | **4.0.0** | Reverse proxy to FastAPI and CubeJS | Standard Node.js proxy library, based on `http-proxy`. v4 supports Express 5 and http.createServer() natively. Handles WebSocket upgrades too (relevant for CubeJS subscriptions). |
 
-**Decision Rationale:**
+### Supporting Libraries
 
-The Connection Management milestone already implemented SMTP DataSource support with connection pooling and credential management. Using `smtplib` directly is the simplest integration path:
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `connect-pg-simple` | **10.0.0** | PostgreSQL session store for express-session | Always — the project already has PostgreSQL. Sessions must survive BFF restarts; in-memory store (default) is unsafe for production. |
+| `helmet` | **8.x** (latest) | Security headers middleware | Always in Express apps. Sets `Content-Security-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, etc. One `app.use(helmet())` covers all. |
+| `cors` | **2.x** (latest) | CORS headers for dev mode | Only in development, when Vue dev server (port 3000) hits BFF directly (port 4000). In production, the BFF serves the frontend or a reverse proxy (Traefik) handles CORS. |
+| `dotenv` | **16.x** (latest) | Load `.env` file for local dev | In `bff/` only for local development. Docker Compose and production environments inject env vars natively. |
+| `express-rate-limit` | **7.x** (latest) | Rate-limit `/auth/*` endpoints | On login and token-refresh routes specifically, to defend against brute-force and credential-stuffing attacks. |
 
-1. **No additional dependencies** - smtplib is part of Python standard library
-2. **Direct DataSource integration** - The existing DataSource system retrieves SMTP credentials; smtplib can use them directly
-3. **Synchronous execution fits the flow runner** - The Python flow runner with APScheduler executes nodes synchronously
-4. **Proven reliability** - smtplib has been part of Python since 1999 and handles all modern SMTP requirements (STARTTLS, AUTH, UTF-8)
+### Development Tools
 
-**When to consider `aiosmtplib`:**
-- If the flow runner is refactored to async/await
-- If bulk email sending (1000s of emails) becomes a requirement
-- If non-blocking email sending during flow execution is needed
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| `nodemon` | Auto-restart during development | `nodemon src/index.js` — no transpilation needed (Node 20+ supports all required ESM features) |
+| `jest` or `vitest` | Unit tests for auth middleware and proxy logic | `vitest` is preferred for consistency with the Vue frontend toolchain |
 
-### 2. Template Engines
+---
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `Jinja2` | ^3.1.6 | Primary template engine | Industry standard; SandboxedEnvironment for security; rich feature set; excellent for complex templates with loops/conditionals |
-| `chevron` | ^0.14.0 | Mustache syntax alternative | If strict `{{variable}}` Mustache compatibility is required; lighter weight; logic-less templates |
+## Why `openid-client` over `keycloak-connect`
 
-**Decision Rationale:**
+This is the single most important decision in the BFF stack. Both packages were verified via npm (versions as of 2026-05-28).
 
-**Jinja2 is the primary recommendation** for the following reasons:
+**`keycloak-connect` (version 26.1.1):**
+- Official Keycloak Node.js adapter maintained by Red Hat / Keycloak project
+- Version number tracks Keycloak server releases (currently Keycloak 26)
+- Deeply tied to the `express-session` pattern for storing tokens
+- Works well for straightforward "protect a route" middleware scenarios
+- Problem: As of Keycloak 21+, Red Hat has signaled that `keycloak-connect` is in maintenance mode; the project recommends migrating to a generic OIDC library. The adapter's `keycloak-connect` GitHub repo shows diminishing active development compared to `openid-client`.
+- Missing: does not handle the Authorization Code Flow + PKCE pattern cleanly for SPAs-behind-BFF
 
-1. **Rich expression support** - Handles complex scenarios like:
-   - Array iteration for table generation: `{% for row in data %}`
-   - Conditionals: `{% if user.is_active %}`
-   - Filters: `{{ name \| title }}`, `{{ date \| format_date }}`
-   - Custom functions for data transformation
+**`openid-client` (version 6.8.4):**
+- Maintained by the OpenID Foundation (panva/node-openid-client)
+- Supports all OIDC flows: Authorization Code + PKCE, Client Credentials, Token Refresh, End Session
+- Framework-agnostic — integrates with Express via standard middleware pattern
+- v6 (2024 rewrite) uses Web Crypto API, zero external dependencies, native ESM
+- Explicitly designed for the "BFF proxies tokens" pattern described in this milestone
+- The Keycloak documentation itself links to `openid-client` for server-side OIDC integration
 
-2. **Security with SandboxedEnvironment** - Prevents code execution:
-   ```python
-   from jinja2.sandbox import SandboxedEnvironment
-   env = SandboxedEnvironment()
-   template = env.from_string("{{ user.name }}")
-   ```
+**Recommendation: Use `openid-client` v6.**
 
-3. **Familiar syntax** - The `{{expression}}` syntax requested in the milestone is native to Jinja2
+The BFF pattern being implemented — where the BFF handles all OIDC flows and only exposes session cookies to the frontend — is precisely the use case `openid-client` is designed for. `keycloak-connect` would work, but it adds Keycloak-specific coupling that `openid-client` avoids.
 
-4. **Wide adoption** - Used by Flask, Ansible, SaltStack; extensive documentation and community
+**Critical note on `openid-client` v6 API change:** v6 is NOT backward-compatible with v5. The `Issuer.discover()` pattern from v5 was replaced. v6 uses:
+```javascript
+import { discovery } from 'openid-client'
+const config = await discovery(
+  new URL('http://keycloak:8080/realms/apps'),
+  'bff-client',
+  clientSecret
+)
+```
+Do not follow v5 tutorials.
 
-**Alternative: Chevron (Mustache)**
-- Use if templates should be strictly logic-less (no conditionals/loops in templates)
-- Simpler mental model for non-technical users
-- Less powerful for complex table generation from arrays
+---
 
-**Template Syntax Comparison:**
+## Why `http-proxy-middleware` over alternatives
 
-| Feature | Jinja2 | Chevron (Mustache) |
-|---------|--------|-------------------|
-| Variables | `{{ user.name }}` | `{{ user.name }}` |
-| Loops | `{% for item in items %}` | `{{#items}}` |
-| Conditionals | `{% if condition %}` | Not supported |
-| Filters | `{{ name \| upper }}` | Not supported |
-| Partials | `{% include 'partial' %}` | `{{> partial}}` |
+| Alternative | Problem |
+|-------------|---------|
+| `node-http-proxy` (direct) | Lower-level, requires more boilerplate for path rewriting and error handling |
+| `express-http-proxy` | Less maintained; does not handle WebSocket upgrades (needed for CubeJS subscriptions) |
+| Writing a custom proxy with `fetch` | Does not stream responses; buffering large datasets from FastAPI breaks efficiency |
+| Nginx as inner proxy | Adds operational complexity; defeats the purpose of a single BFF entry point |
 
-### 3. HTML Sanitization
+`http-proxy-middleware` v4 provides `createProxyMiddleware()` which integrates as standard Express middleware, handles streaming, WebSocket upgrades, and path rewrites in one config object.
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `nh3` | ^0.3.5 | HTML sanitization | 20x faster than bleach; actively maintained; Rust-based; strict allow-list approach |
+---
 
-**Decision Rationale:**
+## Why Express 5 (not 4)
 
-**nh3 replaces the deprecated `bleach` library** (officially deprecated as of January 2023). Key advantages:
+Express 5 (stable since Oct 2024) has:
+- Native async route handlers — errors thrown in `async` routes are automatically passed to the error handler (critical for OIDC callback handlers)
+- No behavior change for the route/middleware APIs used in a BFF
+- `http-proxy-middleware` v4 explicitly supports Express 5
 
-1. **Performance** - ~20x faster than bleach in benchmarks
-2. **Security** - Rust-based ammonia library under the hood; memory-safe
-3. **Active maintenance** - Regular releases (latest: April 2026)
-4. **Flexible allow-list configuration**:
-   ```python
-   import nh3
-   # Allow only safe email-friendly tags
-   clean_html = nh3.clean(
-       raw_html,
-       tags={"p", "br", "strong", "em", "a", "ul", "ol", "li", "table", "tr", "td", "th"},
-       attributes={"a": {"href"}, "*": {"class"}},
-       url_schemes={"https", "http", "mailto"}
-   )
-   ```
+Express 4 would also work but requires `express-async-errors` wrapper for async route handlers. Express 5 is the current stable release; there is no reason to start a new service on Express 4.
 
-**Security considerations:**
-- Always sanitize HTML body content before sending
-- Prevent XSS in email clients that execute JavaScript
-- Strip potentially dangerous attributes (onerror, onclick, etc.)
+---
 
-### 4. Integration Libraries
+## Session Store: Why PostgreSQL (not Redis)
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `fastapi-mail` | ^1.6.4 | FastAPI integration (optional) | Only if refactoring to use a higher-level abstraction; currently not needed |
+The project already has PostgreSQL in the Docker Compose stack and no Redis instance. `connect-pg-simple` v10 is the maintained PostgreSQL session store for express-session.
 
-**Decision:** Skip `fastapi-mail` for now. The existing DataSource + smtplib approach is simpler and sufficient. Consider `fastapi-mail` only if:
-- Email sending needs to happen outside the flow runner (direct API endpoints)
-- Built-in template rendering with Jinja2 integration is desired
-- Connection pooling at the email library level becomes necessary
+**If Redis is added later:** `connect-redis` v8+ is the alternative. Redis provides faster session lookups under high concurrency, but PostgreSQL is sufficient for this dashboard application's expected load.
+
+The `connect-pg-simple` store requires a `session` table in PostgreSQL. It provides a migration SQL script.
 
 ---
 
 ## Installation
 
-### Minimal Setup (Recommended)
-
 ```bash
-# Core dependencies (only 2 external packages needed)
-pip install Jinja2==3.1.6 nh3==0.3.5
+# Create the bff/ directory
+mkdir bff && cd bff
+npm init -y
+
+# Core runtime
+npm install express@5 openid-client express-session http-proxy-middleware connect-pg-simple helmet cors dotenv express-rate-limit
+
+# Dev dependencies
+npm install -D nodemon vitest
 ```
 
-### With Optional Async Support
-
-```bash
-# If async SMTP becomes a requirement
-pip install Jinja2==3.1.6 nh3==0.3.5 aiosmtplib==3.0.0
+Exact pinned versions for `package.json`:
+```json
+{
+  "dependencies": {
+    "express": "^5.2.1",
+    "openid-client": "^6.8.4",
+    "express-session": "^1.19.0",
+    "http-proxy-middleware": "^4.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "helmet": "^8.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express-rate-limit": "^7.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "vitest": "^2.0.0"
+  }
+}
 ```
-
-### Requirements.txt Entry
-
-```
-# Email Node Dependencies
-Jinja2>=3.1.6,<4.0.0      # Template engine with sandbox support
-nh3>=0.3.5                # HTML sanitization (replaces deprecated bleach)
-# Note: smtplib and email.mime are part of Python standard library
-```
-
----
-
-## Architecture Integration
-
-### Existing Infrastructure Leverage
-
-The Email Node will integrate with existing capabilities:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Flow Runner (Python)                      │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
-│  │  Email Node │───▶│   Jinja2    │───▶│  Template Engine │  │
-│  │   Logic     │    │SandboxedEnv │    │  {{expressions}} │  │
-│  └─────────────┘    └─────────────┘    └─────────────────┘  │
-│         │                                                    │
-│         ▼                                                    │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
-│  │ DataSource  │───▶│  smtplib    │───▶│   SMTP Server   │  │
-│  │  (SMTP)     │    │   client    │    │                 │  │
-│  │  Credentials│    └─────────────┘    └─────────────────┘  │
-│  └─────────────┘                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | Input | Output |
-|-----------|---------------|-------|--------|
-| Email Node | Orchestrate sending, validate config | Node config, flow input | Email sent status |
-| Jinja2 Sandbox | Render templates safely | Template string, data context | Rendered text/HTML |
-| nh3 | Sanitize HTML content | Raw HTML | Sanitized HTML |
-| DataSource | Retrieve SMTP credentials | Connection ID | SMTP config dict |
-| smtplib | Send email via SMTP | Message, server config | Delivery status |
-
----
-
-## Implementation Patterns
-
-### Safe Template Rendering
-
-```python
-from jinja2.sandbox import SandboxedEnvironment
-from jinja2 import UndefinedError
-
-class TemplateEngine:
-    def __init__(self):
-        # SandboxedEnvironment prevents code execution
-        self.env = SandboxedEnvironment(
-            autoescape=True,  # Auto-escape HTML
-            undefined='strict'  # Raise error on undefined variables
-        )
-    
-    def render(self, template_str: str, context: dict) -> str:
-        try:
-            template = self.env.from_string(template_str)
-            return template.render(**context)
-        except UndefinedError as e:
-            # Handle missing variables gracefully
-            raise TemplateRenderError(f"Template variable error: {e}")
-```
-
-### HTML Email Composition
-
-```python
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import nh3
-
-def create_email_message(subject: str, body_html: str, body_text: str, 
-                         from_addr: str, to_addrs: list) -> MIMEMultipart:
-    # Sanitize HTML content
-    safe_html = nh3.clean(
-        body_html,
-        tags={"p", "br", "strong", "em", "a", "ul", "ol", "li", 
-              "table", "tr", "td", "th", "thead", "tbody", "h1", "h2", "h3"},
-        attributes={
-            "*": {"class"},
-            "a": {"href"},
-            "td": {"colspan", "rowspan"},
-            "th": {"colspan", "rowspan"}
-        },
-        url_schemes={"https", "http", "mailto"}
-    )
-    
-    # Create multipart message
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = from_addr
-    msg['To'] = ', '.join(to_addrs)
-    
-    # Attach text and HTML parts
-    msg.attach(MIMEText(body_text, 'plain', 'utf-8'))
-    msg.attach(MIMEText(safe_html, 'html', 'utf-8'))
-    
-    return msg
-```
-
-### SMTP Integration with DataSource
-
-```python
-import smtplib
-from typing import Dict
-
-class EmailSender:
-    def __init__(self, datasource_service):
-        self.datasource = datasource_service
-    
-    def send(self, connection_id: str, message: MIMEMultipart) -> Dict:
-        # Retrieve SMTP config from existing DataSource system
-        smtp_config = self.datasource.get_connection(connection_id)
-        
-        server = smtplib.SMTP(smtp_config['host'], smtp_config['port'])
-        
-        try:
-            # Enable TLS if port is 587
-            if smtp_config['port'] == 587:
-                server.starttls()
-            
-            # Authenticate
-            server.login(smtp_config['username'], smtp_config['password'])
-            
-            # Send message
-            server.send_message(message)
-            
-            return {'success': True, 'message_id': message['Message-ID']}
-        finally:
-            server.quit()
-```
-
----
-
-## Security Considerations
-
-### Template Security
-
-| Risk | Mitigation | Implementation |
-|------|------------|----------------|
-| Code execution in templates | Use SandboxedEnvironment | `from jinja2.sandbox import SandboxedEnvironment` |
-| Access to private attributes | SandboxedEnvironment blocks `_` and `__` prefixed attrs | Built-in protection |
-| Infinite loops in templates | Set reasonable max template size and render timeout | Monitor template execution time |
-| Data exfiltration | Pass only necessary data to template context | Restrict context to flow input only |
-
-### Email Security
-
-| Risk | Mitigation | Implementation |
-|------|------------|----------------|
-| XSS in email HTML | Sanitize with nh3 | `nh3.clean(html, tags={...}, attributes={...})` |
-| Header injection | Validate email addresses | Regex validation or email-validator library |
-| Open redirect in links | Restrict URL schemes | `url_schemes={"https", "http", "mailto"}` |
-| Information disclosure | Use Bcc for bulk emails | Support Bcc field in configuration |
-
-### SMTP Security
-
-| Risk | Mitigation | Implementation |
-|------|------------|----------------|
-| Credential exposure | Use existing encrypted DataSource storage | Leverage Connection Management milestone |
-| Man-in-the-middle | Enforce TLS/STARTTLS | Port 587 + starttls() or port 465 with SSL |
-| Server spoofing | Validate certificates | Ensure proper SSL context configuration |
 
 ---
 
 ## Alternatives Considered
 
-| Category | Recommended | Alternative | Why Not Chosen |
-|----------|-------------|-------------|----------------|
-| SMTP Library | smtplib (stdlib) | fastapi-mail | Adds unnecessary abstraction; DataSource already handles connection management |
-| SMTP Library | smtplib (stdlib) | aiosmtplib | Flow runner is synchronous; async adds complexity without benefit |
-| Template Engine | Jinja2 | Chevron (Mustache) | Jinja2 more powerful for complex table generation; Chevron lacks conditionals/loops |
-| HTML Sanitizer | nh3 | bleach | bleach officially deprecated (Jan 2023); nh3 is 20x faster and actively maintained |
+| Recommended | Alternative | When Alternative Is Better |
+|-------------|-------------|----------------------------|
+| `openid-client` v6 | `keycloak-connect` v26 | When you need Keycloak-specific features (UMA, resource authorization) and don't need standard OIDC portability |
+| `openid-client` v6 | `passport-keycloak-oauth2-oidc` | Never — this is an unmaintained Passport.js strategy; outdated |
+| `express-session` + `connect-pg-simple` | `express-session` + `connect-redis` | When session lookup latency matters at scale (10K+ concurrent sessions); not applicable here |
+| `http-proxy-middleware` v4 | Manual `fetch()` forwarding | Never for streaming endpoints; manual fetch buffers responses in memory |
+| Express 5 | Fastify | When maximum throughput (API gateway at scale) is needed; BFF for a dashboard app doesn't need it |
+| Express 5 | Koa | Only if the team prefers Koa's middleware model; Express has broader ecosystem and `http-proxy-middleware` is Express-native |
 
 ---
 
-## Integration Complexity Assessment
+## What NOT to Use
 
-| Component | Complexity | Effort | Notes |
-|-----------|------------|--------|-------|
-| SMTP DataSource Integration | Low | 1-2 days | Existing Connection Management milestone provides foundation |
-| Template Engine Integration | Low | 1 day | Jinja2 SandboxedEnvironment is drop-in replacement for standard Environment |
-| HTML Sanitization | Low | 0.5 days | nh3 has simple API: `nh3.clean(html, tags={...})` |
-| Email Node UI | Medium | 2-3 days | Property panel for subject, body, template variables; Monaco editor for templates |
-| Testing | Medium | 2 days | Unit tests for template rendering, sanitization, SMTP integration |
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `keycloak-js` (in the BFF) | It is a browser-only adapter; uses `window` and `sessionStorage`; will crash in Node.js | `openid-client` v6 |
+| `openid-client` v5 | v6 is a complete rewrite with a different API; v5 tutorials are abundant online and will cause confusion | `openid-client` v6 |
+| `express-session` with default MemoryStore | MemoryStore leaks memory and resets on every BFF restart, logging out all users | `connect-pg-simple` backed session store |
+| `passport` + `passport-keycloak-*` | Passport strategies for Keycloak are unmaintained; adds unnecessary abstraction over `openid-client` | `openid-client` directly |
+| `node-jose` / `jsonwebtoken` for token verification | `openid-client` handles JWKS-based token verification internally; double-parsing adds complexity | `openid-client`'s built-in `validateAuthResponse` |
+| `axios` as proxy | Buffers response bodies in memory; breaks streaming; adds unnecessary dependency | `http-proxy-middleware` |
 
-**Total Estimated Effort: 1-2 weeks** (including testing and documentation)
+---
+
+## Version Compatibility
+
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| `express@^5.2.1` | `http-proxy-middleware@^4.0.0` | HPM v4 explicitly supports Express 5; v2/v3 had Express 4 assumptions |
+| `express@^5.2.1` | `express-session@^1.19.0` | Session middleware API unchanged between Express 4 and 5 |
+| `openid-client@^6.8.0` | Node.js >=20 | v6 uses Web Crypto API, requires Node 20+. If running Node 18, use `openid-client@5.x` (different API). |
+| `connect-pg-simple@^10.0.0` | `express-session@^1.19.0` | v10 is the current release; works as a session store factory |
+| `keycloak-js@26.x` (in frontend) | `openid-client@6.x` (in BFF) | These operate independently; the frontend will use BFF session cookies instead of keycloak-js directly — `keycloak-js` will be removed from the frontend in this milestone |
+
+**Node.js version requirement:** The BFF requires Node.js 20+. Verify with:
+```bash
+node --version  # Must be >= 20.0.0
+```
+
+---
+
+## Stack Patterns by Variant
+
+**If using PostgreSQL for sessions (recommended — existing infra):**
+- Use `connect-pg-simple` with the same `DATABASE_URL` env var as the FastAPI backend
+- Create the `session` table using the SQL from `connect-pg-simple`'s README
+
+**If the team adds Redis later:**
+- Swap `connect-pg-simple` for `connect-redis@^8`
+- No other code changes needed — express-session stores are interchangeable
+
+**If CubeJS requires WebSocket (subscription queries):**
+- Configure `http-proxy-middleware` with `ws: true` for the CubeJS proxy route
+- Requires Express's `server.on('upgrade', ...)` hook wired to the proxy
+
+**If running in Docker Compose (current production setup):**
+- BFF runs as a new service `bff` in `docker-compose.yaml`
+- Internal Docker network name resolution (`backend:8000`, `cubejs:4000`) replaces `localhost`
+- Traefik routes `dashboard.pm.comsatel.com.pe` → BFF instead of `frontend-app`
 
 ---
 
 ## Sources
 
-- **smtplib**: https://docs.python.org/3/library/smtplib.html (Official Python docs - HIGH confidence)
-- **aiosmtplib**: https://aiosmtplib.readthedocs.io/en/stable/ (Official docs - HIGH confidence)
-- **Jinja2**: https://jinja.palletsprojects.com/en/3.1.x/ (Official Pallets project docs - HIGH confidence)
-- **Jinja2 Sandbox**: https://jinja.palletsprojects.com/en/3.1.x/sandbox/ (Official docs - HIGH confidence)
-- **nh3**: https://nh3.readthedocs.io/en/latest/ (Official docs - HIGH confidence)
-- **nh3 PyPI**: https://pypi.org/project/nh3/ (Version 0.3.5, April 2026 - HIGH confidence)
-- **chevron**: https://pypi.org/project/chevron/ (Version 0.14.0 - MEDIUM confidence - last update 2021)
-- **fastapi-mail**: https://pypi.org/project/fastapi-mail/ (Version 1.6.4, May 2026 - HIGH confidence)
-- **email.mime**: https://docs.python.org/3/library/email.mime.html (Official Python docs - HIGH confidence)
-- **bleach deprecation**: https://bleach.readthedocs.io/en/latest/ (Official notice - HIGH confidence)
+- npm registry — `express` version 5.2.1 (verified 2026-05-28)
+- npm registry — `express-session` version 1.19.0 (verified 2026-05-28)
+- npm registry — `http-proxy-middleware` version 4.0.0 (verified 2026-05-28)
+- npm registry — `openid-client` version 6.8.4 (verified 2026-05-28)
+- npm registry — `keycloak-connect` version 26.1.1 (verified 2026-05-28)
+- npm registry — `connect-pg-simple` version 10.0.0 (verified 2026-05-28)
+- Keycloak JS adapter (`keycloak-js`) in project: version 26.2.3 (from `dashboard-app/node_modules/keycloak-js/package.json`)
+- Project Keycloak realm: `apps` realm, RS256 signature, 5-minute access token TTL (from `environment/keycloak/realm-export.json`)
+- Express 5 release announcement: https://expressjs.com/2024/10/15/v5-release.html — MEDIUM confidence (URL inferred, content from training knowledge cutoff Aug 2025)
+- openid-client v6 migration guide: https://github.com/panva/openid-client/releases — MEDIUM confidence (training knowledge)
+- http-proxy-middleware v4 changelog: https://github.com/chimurai/http-proxy-middleware — MEDIUM confidence (training knowledge)
 
 ---
 
-## Confidence Assessment
-
-| Area | Confidence | Reason |
-|------|------------|--------|
-| SMTP Libraries | HIGH | Official Python stdlib documentation; mature and stable |
-| Template Engine | HIGH | Jinja2 is industry standard; official Pallets documentation |
-| HTML Sanitization | HIGH | nh3 is actively maintained; official docs and benchmarks |
-| Integration Approach | HIGH | Builds on existing validated DataSource infrastructure |
-| Security Model | HIGH | SandboxedEnvironment is well-documented and proven |
-
----
-
-## Roadmap Implications
-
-### Phase Ordering Recommendation
-
-1. **Email Node Core** (Week 1)
-   - SMTP DataSource integration using smtplib
-   - Basic email sending (text only)
-   - Integration with flow runner
-
-2. **Template Engine** (Week 1-2)
-   - Jinja2 SandboxedEnvironment integration
-   - Subject and body templating with `{{expression}}` syntax
-   - Context passing from node input
-
-3. **HTML Support** (Week 2)
-   - HTML email composition with email.mime
-   - nh3 sanitization integration
-   - Table generation from arrays using Jinja2 loops
-
-4. **Testing & Polish** (Week 2)
-   - Security testing (template injection, XSS)
-   - SMTP integration testing with various providers (Gmail, Outlook, etc.)
-   - UI/UX refinement
-
-### Defer to Later Milestones
-
-- **Async email sending** - Not needed with current APScheduler flow runner
-- **Email attachments** - Can be added later; requires file storage integration
-- **Email templates library** - Users can save templates in flow configurations
-- **Email tracking** (open rates, click tracking) - Requires external service integration
+*Stack research for: Node.js + Express BFF Service (Dashboard Studio v1.8)*  
+*Researched: 2026-05-28*
