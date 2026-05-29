@@ -1,11 +1,11 @@
 /**
  * API client for backend services
- * Automatically includes Keycloak token for authentication
+ * Automatically includes session cookie via BFF
  */
-import keycloak from '@/services/keycloak'
 
-// Use the backend URL from env or default to port 8000 (matching backend .env)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Use the BFF URL from env or default to empty (relative)
+const BFF_URL = import.meta.env.VITE_BFF_URL || ''
+const API_BASE_URL = `${BFF_URL}/bff/api`
 
 class ApiError extends Error {
   constructor(message, status, data) {
@@ -15,47 +15,20 @@ class ApiError extends Error {
   }
 }
 
-async function getAuthHeaders() {
-  // Check if keycloak is initialized and has a token
-  if (!keycloak.authenticated) {
-    throw new Error('Not authenticated - Keycloak not initialized')
-  }
-  
-  const token = keycloak.token
-  if (!token) {
-    throw new Error('Not authenticated - No token available')
-  }
-  
-  // Refresh token if it will expire in less than 30 seconds
-  if (keycloak.isTokenExpired(30)) {
-    try {
-      await keycloak.updateToken(30)
-    } catch (err) {
-      console.error('Failed to refresh token:', err)
-      throw new Error('Session expired - Please login again')
-    }
-  }
-  
-  return {
-    'Authorization': `Bearer ${keycloak.token}`,
-    'Content-Type': 'application/json'
-  }
-}
-
 export async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
-  const headers = await getAuthHeaders()
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  }
 
   console.log(`[API] ${options.method || 'GET'} ${url}`)
-  console.log(`[API] Token available: ${!!keycloak.token}`)
-  console.log(`[API] Token prefix: ${keycloak.token ? keycloak.token.substring(0, 50) + '...' : 'none'}`)
 
   const response = await fetch(url, {
     ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
+    headers,
+    credentials: 'include' // Important: Send session cookies to BFF
   })
 
   if (!response.ok) {
