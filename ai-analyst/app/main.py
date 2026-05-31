@@ -18,10 +18,15 @@ from google.adk.agents.run_config import RunConfig, StreamingMode
 
 from app.core.config import get_settings
 from app.agent import APP_NAME, runner, session_service
+from app.tools.skills import load_catalog
 
 settings = get_settings()
 
 app = FastAPI(title="AI Analyst Service", version="0.1.0")
+
+@app.on_event("startup")
+async def startup_event():
+    await load_catalog()
 
 app.add_middleware(
     CORSMiddleware,
