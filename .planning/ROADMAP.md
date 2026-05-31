@@ -28,8 +28,8 @@
 | 41. Pickle Model Node | v1.9 | 3/3 | Complete | 2026-05-31 |
 | 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
-| 44. AI Analyst Skills | 1/2 | In Progress|  | - |
-| 45. BFF Integration | v2.0 | 0/TBD | Not started | - |
+| 44. AI Analyst Skills | v2.0 | 2/2 | Complete | 2026-05-31 |
+| 45. BFF Integration | v2.0 | 0/1 | In progress | - |
 | 46. Chat UI | v2.0 | 0/TBD | Not started | - |
 
 
@@ -136,7 +136,7 @@
 ## Phases
 
 - [x] **Phase 43: AI Service Foundation** - New Python microservice (ai-analyst/) with Google ADK, Gemini API, and a basic `/chat` endpoint that accepts a message and returns a streamed agent response
-- [ ] **Phase 44: AI Analyst Skills** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation
+- [x] **Phase 44: AI Analyst Skills** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation (completed 2026-05-31)
 - [ ] **Phase 45: BFF Integration** - BFF routes that proxy `/bff/ai/*` requests to the AI service with session validation and screen context passthrough
 - [ ] **Phase 46: Chat UI** - Vue 3 collapsible chat panel matching the Stitch design: message bubbles, expandable Thought/Actions/Result sections, live usage stats, and CTA skill buttons
 
@@ -169,8 +169,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 44-01-PLAN.md — CubeJS Tool + Screen Context support
-- [ ] 44-02-PLAN.md — Skills Catalog Tool + Startup Fetch integration
+- [x] 44-01-PLAN.md — CubeJS Tool + Screen Context support
+- [x] 44-02-PLAN.md — Skills Catalog Tool + Startup Fetch integration
 
 ### Phase 45: BFF Integration
 **Goal**: The dashboard-app frontend can reach the AI service through the BFF with session validation; unauthenticated requests are rejected before touching the AI service
@@ -180,10 +180,10 @@ Plans:
   1. A POST to `/bff/ai/chat` with a valid session cookie is forwarded to the AI service and returns its response; a request with no session cookie receives HTTP 401
   2. The BFF extracts the current user's session context and forwards it as a header or body field to the AI service with every request
   3. Screen context (JSON payload of visible chart data) sent by the frontend is passed through to the AI service without modification
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 45-01: TBD
+- [ ] 45-01-PLAN.md — BFF Integration & Core Proxy Logic
 
 ### Phase 46: Chat UI
 **Goal**: Dashboard designers can open a chat panel, ask questions about their dashboard, and interact with agent responses including skill CTAs — without leaving the designer
