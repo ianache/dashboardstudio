@@ -21,7 +21,7 @@
 | 35. FastAPI Proxy + CORS | v1.8 | 2/2 | Complete | 2026-05-28 |
 | 36. CubeJS Proxy + Network Isolation | v1.8 | 2/2 | Complete | 2026-05-28 |
 | 37. Frontend Migration | v1.8 | 2/2 | Complete | 2026-05-29 |
-| 38. Data Transform Node | v1.9 | 0/TBD | Not started | - |
+| 38. Data Transform Node | v1.9 | 0/1 | Not started | - |
 | 39. Templating Node | v1.9 | 0/TBD | Not started | - |
 | 40. LLM Node | v1.9 | 0/TBD | Not started | - |
 | 41. Pickle Model Node | v1.9 | 0/TBD | Not started | - |
@@ -126,10 +126,10 @@
   2. Connecting a Data Transform node between two other nodes passes the transformed output as the next node's input — not the original payload
   3. When the input payload contains more than 10,000 rows, a warning message appears in the execution console (flow continues normally)
   4. A transform error (e.g. malformed JS, runtime exception) fails the flow with a clear error message pinned to the transform node
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 38-01: TBD
+- [ ] 38-01-PLAN.md — Register data_transform in editor_tools + add runner.ts execution branch
 
 ### Phase 39: Templating Node
 **Goal**: Users can render dynamic text output by filling a Nunjucks template with flow payload data, enabling a natural predecessor step before the Email node
