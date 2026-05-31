@@ -27,7 +27,7 @@
 | 40. LLM Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 41. Pickle Model Node | v1.9 | 3/3 | Complete | 2026-05-31 |
 | 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
-| 43. AI Service Foundation | v2.0 | 0/TBD | Not started | - |
+| 43. AI Service Foundation | 1/2 | In Progress|  | - |
 | 44. Agent Tools | v2.0 | 0/TBD | Not started | - |
 | 45. BFF Integration | v2.0 | 0/TBD | Not started | - |
 | 46. Chat UI | v2.0 | 0/TBD | Not started | - |

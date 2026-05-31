@@ -21,7 +21,7 @@
 
 ### AI Service
 
-- [ ] **SVC-01**: A dedicated Python microservice uses Google ADK to orchestrate the agent workflow with Gemini models via native API
+- [x] **SVC-01**: A dedicated Python microservice uses Google ADK to orchestrate the agent workflow with Gemini models via native API
 - [ ] **SVC-02**: The AI service integrates CubeJS as an agent tool — executes dimension/measure queries and returns structured results to the agent
 - [ ] **SVC-03**: The AI service loads the skills catalog (catalog.yaml) dynamically at startup to discover available actions
 - [ ] **SVC-04**: All AI requests are proxied through the BFF for session validation before reaching the AI service
@@ -49,7 +49,7 @@ Deferred to next milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SVC-01 | Phase 43 | Pending |
+| SVC-01 | Phase 43 | Complete |
 | SVC-02 | Phase 44 | Pending |
 | SVC-03 | Phase 44 | Pending |
 | AGENT-01 | Phase 44 | Pending |
