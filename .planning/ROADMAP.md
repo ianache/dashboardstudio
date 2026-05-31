@@ -27,8 +27,8 @@
 | 40. LLM Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 41. Pickle Model Node | v1.9 | 3/3 | Complete | 2026-05-31 |
 | 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
-| 43. AI Service Foundation | 1/2 | In Progress|  | - |
-| 44. Agent Tools | v2.0 | 0/TBD | Not started | - |
+| 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
+| 44. AI Analyst Skills | v2.0 | 0/2 | In Progress | - |
 | 45. BFF Integration | v2.0 | 0/TBD | Not started | - |
 | 46. Chat UI | v2.0 | 0/TBD | Not started | - |
 
@@ -135,8 +135,8 @@
 
 ## Phases
 
-- [ ] **Phase 43: AI Service Foundation** - New Python microservice (ai-analyst/) with Google ADK, Gemini API, and a basic `/chat` endpoint that accepts a message and returns a streamed agent response
-- [ ] **Phase 44: Agent Tools** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation
+- [x] **Phase 43: AI Service Foundation** - New Python microservice (ai-analyst/) with Google ADK, Gemini API, and a basic `/chat` endpoint that accepts a message and returns a streamed agent response
+- [ ] **Phase 44: AI Analyst Skills** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation
 - [ ] **Phase 45: BFF Integration** - BFF routes that proxy `/bff/ai/*` requests to the AI service with session validation and screen context passthrough
 - [ ] **Phase 46: Chat UI** - Vue 3 collapsible chat panel matching the Stitch design: message bubbles, expandable Thought/Actions/Result sections, live usage stats, and CTA skill buttons
 
@@ -154,10 +154,10 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 43-01-PLAN.md — ai-analyst/ service scaffold (pyproject.toml, Dockerfile, config.py, env template)
-- [ ] 43-02-PLAN.md — Agent + endpoints + docker-compose wiring (agent.py, main.py, SSE /chat)
+- [x] 43-01-PLAN.md — ai-analyst/ service scaffold (pyproject.toml, Dockerfile, config.py, env template)
+- [x] 43-02-PLAN.md — Agent + endpoints + docker-compose wiring (agent.py, main.py, SSE /chat)
 
-### Phase 44: Agent Tools
+### Phase 44: AI Analyst Skills
 **Goal**: The agent can answer questions about dashboard data by running CubeJS queries, and can execute skills from a dynamically loaded catalog
 **Depends on**: Phase 43
 **Requirements**: SVC-02, SVC-03, AGENT-01, AGENT-02, AGENT-03
@@ -166,10 +166,11 @@ Plans:
   2. When the agent receives screen context (chart data), it can describe visible trends, peaks, or anomalies in plain language without executing an additional CubeJS query
   3. The skills catalog (catalog.yaml from github.com/ianache/skills-catalog) is fetched and parsed at service startup; available skill names are visible in agent tool descriptions
   4. Asking the agent to run a skill by name causes it to invoke the catalog tool and return the skill's execution result or a clear error if the skill is not found
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 44-01: TBD
+- [ ] 44-01-PLAN.md — CubeJS Tool + Screen Context support
+- [ ] 44-02-PLAN.md — Skills Catalog Tool + Startup Fetch integration
 
 ### Phase 45: BFF Integration
 **Goal**: The dashboard-app frontend can reach the AI service through the BFF with session validation; unauthenticated requests are rejected before touching the AI service
