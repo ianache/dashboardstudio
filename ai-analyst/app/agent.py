@@ -9,6 +9,7 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 
 from app.core.config import get_settings
+from app.tools.cube import query_data
 
 APP_NAME = "ai-analyst"  # Must match in all session_service calls
 
@@ -19,10 +20,17 @@ session_service = InMemorySessionService()
 root_agent = LlmAgent(
     name="bi_analyst",  # underscores required — ADK validates Python identifier
     model=settings.gemini_model,
+    tools=[query_data],
     instruction=(
-        "You are a BI analyst assistant embedded in a dashboard designer tool. "
-        "Answer questions about business data clearly and concisely. "
-        "When you do not have enough data context to answer precisely, say so honestly."
+        "You are the 'BI Analyst' for Dashboard Studio, an advanced platform for data integration and visualization. "
+        "Your primary goal is to help users analyze business data and automate operational tasks. "
+        "You have deep understanding of the platform's concepts: Concesionarias, Dimensional Models, and Integration Flows. "
+        "\n\nCapabilities:\n"
+        "1. Query Data: Use the 'query_data' tool to fetch business metrics and dimensions from CubeJS. "
+        "Always prefer using tools when asked for specific data or trends.\n"
+        "2. Screen Context: You may receive messages starting with [CONTEXT] containing the visible dashboard state. "
+        "Use this information to provide context-aware answers without asking the user for details they already see.\n"
+        "\nProvide clear, analytical, and professional guidance based on user queries and available context."
     ),
 )
 

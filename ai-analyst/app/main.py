@@ -10,19 +10,13 @@ import uuid
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel
 
 from google.genai import types
 from google.adk.agents.run_config import RunConfig, StreamingMode
 
 from app.core.config import get_settings
-
-# Try native FastAPI SSE (>=0.135.0); fall back to sse-starlette if unavailable
-try:
-    from fastapi.sse import EventSourceResponse, ServerSentEvent
-except ImportError:
-    from sse_starlette.sse import EventSourceResponse, ServerSentEvent  # type: ignore[no-redef]
-
 from app.agent import APP_NAME, runner, session_service
 
 settings = get_settings()
@@ -39,6 +33,7 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     message: str
+    screen_context: dict | None = None
 
 
 @app.get("/health")
@@ -46,7 +41,7 @@ async def health():
     return {"status": "ok"}
 
 
-@app.post("/chat")
+@app.post("/chat", response_class=EventSourceResponse)
 async def chat(request: ChatRequest):
     session_id = str(uuid.uuid4())
 
@@ -57,44 +52,51 @@ async def chat(request: ChatRequest):
         session_id=session_id,
     )
 
-    async def stream():
-        run_config = RunConfig(streaming_mode=StreamingMode.SSE)
-        try:
-            async for event in runner.run_async(
-                user_id="default",
-                session_id=session_id,
-                new_message=types.Content(
-                    role="user",
-                    parts=[types.Part(text=request.message)],
-                ),
-                run_config=run_config,
-            ):
-                # Emit token events for partial text chunks
-                if event.content and event.content.parts:
-                    for part in event.content.parts:
-                        if hasattr(part, "text") and part.text:
-                            yield ServerSentEvent(
-                                data=json.dumps({"type": "token", "text": part.text})
-                            )
+    # Inject screen context if provided
+    if request.screen_context:
+        await session_service.append_message(
+            app_name=APP_NAME,
+            user_id="default",
+            session_id=session_id,
+            role="user",
+            text=f"[CONTEXT] Visible data: {json.dumps(request.screen_context)}",
+        )
 
-                # Emit done event on final response with usage metadata
-                if event.is_final_response():
-                    usage = {"input_tokens": 0, "output_tokens": 0}
-                    if event.usage_metadata:
-                        usage["input_tokens"] = getattr(
-                            event.usage_metadata, "prompt_token_count", 0
-                        ) or 0
-                        usage["output_tokens"] = getattr(
-                            event.usage_metadata, "candidates_token_count", 0
-                        ) or 0
-                    yield ServerSentEvent(
-                        data=json.dumps({"type": "done", "usage": usage})
-                    )
+    run_config = RunConfig(streaming_mode=StreamingMode.SSE)
+    try:
+        async for event in runner.run_async(
+            user_id="default",
+            session_id=session_id,
+            new_message=types.Content(
+                role="user",
+                parts=[types.Part(text=request.message)],
+            ),
+            run_config=run_config,
+        ):
+            # Emit token events for partial text chunks
+            if event.content and event.content.parts:
+                for part in event.content.parts:
+                    if hasattr(part, "text") and part.text:
+                        yield ServerSentEvent(
+                            data=json.dumps({"type": "token", "text": part.text})
+                        )
 
-        except Exception as e:
-            # Inline error — do not disconnect with HTTP 500
-            yield ServerSentEvent(
-                data=json.dumps({"type": "error", "message": str(e)})
-            )
+            # Emit done event on final response with usage metadata
+            if event.is_final_response():
+                usage = {"input_tokens": 0, "output_tokens": 0}
+                if event.usage_metadata:
+                    usage["input_tokens"] = getattr(
+                        event.usage_metadata, "prompt_token_count", 0
+                    ) or 0
+                    usage["output_tokens"] = getattr(
+                        event.usage_metadata, "candidates_token_count", 0
+                    ) or 0
+                yield ServerSentEvent(
+                    data=json.dumps({"type": "done", "usage": usage})
+                )
 
-    return EventSourceResponse(stream())
+    except Exception as e:
+        # Inline error — do not disconnect with HTTP 500
+        yield ServerSentEvent(
+            data=json.dumps({"type": "error", "message": str(e)})
+        )
