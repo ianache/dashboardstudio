@@ -5,7 +5,7 @@ milestone_name: BI Analyst
 status: in_progress
 last_updated: "2026-05-31T00:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,22 +17,22 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-31)
 
-**Core value:** Panel lateral colapsable con drag & drop de tablas para el diseñador de dashboards
-**Current focus:** Defining requirements
+**Core value:** Agente BI interactivo que lee el contexto del dashboard, ejecuta consultas analíticas y dispara skills operativas — sin salir de la interfaz del diseñador
+**Current focus:** Phase 43 — AI Service Foundation (ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 43 of 46 (AI Service Foundation)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-31 — Milestone v2.0 started
+Status: Ready to plan
+Last activity: 2026-05-31 — Roadmap created for v2.0 BI Analyst milestone
 
-Progress: [▓▓▓▓▓▓▓▓▓▓] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 0 (this milestone)
 - Average duration: —
 - Total execution time: —
 
@@ -40,11 +40,10 @@ Progress: [▓▓▓▓▓▓▓▓▓▓] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 38 | 1 | 1 | — |
-| 39 | 1 | 1 | — |
-| 40 | 1 | 1 | — |
-| 41 | 3 | 3 | — |
-| 42 | 1 | 1 | — |
+| 43 | TBD | - | - |
+| 44 | TBD | - | - |
+| 45 | TBD | - | - |
+| 46 | TBD | - | - |
 
 *Updated after each plan completion*
 
@@ -52,17 +51,11 @@ Progress: [▓▓▓▓▓▓▓▓▓▓] 100%
 
 ### Decisions
 
-- **Execution pattern split:** Data Transform, Templating, Conditional/Branch run purely in Deno. LLM and Pickle Model use Python pre-execution — credentials and ML libraries cannot be reached from Deno.
-- **LLM API keys:** Must always live in encrypted LlmConfig DataSource. Never in node.props. node.props ends up in flow_nodes DB column and browser WebSocket frames.
-- **Pickle isolation:** subprocess isolation is the primary mitigation; picklescan is supplementary. Phase 41 uses `ml_worker.py` for isolation.
-- **Build order rationale:** Lowest blast radius first (38→39→40→41→42). Phase 42 last because it modifies the shared FlowConnection schema used by all existing flows.
-- **fromHandle field:** New field on FlowConnection — absent means 'out' (backward-compatible). Conditional node writes true/false; runner routes only the matching branch.
-- **LLM Node Category:** Reverted to 'transform' to support input connections, but UI logic in `FlowEditorCanvas.vue` was enhanced to show connection selectors for 'transform' nodes requiring them.
-- **Cycle Detection:** Implemented BFS-based prevention in the UI and Kahn's algorithm in the Deno runner for double-layered safety.
-
-### Research Flags (resolve before planning these phases)
-
-- All flags for Milestone v1.9 resolved.
+- **BFF already exists:** `bff/` (Node.js + Express + Redis) from v1.8 is the proxy layer. Phase 45 adds new `/bff/ai/*` routes — no new service.
+- **AI service is a new microservice:** `ai-analyst/` (Python + Google ADK) is net-new. Containerized with its own Dockerfile and docker-compose entry.
+- **CubeJS reachable from Python:** CubeJS runs on the internal Docker network. The AI service calls it directly (no BFF hop) via the REST API with a backend-generated JWT.
+- **Skills catalog is external YAML:** Fetched at startup from github.com/ianache/skills-catalog/blob/main/catalog.yaml. Not bundled.
+- **Build order:** Service (43) → Tools (44) → BFF proxy (45) → UI (46). Each phase has a runnable, verifiable artifact before the next begins.
 
 ### Blockers/Concerns
 
@@ -71,5 +64,5 @@ Progress: [▓▓▓▓▓▓▓▓▓▓] 100%
 ## Session Continuity
 
 Last session: 2026-05-31
-Stopped at: Roadmap created — ready to plan Phase 38
+Stopped at: Roadmap created — ready to plan Phase 43
 Resume file: None

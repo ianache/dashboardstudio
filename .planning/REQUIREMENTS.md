@@ -49,24 +49,24 @@ Deferred to next milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHAT-01 | TBD | Pending |
-| CHAT-02 | TBD | Pending |
-| CHAT-03 | TBD | Pending |
-| CHAT-04 | TBD | Pending |
-| CHAT-05 | TBD | Pending |
-| AGENT-01 | TBD | Pending |
-| AGENT-02 | TBD | Pending |
-| AGENT-03 | TBD | Pending |
-| SVC-01 | TBD | Pending |
-| SVC-02 | TBD | Pending |
-| SVC-03 | TBD | Pending |
-| SVC-04 | TBD | Pending |
+| SVC-01 | Phase 43 | Pending |
+| SVC-02 | Phase 44 | Pending |
+| SVC-03 | Phase 44 | Pending |
+| AGENT-01 | Phase 44 | Pending |
+| AGENT-02 | Phase 44 | Pending |
+| AGENT-03 | Phase 44 | Pending |
+| SVC-04 | Phase 45 | Pending |
+| CHAT-01 | Phase 46 | Pending |
+| CHAT-02 | Phase 46 | Pending |
+| CHAT-03 | Phase 46 | Pending |
+| CHAT-04 | Phase 46 | Pending |
+| CHAT-05 | Phase 46 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 12 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 after initial definition*
+*Last updated: 2026-05-31 after roadmap creation (traceability complete)*

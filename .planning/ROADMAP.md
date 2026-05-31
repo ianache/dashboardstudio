@@ -5,7 +5,8 @@
 - ✅ **v1.6 ODS Execution Engine** — Phases 29-31 (shipped 2026-05-17)
 - ✅ **v1.7 Email Node** — Phase 32 (shipped 2026-05-17)
 - ✅ **v1.8 BFF Service Architecture** — Phases 33-37 (shipped 2026-05-31)
-- 🚧 **v1.9 Advanced Node Types** — Phases 38-42 (in progress)
+- ✅ **v1.9 Advanced Node Types** — Phases 38-42 (shipped 2026-05-31)
+- 🚧 **v2.0 BI Analyst** — Phases 43-46 (in progress)
 
 ## Progress Table
 
@@ -26,14 +27,16 @@
 | 40. LLM Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 41. Pickle Model Node | v1.9 | 3/3 | Complete | 2026-05-31 |
 | 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
+| 43. AI Service Foundation | v2.0 | 0/TBD | Not started | - |
+| 44. Agent Tools | v2.0 | 0/TBD | Not started | - |
+| 45. BFF Integration | v2.0 | 0/TBD | Not started | - |
+| 46. Chat UI | v2.0 | 0/TBD | Not started | - |
 
 
 ---
 
-## ✅ v1.6 ODS Execution Engine (Phases 29-31) — SHIPPED 2026-05-17
-
 <details>
-<summary>View v1.6 Details</summary>
+<summary>✅ v1.6 ODS Execution Engine (Phases 29-31) — SHIPPED 2026-05-17</summary>
 
 ### Phase 29: Metadata Inspection API
 - [x] 29-01: Implement MetadataService with PostgreSQL support.
@@ -53,10 +56,8 @@
 
 ---
 
-## ✅ v1.7 Email Node with Dynamic Templates (Phase 32) — SHIPPED 2026-05-17
-
 <details>
-<summary>View v1.7 Details</summary>
+<summary>✅ v1.7 Email Node with Dynamic Templates (Phase 32) — SHIPPED 2026-05-17</summary>
 
 ### Phase 32: Email Node Implementation
 - [x] 32-01: Core Email Service (email_executor.py, email_schemas.py, Jinja2 integration)
@@ -69,10 +70,8 @@
 
 ---
 
-## ✅ v1.8 BFF Service Architecture (Phases 33-37) — SHIPPED 2026-05-31
-
 <details>
-<summary>View v1.8 Details</summary>
+<summary>✅ v1.8 BFF Service Architecture (Phases 33-37) — SHIPPED 2026-05-31</summary>
 
 ### Phase 33: BFF Foundation
 - [x] 33-01: BFF Express 5 scaffold — package.json, Dockerfile, config.js, health route
@@ -102,96 +101,104 @@
 
 ---
 
-## 🚧 v1.9 Advanced Node Types (Phases 38-42) — IN PROGRESS
+<details>
+<summary>✅ v1.9 Advanced Node Types (Phases 38-42) — SHIPPED 2026-05-31</summary>
 
 **Milestone Goal:** Extend the integration flow editor with five new node types — data transformation, Nunjucks templating, LLM integration, ML model inference, and conditional branching.
 
-**Build order rationale:** Lowest blast radius first. Phases 38-39 are pure Deno additions with zero infrastructure changes. Phase 40 introduces the Python pre-execution pattern. Phase 41 extends pre-execution with the highest-risk component (Pickle). Phase 42 is last because it modifies the shared FlowConnection schema used by all existing flows.
-
-## Phases
-
-- [x] **Phase 38: Data Transform Node** - Add a JS transform node that reshapes/maps/filters the flow payload via a CodeEditor function body
-- [x] **Phase 39: Templating Node** - Add a Nunjucks templating node that renders `{{expr}}` markers against node input and outputs a text string (completed 2026-05-31)
-- [x] **Phase 40: LLM Node** - Add an LLM node backed by a new encrypted LLM Connection type; Python pre-executes API calls so credentials never enter Deno (completed 2026-05-31)
-- [x] **Phase 41: Pickle Model Node** - Add a node for file upload for `.pkl` models, subprocess-isolated inference, and a node that runs `predict()` within a flow (completed 2026-05-31)
-- [ ] **Phase 42: Conditional/Branch Node** - Add a branch node with true/false output ports and harden cycle detection in runner.ts
-
-## Phase Details
-
 ### Phase 38: Data Transform Node
-**Goal**: Users can reshape, filter, or map flow payload data using a JavaScript function body without writing a full Script node
-**Depends on**: Phase 37 (v1.8 complete)
-**Requirements**: TRANS-01, TRANS-02
-**Success Criteria** (what must be TRUE):
-  1. User can drag a Data Transform node onto the canvas and open a CodeEditor in the property panel with a function body that receives `data` and returns the transformed payload
-  2. Connecting a Data Transform node between two other nodes passes the transformed output as the next node's input — not the original payload
-  3. When the input payload contains more than 10,000 rows, a warning message appears in the execution console (flow continues normally)
-  4. A transform error (e.g. malformed JS, runtime exception) fails the flow with a clear error message pinned to the transform node
-**Plans**: 1 plan
-
-Plans:
 - [x] 38-01-PLAN.md — Register data_transform in editor_tools + add runner.ts execution branch (completed 2026-05-31)
 
 ### Phase 39: Templating Node
-**Goal**: Users can render dynamic text output by filling a Nunjucks template with flow payload data, enabling a natural predecessor step before the Email node
-**Depends on**: Phase 38
-**Requirements**: TMPL-01, TMPL-02
-**Success Criteria** (what must be TRUE):
-  1. User can drag a Templating node onto the canvas and see a "Preview" section in the property panel
-  2. Clicking "Preview" renders the template against sample JSON data using the backend Jinja2 engine
-  3. Running a flow with a Templating node renders the result using the Deno Nunjucks engine and passes the string to the next node
-  4. Template errors are correctly caught and displayed with a `[Template Error]` prefix
-**Plans**: 1 plan
-
-Plans:
 - [x] 39-01-PLAN.md — Register nunjucks_template tool + FastAPI preview + UI block + Runner logic (completed 2026-05-31)
 
 ### Phase 40: LLM Node
-**Goal**: Users can call any OpenAI-compatible LLM endpoint from within a flow by selecting an encrypted LLM Connection; API keys never appear in Deno or execution history
-**Depends on**: Phase 39
-**Requirements**: LLM-01, LLM-02, LLM-03, LLM-04
-**Success Criteria** (what must be TRUE):
-  1. User can create an LLM Connection in the connections area with an endpoint URL, API key, and default model name (free-form string — no hardcoded dropdown)
-  2. LLM node property panel exposes a system prompt field (designer-controlled) and a user prompt field supporting `{{payload.*}}` markers for dynamic content
-  3. User can configure temperature (default 0.7) and max_tokens (default 1024) directly in the property panel
-  4. When the LLM provider responds with HTTP 429, the node retries automatically using the `retry-after-ms` header value or exponential backoff, and the flow does not fail on transient rate limits
-  5. The LLM property panel displays a prominent warning that LLM nodes cannot consume Data Transform node output (permanent architectural constraint)
-**Plans**: 1 plan
-
-Plans:
 - [x] 40-01-PLAN.md — Register llm connection + migration + executor service + scrubbing logic (completed 2026-05-31)
 
 ### Phase 41: Pickle Model Node
-**Goal**: Users can upload a scikit-learn `.pkl` model, select it in a flow node, and run batch inference against the node's input payload — in a subprocess-isolated environment that prevents RCE
-**Depends on**: Phase 40
-**Requirements**: MODEL-01, MODEL-02, MODEL-03, MODEL-04
-**Success Criteria** (what must be TRUE):
-  1. User can upload a `.pkl` file from the Settings area, see it appear in a model list, and delete it; upload is restricted to admin and designer roles
-  2. Pickle deserialization and `predict()` execution happen in a subprocess-isolated Python process; a malicious pickle payload cannot escape to the host backend process
-  3. The Pickle Model node property panel shows the expected feature columns for the selected model, loaded from metadata stored at upload time
-  4. When the scikit-learn version in the inference environment differs from the version recorded at upload time, a `[Model Warning]` appears in the execution console
-**Plans**: 3 plans
-
-Plans:
 - [x] 41-01-PLAN.md — ML Registry + Migration + Metadata Worker + RBAC API (completed 2026-05-31)
 - [x] 41-02-PLAN.md — Model Management UI + Node Property Panel (completed 2026-05-31)
 - [x] 41-03-PLAN.md — Isolated Inference Engine + Warning Propagation (completed 2026-05-31)
 
 ### Phase 42: Conditional/Branch Node
-**Goal**: Users can split flow execution into true and false branches based on a JS boolean expression evaluated at runtime; the canvas visually distinguishes branches, and cycles are caught before they can produce wrong data
-**Depends on**: Phase 41
-**Requirements**: BRNCH-01, BRNCH-02, BRNCH-03
+- [x] 42-01-PLAN.md — Branch node UI, fromHandle protocol, BFS cycle detection (completed 2026-05-31)
+
+</details>
+
+---
+
+## 🚧 v2.0 BI Analyst (Phases 43-46) — IN PROGRESS
+
+**Milestone Goal:** Deploy an interactive BI analyst agent that reads the current dashboard context, executes analytical queries via CubeJS, and triggers pre-configured skills — all from a chat panel embedded in the dashboard designer. The browser session never leaves the platform.
+
+**Build order rationale:** Service before tools before gateway before UI. Phase 43 establishes the Python microservice skeleton so Phases 44-46 have a stable target. Phase 44 wires the two agent tools (CubeJS + skills catalog) that deliver the core analytical value. Phase 45 adds the BFF proxy layer so the frontend can reach the service securely. Phase 46 delivers the chat panel that users actually interact with.
+
+## Phases
+
+- [ ] **Phase 43: AI Service Foundation** - New Python microservice (ai-analyst/) with Google ADK, Gemini API, and a basic `/chat` endpoint that accepts a message and returns a streamed agent response
+- [ ] **Phase 44: Agent Tools** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation
+- [ ] **Phase 45: BFF Integration** - BFF routes that proxy `/bff/ai/*` requests to the AI service with session validation and screen context passthrough
+- [ ] **Phase 46: Chat UI** - Vue 3 collapsible chat panel matching the Stitch design: message bubbles, expandable Thought/Actions/Result sections, live usage stats, and CTA skill buttons
+
+## Phase Details
+
+### Phase 43: AI Service Foundation
+**Goal**: A deployable Python microservice exists that accepts a chat message and returns a Gemini-powered agent response via Google ADK
+**Depends on**: Phase 42 (v1.9 complete)
+**Requirements**: SVC-01
 **Success Criteria** (what must be TRUE):
-  1. User can add a Conditional/Branch node with a JS boolean expression in the property panel; the node renders two distinct output ports (true and false) on the canvas
-  2. True port is green and false port is red; connecting a cable from either port sets `fromHandle` on the connection so runner.ts routes execution to only the matching branch
-  3. When a user draws a connection that creates a cycle on the canvas, the editor rejects the connection with an error and does not allow the flow to be saved with the cycle in place
-  4. A flow that previously had a silent cycle (runner.ts:153 bug) now exits with a clear error message identifying the cycle instead of producing silently wrong output
+  1. Running `docker-compose up ai-analyst` starts the service on a dedicated port with a `/health` endpoint returning 200
+  2. Posting a plain text message to the `/chat` endpoint returns a structured agent response (at minimum: final answer text)
+  3. The service uses the Gemini model via Google ADK orchestration — not a direct Gemini SDK call from a single function
+  4. Agent configuration (model name, Gemini API key) is read from environment variables, not hardcoded
 **Plans**: TBD
 
 Plans:
-- [ ] 42-01: TBD
+- [ ] 43-01: TBD
+
+### Phase 44: Agent Tools
+**Goal**: The agent can answer questions about dashboard data by running CubeJS queries, and can execute skills from a dynamically loaded catalog
+**Depends on**: Phase 43
+**Requirements**: SVC-02, SVC-03, AGENT-01, AGENT-02, AGENT-03
+**Success Criteria** (what must be TRUE):
+  1. Asking the agent "what were total sales last month?" causes it to invoke the CubeJS tool, execute a dimension/measure query, and return a data-grounded answer
+  2. When the agent receives screen context (chart data), it can describe visible trends, peaks, or anomalies in plain language without executing an additional CubeJS query
+  3. The skills catalog (catalog.yaml from github.com/ianache/skills-catalog) is fetched and parsed at service startup; available skill names are visible in agent tool descriptions
+  4. Asking the agent to run a skill by name causes it to invoke the catalog tool and return the skill's execution result or a clear error if the skill is not found
+**Plans**: TBD
+
+Plans:
+- [ ] 44-01: TBD
+
+### Phase 45: BFF Integration
+**Goal**: The dashboard-app frontend can reach the AI service through the BFF with session validation; unauthenticated requests are rejected before touching the AI service
+**Depends on**: Phase 44
+**Requirements**: SVC-04
+**Success Criteria** (what must be TRUE):
+  1. A POST to `/bff/ai/chat` with a valid session cookie is forwarded to the AI service and returns its response; a request with no session cookie receives HTTP 401
+  2. The BFF extracts the current user's session context and forwards it as a header or body field to the AI service with every request
+  3. Screen context (JSON payload of visible chart data) sent by the frontend is passed through to the AI service without modification
+**Plans**: TBD
+
+Plans:
+- [ ] 45-01: TBD
+
+### Phase 46: Chat UI
+**Goal**: Dashboard designers can open a chat panel, ask questions about their dashboard, and interact with agent responses including skill CTAs — without leaving the designer
+**Depends on**: Phase 45
+**Requirements**: CHAT-01, CHAT-02, CHAT-03, CHAT-04, CHAT-05
+**Success Criteria** (what must be TRUE):
+  1. User can open and close the AI Analyst panel via a button in the dashboard designer toolbar; the panel is collapsible and does not overlap the canvas when open
+  2. Submitting a question in the chat input automatically captures the visible chart data from the current dashboard view and sends it as screen context with the request
+  3. Agent responses render in message bubbles with three independently expandable sections: Thought Process, Actions Taken, and Final Result
+  4. The panel header shows live usage stats that update after each response: input tokens, output tokens, cache hit %, and session cost
+  5. When an agent response includes a recommended skill, a call-to-action button appears inside the message bubble; clicking it triggers that skill and shows the result inline
+**Plans**: TBD
+
+Plans:
+- [ ] 46-01: TBD
 
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-05-31 after v1.9 roadmap creation*
+*Last updated: 2026-05-31 after v2.0 roadmap creation*
