@@ -134,16 +134,16 @@ Implementar un configurador de visualizaciones dinámico con:
 
 **Archive:** `.planning/milestones/v1.7-ROADMAP.md`
 
-## Current Milestone: v1.9 — Advanced Node Types
+## Current Milestone: v2.0 — BI Analyst
 
-**Goal:** Extender el editor de flujos de integración con cinco nuevos tipos de nodos que habilitan lógica condicional, transformación de datos, generación de texto con plantillas, integración con LLMs y ejecución de modelos ML (Pickle/scikit-learn).
+**Goal:** Mejorar la experiencia del diseñador de dashboards para analistas BI, comenzando con un panel lateral colapsable para explorar y añadir tablas (hechos y dimensiones) al canvas mediante drag & drop.
 
 **Target features:**
-- Conditional/Branch node — JS boolean expression → rutas true/false en el canvas
-- Data Transform node — función JS que reshape/map/filter datos en tránsito
-- Templating node — rellena una plantilla `{{expr}}` con datos → output de texto
-- LLM node — llama a un endpoint OpenAI-compatible vía Connection configurada
-- Pickle Model node — sube un .pkl file, backend ejecuta predict() con los datos del nodo
+- Panel lateral izquierdo colapsable con listado de tablas disponibles (hechos y dimensiones)
+- Drag & drop de tablas desde el panel al canvas de diseño visual
+- Posibilidad de añadir la misma tabla más de una vez al canvas
+- Filtrado de tablas por nombre dentro del panel
+- Agrupación alfabética: grupo "Hechos" primero, luego "Dimensiones", cada uno colapsable
 
 ---
-*Last updated: 2026-05-31 after starting milestone v1.9*
+*Last updated: 2026-05-31 after starting milestone v2.0*
