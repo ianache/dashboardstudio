@@ -1,325 +1,444 @@
-# Feature Research: BFF Service Architecture
+# Feature Research — v1.9 Advanced Node Types
 
-**Domain:** Backend for Frontend (BFF) — SPA Authentication & API Gateway
-**Researched:** 2026-05-28
-**Confidence:** HIGH (based on codebase analysis of existing auth/API surface + established OIDC/BFF patterns)
-
----
-
-## Context: What Already Exists
-
-Before cataloguing BFF features, understanding what is being replaced matters.
-
-**Current client-side auth (dashboard-app):**
-- `keycloak-js` adapter in `main.js` runs PKCE authorization code flow entirely in the browser
-- Access token, refresh token, and ID token stored in `sessionStorage` (`kc_token`, `kc_refresh`, `kc_id`)
-- `api.js` reads `keycloak.token` on every request and injects `Authorization: Bearer <token>` header
-- Token refresh is client-managed: `keycloak.onTokenExpired` fires 60s before expiry, calls `keycloak.updateToken(60)`
-- `cubejs.js` store holds the CubeJS token and calls CubeJS API directly from the browser
-
-**Current backend (FastAPI):**
-- Validates `Authorization: Bearer` on every request via `security.py` (`verify_token`)
-- Fetches JWKS from Keycloak, caches 1h, verifies RS256 signature
-- Extracts `sub`, `email`, `name`, `realm_access.roles` from payload
-- Auto-creates user record on first authenticated request (`ensure_user_exists`)
-
-**API surface to proxy:** 15 endpoint groups in `router.py` — users, dashboards, widgets, palettes, data_types, dimensional_models, cube_config, llm_config, currencies, data_sources, knowledge_spaces, diagram_types, editor_tools, integration_flows, execution_history.
+**Domain:** Visual ETL / Integration Flow Editor — Advanced Node Types
+**Researched:** 2026-05-31
+**Confidence:** HIGH (architecture sourced from codebase) / MEDIUM (behavioral patterns from n8n, Node-RED, Airflow docs)
 
 ---
 
-## Feature Landscape
+## How Each Node Type Works in the Wild
 
-### Table Stakes (Users Expect These)
-
-Features the BFF must deliver. Missing any = the BFF is not a BFF, the migration is incomplete.
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| OIDC Authorization Code + PKCE initiation | Browser cannot hold a client secret; BFF initiates the redirect with `response_type=code` and PKCE challenge | MEDIUM | BFF generates `state` and `code_verifier`, stores in server session before redirect |
-| Callback endpoint (`/auth/callback`) | Keycloak redirects here with `code`; BFF exchanges for tokens server-side | MEDIUM | POST to Keycloak `/token` endpoint with `code` + `code_verifier`; store tokens in session, set HttpOnly cookie |
-| HttpOnly session cookie | Users should never have tokens in JS memory or `sessionStorage` | LOW | `express-session` + `connect-pg-simple` or in-memory (dev); `SameSite=Lax`, `Secure`, `HttpOnly` flags required |
-| Session-backed token storage | Access token, refresh token, ID token stored server-side in session store, never sent to browser | LOW | Session record holds `{ access_token, refresh_token, id_token, expires_at }` |
-| Transparent token refresh | When BFF proxies a request and the access token is expired (or near-expiry), BFF refreshes silently before forwarding | MEDIUM | Compare `expires_at` against `Date.now()`; call Keycloak `/token` with `grant_type=refresh_token`; update session; no user interaction |
-| FastAPI proxy (`/api/*`) | Frontend currently calls FastAPI directly with Bearer; after BFF, frontend calls BFF which forwards with `Authorization: Bearer <stored_token>` | LOW-MEDIUM | `http-proxy-middleware` or `express-http-proxy`; strip cookie, inject Bearer from session |
-| CubeJS proxy (`/cubejs/*`) | CubeJS JWT is currently held in `cubejs.js` store; BFF must hold and inject it | MEDIUM | BFF fetches or generates CubeJS token server-side; frontend sends no token to CubeJS; BFF proxies all `/cubejs-api/v1/*` requests |
-| `/auth/me` endpoint | Frontend needs to know who is logged in (user profile, roles) after page load — cannot read HttpOnly cookie | LOW | BFF reads session, returns `{ sub, email, name, roles }` from stored ID token claims; no token exposed |
-| Local logout (`/auth/logout`) | Destroy server-side session and clear the session cookie | LOW | `req.session.destroy()` + `res.clearCookie()`; redirect to Keycloak logout URL |
-| Keycloak logout redirect | After local session is destroyed, redirect browser to Keycloak's `/protocol/openid-connect/logout` with `id_token_hint` and `post_logout_redirect_uri` | LOW | Required for full SSO logout; uses stored `id_token` from session before destroying it |
-| Unauthenticated redirect | Any request to a protected route without a valid session returns 401 (for API calls) or redirects to login (for browser navigation) | LOW | Middleware: if no session, `res.status(401).json({ error: 'unauthenticated' })`; frontend handles redirect |
-| CSRF protection | Session cookies are vulnerable to CSRF; all state-mutating BFF routes need protection | MEDIUM | `csurf` or `double-submit cookie` pattern; applies to `/auth/*` endpoints and any BFF-owned state |
+This section captures the domain consensus from n8n, Node-RED, Apache Airflow, and Zapier before applying it to Dashboard Studio's specific runtime model.
 
 ---
 
-### Differentiators (Competitive Advantage for This BFF)
+## Node 1: Conditional / Branch Node
 
-Features that improve security posture or operational experience beyond the bare minimum.
+### How It Works in the Wild
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| CubeJS token generation server-side | CubeJS JWT signed with shared secret never leaves the server; eliminates the current pattern of storing `VITE_CUBEJS_TOKEN` in frontend env | HIGH | BFF needs the CubeJS secret; generates JWT per-session or shared; injects on proxy |
-| Session expiry aligned with Keycloak token TTL | Server-side session max-age mirrors Keycloak access + refresh token lifetime; no stale sessions holding expired tokens | MEDIUM | Read `expires_in` from Keycloak token response; set `session.cookie.maxAge` accordingly |
-| `/auth/status` polling endpoint | Frontend can poll BFF to detect session expiry without reading tokens; enables proactive logout UI | LOW | Returns `{ authenticated: boolean, expiresAt: ISO string }` from session metadata |
-| Token refresh on-demand (`/auth/refresh`) | Frontend can explicitly trigger refresh (e.g., after returning from background); BFF refreshes and updates session | LOW | Calls Keycloak `/token` with `grant_type=refresh_token`; no response body needed beyond 200/401 |
-| Keycloak backchannel logout (OIDC Back-Channel) | Keycloak can notify the BFF server directly when a session is invalidated (e.g., admin logout, password change) | HIGH | Requires registering BFF backchannel logout URL in Keycloak client config; BFF destroys matching sessions from store |
+n8n's IF node evaluates a condition and routes items to one of two outputs labeled "true" and "false". Each output is a separate wire drawn from a distinct port on the node's right side. Node-RED's Switch node extends this to N outputs, each mapping to a rule. Airflow's `BranchPythonOperator` returns a task_id string and all other branches are marked "skipped" — downstream convergence requires a `none_failed_min_one_success` trigger rule.
 
----
+**What users configure:**
+- A JS boolean expression evaluated against the current payload (e.g., `payload.status === 'active'`)
+- Two output branches: true path and false path (named connections, not unlabeled wires)
 
-### Anti-Features (Commonly Requested, Often Problematic)
+**Input / Output:**
+- Input: any payload (object or array)
+- Output: same payload unchanged, routed to either the true or false output port
+- The condition does NOT transform the data — it only routes it
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Exposing raw tokens to frontend | Seems simpler — just forward the token from session to the browser | Defeats the entire purpose of the BFF pattern; tokens in JS memory are accessible via XSS | Keep tokens server-side; expose only user metadata via `/auth/me` |
-| BFF managing business logic | Tempting to add filtering, aggregation, or transformation in the BFF while proxying | BFF becomes a second FastAPI; adds coupling, doubles maintenance surface | BFF is a dumb proxy + auth layer only; all business logic stays in FastAPI |
-| Replacing express-session with JWT-signed cookies | Stateless approach avoids session store complexity | Logout cannot revoke a JWT cookie; stolen cookie is valid until expiry; no backchannel logout possible | Use server-side session store (even in-memory for dev); `connect-pg-simple` for production |
-| Silent SSO iframe checks | keycloak-js uses an iframe to check session status without redirect; current code already disables this (`checkLoginIframe: false`) due to Keycloak's `frame-ancestors 'self'` CSP | iframes blocked by CSP at `oauth2.qa.comsatel.com.pe`; cannot use; causes silent failures | Use `/auth/status` polling or session cookie presence as the session check mechanism |
-| WebSocket proxying via BFF | CubeJS real-time subscriptions use WebSocket; proxying WS through BFF is non-trivial | Adds significant complexity; CubeJS WebSocket auth is separate from REST auth | For v1, proxy only HTTP; defer WebSocket to v2 or keep direct CubeJS WS connection (acceptable risk if CubeJS is not internet-exposed) |
-| Per-request token validation in BFF | BFF re-validates token signature on every proxied request | Adds latency; creates second JWKS dependency in BFF; FastAPI already validates; double validation is redundant | BFF trusts its own session (it set the token); FastAPI validates signature as-is; BFF just injects the stored token |
-| Storing tokens in Redis with complex eviction | Seems production-grade | Overkill for a single-tenant internal dashboard; adds infrastructure dependency | `connect-pg-simple` uses the existing PostgreSQL database; one less service to operate |
+### Application to Dashboard Studio
 
----
+**The core problem: the canvas model is `{ from, to }` with no port field.**
 
-## Feature Breakdown by Auth Flow
+Currently every node has exactly one output port (`fec-port--out`), positioned at the center-right of the node. A conditional node requires two output ports — one for true, one for false — so connections must carry a `port` field (e.g., `{ from, to, fromPort: 'true' | 'false' }`).
 
-### Flow 1: Login (User-Visible vs Server-Side)
+The runner's topological sort must also change: when a conditional node is encountered, it evaluates the expression and adds the false-branch nodes to a `skippedNodes` set (the DSplit/DJoin pattern already demonstrates this). The existing `skippedNodes` mechanism in `runner.ts` is the correct template.
 
-**User sees:**
-1. App loads, no session cookie → frontend detects 401 from `/auth/me` → redirects browser to `/auth/login`
-2. Browser redirects to Keycloak login page
-3. User enters credentials on Keycloak UI
-4. Browser redirects back to the app
+**What happens when the condition fails (false)?**
+- Items are routed to the false-branch connected nodes
+- If no node is connected to the false port, execution continues without error (same semantics as n8n: unconnected branches are silently skipped)
+- The node itself always emits `success` status — it is the routing that changes, not the node's success state
 
-**Server-side mechanics (BFF):**
+**What happens on expression error?**
+- The node emits `error` status and execution halts (same as other nodes calling `Deno.exit(1)`)
 
-`GET /auth/login`:
-- BFF generates `state` (random nonce), `code_verifier` (random), `code_challenge = BASE64URL(SHA256(code_verifier))`
-- Stores `{ state, code_verifier }` in `req.session` (before redirect, so session exists)
-- Redirects browser to: `https://keycloak/realms/{realm}/protocol/openid-connect/auth?response_type=code&client_id=bff&redirect_uri=https://bff/auth/callback&scope=openid+profile+email&state={state}&code_challenge={challenge}&code_challenge_method=S256`
+### Table Stakes vs Nice-to-Haves
 
-`GET /auth/callback?code={code}&state={state}`:
-- Validates `state` matches session (CSRF protection)
-- POSTs to Keycloak `/token`: `grant_type=authorization_code`, `code`, `redirect_uri`, `client_id`, `client_secret` (if confidential client), `code_verifier`
-- Keycloak responds with `{ access_token, refresh_token, id_token, expires_in, refresh_expires_in }`
-- BFF stores all tokens in session: `req.session.tokens = { access_token, refresh_token, id_token, expires_at: Date.now() + expires_in * 1000 }`
-- BFF sets session cookie (HttpOnly, Secure, SameSite=Lax)
-- Redirects browser to `/` (or stored pre-login URL)
+| Feature | Category | Notes |
+|---------|----------|-------|
+| JS boolean expression evaluated in Deno (uses `executeScriptNode` pattern) | Table stakes | Reuses existing infrastructure |
+| Two labeled output ports (true / false) on node UI | Table stakes | Requires canvas port model change |
+| Connection carries `fromPort` field (`'true'` or `'false'`) | Table stakes | DB schema change for connections |
+| Runner skips false-branch nodes when condition is true (and vice versa) | Table stakes | Mirror DSplit's `skippedNodes` pattern |
+| Node emits `success` status regardless of which branch taken | Table stakes | Routing is not a failure |
+| Silent pass-through if false port has no downstream connection | Table stakes | Match n8n semantics |
+| Inline expression editor with syntax hints | Table stakes | Reuse existing CodeEditor component |
+| Expression builder UI (point-and-click condition builder) | Nice-to-have | High complexity; defer |
+| Switch node with N branches | Nice-to-have | Defer until IF is validated |
 
-**Complexity:** MEDIUM
-**Dependencies:** Keycloak client configured with BFF callback URI; PKCE support in Keycloak (enabled by default in Keycloak 18+)
+**Complexity: HIGH.** Requires canvas model change (port field), runner change (branch-aware execution), and SVG rendering of two output ports with labels.
 
 ---
 
-### Flow 2: Session Check (Page Load)
+## Node 2: Data Transform Node
 
-**User sees:** App loads seamlessly if session valid; redirect to login if not.
+### How It Works in the Wild
 
-**Server-side mechanics:**
+n8n's Code node runs in "Run Once for All Items" mode and expects the user to write a JS function body that receives `$input.all()` and returns an array of items. Zapier's Formatter step applies built-in operations (text, number, date). The common denominator in every platform: the user writes a JS function that receives the payload and returns a new payload. The function can map, filter, reduce, or reshape.
 
-`GET /auth/me`:
-- BFF checks `req.session.tokens`
-- If no session or session expired: `401 Unauthenticated`
-- If session valid: extract claims from stored `id_token` (parse JWT, no verification needed — BFF issued it); return `{ sub, email, name, roles }`
-- Frontend uses this to populate `useAuthStore`; no `keycloak-js` adapter needed
+**What users configure:**
+- A JS function body that receives `payload` (the upstream data) and returns the transformed data
+- Optional: mode toggle — "Process each item" vs "Process all items at once"
 
-**Complexity:** LOW
+**Input / Output:**
+- Input: any payload (typically an array of objects)
+- Output: any payload returned by the user function
 
----
+### Application to Dashboard Studio
 
-### Flow 3: Transparent Token Refresh (On Proxy Request)
+This is essentially the existing `js_script` (Script node) with two differences:
+1. The UX intent is explicit: "transform data", not "run arbitrary code"
+2. The function signature is enforced: `function transform(payload) { return newPayload; }` — the user writes only the body
 
-**User sees:** Nothing — API calls continue working even as the access token expires.
+The runner execution is identical to `js_script` — call `executeScriptNode` with the user code. The distinction is purely in the UI/UX (different label, different icon, different property panel hint text, different toolType name `data_transform`).
 
-**Server-side mechanics (BFF middleware):**
+**What happens when the transform throws?**
+- Node emits `error` status, execution halts (same as `js_script`)
 
-Before forwarding any proxied request:
-1. Check `req.session.tokens.expires_at` — if `expires_at - Date.now() < 60_000` (< 60s remaining):
-2. POST to Keycloak `/token`: `grant_type=refresh_token`, `refresh_token`, `client_id`, `client_secret`
-3. If refresh succeeds: update `req.session.tokens` with new tokens + new `expires_at`; save session; proceed with proxy using new `access_token`
-4. If refresh fails (refresh token expired): destroy session; return `401` to frontend; frontend redirects to login
+**What happens when the transform returns null/undefined?**
+- Should be treated as "pass payload unchanged" (n8n behavior) or error (strict mode). Recommended: emit a warning and pass the original payload through.
 
-**Complexity:** MEDIUM
-**Critical:** Concurrent requests during refresh window can cause multiple simultaneous refresh calls. Mitigation: in-flight refresh deduplication per session ID (a simple promise map keyed by session ID is sufficient).
+### Table Stakes vs Nice-to-Haves
 
----
+| Feature | Category | Notes |
+|---------|----------|-------|
+| JS function body in CodeEditor panel | Table stakes | Same as Script node |
+| Enforced signature hint: `// payload is the input; return transformed data` | Table stakes | Comment scaffolding in default code |
+| Runs via `executeScriptNode` in Deno | Table stakes | Zero new runtime work |
+| Null/undefined return → pass payload through with warning | Table stakes | Defensive behavior |
+| Mode toggle: per-item vs batch | Nice-to-have | Low value for current use cases; defer |
+| Built-in transform helpers (jq-like) | Nice-to-have | Very high complexity; anti-feature risk |
+| Visual field mapper UI | Nice-to-have | Complex; use Code node pattern instead |
 
-### Flow 4: API Proxy (FastAPI Routes)
+**Complexity: LOW.** Runtime is identical to the Script node. The work is UI labeling, a new `toolType` database entry, and a distinct property panel template. No new runner code needed.
 
-**User sees:** All API calls work as before; no auth headers to manage in frontend.
-
-**Server-side mechanics:**
-
-`ALL /api/*` → forward to `http://backend:8000/api/*`
-- Strip `Cookie` header (never forward session cookie to backend)
-- Inject `Authorization: Bearer {req.session.tokens.access_token}`
-- Forward all other headers (Content-Type, etc.)
-- Forward request body unchanged
-- Stream response back to client
-- On `401` from backend: attempt one token refresh, retry once, then propagate `401`
-
-**Complexity:** LOW-MEDIUM
-**Library:** `http-proxy-middleware` v3 (Express-compatible, supports `on.proxyReq` hook for header injection)
+**Dependency:** Requires a `data_transform` entry in the `editor_tools` table (same `prop_defs` as `js_script`, different label/icon/category).
 
 ---
 
-### Flow 5: CubeJS Proxy
+## Node 3: Templating Node
 
-**User sees:** CubeJS charts load as before; frontend no longer needs `VITE_CUBEJS_TOKEN`.
+### How It Works in the Wild
 
-**Server-side mechanics:**
+n8n's Set node with "expression mode" inlines `{{ $json.field }}` syntax into string values. Jinja2 (used in the existing Email node) renders a template string against a context dict. The existing Dashboard Studio Email node already uses this exact pattern — `Jinja2 SandboxedEnvironment` in Python renders `{{expr}}` placeholders.
 
-Option A (recommended for v1.8): BFF reads CubeJS JWT from `cube_config` table via FastAPI API, caches it in memory (it changes infrequently).
-Option B: BFF generates the CubeJS JWT itself using the shared secret (requires BFF to know `CUBEJS_API_SECRET`).
+**What users configure:**
+- A template string with `{{expression}}` placeholders (multi-line, potentially with HTML or structured text)
+- Optional: output format label (plain text, HTML, markdown — purely cosmetic)
 
-`ALL /cubejs-api/*` → forward to `http://cubejs:4000/cubejs-api/*`
-- Inject `Authorization: Bearer {cubejs_token}`
-- No user-specific CubeJS token needed for v1 (single-tenant, shared token)
+**Input / Output:**
+- Input: any payload (object or array) — used as the template context
+- Output: a single string (the rendered template)
 
-**Complexity:** MEDIUM (Option A) / HIGH (Option B — requires secret management)
-**Recommendation:** Option A for v1; BFF calls `GET /api/v1/cube-config/active` on startup to get the CubeJS token; refreshes on cache miss or backend-signaled change.
+### Application to Dashboard Studio
+
+The Python-side rendering infrastructure already exists in `email_executor.py`. The Templating node needs a Deno-side signal (`EXEC_TEMPLATE`) handled in Python, similar to `EXEC_EMAIL`. However, there is a simpler alternative: since the template resolution logic `resolveString()` already exists in `runner.ts` and handles `{{path.to.val}}` syntax, a basic templating node can run entirely in Deno without a Python roundtrip.
+
+The existing `resolveString(str, context)` in `runner.ts` is the engine. The user writes a multi-line template, the runner calls `resolveString` on every line, and emits the result as a string payload.
+
+**What happens when a placeholder is not found?**
+- Current `resolveString` behavior: leaves the placeholder text unchanged (e.g., `{{missing.field}}` stays as is)
+- This is the correct table-stakes behavior (matches Jinja2 undefined = silent, matches n8n)
+
+**What happens when the input payload is an array?**
+- The template context should be set to `payload[0]` for single-object array (common upstream pattern)
+- Or expose `records` as a context variable that iterates the array inside the template
+
+### Table Stakes vs Nice-to-Haves
+
+| Feature | Category | Notes |
+|---------|----------|-------|
+| Multi-line template textarea in properties panel | Table stakes | Not a CodeEditor — plain textarea |
+| `{{dot.path}}` placeholder resolution against payload | Table stakes | Reuse `resolveString()` from runner.ts |
+| Output is a string emitted as `context.payload` | Table stakes | Downstream nodes receive string payload |
+| Array input: expose `payload` (array) and first item's fields directly | Table stakes | Match Email node templating context |
+| Placeholder left unchanged if path not found | Table stakes | Current `resolveString` behavior |
+| Preview panel rendering template with sample data | Nice-to-have | Medium complexity; useful but not blocking |
+| Jinja2 `for` loops / `if` blocks | Nice-to-have | Requires Python delegation via EXEC signal |
+| Output format selector (HTML/text/markdown) | Anti-feature | Cosmetic complexity with no runtime effect |
+
+**Complexity: LOW.** Can run entirely in Deno using the existing `resolveString`. No new Python executor needed for the basic version. Output is a string.
+
+**Dependency:** The Email node is the primary consumer — Templating node output → Email node body is a natural flow.
 
 ---
 
-### Flow 6: Logout
+## Node 4: LLM Node
 
-**User sees:** Clicks "Logout" → session ends → redirected to Keycloak login page.
+### How It Works in the Wild
 
-**Server-side mechanics:**
+n8n's OpenAI node, Langchain-based automation tools, and every major flow editor in 2025-2026 standardized on the OpenAI Chat Completion API format (`POST /v1/chat/completions`). The API is provider-agnostic when the endpoint is configurable. Users configure:
+- An HTTP connection (base URL + API key) — reuses existing Connection infrastructure
+- Model name string (e.g., `gpt-4o`, `claude-3-5-sonnet`, `llama3`)
+- System prompt (static string or template with `{{}}`)
+- User prompt (template with `{{}}` resolved against payload)
+- Temperature (float 0.0–2.0, default 0.7)
+- Max tokens (integer, default provider-dependent)
+- Input: the user prompt, optionally including serialized payload
+- Output: `{ content: string, model: string, usage: { prompt_tokens, completion_tokens } }`
 
-`POST /auth/logout`:
-1. Extract `id_token` from `req.session.tokens` (needed for `id_token_hint`)
-2. Call `req.session.destroy()` to invalidate server-side session
-3. Call `res.clearCookie(SESSION_COOKIE_NAME)`
-4. Redirect browser to: `https://keycloak/realms/{realm}/protocol/openid-connect/logout?id_token_hint={id_token}&post_logout_redirect_uri=https://dashboard/auth/login`
-5. Keycloak invalidates its SSO session; redirects user to `post_logout_redirect_uri`
+**What is table stakes (industry consensus):**
+- `model`, `system_prompt`, `user_prompt`, `temperature`, `max_tokens`
+- Connection selector (HTTP type with bearer auth / API key)
+- Output is the assistant's `content` string (plus metadata in a structured object)
 
-**Complexity:** LOW
-**Note:** Without `id_token_hint`, Keycloak (v18+) shows a "do you want to logout?" confirmation page. Always include it.
+**What is nice-to-have:**
+- Streaming responses (requires SSE handling in Deno — complex)
+- Multi-turn conversation history
+- Tool calling / function calling
+- Response format enforcement (JSON mode)
+
+### Application to Dashboard Studio
+
+The existing `http_rest` node already does `fetch()` in Deno with Bearer auth headers. The LLM node is essentially a specialized HTTP node with a fixed JSON body shape. This means the runner can execute it entirely in Deno — no Python delegation needed.
+
+The Connection type should be `http_jwt` or a new `llm` type that stores `{ base_url, api_key, model_default }`. The simplest approach: reuse the existing HTTP connection type (stores `base_url` and `api_key`) and let the node override the model per-call.
+
+**Body shape sent to the API:**
+```json
+{
+  "model": "<node.props.model>",
+  "messages": [
+    { "role": "system", "content": "<resolved system_prompt>" },
+    { "role": "user",   "content": "<resolved user_prompt>" }
+  ],
+  "temperature": <node.props.temperature>,
+  "max_tokens": <node.props.max_tokens>
+}
+```
+
+**What the node emits as output:**
+```json
+{
+  "content": "<assistant reply>",
+  "model": "<model used>",
+  "usage": { "prompt_tokens": N, "completion_tokens": N, "total_tokens": N }
+}
+```
+
+**What happens when the API returns an error?**
+- HTTP non-2xx → node emits `error` status, execution halts
+- Connection not found → validation error before request
+
+**What happens when max_tokens is exceeded?**
+- The API returns a truncated response with `finish_reason: "length"` — the node should emit `success` with the truncated content (it is the model's choice, not an error)
+
+### Table Stakes vs Nice-to-Haves
+
+| Feature | Category | Notes |
+|---------|----------|-------|
+| Connection selector (HTTP type, stores base URL + API key) | Table stakes | Reuse existing DataSource HTTP type |
+| Model field (string, free-form to support any provider) | Table stakes | No hardcoded model list |
+| System prompt textarea (supports `{{}}` template syntax) | Table stakes | Resolved via `resolveString` before send |
+| User prompt textarea (supports `{{}}` template syntax) | Table stakes | Primary input, payload injected here |
+| Temperature (0.0–2.0 float slider or number input, default 0.7) | Table stakes | Industry-standard parameter |
+| Max tokens (integer, default 1024) | Table stakes | Prevents runaway costs |
+| Output: `{ content, model, usage }` object as next payload | Table stakes | Downstream nodes can use `{{content}}` |
+| HTTP 4xx/5xx → node error, execution halt | Table stakes | Match existing HTTP node behavior |
+| Streaming responses | Nice-to-have | Requires SSE in Deno subprocess; defer |
+| Multi-turn conversation (history management) | Nice-to-have | Requires stateful context; defer |
+| JSON response format enforcement | Nice-to-have | Add `response_format` field later |
+| Tool calling / function calling | Nice-to-have | Large feature; separate node type if needed |
+| Hardcoded model dropdown (OpenAI-only) | Anti-feature | Kills compatibility with Ollama, Anthropic, etc. |
+
+**Complexity: MEDIUM.** The Deno execution is straightforward (HTTP POST). The UI requires 5 configurable fields with the system/user prompts being multi-line. The main complexity is UX: the user prompt needs clear guidance on how to inject payload data via `{{}}` syntax.
+
+**Dependency:** Requires an HTTP-type DataSource connection configured with the LLM provider's base URL and API key. No new connection type needed — reuse existing HTTP connection, or add a simple `llm` connection type that stores `{ base_url, api_key }`.
+
+---
+
+## Node 5: Pickle Model Node
+
+### How It Works in the Wild
+
+scikit-learn's `predict()` method accepts:
+- A 2D NumPy array of shape `(n_samples, n_features)` — the canonical form
+- A pandas DataFrame (column names must match training feature names)
+- A list of lists (Python auto-converts to array)
+
+The safest format for a runtime that receives JSON data from Deno: a list of dicts (one dict per sample, keys = feature names). Python-side: `pd.DataFrame(records)` then `model.predict(df)`.
+
+**What users configure:**
+- Upload a `.pkl` file (the trained model)
+- Feature list (column names expected by the model, in order)
+- Output column name (what to call the prediction result field)
+- Optional: predict mode — `predict` (class labels) vs `predict_proba` (probabilities)
+
+**Input / Output:**
+- Input: array of objects where each object has the feature fields (e.g., `[{ age: 25, salary: 50000 }, ...]`)
+- Output: same array with a new field added containing the prediction (e.g., `[{ age: 25, salary: 50000, prediction: 1 }, ...]`)
+
+**What happens when `predict()` throws?**
+- Missing feature column → ValueError → node emits `error` and halts
+- Model file corrupted → UnpicklingError → same
+- Feature count mismatch → same
+
+**What happens with Python version / sklearn version mismatch?**
+- Pickle files are NOT forward/backward compatible across major sklearn versions. A model pickled with sklearn 1.3 may fail to load under 1.5. This is the single most critical pitfall for this node.
+
+### Application to Dashboard Studio
+
+The Pickle node requires Python-side execution because Deno cannot load `.pkl` files. This means it must follow the `EXEC_ODS` / `EXEC_EMAIL` delegation pattern:
+1. Deno emits `EXEC_PICKLE:<node_id>:<batch_id>`
+2. Deno emits `EXEC_PICKLE_PAYLOAD:<json>` (the data records + model reference)
+3. Python's `deno_service.py` intercepts the signal, calls a new `PickleExecutor`
+4. `PickleExecutor` loads the pkl file, runs `predict()`, returns results
+5. Results are injected back into `context.payload` via the existing ods_result pattern
+
+**Model file storage:** The `.pkl` file needs to be stored server-side. Options:
+- Backend filesystem: simple, works, but not containerization-friendly
+- Database blob: acceptable for small models (< 10MB)
+- Recommended: store as a named artifact in a backend upload endpoint, referenced by an artifact ID in the node props
+
+**Input format to `predict()`:**
+```python
+import pandas as pd
+df = pd.DataFrame(records)  # records = list of dicts from payload
+features = node_props['features']  # ordered list of column names
+X = df[features]
+predictions = model.predict(X)
+# Merge predictions back: zip(records, predictions)
+```
+
+### Table Stakes vs Nice-to-Haves
+
+| Feature | Category | Notes |
+|---------|----------|-------|
+| Upload endpoint for `.pkl` file (stores server-side, returns artifact ID) | Table stakes | Required before node can function |
+| Node props store `artifact_id` (not raw file path) | Table stakes | Portable across environments |
+| Feature list config (ordered list of column names) | Table stakes | Required for DataFrame construction |
+| Output field name config (default: `prediction`) | Table stakes | Merges prediction into each record |
+| `predict` mode (class labels) | Table stakes | Primary use case |
+| Python-side `PickleExecutor` following EXEC_PICKLE signal pattern | Table stakes | Required for Deno-to-Python delegation |
+| Error if feature columns missing from payload | Table stakes | Clear error message with missing field name |
+| `predict_proba` mode (probability scores) | Nice-to-have | Add `predict_mode` toggle; returns array of floats |
+| sklearn version pinning warning in UI | Nice-to-have | Display sklearn version model was trained on |
+| ONNX export as alternative to pickle | Nice-to-have | Better cross-version compatibility; separate feature |
+| Model versioning / multiple artifact storage | Nice-to-have | Defer; file upload + ID is sufficient for v1.9 |
+
+**Complexity: HIGH.** Requires: (1) a file upload API endpoint, (2) artifact storage schema, (3) a new `PickleExecutor` class, (4) the EXEC_PICKLE signal protocol in `deno_service.py`, (5) `pandas` and `scikit-learn` as new backend dependencies, (6) handling the sklearn version compatibility pitfall.
+
+---
+
+## Feature Landscape Summary
+
+### Table Stakes (All 5 Nodes)
+
+| Feature | Node | Complexity | Dependencies |
+|---------|------|------------|--------------|
+| Two labeled output ports (true/false) on canvas | Conditional | HIGH | Canvas port model change, connection schema change |
+| `fromPort` field on connections (true/false) | Conditional | HIGH | DB migration for connections table |
+| Expression evaluator (reuse `executeScriptNode`) | Conditional | LOW | No new runtime code |
+| False-branch `skippedNodes` in runner | Conditional | MEDIUM | Mirror DSplit pattern |
+| `data_transform` toolType DB entry | Transform | LOW | New DB row, no code |
+| Function body CodeEditor with enforced signature hint | Transform | LOW | Reuse CodeEditor component |
+| Null-return pass-through behavior | Transform | LOW | Two-line runner guard |
+| Multi-line template textarea | Templating | LOW | No CodeEditor — plain textarea |
+| `resolveString()` applied to template body | Templating | LOW | Already exists in runner.ts |
+| String output as `context.payload` | Templating | LOW | One-liner in runner |
+| Connection selector (HTTP type) | LLM | LOW | Reuse existing DataSource HTTP |
+| Model, system prompt, user prompt, temperature, max_tokens fields | LLM | LOW | Standard prop_defs |
+| OpenAI-compatible POST via Deno fetch | LLM | LOW | Same pattern as http_rest node |
+| `{ content, model, usage }` output shape | LLM | LOW | Parse API response |
+| `.pkl` upload endpoint + artifact storage | Pickle | HIGH | New API endpoint + DB table |
+| `PickleExecutor` Python class | Pickle | HIGH | New service, new deps |
+| EXEC_PICKLE signal protocol in deno_service.py | Pickle | MEDIUM | Mirror EXEC_ODS pattern |
+| Feature list config, prediction column merge | Pickle | MEDIUM | DataFrame construction |
+
+### Differentiators
+
+| Feature | Node | Value | Notes |
+|---------|------|-------|-------|
+| `{{}}` syntax in LLM prompts | LLM | High | Connects pipeline data directly into prompts without extra nodes |
+| Prediction merged into records (augment, not replace) | Pickle | High | Downstream nodes still have all original fields |
+| Conditional routes payload unchanged (pure routing) | Conditional | Medium | Preserves data integrity across branches |
+| Templating node output feeds Email node | Templating | High | Creates a natural Templating to Email composition |
+
+### Anti-Features (Do Not Build)
+
+| Anti-Feature | Reason | Alternative |
+|--------------|--------|-------------|
+| Expression builder UI for Conditional | Huge complexity for marginal UX gain — target users are developers | Plain JS expression textarea with examples |
+| Hardcoded model dropdown for LLM | Excludes Ollama, Anthropic, Mistral, etc. | Free-form `model` string field |
+| LLM streaming | Requires SSE in Deno subprocess — conflicts with batch signal model | Batch response is sufficient for ETL context |
+| Jinja2 for loops in Templating node | Requires Python delegation, adds EXEC_TEMPLATE signal overhead | Use the existing Email node's Jinja2 support; or use Script node for complex logic |
+| ONNX as default Pickle format | Adds major dependency, different workflow | Support as future upgrade; start with `.pkl` |
+| Pickle model file stored in DB blob | Performance problems above 10MB, not streamable | Filesystem artifact with artifact_id reference |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Keycloak OIDC Client (confidential or PKCE public)
-    └──required for──> Login Flow (/auth/login + /auth/callback)
-                           └──produces──> Session with tokens
-                                              └──enables──> /auth/me (identity)
-                                              └──enables──> API Proxy (/api/*)
-                                              └──enables──> CubeJS Proxy (/cubejs-api/*)
-                                              └──enables──> Token Refresh (transparent)
-                                              └──enables──> Logout (/auth/logout)
+Conditional Node
+    requires -> canvas port model change (fromPort on connections)
+    requires -> runner.ts branch-aware execution (skippedNodes pattern)
+    can reuse -> executeScriptNode (boolean expression evaluation)
 
-Session Store (express-session + pg or memory)
-    └──required for──> All session-dependent features above
+Data Transform Node
+    can reuse -> executeScriptNode (identical runtime)
+    requires -> new toolType DB entry only
 
-CubeJS token source (either FastAPI /cube-config/active or shared secret)
-    └──required for──> CubeJS Proxy
+Templating Node
+    can reuse -> resolveString() in runner.ts
+    enhances -> Email Node (natural predecessor)
+    does NOT require -> Python delegation (Deno-only)
 
-Frontend update (remove keycloak-js adapter, remove direct API calls)
-    └──depends on──> All BFF flows being operational first
+LLM Node
+    requires -> HTTP-type DataSource connection (existing)
+    can reuse -> fetch() pattern from http_rest node
+    does NOT require -> Python delegation (Deno-only)
+
+Pickle Model Node
+    requires -> file upload endpoint (new)
+    requires -> artifact storage (new DB table or filesystem path)
+    requires -> PickleExecutor Python class (new service)
+    requires -> EXEC_PICKLE signal in deno_service.py (new protocol)
+    requires -> pandas + scikit-learn as backend deps (new)
 ```
 
-### Dependency Notes
+---
 
-- **Login flow requires session before redirect:** `req.session` must be initialized (session middleware must run before `/auth/login`) so `state` and `code_verifier` survive the redirect roundtrip.
-- **Token refresh requires session store to be write-capable:** In-memory session store loses sessions on BFF restart; use `connect-pg-simple` in production.
-- **Frontend removal of keycloak-js requires BFF to be fully operational:** The frontend migration (`remove keycloak-js`, `call BFF instead of FastAPI`) must happen after the BFF is deployed and tested.
-- **FastAPI auth cleanup depends on BFF being the sole caller:** Only remove FastAPI JWT validation after confirming BFF injects Bearer on every request; premature removal breaks security.
+## Phase Sequencing Recommendation
+
+Phase order based on implementation complexity and dependencies:
+
+1. **Data Transform Node** — Zero new infrastructure. New DB row + UX label. Ship first to validate toolType extension pattern.
+
+2. **Templating Node** — Zero new runtime. Deno-only `resolveString` application. Natural next step; enables Templating to Email flows.
+
+3. **LLM Node** — Deno-only HTTP call. Requires existing HTTP connection. Medium UI complexity (5 fields + two multi-line textareas). No new Python code.
+
+4. **Conditional / Branch Node** — Highest canvas complexity. Requires port model migration (DB + frontend + runner). Do after simpler nodes are shipped to reduce risk.
+
+5. **Pickle Model Node** — Highest backend complexity. Requires new executor, upload API, dependencies. Ship last.
+
+Rationale: Phases 1-3 are additive (new toolType entries + runner else-if branches). Phase 4 is invasive (changes the canvas connection model). Phase 5 is expansive (new backend service stack). This ordering minimizes blast radius per phase.
 
 ---
 
-## MVP Definition
+## Edge Cases Requiring Explicit Design Decisions
 
-### Launch With (v1.8 — this milestone)
-
-- [ ] OIDC authorization code + PKCE login flow (`/auth/login` + `/auth/callback`) — without this the BFF has no auth
-- [ ] HttpOnly session cookie with server-side session store — without this tokens leak to browser
-- [ ] `/auth/me` endpoint — without this frontend cannot determine logged-in identity
-- [ ] Transparent token refresh middleware — without this sessions expire mid-use
-- [ ] FastAPI proxy (`/api/*`) with Bearer injection — without this no business functionality works
-- [ ] CubeJS proxy (`/cubejs-api/*`) with server-side token — without this dashboards show no data
-- [ ] Logout (`/auth/logout`) with Keycloak redirect — without this users cannot sign out
-- [ ] CSRF protection on `/auth/*` endpoints — without this session fixation/CSRF attacks are possible
-- [ ] Frontend update: replace `keycloak-js` calls with BFF calls, use `credentials: 'include'` — without this BFF is unused
-
-### Add After Validation (v1.8.x)
-
-- [ ] `/auth/status` endpoint — add when frontend needs proactive session expiry UI
-- [ ] `/auth/refresh` explicit endpoint — add when background-tab refresh is needed
-- [ ] `connect-pg-simple` session store — add when BFF restarts are causing session loss in production
-
-### Future Consideration (v2+)
-
-- [ ] Keycloak backchannel logout — requires Keycloak client configuration + session store that supports lookup by `sid` claim; complex, adds real-time logout propagation
-- [ ] Per-user CubeJS JWT with row-level security claims — requires CubeJS RBAC model; significant CubeJS schema work
-- [ ] WebSocket proxy for CubeJS real-time subscriptions — requires `http-proxy-middleware` WS mode + BFF auth for WS upgrade
-
----
-
-## Feature Prioritization Matrix
-
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| OIDC login flow (redirect + callback) | HIGH | MEDIUM | P1 |
-| HttpOnly cookie session | HIGH | LOW | P1 |
-| `/auth/me` identity endpoint | HIGH | LOW | P1 |
-| Transparent token refresh | HIGH | MEDIUM | P1 |
-| FastAPI proxy with Bearer injection | HIGH | LOW | P1 |
-| CubeJS proxy with server-side token | HIGH | MEDIUM | P1 |
-| Logout + Keycloak redirect | HIGH | LOW | P1 |
-| CSRF protection | HIGH (security) | MEDIUM | P1 |
-| Frontend migration off keycloak-js | HIGH | MEDIUM | P1 |
-| `/auth/status` polling | MEDIUM | LOW | P2 |
-| `connect-pg-simple` session persistence | MEDIUM | LOW | P2 |
-| Keycloak backchannel logout | LOW | HIGH | P3 |
-| Per-user CubeJS JWT (RBAC) | MEDIUM | HIGH | P3 |
-| WebSocket proxy | LOW | HIGH | P3 |
-
-**Priority key:**
-- P1: Must have for launch (v1.8 milestone)
-- P2: Should have, add after core validated
-- P3: Future consideration (v2+)
-
----
-
-## Existing Infrastructure Dependencies
-
-| Component | Current State | BFF Dependency |
-|-----------|--------------|----------------|
-| Keycloak at `oauth2.qa.comsatel.com.pe` | Running, PKCE enabled, CSP `frame-ancestors 'self'` | BFF needs a new confidential client (or reuses `dashboard-app` as public PKCE client); callback URI must be registered |
-| FastAPI backend at `dashboard-api.pm.comsatel.com.pe` | Running, validates JWT via JWKS | BFF proxies all traffic; FastAPI JWT validation stays in place (defense in depth) |
-| CubeJS instance | Running, token in `cube_config` table | BFF fetches token via FastAPI on startup; or receives `CUBEJS_API_SECRET` env var |
-| PostgreSQL (backend DB) | Running | `connect-pg-simple` can use same DB for session store (separate table) |
-| Traefik reverse proxy | Running, routes `dashboard.pm.comsatel.com.pe` → frontend | Needs new route for BFF or BFF sits behind existing frontend domain as a new service |
-| `express-session` | Not yet installed | Core BFF dependency; session cookie name and secret must be in BFF env |
-
----
-
-## User-Visible vs Server-Side Behavior Summary
-
-| User Experience | What BFF Does Server-Side |
-|----------------|--------------------------|
-| User clicks "Login" → sees Keycloak login page | `/auth/login` generates PKCE challenge, stores in session, redirects to Keycloak |
-| User enters credentials on Keycloak → app loads | `/auth/callback` exchanges `code` for tokens, stores in session, sets HttpOnly cookie, redirects to `/` |
-| App loads, user appears logged in | Frontend calls `/auth/me`, BFF reads session and returns user claims — no token in browser |
-| User navigates, API calls succeed | BFF middleware reads session, injects Bearer, proxies to FastAPI; user sees normal app |
-| User stays on app for hours without action | Keycloak refresh token keeps session alive; BFF refreshes silently 60s before access token expires |
-| User clicks "Logout" | `/auth/logout` destroys session, clears cookie, redirects to Keycloak logout; Keycloak shows login page |
-| Admin forces user logout in Keycloak (v2) | Keycloak calls BFF backchannel endpoint; BFF destroys session; next request from user gets 401 |
+| Scenario | Node | Recommended Behavior |
+|----------|------|---------------------|
+| Condition expression syntax error at runtime | Conditional | `error` status, halt; expression is user code so errors are expected and logged |
+| Condition true but no node connected to true port | Conditional | `success` status, execution ends (no downstream nodes to run) |
+| Condition false but no node connected to false port | Conditional | `success` status, execution ends — this is intentional "if only" pattern |
+| Transform returns `null` or `undefined` | Transform | Emit console warning, pass original `context.payload` through unchanged |
+| Template placeholder references missing field | Templating | Leave placeholder text as-is (current `resolveString` behavior) — document clearly |
+| LLM API returns HTTP 429 (rate limit) | LLM | `error` status, halt — retry logic is out of scope for v1.9 |
+| LLM `finish_reason: "length"` (truncated) | LLM | `success` status — truncation is model behavior, not a node failure |
+| Pickle: feature column missing from payload record | Pickle | `error` status, halt — log which column is missing |
+| Pickle: model sklearn version mismatch | Pickle | `error` status with descriptive message — document that model must match backend sklearn version |
+| Pickle: payload is empty array | Pickle | `success` status, output empty array — match ODS node behavior |
 
 ---
 
 ## Sources
 
-| Source | Confidence | Notes |
-|--------|------------|-------|
-| Codebase analysis: `dashboard-app/src/services/keycloak.js`, `main.js`, `api.js`, `stores/auth.js`, `stores/cubejs.js` | HIGH | Direct inspection of current client-side auth implementation |
-| Codebase analysis: `backend/app/core/security.py`, `api/router.py` | HIGH | Direct inspection of FastAPI JWT validation and API surface |
-| Codebase analysis: `docker-compose.yaml` | HIGH | Infrastructure topology |
-| OIDC Authorization Code + PKCE flow (RFC 7636, OpenID Connect Core 1.0) | HIGH | Well-established, stable specs; BFF pattern applies these directly |
-| `express-session` + `http-proxy-middleware` established patterns | HIGH (training, pre-cutoff) | Both libraries stable, widely documented; verify current major versions |
-| Keycloak OIDC logout spec (`id_token_hint` + `post_logout_redirect_uri`) | HIGH | Keycloak 18+ behavior; current deployment at `oauth2.qa.comsatel.com.pe` |
+- n8n IF node documentation: https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.if/
+- n8n conditional logic guide: https://theowllogic.com/conditional-logic-in-n8n
+- Node-RED Switch node: https://flowfuse.com/node-red/core-nodes/switch/
+- Airflow branching: https://docs.astronomer.io/learn/airflow-branch-operator
+- scikit-learn predict() input format: https://machinelearningmastery.com/make-predictions-scikit-learn/
+- scikit-learn pickling implications: https://uwekorn.com/2021/04/26/implications-of-pickling-ml-models.html
+- n8n data transformation: https://docs.n8n.io/data/transforming-data/
+- OpenAI-compatible API standard: https://www.onprem.ai/en/knowhow/llm-api-standards/
+- n8n OpenAI integration 2026: https://tokenmix.ai/blog/n8n-openai-compatible-api
+- Dashboard Studio runner.ts, deno_service.py, FlowEditorCanvas.vue (codebase — HIGH confidence)
 
 ---
 
-*Feature research for: BFF Service Architecture (Dashboard Studio v1.8)*
-*Researched: 2026-05-28*
+*Feature research for: Dashboard Studio v1.9 Advanced Node Types*
+*Researched: 2026-05-31*

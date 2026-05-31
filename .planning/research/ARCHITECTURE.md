@@ -1,610 +1,585 @@
-# Architecture Research
+# Architecture Research — v1.9 Advanced Node Types
 
-**Domain:** BFF Service Architecture — Dashboard Studio v1.8
-**Researched:** 2026-05-28
+**Domain:** Visual Flow Editor — Extending the Deno/Python Signal Architecture
+**Researched:** 2026-05-31
 **Confidence:** HIGH (based on direct codebase analysis)
 
 ---
 
 ## Standard Architecture
 
-### System Overview
+### Current System Overview
 
 ```
-CURRENT (v1.7)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ┌──────────────────────┐     Bearer <kc_token>     ┌──────────────────────┐
-  │  dashboard-app       │ ─────────────────────────► │  backend FastAPI     │
-  │  Vue 3 (port 3000)   │                            │  (port 8000, Traefik)│
-  │                      │   Keycloak JS adapter      │                      │
-  │  keycloak.js         │◄───────────────────────────│  security.py:        │
-  │  stores tokens in    │      redirect flows        │  verify_token()      │
-  │  sessionStorage      │                            │  fetches JWKS        │
-  │                      │                            └──────────────────────┘
-  │  cubejs.js           │   Bearer <cube_jwt>        ┌──────────────────────┐
-  │  token from DB via   │ ─────────────────────────► │  CubeJS              │
-  │  FastAPI             │                            │  (port 4000, ext.)   │
-  └──────────────────────┘                            └──────────────────────┘
-             │                                                   ▲
-             │ OIDC redirect                          Static JWT from DB
-             ▼                                        (cube_config table)
-  ┌──────────────────────┐
-  │  Keycloak            │
-  │  (ext. OIDC server)  │
-  └──────────────────────┘
-
-
-TARGET (v1.8)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ┌──────────────────────┐   httpOnly cookie session  ┌──────────────────────┐
-  │  dashboard-app       │ ─────────────────────────► │  BFF                 │
-  │  Vue 3 (port 3000)   │                            │  Node.js + Express   │
-  │                      │   /bff/auth/login          │  (port 3001)         │
-  │  NO keycloak-js      │   /bff/api/v1/...          │                      │
-  │  NO token in browser │   /bff/cubejs/...          │  Session store       │
-  │                      │◄──────────────────────────  │  OIDC client         │
-  │  api.js points to    │   Set-Cookie: session=...  │  http-proxy-mw       │
-  │  BFF base URL        │                            └──────────┬───────────┘
-  └──────────────────────┘                                       │
-                                                                 │ Bearer <kc_token> (forwarded)
-                                                                 ▼
-                                            ┌───────────────────────────────────────┐
-                                            │                                       │
-                               ┌────────────▼──────────┐   ┌──────────────────────┐│
-                               │  backend FastAPI       │   │  CubeJS              ││
-                               │  (port 8000, internal) │   │  (port 4000, int.)   ││
-                               │                        │   │                      ││
-                               │  security.py:          │   │  JWT signed by BFF   ││
-                               │  verify_token()        │   │  (shared secret)     ││
-                               │  unchanged             │   └──────────────────────┘│
-                               └────────────────────────┘                           │
-                                            │                                       │
-                                            └───────────────────────────────────────┘
-                                                         ▲
-                                            ┌────────────┴──────────┐
-                                            │  Keycloak             │
-                                            │  (ext. OIDC server)   │
-                                            │  JWKS, token endpoint │
-                                            └───────────────────────┘
+Browser (Vue 3 SPA)
+  └─ FlowEditorCanvas.vue
+       ├─ nodes: [{ id, toolType, category, label, props, x, y }]
+       └─ connections: [{ id, from, to }]   ← ONE output handle per node today
+            │
+            │  WebSocket (ws://bff/integration-flows/{id}/logs)
+            ▼
+BFF (Node.js + Express)
+  └─ proxy → FastAPI:8000
+            │
+            ▼
+FastAPI /integration-flows/{id}/logs (WebSocket)
+  └─ pre_execute_flow_nodes()   ← source nodes resolved in Python before Deno
+  └─ deno_service.run_flow_stream()
+            │
+            │  stdin: flow JSON (nodes + connections + metadata + prefetched_outputs)
+            ▼
+Deno runner.ts (subprocess)
+  ├─ getTopologicalOrder()      ← Kahn's BFS over { from, to } edges
+  ├─ runNodeExecution()         ← switch on node.toolType
+  │    ├─ js_script → executeScriptNode() (data URI module trick)
+  │    ├─ http_rest / graphql  → fetch()
+  │    ├─ join                 → in-process join
+  │    ├─ ods_pg               → emits EXEC_ODS: signal + EXEC_ODS_PAYLOAD: JSON
+  │    └─ email                → emits EXEC_EMAIL: signal + EXEC_EMAIL_PAYLOAD: JSON
+  │
+  │  stdout: signal lines, parsed by deno_service.py
+  ▼
+deno_service.py (stdout parser + Python executor dispatcher)
+  ├─ NODE_STATUS:id:status       → WebSocket → browser canvas update
+  ├─ NODE_LOG_JSON:{json}        → execution history log
+  ├─ EXEC_ODS: + EXEC_ODS_PAYLOAD: → _handle_ods_execution() → asyncpg → PostgreSQL
+  ├─ EXEC_EMAIL: + EXEC_EMAIL_PAYLOAD: → _handle_email_execution() → smtplib
+  └─ FINAL_RESULT:{json}         → final payload forwarded to client
 ```
-
-### Component Responsibilities
-
-| Component | Responsibility | Change in v1.8 |
-|-----------|----------------|----------------|
-| dashboard-app | Vue 3 SPA, renders UI, calls APIs | Remove keycloak-js; point api.js to BFF |
-| BFF | Auth flows, session management, proxy to backend + CubeJS | NEW service |
-| backend FastAPI | Business logic only, CRUD, flow execution | Keep verify_token; add internal-only CORS |
-| CubeJS | Semantic layer for analytical queries | Unchanged; JWT now signed server-side |
-| Keycloak | External OIDC identity provider | Unchanged; BFF becomes the OIDC relying party |
 
 ---
 
-## Port Layout
+## Component Responsibilities
 
-| Service | Dev port | Docker-internal | Production (Traefik) |
-|---------|----------|-----------------|----------------------|
-| dashboard-app (Nginx) | 3000 | 80 | dashboard.pm.comsatel.com.pe |
-| BFF (Express) | 3001 | 3001 | dashboard-bff.pm.comsatel.com.pe (or same domain, /bff) |
-| backend (FastAPI) | 8000 | 8000 | dashboard-api.pm.comsatel.com.pe (restrict to internal) |
-| CubeJS | 4000 | 4000 | (internal only — never exposed to public) |
-
-**Recommendation:** Use a single external hostname and path-prefix routing via Traefik or an upstream Nginx in the frontend image:
-- `dashboard.pm.comsatel.com.pe/bff/*` → BFF:3001
-- BFF:3001 proxies internally to backend:8000 and cubejs:4000
-
-This avoids CORS headaches because frontend and BFF share the same origin. The httpOnly session cookie has `SameSite=Lax` and `Secure`, which works cross-origin if needed but is simpler at the same origin.
+| Component | Responsibility | Where Defined |
+|-----------|---------------|---------------|
+| `FlowEditorCanvas.vue` | Drag/drop canvas, port rendering, connection drawing, property panel | `dashboard-app/src/components/editor/` |
+| `runner.ts` | Topological sort + node execution in Deno sandbox | `backend/app/runtime/runner.ts` |
+| `deno_service.py` | Subprocess management, stdout signal parsing, Python executor dispatch | `backend/app/services/deno_service.py` |
+| `email_executor.py` | Jinja2 SandboxedEnvironment + smtplib SMTP send | `backend/app/services/email_executor.py` |
+| `ods_executor.py` | asyncpg batch write (Append/Overwrite/Upsert) to PostgreSQL | `backend/app/services/ods_executor.py` |
+| `source_executor.py` | Pre-execution of source nodes (SQL/HTTP) before Deno starts | `backend/app/services/source_executor.py` |
+| `DataSource` (model) | Encrypted connection credentials (SMTP, DB, HTTP, FTP) | `backend/app/models/models.py` |
+| `LlmConfig` (model) | Encrypted API keys per provider (Anthropic, Gemini, Groq, Moonshot) | `backend/app/models/models.py` |
+| `EditorTool` (model) | Tool catalog: type, category, prop_defs, icon stored in DB | `backend/app/models/models.py` |
 
 ---
 
-## Recommended Project Structure
+## Integration Design per New Node Type
+
+### Node 1: Conditional / Branch
+
+**Core problem:** `FlowConnection` currently has `{ id, from, to }` with no handle discriminator. The topological sort and payload routing use only `from`/`to`. A branch node requires two output connections, one taken (`true`) and one not taken (`false`).
+
+**Canvas changes required (one-way door):**
+
+The `FlowConnection` interface must gain an optional `fromHandle` field:
+
+```typescript
+interface FlowConnection {
+  id: string;
+  from: string;
+  to: string;
+  fromHandle?: 'true' | 'false' | 'out';  // 'out' = default for all existing nodes
+}
+```
+
+All existing connections without `fromHandle` are treated as `'out'` by the runner — no migration of existing flows needed.
+
+In `FlowEditorCanvas.vue`, the branch node renders two output ports instead of one. The single `fec-port--out` div (currently shown for all non-destination/non-notification nodes at line 314) must be replaced with a conditional block:
+
+```html
+<!-- Single output port for normal nodes (existing) -->
+<div v-if="!readOnly && node.category !== 'destination'
+           && node.category !== 'notification'
+           && node.toolType !== 'branch'"
+  class="fec-port fec-port--out"
+  @mousedown.stop="onPortMousedown($event, node, 'out', 'out')"
+  @mouseup="onPortMouseup($event, node, 'in')">
+</div>
+
+<!-- Dual output ports for branch node -->
+<template v-if="!readOnly && node.toolType === 'branch'">
+  <div class="fec-port fec-port--out fec-port--true"
+    @mousedown.stop="onPortMousedown($event, node, 'out', 'true')"
+    @mouseup="onPortMouseup($event, node, 'in')">
+    <span class="fec-port-label">T</span>
+  </div>
+  <div class="fec-port fec-port--out fec-port--false"
+    @mousedown.stop="onPortMousedown($event, node, 'out', 'false')"
+    @mouseup="onPortMouseup($event, node, 'in')">
+    <span class="fec-port-label">F</span>
+  </div>
+</template>
+```
+
+`onPortMousedown` receives a fourth argument `handleId` stored in the pending connection state and written into `fromHandle` when the connection completes in `onPortMouseup`.
+
+**Runner changes (Deno side):**
+
+The topological sort (`getTopologicalOrder`) is unaffected — it walks all edges regardless of `fromHandle`. The change is in two places inside `main()`:
+
+1. The payload routing section (lines ~801-807) must use `fromHandle` to select keyed outputs:
+
+```typescript
+// Extended: resolve incoming payload via handle key if present
+const incoming = flow.connections.filter(c => c.to === node.id);
+if (incoming.length === 1) {
+  const c = incoming[0];
+  const handleKey = c.fromHandle && c.fromHandle !== 'out'
+    ? `${c.from}#${c.fromHandle}`
+    : c.from;
+  currentPayload = nodeOutputs.get(handleKey) ?? nodeOutputs.get(c.from) ?? [];
+}
+```
+
+2. A new branch node handler writes two keyed outputs and emits success:
+
+```typescript
+} else if (node.toolType === 'branch') {
+  const expr = node.props?.condition || 'false';
+  let result: boolean;
+  try {
+    result = Boolean(await executeScriptNode(`return Boolean(${expr})`, '', context));
+  } catch {
+    result = false;
+  }
+  nodeOutputs.set(`${node.id}#true`,  result ? context.payload : undefined);
+  nodeOutputs.set(`${node.id}#false`, result ? undefined : context.payload);
+  nodeOutputs.set(node.id, context.payload); // fallback for handle-unaware consumers
+  emitStatus(node.id, 'success');
+  // Standard nodeOutputs.set at end of loop is redundant here but harmless
+}
+```
+
+3. Branch pruning: downstream nodes with all `undefined` incoming payloads must be skipped:
+
+```typescript
+// Before emitStatus(node.id, 'running'):
+const allInputsUndefined = incoming.length > 0 && incoming.every(c => {
+  const handleKey = c.fromHandle && c.fromHandle !== 'out'
+    ? `${c.from}#${c.fromHandle}`
+    : c.from;
+  return nodeOutputs.get(handleKey) === undefined && nodeOutputs.get(c.from) === undefined;
+});
+if (allInputsUndefined) {
+  skippedNodes.add(node.id);
+  continue;
+}
+```
+
+**What does NOT change:** `deno_service.py` signal parsing, `FlowConnection` database column (JSON blob — new field is backward-compatible), `getTopologicalOrder`, all existing node types.
+
+**Confidence:** HIGH — design derived from existing `dsplit/djoin` pattern in `runner.ts` which already uses keyed outputs (`branchOutputs.set(node.id, item)`).
+
+---
+
+### Node 2: Data Transform
+
+**Architecture fit:** Pure Deno execution. No Python signal needed.
+
+This node is structurally identical to `js_script` but with a different UX contract: the function receives `data` (current payload) and must return the transformed result. The runner reuses `executeScriptNode()` exactly.
+
+```typescript
+} else if (node.toolType === 'data_transform') {
+  const fn = node.props?.transform_fn || 'return data';
+  const wrappedCode = `const data = ctx.payload;\n${fn}`;
+  const inputPayload = context.payload;
+  context.payload = await executeScriptNode(wrappedCode, node.props?.imports || '', context);
+  const endMs = Date.now();
+  console.log(`NODE_LOG_JSON:${JSON.stringify({
+    node_id: node.id, status: 'success',
+    input: inputPayload, output: context.payload,
+    duration: endMs - startMs, start_time: startTime,
+    end_time: new Date(endMs).toISOString()
+  })}`);
+  emitStatus(node.id, 'success');
+}
+```
+
+**Canvas changes:** None. Single input, single output — category `transform`, same port rendering as existing nodes.
+
+**Property panel:** One CodeEditor field (`transform_fn`) with `data` variable pre-bound to the input payload. The `executeScriptNode` wrapper is transparent to the user.
+
+**Confidence:** HIGH — trivial extension of existing `js_script` node.
+
+---
+
+### Node 3: Templating Node
+
+**Decision: Deno-side Nunjucks, NOT Python signal delegation.**
+
+The reason to avoid the Python signal path here is a fundamental architectural constraint: `deno_service.py` parses stdout only after the Deno process exits (the `run_flow_stream()` function uses `subprocess.run()` which buffers all output). Deno cannot receive Python's result back to continue execution in the same process. Signal delegation (EXEC_ODS, EXEC_EMAIL) works only for terminal operations where the result does not need to flow into a downstream Deno node.
+
+The existing `email_executor.py` Jinja2 implementation is excellent for emails because email sending IS terminal. A templating node whose output text must feed downstream nodes cannot use this path.
+
+Nunjucks (npm) supports `{{ expr }}`, `{% for %}`, and `{% if %}` — a superset of what the email node already supports. Add it to `deno.json`:
+
+```json
+{
+  "imports": {
+    "nunjucks": "npm:nunjucks@^3.2.4"
+  }
+}
+```
+
+Runner handler:
+
+```typescript
+} else if (node.toolType === 'template') {
+  const nunjucks = await import('nunjucks');
+  const template = node.props?.template || '';
+  const env = new nunjucks.Environment(null, { autoescape: false });
+  const templateContext = {
+    payload: context.payload,
+    variables: context.variables,
+    ...(Array.isArray(context.payload) ? { records: context.payload } : context.payload)
+  };
+  const inputPayload = context.payload;
+  const rendered = env.renderString(template, templateContext);
+  context.payload = { text: rendered };
+  const endMs = Date.now();
+  console.log(`NODE_LOG_JSON:${JSON.stringify({
+    node_id: node.id, status: 'success',
+    input: inputPayload, output: context.payload,
+    duration: endMs - startMs, start_time: startTime,
+    end_time: new Date(endMs).toISOString()
+  })}`);
+  emitStatus(node.id, 'success');
+}
+```
+
+The `cache_runner_deps()` warmup at startup pre-caches nunjucks so the first execution is not slow.
+
+**Limitation to document:** Jinja2-specific filters (e.g., `| safe`, `| date`, `| tojson`) are not available in Nunjucks. Nunjucks has its own filter set. If byte-for-byte Jinja2 compatibility is needed, the pre-execution Python path must be used, with the output injected as a `prefetched_output` (same as LLM). For current BI use cases, Nunjucks is sufficient.
+
+**Confidence:** MEDIUM — Nunjucks is well-tested but Jinja2 syntax divergences may surprise users who already use `{{expr}}` in email templates.
+
+---
+
+### Node 4: LLM Node
+
+**Decision: Python pre-execution (same pattern as SQL/HTTP source nodes), NOT Deno native fetch.**
+
+The decisive factor is credential security: `LlmConfig` stores encrypted API keys in PostgreSQL. If Deno called the LLM provider directly, the decrypted key would appear in either `node.props` (stored in `flow_nodes` column, visible in execution history) or in the Deno process environment (still logged). Python resolves credentials at pre-execution time without them ever touching Deno's context.
+
+| Factor | Deno fetch | Python pre-execution |
+|--------|-----------|----------------------|
+| LlmConfig credential access | Requires passing key through flow JSON | Native SQLAlchemy query, decrypted in Python |
+| API key exposure | Visible in `flow_nodes` DB column + execution logs | Never leaves Python process |
+| Downstream data availability | Result available to next Deno node | Result available as prefetched_output |
+| Dependency | Deno `fetch()`, no new deps | `httpx` already in backend |
+| Provider support | All (OpenAI-compatible) | All (same httpx calls as `useLlmCall.js`) |
+
+**`pre_execute_flow_nodes()` extension** in `source_executor.py`:
+
+```python
+# Detect 'llm' nodes and execute them before Deno starts
+elif node.get('toolType') == 'llm':
+    from app.services.llm_executor import execute_llm_node
+    result = await execute_llm_node(node, db, upstream_context)
+    prefetched_outputs[node['id']] = result
+    node['__pre_executed'] = True
+```
+
+**New `llm_executor.py`:**
+
+```python
+import httpx
+from app.models.models import LlmConfig
+from app.core.encryption import decrypt_value
+
+async def execute_llm_node(node: dict, db, upstream_context: any) -> dict:
+    config_id = node['props'].get('config_id')
+    llm_cfg = db.query(LlmConfig).filter(LlmConfig.id == config_id).first()
+    provider = llm_cfg.provider
+    api_key = decrypt_value(llm_cfg.api_key)
+    model_id = node['props'].get('model_id', '')
+    prompt_template = node['props'].get('prompt', '')
+    # Resolve {{payload.*}} placeholders using upstream_context
+    prompt = resolve_string(prompt_template, upstream_context)
+    response_text = await call_provider(provider, api_key, model_id, prompt)
+    return {"rows": [{"text": response_text}], "duration": duration_ms}
+```
+
+**Architectural constraint to document:** An LLM node placed after a `data_transform` node cannot consume that transform's output, because pre-execution runs before Deno starts. The LLM node receives only the initial flow payload as its context. Users who need LLM-after-transform must either use a `js_script` node with direct API calls (bypassing LlmConfig security) or restructure to put the transform in the pre-execution phase (i.e., as a source node).
+
+**Canvas:** Single input port, single output port. Category `processor`. Property panel shows: config selector (dropdown fetching from `/llm-config/`), model_id text field, prompt textarea with `{{payload.*}}` hints.
+
+**Confidence:** HIGH — pre-execution pattern is proven in the codebase.
+
+---
+
+### Node 5: Pickle Model Node
+
+**Architecture:** Python pre-execution (same pattern as LLM). No Deno involvement beyond receiving the prefetched result.
+
+**File storage decision (one-way door):**
+
+| Option | Pros | Cons |
+|--------|------|------|
+| Local filesystem (recommended) | Zero new infra, fits current single-container setup | Not multi-replica safe without volume mount |
+| PostgreSQL BYTEA | Transactional, no extra infra | Slow for large models; 1GB TOAST limit is usually fine but awkward |
+| S3/MinIO | Scalable, production-ready | New infra dependency not justified for current scale |
+
+**Recommended:** Store `.pkl` files on the local filesystem at `MODEL_STORAGE_PATH` env var (default: `/app/models_storage/`). Mount this path as a Docker named volume in `docker-compose.yml`. Store the file path and model metadata in a new `MLModel` DB table.
+
+**New database model** (add to `models.py`):
+
+```python
+class MLModel(Base):
+    __tablename__ = "ml_models"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    file_path = Column(String(500), nullable=False)      # absolute path on server
+    file_size_bytes = Column(Integer, nullable=True)
+    feature_names = Column(JSON, default=list)            # expected input columns
+    target_name = Column(String(100), nullable=True)      # output column name
+    created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+```
+
+**New API endpoints** (`backend/app/api/endpoints/ml_models.py`):
+- `POST /ml-models/` — multipart file upload, saves to disk, creates `MLModel` record
+- `GET /ml-models/` — list available models (id, name, feature_names, created_at)
+- `DELETE /ml-models/{id}` — removes file from disk + DB record
+
+**New `ml_executor.py`**:
+
+```python
+import pickle, time
+import pandas as pd
+from app.models.models import MLModel
+
+def execute_pickle_node(node: dict, db, upstream_data: any) -> dict:
+    model_id = node['props'].get('model_id')
+    ml_model = db.query(MLModel).filter(MLModel.id == model_id).first()
+    t0 = time.time()
+    with open(ml_model.file_path, 'rb') as f:
+        model = pickle.load(f)
+    records = upstream_data if isinstance(upstream_data, list) else [upstream_data]
+    df = pd.DataFrame(records)
+    predictions = model.predict(df)
+    duration_ms = int((time.time() - t0) * 1000)
+    return {
+        "rows": [{"prediction": float(p)} for p in predictions.tolist()],
+        "duration": duration_ms
+    }
+```
+
+**New Python dependencies** (add to `backend/pyproject.toml`):
+- `scikit-learn>=1.4.0`
+- `pandas>=2.0.0`
+
+**Security:** `pickle.load()` on user-uploaded files is an arbitrary code execution vector. Restrict upload endpoint to `admin`/`designer` roles. Add a warning in the UI: "Only upload .pkl files from trusted sources." This is acceptable for internal BI tooling where all users are organizational employees.
+
+**Canvas:** Single input port, single output port. Category `processor`. Property panel: model selector dropdown (fetching `/ml-models/`) + optional output field name.
+
+**Confidence:** HIGH for the execution pattern. MEDIUM for security posture (documented and accepted risk for internal tooling).
+
+---
+
+## Recommended Project Structure Changes
 
 ```
-bff/                              # New top-level service
-├── package.json
-├── Dockerfile
-├── .env.example
-└── src/
-    ├── index.js                  # Express app entry point, port 3001
-    ├── config.js                 # Env-driven config (Keycloak, backend URL, CubeJS URL)
-    ├── middleware/
-    │   ├── session.js            # express-session + connect-pg-simple or memorystore
-    │   └── requireSession.js     # Guard: 401 if no active session
-    ├── routes/
-    │   ├── auth.js               # GET /bff/auth/login, /bff/auth/callback, /bff/auth/logout
-    │   │                         # POST /bff/auth/refresh, GET /bff/auth/me
-    │   ├── api.js                # ALL /bff/api/* → http-proxy-middleware → FastAPI
-    │   └── cubejs.js             # ALL /bff/cubejs/* → http-proxy-middleware → CubeJS
-    └── lib/
-        ├── oidcClient.js         # openid-client: discovery, authorizationUrl, callback
-        └── cubeToken.js          # jsonwebtoken.sign() with CUBEJS_API_SECRET
+backend/
+├── app/
+│   ├── api/
+│   │   └── endpoints/
+│   │       └── ml_models.py          # NEW: upload, list, delete
+│   ├── models/
+│   │   └── models.py                 # ADD: MLModel table
+│   ├── runtime/
+│   │   ├── runner.ts                 # MODIFY: branch + data_transform + template nodes
+│   │   └── deno.json                 # ADD: nunjucks npm import
+│   └── services/
+│       ├── deno_service.py           # NO CHANGE
+│       ├── source_executor.py        # EXTEND: detect 'llm' and 'pickle_model' in pre-exec
+│       ├── llm_executor.py           # NEW: httpx calls per provider
+│       └── ml_executor.py            # NEW: pickle.load + model.predict
+├── alembic/versions/
+│   └── xxxx_add_ml_models.py        # NEW: migration for MLModel table
+└── models_storage/                  # NEW: volume-mounted directory for .pkl files
+
+dashboard-app/src/
+└── components/editor/
+    └── FlowEditorCanvas.vue         # MODIFY: dual output ports for branch node only
 ```
+
+No new Vue views are needed. Model management happens through the existing `ConnectionsView` / `ToolCatalogView` UI patterns or a small model list panel added to the existing settings area.
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: Server-Side Session with httpOnly Cookie
+### Pattern 1: Signal Delegation (existing — ODS, Email)
 
-**What:** BFF stores Keycloak access token and refresh token in a server-side session. The browser receives only an opaque session ID cookie. No tokens are ever sent to the browser.
+**What:** Deno emits a two-line signal (`EXEC_X:` header + `EXEC_X_PAYLOAD:` JSON). Python parses it after Deno exits and runs the operation. The Deno node marks its output as `{ status: 'delegated' }`.
 
-**When to use:** Required when the goal is to prevent token theft via XSS. The Keycloak `frame-ancestors 'self'` CSP already blocks the silent iframe refresh; this pattern eliminates client-side token entirely.
+**When to use:** Terminal operations (write to DB, send email) where the result does not need to flow into a downstream Deno node.
 
-**Trade-offs:** Statefulness on the BFF. The session store must survive BFF restarts (use Redis or PostgreSQL-backed sessions in production; in-memory is acceptable for single-instance dev).
+**Not suitable for:** Nodes whose output must feed downstream nodes in the same execution.
 
-**Implementation sketch:**
-```javascript
-// src/middleware/session.js
-import session from 'express-session'
+### Pattern 2: Pre-Execution (existing — SQL/HTTP source nodes; new — LLM, Pickle)
 
-export default session({
-  secret: process.env.SESSION_SECRET,
-  name: 'dsid',               // cookie name — opaque, not "connect.sid"
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',  // HTTPS in prod
-    sameSite: 'lax',
-    maxAge: 8 * 60 * 60 * 1000  // 8 hours — matches Keycloak SSO session
-  }
-})
-```
+**What:** Python detects certain node types in `pre_execute_flow_nodes()` before starting Deno. Results stored in `prefetched_outputs`. Deno receives those nodes flagged as `__pre_executed = true` and emits their pre-computed output without running them.
 
-**Session payload (stored server-side, never in cookie):**
-```javascript
-req.session.tokens = {
-  accessToken: '...',          // Keycloak access JWT
-  refreshToken: '...',
-  idToken: '...',
-  expiresAt: Date.now() + 300_000  // ms
-}
-req.session.user = {
-  sub: '...',
-  email: '...',
-  name: '...',
-  roles: ['designer']
-}
-```
+**When to use:** For nodes requiring Python capabilities (DB access, ML libraries, encrypted credentials) AND whose output must feed downstream Deno nodes.
 
-### Pattern 2: OIDC Authorization Code Flow (Server-Side)
+**Constraint:** Pre-executed nodes receive only the initial flow payload as context — they cannot consume the output of a Deno-side transform that runs before them in the graph.
 
-**What:** BFF initiates and completes the OIDC Authorization Code + PKCE flow on behalf of the SPA. The frontend redirects to `GET /bff/auth/login` instead of calling `keycloak.login()`.
+### Pattern 3: Pure Deno Execution (existing — js_script, http, join, csv; new — data_transform, template)
 
-**When to use:** Required when removing keycloak-js from the browser.
+**What:** Node logic runs entirely inside the Deno sandbox using `executeScriptNode()`, built-in fetch, or npm packages from the import map.
 
-**Trade-offs:** BFF must be a registered OIDC client in Keycloak with its own `client_id` and `client_secret` (confidential client). The existing `dashboard-app` public client in Keycloak can be retired or kept for fallback.
-
-**Keycloak client required:**
-- Client ID: `dashboard-bff`
-- Client type: Confidential
-- Valid Redirect URIs: `https://dashboard.pm.comsatel.com.pe/bff/auth/callback`
-- Service accounts: not needed
-
-**Flow:**
-```
-Browser            BFF                    Keycloak
-  |                 |                        |
-  |--GET /bff/auth/login-->                  |
-  |                 |--302 redirect-------->  |
-  |<--------302 to Keycloak login----------  |
-  |                 |                        |
-  |--POST credentials (user types)---------> |
-  |<--------302 to /bff/auth/callback------  |
-  |                 |                        |
-  |--GET /bff/auth/callback?code=xxx-------> |
-  |                 |--exchange code-------> |
-  |                 |<--tokens (access+refresh+id)--|
-  |                 |--store in session       |
-  |<--Set-Cookie: dsid=xxx; redirect to /   |
-```
-
-**openid-client usage:**
-```javascript
-// src/lib/oidcClient.js
-import { Issuer } from 'openid-client'
-
-let _client = null
-
-export async function getOidcClient() {
-  if (_client) return _client
-  const issuer = await Issuer.discover(
-    `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`
-  )
-  _client = new issuer.Client({
-    client_id: process.env.KEYCLOAK_CLIENT_ID,       // dashboard-bff
-    client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
-    redirect_uris: [process.env.BFF_CALLBACK_URL],   // /bff/auth/callback
-    response_types: ['code'],
-  })
-  return _client
-}
-```
-
-### Pattern 3: Token Forwarding to FastAPI (Transparent Proxy)
-
-**What:** BFF reads `req.session.tokens.accessToken` and attaches it as `Authorization: Bearer <token>` on every proxied request to FastAPI. FastAPI's existing `security.py` (`verify_token`, JWKS validation) is completely unchanged.
-
-**When to use:** This is the minimal-change option for the backend. FastAPI keeps validating Keycloak JWTs — it just receives them from the BFF instead of from the browser.
-
-**Trade-offs:** FastAPI still hits Keycloak JWKS on every token KID lookup (cached hourly in memory). If the BFF later rotates to service-account tokens instead, FastAPI would need no change there either.
-
-**Token refresh before proxy:**
-```javascript
-// src/middleware/requireSession.js
-export async function withTokenRefresh(req, res, next) {
-  if (!req.session.tokens) return res.status(401).json({ detail: 'Not authenticated' })
-
-  const { expiresAt, refreshToken } = req.session.tokens
-  // Refresh if token expires within 60 seconds
-  if (Date.now() > expiresAt - 60_000) {
-    try {
-      const client = await getOidcClient()
-      const refreshed = await client.refresh(refreshToken)
-      req.session.tokens = {
-        accessToken: refreshed.access_token,
-        refreshToken: refreshed.refresh_token ?? refreshToken,
-        idToken: refreshed.id_token,
-        expiresAt: Date.now() + (refreshed.expires_in * 1000)
-      }
-    } catch {
-      req.session.destroy()
-      return res.status(401).json({ detail: 'Session expired' })
-    }
-  }
-  next()
-}
-```
-
-**http-proxy-middleware setup:**
-```javascript
-// src/routes/api.js
-import { createProxyMiddleware } from 'http-proxy-middleware'
-import { withTokenRefresh } from '../middleware/requireSession.js'
-
-const apiProxy = createProxyMiddleware({
-  target: process.env.BACKEND_URL,  // http://backend:8000
-  changeOrigin: true,
-  pathRewrite: { '^/bff/api': '/api' },
-  on: {
-    proxyReq: (proxyReq, req) => {
-      // Inject the stored Keycloak access token
-      proxyReq.setHeader('Authorization', `Bearer ${req.session.tokens.accessToken}`)
-    }
-  }
-})
-
-router.use('/*', withTokenRefresh, apiProxy)
-```
-
-### Pattern 4: CubeJS JWT Generated Server-Side
-
-**What:** CubeJS requires a signed JWT to authorize queries. Currently the token is stored (encrypted) in FastAPI's `cube_config` table and sent to the browser via `/api/v1/cube-config/active`. With the BFF, the BFF fetches the `CUBEJS_API_SECRET` from env and signs a JWT server-side on each request or on session creation. The browser never sees the secret or the signed token.
-
-**When to use:** Always preferred over exposing CUBEJS_API_SECRET to the frontend.
-
-**CubeJS JWT structure:**
-```javascript
-// src/lib/cubeToken.js
-import jwt from 'jsonwebtoken'
-
-export function signCubeToken(userRoles = []) {
-  return jwt.sign(
-    {
-      // Claims that CubeJS security context can read for row-level security
-      roles: userRoles,
-      iat: Math.floor(Date.now() / 1000),
-    },
-    process.env.CUBEJS_API_SECRET,
-    { expiresIn: '1h', algorithm: 'HS256' }
-  )
-}
-```
-
-**CubeJS proxy:**
-```javascript
-// src/routes/cubejs.js
-const cubeProxy = createProxyMiddleware({
-  target: process.env.CUBEJS_URL,   // http://cubejs:4000
-  changeOrigin: true,
-  pathRewrite: { '^/bff/cubejs': '/cubejs-api' },
-  on: {
-    proxyReq: (proxyReq, req) => {
-      const token = signCubeToken(req.session.user?.roles ?? [])
-      proxyReq.setHeader('Authorization', `Bearer ${token}`)
-    }
-  }
-})
-router.use('/*', withTokenRefresh, cubeProxy)
-```
-
-**Frontend change:** `cubejs.js` store changes `apiUrl` to `/bff/cubejs/v1` and removes the `token` field (token is injected server-side, browser sends cookies only).
+**When to use:** Pure data manipulation, HTTP calls, or template rendering that does not require Python libraries or server-side encrypted credentials.
 
 ---
 
-## Data Flow
+## Data Flow Changes
 
-### Request Flow (Authenticated API Call)
-
-```
-[User action in Vue component]
-         |
-         | fetch('/bff/api/v1/dashboards/')
-         | + Cookie: dsid=abc123 (automatic, no JS required)
-         v
-[BFF Express]
-  - requireSession: lookup session by dsid
-  - withTokenRefresh: token still valid? skip / refresh
-  - http-proxy-middleware → http://backend:8000/api/v1/dashboards/
-  + Authorization: Bearer <keycloak_access_token>
-         |
-         v
-[FastAPI backend]
-  - verify_token() unchanged: validates Keycloak JWT via JWKS
-  - returns JSON
-         |
-         v
-[BFF] → forwards response body unchanged → [Browser]
-```
-
-### Auth Flow (Login)
+### Branch Node Flow
 
 ```
-[Browser visits /]
-  → authStore detects no session (GET /bff/auth/me returns 401)
-  → redirect to /bff/auth/login
-         |
-[BFF] generates state + PKCE verifier, stores in req.session
-  → 302 redirect to Keycloak /auth endpoint
-         |
-[Keycloak] user logs in → 302 to /bff/auth/callback?code=xxx
-         |
-[BFF /auth/callback]
-  → exchange code for tokens (openid-client)
-  → store tokens in session
-  → 302 redirect to '/'
-         |
-[Browser loads app] → GET /bff/auth/me → { sub, email, name, roles }
-  → authStore.initFromBff(userInfo)
+[Upstream Node]  -->  output stored as nodeOutputs.set('nodeA', payload)
+                            |
+                     [Branch Node]
+                     evaluates condition JS
+                            |
+              nodeOutputs.set('branch#true', payload)   if true
+              nodeOutputs.set('branch#false', payload)  if false
+                        /         \
+        (fromHandle='true')    (fromHandle='false')
+               |                       |
+           [Node A]               [Node B]
+      receives payload           receives payload
+      if #true is defined        if #false is defined
+      otherwise: skipped         otherwise: skipped
 ```
 
-### CubeJS Query Flow
+### LLM / Pickle Node Flow (pre-execution)
 
 ```
-[Vue cubejs store]
-  cubejs('@COOKIE_BASED@', { apiUrl: '/bff/cubejs/v1' })
-  → HTTP GET /bff/cubejs/v1/meta  + Cookie: dsid=abc123
-         |
-[BFF /bff/cubejs/*]
-  → signCubeToken(session.user.roles)
-  → proxy to http://cubejs:4000/cubejs-api/v1/meta
-  + Authorization: Bearer <signed_cube_jwt>
-         |
-[CubeJS] validates JWT with CUBEJS_API_SECRET → returns meta
+PHASE 1 — Python pre_execute_flow_nodes():
+  Detects llm / pickle_model nodes
+  → calls llm_executor / ml_executor
+  → stores results in prefetched_outputs[node_id]
+  → marks node.__pre_executed = True
+  → passes annotated flow JSON to Deno
+
+PHASE 2 — Deno runner.ts:
+  Sees node.__pre_executed = True
+  → reads prefetched_outputs[node_id]
+  → emits NODE_LOG_JSON + NODE_STATUS:success
+  → stores output in nodeOutputs for downstream nodes
 ```
 
 ---
 
 ## Integration Points
 
-### BFF ↔ Frontend (dashboard-app)
+### External Services
 
-| Concern | Current | After BFF |
-|---------|---------|-----------|
-| Login | keycloak.login() in main.js | redirect to GET /bff/auth/login |
-| Auth state | keycloak.tokenParsed | GET /bff/auth/me → JSON user object |
-| Token refresh | keycloak.updateToken() in api.js | Transparent — BFF handles in proxy |
-| Logout | keycloak.logout() in authStore | POST /bff/auth/logout → destroy session → redirect to Keycloak logout |
-| API base URL | VITE_API_URL (port 8000) | /bff/api (same origin, no VITE needed) |
-| CubeJS URL | VITE_CUBEJS_API_URL + VITE_CUBEJS_TOKEN | /bff/cubejs/v1 (no token, cookie only) |
-| Role guards | parsed from keycloak.tokenParsed | parsed from /bff/auth/me response |
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| OpenAI-compatible APIs (Anthropic, Groq, Gemini) | httpx in `llm_executor.py`, credentials from `LlmConfig` | Provider-agnostic; reuses existing LlmConfig + encryption |
+| Nunjucks (npm) | Dynamic import in Deno runner | Declared in `deno.json`, cached at startup by `cache_runner_deps()` |
+| scikit-learn models (.pkl) | `pickle.load()` in `ml_executor.py` | Requires `scikit-learn` + `pandas` in `pyproject.toml` |
 
-**Files to modify in dashboard-app:**
-- `src/main.js` — remove keycloak init, replace with /bff/auth/me fetch
-- `src/services/keycloak.js` — can be deleted entirely
-- `src/services/api.js` — change `API_BASE_URL` to `/bff/api`; remove `getAuthHeaders()`; use plain `fetch` with `credentials: 'include'`
-- `src/stores/auth.js` — replace `initFromKeycloak()` with `initFromBff(userInfo)`; remove `_keycloak` reference
-- `src/stores/cubejs.js` — remove `token` field; set `apiUrl` to `/bff/cubejs/v1`; remove `loadConfigFromBackend` for token (URL still comes from backend or env)
+### Internal Boundaries
 
-### BFF ↔ Backend (FastAPI)
-
-| Concern | Detail |
-|---------|--------|
-| Token mechanism | BFF forwards the original Keycloak access token in `Authorization: Bearer` header |
-| No backend changes required | `security.py` verify_token() and get_current_user() are completely unchanged |
-| CORS change needed | FastAPI CORS `origins` list should remove `localhost:3000` and add `localhost:3001` (BFF origin) for dev; in prod, backend can restrict to the BFF internal hostname only |
-| User provisioning | `POST /api/v1/users/provision-batch` stays as-is; BFF proxies it transparently |
-| JWKS caching | Stays in FastAPI security.py in-memory cache; no change |
-
-**Files to modify in backend:**
-- `app/main.py` — update CORS `origins` list to include BFF dev port and restrict to internal network in prod; the exception handler's allowed list also needs updating
-
-### BFF ↔ CubeJS
-
-| Concern | Detail |
-|---------|--------|
-| Token mechanism | BFF signs a fresh JWT per-request using `CUBEJS_API_SECRET` |
-| CubeJS configuration | Unchanged — CubeJS is already running as an internal service |
-| Security context | BFF can embed user roles in JWT payload for CubeJS row-level security |
-| Frontend CubeJS client | `@cubejs-client/core` connects to `/bff/cubejs/v1` without a token; session cookie is sent automatically |
-
-### BFF ↔ Keycloak
-
-| Concern | Detail |
-|---------|--------|
-| New Keycloak client needed | Register `dashboard-bff` as a **confidential** client with PKCE |
-| Redirect URI | `https://dashboard.pm.comsatel.com.pe/bff/auth/callback` |
-| Old client | `dashboard-app` public client can be kept (for legacy dev) or retired |
-| Token storage | BFF stores tokens server-side; Keycloak never sees the browser again after callback |
-| Session logout | On `/bff/auth/logout`, BFF destroys session then redirects to Keycloak's end-session endpoint |
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| FlowEditorCanvas ↔ Runner | JSON blob via WebSocket → FastAPI → Deno stdin | `fromHandle` field added to connection schema |
+| runner.ts ↔ deno_service.py | stdout signal lines | No new signal types for v1.9 |
+| pre_execute_flow_nodes ↔ runner.ts | `prefetched_outputs` dict + `__pre_executed` flag | LLM/Pickle use this path |
+| ml_models API ↔ filesystem | File saved to `MODEL_STORAGE_PATH`, path stored in DB | Must be volume-mounted in docker-compose |
 
 ---
 
-## Docker Compose Changes
+## Build Order with Dependency Rationale
 
-The existing `docker-compose.yaml` has two services (`backend`, `frontend-app`). The BFF becomes a third service:
+### Phase 1: Data Transform — build first
 
-```yaml
-# Addition to docker-compose.yaml
+**Why:** No canvas changes, no new Python services, no new DB tables. Pure `runner.ts` extension reusing `executeScriptNode()`. Validates the new-node build pipeline (EditorTool DB record + runner handler) with zero risk. Confirms that new `toolType` values work end-to-end before tackling complex nodes.
 
-  bff:
-    build:
-      context: ./bff
-      dockerfile: Dockerfile
-    env_file:
-      - ./.env-bff           # New env file with BFF-specific config
-    # ports:
-    #   - "3001:3001"        # Expose locally for dev; Traefik routes in prod
-    restart: unless-stopped
-    depends_on:
-      - backend
-    labels:
-      traefik.enable: true
-      traefik.http.routers.dashboard-bff.rule: Host(`dashboard.pm.comsatel.com.pe`) && PathPrefix(`/bff`)
-      traefik.http.routers.dashboard-bff.entrypoints: web-secure
-      traefik.http.routers.dashboard-bff.tls: true
-      traefik.http.services.dashboard-bff.loadbalancer.server.port: 3001
-    networks:
-      - frontends
-      - backends
-```
+**Touches:** `runner.ts` (+~15 lines), one Alembic migration or DB seed for the `EditorTool` record.
 
-**New `.env-bff` file contents:**
-```env
-NODE_ENV=production
-PORT=3001
-SESSION_SECRET=<random-256-bit>
-KEYCLOAK_URL=https://oauth2.qa.comsatel.com.pe
-KEYCLOAK_REALM=Apps
-KEYCLOAK_CLIENT_ID=dashboard-bff
-KEYCLOAK_CLIENT_SECRET=<from-keycloak-admin>
-BFF_CALLBACK_URL=https://dashboard.pm.comsatel.com.pe/bff/auth/callback
-BACKEND_URL=http://backend:8000
-CUBEJS_URL=http://cubejs:4000
-CUBEJS_API_SECRET=<same-secret-used-by-cubejs-container>
-FRONTEND_URL=https://dashboard.pm.comsatel.com.pe
-```
+### Phase 2: Templating Node — build second
 
-**Network topology:** Both `backend` and `bff` need to be on the `backends` network so BFF can reach `http://backend:8000`. The `frontend-app` only needs `frontends` (it serves static files). BFF needs both `frontends` (Traefik routes to it) and `backends` (to reach FastAPI and CubeJS).
+**Why:** Still pure Deno, no canvas changes, no Python services. Adds one npm dependency (`nunjucks`) to `deno.json`. Validates the import-map extension process and `cache_runner_deps()` warmup for a new package.
+
+**Touches:** `runner.ts` (+~20 lines), `deno.json` (one import entry), `EditorTool` record.
+
+### Phase 3: LLM Node — build third
+
+**Why:** First node using pre-execution path. Requires extending `source_executor.py` / `pre_execute_flow_nodes()` and adding `llm_executor.py`. No canvas changes, no new DB tables (uses existing `LlmConfig`). Validates the pre-execution extension pattern before applying it to the more complex Pickle node that also needs new DB tables and file upload.
+
+**Touches:** `source_executor.py` (detect `llm` type), new `llm_executor.py`, `EditorTool` record.
+
+### Phase 4: Pickle Model Node — build fourth
+
+**Why:** Depends on Phase 3 pre-execution pattern. Adds the most infrastructure: new `MLModel` DB table, Alembic migration, file upload endpoint, Docker volume, `scikit-learn`/`pandas` dependencies. Isolating this complexity after the simpler pre-execution pattern is proven reduces debugging surface.
+
+**Touches:** `models.py`, new `ml_models.py` endpoint, new `ml_executor.py`, `source_executor.py` (detect `pickle_model`), Alembic migration, `docker-compose.yml` (volume), `pyproject.toml` (deps).
+
+### Phase 5: Conditional / Branch Node — build last
+
+**Why:** Highest risk. Modifies the `FlowConnection` schema (adds `fromHandle`), changes canvas port rendering in `FlowEditorCanvas.vue`, changes the payload routing loop in `runner.ts`, and introduces branch pruning logic (skip subtrees with undefined payloads). Any regression here breaks graph traversal for all node types. Building last ensures a known-good baseline from the four simpler nodes to compare against. Tests should include: both branches active, only true branch active, only false branch active, branch inside a dsplit loop.
+
+**Touches:** `FlowEditorCanvas.vue` (dual ports, `fromHandle` writing), `runner.ts` (payload routing + branch handler + skip logic), `EditorTool` record.
 
 ---
 
-## New Components vs. Modified Components
+## One-Way Door Decisions
 
-### New Components (Create from Scratch)
+1. **`fromHandle` in `FlowConnection`** — Adding this field is backward-compatible (absent = default `'out'` behavior). However, if the branch node is later redesigned (e.g., multi-branch switch), the `fromHandle` semantics become a constraint. Choose a forward-compatible name now; `fromHandle` as a freeform string (not a union type in the DB) allows future extension to `'case_1'`, `'case_2'`, etc.
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| BFF Express app | `bff/src/index.js` | Entry point, Express setup |
-| OIDC client wrapper | `bff/src/lib/oidcClient.js` | openid-client Keycloak integration |
-| CubeJS token signer | `bff/src/lib/cubeToken.js` | jsonwebtoken.sign() for CubeJS |
-| Session middleware | `bff/src/middleware/session.js` | express-session configuration |
-| Auth guard | `bff/src/middleware/requireSession.js` | 401 guard + token refresh |
-| Auth routes | `bff/src/routes/auth.js` | /login, /callback, /logout, /me |
-| API proxy routes | `bff/src/routes/api.js` | Proxy all /bff/api/* to FastAPI |
-| CubeJS proxy routes | `bff/src/routes/cubejs.js` | Proxy all /bff/cubejs/* to CubeJS |
-| BFF Dockerfile | `bff/Dockerfile` | Node.js Alpine image |
-| BFF env example | `bff/.env.example` | Documentation for env vars |
+2. **Nunjucks vs Python Jinja2 for Templating** — If users expect Jinja2-specific features that Nunjucks lacks (custom filters, `| safe`, `| date`), switching later requires adding a Python executor and changing how downstream nodes receive the result. Document the supported Nunjucks syntax in the property panel tooltip at launch to set correct expectations.
 
-### Modified Components (Update Existing)
+3. **Local filesystem for Pickle models** — Moving to multi-replica deployment later requires migrating to S3/MinIO. A `MODEL_STORAGE_BACKEND` env var with `local` and `s3` implementations is a cheap hedge. The abstraction is simple: `save_model(id, bytes)` / `load_model(id) -> bytes`.
 
-| Component | File | Scope of Change |
-|-----------|------|----------------|
-| Main app bootstrap | `dashboard-app/src/main.js` | Remove keycloak init (60+ lines); replace with /bff/auth/me fetch; mount app on success |
-| Auth store | `dashboard-app/src/stores/auth.js` | Replace initFromKeycloak(); remove _keycloak reference; add initFromBff() |
-| API client | `dashboard-app/src/services/api.js` | Change base URL; remove getAuthHeaders(); add credentials:'include' to fetch |
-| CubeJS store | `dashboard-app/src/stores/cubejs.js` | Remove token field from state/config; set apiUrl to /bff/cubejs/v1 |
-| FastAPI CORS | `backend/app/main.py` | Add BFF origin to allowed origins list; update exception handler list |
-| docker-compose | `docker-compose.yaml` | Add `bff` service block |
-
-### Deleted Components
-
-| Component | File | Reason |
-|-----------|------|--------|
-| Keycloak JS service | `dashboard-app/src/services/keycloak.js` | Auth moved to BFF entirely |
-
----
-
-## Suggested Build Order
-
-Building the BFF in this order respects dependencies and allows incremental validation:
-
-### Phase 1 — BFF Foundation (no frontend changes yet)
-
-Build the BFF service with auth and session, but leave the frontend untouched. Test auth flows with browser directly hitting `/bff/auth/login`.
-
-1. `bff/` scaffolding: `package.json`, `Dockerfile`, `src/index.js`, `config.js`
-2. Session middleware (`express-session`)
-3. OIDC client (`openid-client`) + auth routes (`/login`, `/callback`, `/logout`, `/me`)
-4. Verify: browser hits `/bff/auth/login` → Keycloak → `/bff/auth/callback` → session set → `/bff/auth/me` returns user JSON
-5. Add to `docker-compose.yaml` with correct networks
-
-### Phase 2 — API Proxy
-
-Add the FastAPI proxy. Keep CORS open temporarily to allow direct frontend testing.
-
-6. `requireSession` middleware with token refresh
-7. `http-proxy-middleware` for `/bff/api/*` → FastAPI
-8. Inject `Authorization: Bearer` from session
-9. Update FastAPI CORS to add BFF port
-10. Verify: curl/Postman with session cookie proxied to FastAPI returns data
-
-### Phase 3 — CubeJS Proxy
-
-11. `cubeToken.js` JWT signer
-12. `http-proxy-middleware` for `/bff/cubejs/*` → CubeJS
-13. Inject signed cube JWT per request
-14. Verify: `/bff/cubejs/v1/meta` returns cube schema
-
-### Phase 4 — Frontend Migration
-
-Only after BFF is confirmed working end-to-end with curl.
-
-15. Update `api.js`: change base URL to `/bff/api`, remove auth headers, add `credentials: 'include'`
-16. Update `cubejs.js` store: remove token, set apiUrl to `/bff/cubejs/v1`
-17. Update `main.js`: remove keycloak init; replace with fetch(`/bff/auth/me`) + mount
-18. Update `auth.js` store: replace `initFromKeycloak()` with `initFromBff()`
-19. Delete `keycloak.js` service
-20. Update `main.py` CORS origins
-21. End-to-end smoke test: full login flow in browser, API calls, CubeJS queries
+4. **LLM pre-execution context limitation** — LLM nodes cannot consume outputs of Deno-side transform nodes (pre-execution runs before Deno). This is a permanent architectural constraint of the current signal architecture. Document it in the LLM node's property panel: "Prompt context is the initial flow payload. To use transformed data, place an HTTP source node or SQL source node before this node."
 
 ---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Storing Keycloak Tokens in the BFF's Memory Only
+### Anti-Pattern 1: Bidirectional Deno-Python Signaling
 
-**What people do:** Skip a real session store; keep tokens in a `Map` in process memory keyed by session ID.
+**What people do:** Try to make Python inject template/LLM results back into the running Deno process mid-execution.
 
-**Why it's wrong:** BFF restart loses all sessions, forcing all users to re-login. Unacceptable in production, and cannot scale to multiple BFF replicas.
+**Why it's wrong:** `run_flow_stream()` uses `subprocess.run()` (blocking). All stdout is buffered and only available after the process exits. Writing to Deno's stdin post-start is not supported.
 
-**Do this instead:** Use `express-session` backed by a persistent store. For single-replica deployments, `connect-pg-simple` (same PostgreSQL already used by FastAPI) is simplest. For multi-replica, use `connect-redis`.
+**Do this instead:** Pre-execute nodes whose results must flow downstream. Use signal delegation (EXEC_*) only for terminal operations.
 
-### Anti-Pattern 2: Generating One CubeJS Token Per Session (Long-Lived)
+### Anti-Pattern 2: Evaluating Conditions as Python Expressions
 
-**What people do:** Sign a cube JWT at login time and store it in the session alongside the Keycloak tokens.
+**What people do:** Accept a Python expression string for branch condition and `eval()` it server-side.
 
-**Why it's wrong:** CubeJS tokens have a fixed expiry. If the BFF signs a 1-hour token at login and the session lasts 8 hours, queries will fail silently after the first hour.
+**Why it's wrong:** `eval()` is arbitrary code execution with no sandbox. The Deno sandbox (`executeScriptNode`) already provides process-level isolation for user code evaluation.
 
-**Do this instead:** Sign a fresh CubeJS JWT on each proxied request to CubeJS (`signCubeToken()` in the proxy middleware). `jwt.sign()` with HS256 is synchronous and costs ~0.1ms. No caching needed.
+**Do this instead:** Branch condition is a JS boolean expression evaluated via `executeScriptNode()` in Deno, same as `js_script`.
 
-### Anti-Pattern 3: Making FastAPI Call Keycloak Userinfo to Validate BFF Requests
+### Anti-Pattern 3: Passing LLM API Keys Through Flow JSON
 
-**What people do:** Add a new auth mode to FastAPI where requests from BFF include a custom `X-BFF-Token` header, and FastAPI validates it by calling Keycloak `/userinfo`.
+**What people do:** Store the decrypted API key in `node.props.api_key` so Deno can call the LLM directly via `fetch()`.
 
-**Why it's wrong:** Unnecessary coupling, adds latency, and the simpler solution (forwarding the original Keycloak JWT) already works with the existing `verify_token()` with zero backend changes.
+**Why it's wrong:** Flow JSON is stored in `flow_nodes` (PostgreSQL JSON column), included in execution history, and visible in browser DevTools WebSocket frames.
 
-**Do this instead:** BFF forwards the original Keycloak access token as `Authorization: Bearer`. FastAPI validates it with JWKS as before. No new auth mode needed.
+**Do this instead:** Resolve credentials from `LlmConfig` in Python during pre-execution. The Deno process never sees the key.
 
-### Anti-Pattern 4: Stripping Authentication from FastAPI Entirely
+### Anti-Pattern 4: Single Output Port on Branch Node
 
-**What people do:** Plan to "clean up" FastAPI by removing all Keycloak auth checks since "the BFF handles it now."
+**What people do:** Implement branching as "the node passes the payload through unchanged; downstream nodes each evaluate the condition themselves."
 
-**Why it's wrong:** FastAPI would then be an unauthenticated service on the internal network. Any service on the Docker network (including other containers or a compromised container) could call it without authentication. Defense in depth requires the backend to still validate tokens.
+**Why it's wrong:** Both downstream branches execute regardless of condition result, wasting resources and potentially causing unintended side effects (two ODS writes, two emails sent).
 
-**Do this instead:** Keep `verify_token()` and all `Depends(get_current_user)` decorators in FastAPI unchanged. The BFF is the public entry point but FastAPI is not blind.
+**Do this instead:** Dual output handles with branch pruning — the runner skips nodes in the non-taken branch entirely.
 
 ---
 
@@ -612,45 +587,21 @@ Only after BFF is confirmed working end-to-end with curl.
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 1-10 concurrent users | In-memory session store acceptable; single BFF instance |
-| 10-500 users | connect-pg-simple (reuse existing PG); single BFF instance |
-| 500+ users | Redis session store; BFF can be horizontally scaled (stateless once session is in Redis) |
-
-The BFF is naturally the first bottleneck for session throughput. Because Keycloak access tokens are forwarded and FastAPI validates independently, the backend is not affected by BFF scaling choices.
-
----
-
-## Integration Points Summary Table
-
-| Touchpoint | Protocol | Auth Mechanism | Change Required |
-|------------|----------|----------------|-----------------|
-| Frontend → BFF | HTTP + httpOnly cookie | Session ID in cookie | Frontend: remove keycloak-js; update base URLs |
-| BFF → FastAPI | HTTP (internal Docker network) | Bearer <Keycloak JWT> forwarded | FastAPI: CORS origin update only |
-| BFF → CubeJS | HTTP (internal Docker network) | Bearer <BFF-signed HS256 JWT> | None in CubeJS config |
-| BFF → Keycloak | OIDC Authorization Code + PKCE | client_id + client_secret | Register new confidential client |
-| FastAPI → Keycloak | JWKS fetch (cached 1h) | N/A (reads public keys) | None |
+| Current (single Docker container) | Local filesystem for models, single Deno subprocess per execution, acceptable |
+| Multiple backend replicas | Shared filesystem (NFS) or S3 for model storage; local path breaks |
+| High concurrency (>20 simultaneous flows) | Deno subprocess spawning is the bottleneck; consider a Deno worker pool or job queue |
 
 ---
 
 ## Sources
 
-- Direct analysis of codebase (HIGH confidence):
-  - `dashboard-app/src/main.js` — keycloak-js init pattern, PKCE, sessionStorage tokens
-  - `dashboard-app/src/services/keycloak.js` — Keycloak client config
-  - `dashboard-app/src/services/api.js` — Bearer token injection, API endpoint inventory
-  - `dashboard-app/src/stores/auth.js` — role extraction from tokenParsed
-  - `dashboard-app/src/stores/cubejs.js` — CubeJS token loaded from backend DB
-  - `backend/app/core/security.py` — JWKS-based verify_token, get_current_user
-  - `backend/app/core/config.py` — Keycloak URLs, CORS origins setting
-  - `backend/app/main.py` — CORS middleware configuration
-  - `backend/app/api/router.py` — full API surface (15 route groups)
-  - `docker-compose.yaml` — Traefik labels, network topology
-- openid-client library: https://github.com/panva/node-openid-client (MEDIUM confidence — widely used, well maintained)
-- http-proxy-middleware: https://github.com/chimurai/http-proxy-middleware (HIGH confidence — de facto standard for Express proxying)
-- express-session: https://github.com/expressjs/session (HIGH confidence — official Express ecosystem)
-- CubeJS JWT auth: https://cube.dev/docs/product/auth (MEDIUM confidence — based on training data, verify HS256 secret name matches running CubeJS container env)
+- Direct codebase analysis: `runner.ts` (963 lines), `deno_service.py` (651 lines), `FlowEditorCanvas.vue`, `models.py`, `email_executor.py`, `source_executor.py`, `integration_flows.py`
+- Existing pre-execution pattern: `source_executor.py::pre_execute_flow_nodes()` + `integration_flows.py` WebSocket handler
+- Existing keyed output pattern: `dsplit/djoin` branching in `runner.ts` lines 809-939
+- Nunjucks: https://mozilla.github.io/nunjucks/ (compatible with `{{ }}` and `{% %}` syntax, Jinja2-inspired)
+- Python pickle security: https://docs.python.org/3/library/pickle.html (not safe against malicious data — documented accepted risk)
 
 ---
 
-*Architecture research for: BFF Service Architecture (v1.8)*
-*Researched: 2026-05-28*
+*Architecture research for: v1.9 Advanced Node Types — Flow Editor Extension*
+*Researched: 2026-05-31*
