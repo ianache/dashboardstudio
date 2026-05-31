@@ -13,7 +13,14 @@ class Settings(BaseSettings):
     # ADK / Gemini — read by google-adk automatically from env
     google_api_key: str = ""
     google_genai_use_vertexai: str = "FALSE"
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-2.5-flash-lite"
+
+    # CubeJS
+    cubejs_url: str = "http://cube_api:4000/v1/load"
+    cubejs_api_secret: str = "welcome1"
+
+    # Skills
+    skills_catalog_url: str = "https://raw.githubusercontent.com/ianache/skills-catalog/main/catalog.yaml"
 
     # Service
     app_host: str = "0.0.0.0"
