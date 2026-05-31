@@ -74,6 +74,28 @@ Implementar un configurador de visualizaciones dinámico con:
 - [x] Implementación de límites de altura (mín/máx) para mantener la estabilidad de la UI.
 - [x] Integración de la clase de iconos `.msi` de forma global para consistencia.
 
+## ✅ Milestone: v1.8 — BFF Service Architecture (SHIPPED 2026-05-31)
+**Goal:** Introducir una capa BFF en Node.js + Express entre el SPA y los servicios backend, concentrando auth Keycloak, sesiones server-side y proxy de APIs en un único punto de entrada. El browser nunca ve un token.
+
+**Key Deliverables:**
+- BFF Express 5 en `bff/` — containerizado, dockerizado con Redis session store
+- OIDC PKCE auth flow completo: login → Keycloak → callback → session (openid-client v6)
+- tokenRefresh middleware con coordinación de refreshes concurrentes
+- FastAPI proxy con Bearer injection + CORS ownership exclusivo en BFF
+- CubeJS proxy con JWT HS256 signing server-side (24h tokens)
+- Network isolation: backend y cubejs removidos de red pública
+- Frontend migrado: keycloak-js eliminado, auth por /bff/auth/me + cookie HttpOnly
+
+**Key Decisions:**
+- Redis elegido sobre PostgreSQL para session store (latencia + TTL nativo)
+- PKCE obligatorio incluso para server-side (defensa en profundidad)
+- activeRefreshes Map previene race conditions en token refresh concurrente
+- Transient Keycloak failures no destruyen sesión si token aún válido
+
+**Archive:** `.planning/milestones/v1.8-ROADMAP.md`
+
+---
+
 ## ✅ Milestone: v1.6 ODS PostgreSQL Upsert & Dynamic Discovery (SHIPPED 2026-05-17)
 **Objective:** Potenciar el nodo "ODS PostgreSQL" con capacidades de descubrimiento dinámico de metadatos y soporte avanzado para operaciones de UPSERT con llaves compuestas.
 
@@ -112,18 +134,9 @@ Implementar un configurador de visualizaciones dinámico con:
 
 **Archive:** `.planning/milestones/v1.7-ROADMAP.md`
 
-## Current Milestone: v1.8 — BFF Service Architecture
+## Current Milestone: v1.9 — TBD
 
-**Goal:** Introducir una capa BFF (Backend for Frontend) en Node.js + Express que se ubique entre dashboard-app y los servicios backend/CubeJS, concentrando la autenticación Keycloak, gestión de sesiones server-side y el proxy de todas las rutas de API en un único punto de entrada.
-
-**Target features:**
-- Servicio BFF en Node.js + Express en el directorio `bff/`
-- Flujos Keycloak: login, logout, callback OIDC, refresh de sesión
-- Sesiones server-side con cookie segura (express-session)
-- Proxy completo de todas las rutas del backend FastAPI
-- Proxy de CubeJS (token gestionado server-side en el BFF)
-- Limpieza del backend: eliminar lógica de auth, solo lógica de negocio pura
-- Actualización del frontend: llamar al BFF en lugar de backend/Keycloak directamente
+**Status:** Planning — run `/gsd:new-milestone` to start the next cycle.
 
 
 

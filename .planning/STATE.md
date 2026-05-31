@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.8
-milestone_name: BFF Service Architecture
-status: Completed
-last_updated: "2026-05-29T03:30:00.000Z"
+milestone: v1.6
+milestone_name: ODS Execution Engine
+status: unknown
+last_updated: "2026-05-31T04:00:06.802Z"
 progress:
-  total_phases: 37
-  completed_phases: 37
-  total_plans: 66
-  completed_plans: 66
+  total_phases: 36
+  completed_phases: 24
+  total_plans: 64
+  completed_plans: 46
 ---
 
 # Project State: Dashboard Studio v1.8
