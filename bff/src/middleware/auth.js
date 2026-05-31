@@ -53,7 +53,7 @@ export async function tokenRefresh(req, res, next) {
 
     try {
       const refreshedTokens = await refreshPromise;
-      
+
       // Store plain-serializable token fields (same shape as callback handler)
       req.session.tokens = {
         access_token: refreshedTokens.access_token,
@@ -76,7 +76,7 @@ export async function tokenRefresh(req, res, next) {
       if (isInitiator) {
         console.log(`BFF [${sessionId}]: Token refreshed successfully.`);
       }
-      
+
       // Save session explicitly to ensure it's persisted before next middleware
       req.session.save((err) => {
         if (err) console.error(`BFF [${sessionId}]: Session save error after refresh:`, err);
@@ -84,17 +84,26 @@ export async function tokenRefresh(req, res, next) {
       });
       return; // Exit to prevent double next()
     } catch (error) {
-      console.error(`BFF [${sessionId}]: Failed to refresh token:`, error.message);
-      if (error.error) {
-        console.error(`BFF [${sessionId}]: Refresh error code:`, error.error);
-      }
-      if (error.error_description) {
-        console.error(`BFF [${sessionId}]: Refresh error description:`, error.error_description);
+      // Log the actual HTTP status from the IdP response (carried in error.cause for RESPONSE_IS_NOT_CONFORM)
+      console.error(`BFF [${sessionId}]: Failed to refresh token:`, error.message, {
+        httpStatus: error.cause?.status,
+        errorCode: error.error,
+        errorDescription: error.error_description,
+      });
+
+      // Distinguish transient IdP failures (5xx / network) from definitive auth errors (invalid_grant).
+      // For transient failures, only destroy the session if the token is already hard-expired.
+      // This prevents unnecessary logouts when Keycloak is temporarily unavailable.
+      const isOAuth2Error = !!error.error; // e.g. invalid_grant, invalid_client
+      const tokenHardExpired = !expiresAt || now >= expiresAt;
+
+      if (!isOAuth2Error && !tokenHardExpired) {
+        console.warn(`BFF [${sessionId}]: Transient refresh failure — token still valid, proceeding.`);
+        return next(); // finally block still runs and cleans up activeRefreshes
       }
 
-      // Cleanup and clear cookies if token refresh failed
+      // Definitive failure: destroy the session
       if (isInitiator) {
-        activeRefreshes.delete(sessionId);
         req.session.destroy((err) => {
           if (err) console.error(`BFF [${sessionId}]: Session destroy error:`, err);
           res.clearCookie('bff.sid');

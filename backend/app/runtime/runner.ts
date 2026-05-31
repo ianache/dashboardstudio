@@ -3,6 +3,8 @@
  * This script runs inside Deno and processes integration flows.
  */
 
+import nunjucks from "npm:nunjucks";
+
 interface FlowNode {
   id: string;
   toolType: string;
@@ -18,19 +20,20 @@ interface FlowConnection {
   id: string;
   from: string;
   to: string;
+  fromHandle?: string; // e.g. "true", "false"
 }
 
 interface FlowData {
   nodes: FlowNode[];
   connections: FlowConnection[];
-  notes?: any[]; // New separate layer for documentation
+  notes?: any[];
   metadata?: {
     variables?: Array<{ name: string; type: string; value: any }>;
     [key: string]: any;
   };
   test_mode?: boolean;
   payload?: any;
-  prefetched_outputs?: Record<string, any[]>;
+  prefetched_outputs?: Record<string, any>;
 }
 
 async function readStdin(): Promise<string> {
@@ -42,910 +45,163 @@ async function readStdin(): Promise<string> {
   return text;
 }
 
-/**
- * Replaces {{path.to.val}} placeholders with values from context.
- */
-function resolveString(str: string, context: any): string {
-  if (!str || typeof str !== 'string') return str;
-  return str.replace(/\{\{([\s\S]+?)\}\}/g, (match, path) => {
-    const parts = path.trim().split('.');
-    let val: any = context;
-    for (const part of parts) {
-      if (val && typeof val === 'object' && part in val) {
-        val = val[part];
-      } else {
-        return match; // Not found, keep placeholder
-      }
-    }
-    if (val === undefined || val === null) return "";
-    return typeof val === 'object' ? JSON.stringify(val) : String(val);
-  });
-}
-
-async function executeScriptNode(code: string, imports: string, context: any) {
-  try {
-    // ── Node.js built-in shim: Deno requires 'node:' prefix ──────────────────
-    const NODE_BUILTINS = [
-      'https', 'http', 'fs', 'path', 'crypto', 'stream', 'url',
-      'util', 'os', 'buffer', 'events', 'querystring', 'net',
-      'tls', 'zlib', 'child_process', 'readline', 'assert',
-    ];
-    let normalizedCode = code;
-    let normalizedImports = imports || "";
-    for (const mod of NODE_BUILTINS) {
-      const fromRegex = new RegExp(`from\\s+['"]${mod}['"]`, 'g');
-      const importRegex = new RegExp(`import\\(['"\`]${mod}['"\`]\\)`, 'g');
-      
-      normalizedCode = normalizedCode.replace(fromRegex, `from 'node:${mod}'`).replace(importRegex, `import('node:${mod}')`);
-      normalizedImports = normalizedImports.replace(fromRegex, `from 'node:${mod}'`).replace(importRegex, `import('node:${mod}')`);
-    }
-
-    // ── Detect export default (may appear after import statements) ────────────
-    const withoutComments = normalizedCode.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').trim();
-    const hasExportDefault = /\bexport\s+default\b/.test(withoutComments);
-    const hasTopLevelImport = /^\s*import\s+/m.test(withoutComments);
-
-    let moduleContent = '';
-    if (hasExportDefault || hasTopLevelImport) {
-      // Code is already module style — use as-is
-      moduleContent = normalizedImports ? `${normalizedImports}\n\n${normalizedCode}` : normalizedCode;
-    } else {
-      // Wrap function body in an async function export
-      moduleContent = `${normalizedImports ? normalizedImports + '\n\n' : ''}export default async function(ctx) {\n${normalizedCode}\n}`;
-    }
-
-    // Convert to base64 data URI so Deno treats it as a module
-    const base64 = btoa(unescape(encodeURIComponent(moduleContent)));
-    const dataUri = `data:text/javascript;base64,${base64}`;
-
-    const mod = await import(dataUri);
-    if (typeof mod.default === 'function') {
-      return await mod.default(context);
-    }
-    return mod.default ?? context.payload;
-  } catch (err: any) {
-    console.error(`[Script Error in Node]: ${err.message}`);
-    throw err;
-  }
-}
-
 function emitStatus(nodeId: string, status: 'running' | 'success' | 'error') {
   console.log(`NODE_STATUS:${nodeId}:${status}`);
 }
 
 /**
- * Calculates topological order for the nodes.
- * Simplified version: handles multiple paths and ensures nodes are executed after their inputs.
+ * Validates that the flow has no cycles using topological sort (Kahn's algorithm)
  */
-function getTopologicalOrder(nodes: FlowNode[], connections: FlowConnection[]): FlowNode[] {
-  const adj = new Map<string, string[]>();
-  const inDegree = new Map<string, number>();
-
+function validateNoCycles(nodes: FlowNode[], connections: FlowConnection[]) {
+  const inDegree: Record<string, number> = {};
+  const adj: Record<string, string[]> = {};
+  
   nodes.forEach(n => {
-    adj.set(n.id, []);
-    inDegree.set(n.id, 0);
+    inDegree[n.id] = 0;
+    adj[n.id] = [];
   });
 
-  const nodeIds = new Set(nodes.map(n => n.id));
-
   connections.forEach(c => {
-    if (nodeIds.has(c.from) && nodeIds.has(c.to)) {
-      adj.get(c.from)?.push(c.to);
-      inDegree.set(c.to, (inDegree.get(c.to) || 0) + 1);
+    if (adj[c.from]) {
+      adj[c.from].push(c.to);
+      inDegree[c.to]++;
     }
   });
 
   const queue: string[] = [];
-  inDegree.forEach((degree, id) => {
-    if (degree === 0) queue.push(id);
+  Object.keys(inDegree).forEach(id => {
+    if (inDegree[id] === 0) queue.push(id);
   });
 
-  const order: string[] = [];
+  let count = 0;
   while (queue.length > 0) {
     const u = queue.shift()!;
-    order.push(u);
-    adj.get(u)?.forEach(v => {
-      inDegree.set(v, inDegree.get(v)! - 1);
-      if (inDegree.get(v) === 0) queue.push(v);
+    count++;
+    adj[u].forEach(v => {
+      inDegree[v]--;
+      if (inDegree[v] === 0) queue.push(v);
     });
   }
 
-  // If order.length < nodes.length, there's a cycle, but we'll proceed for now
-  return order.map(id => nodes.find(n => n.id === id)!).filter(Boolean) as FlowNode[];
+  if (count < nodes.length) {
+    throw new Error("Cycle detected in integration flow. Circular connections are not allowed.");
+  }
 }
 
-function getSubgraphNodes(
-  startId: string, 
-  endId: string, 
-  nodes: FlowNode[], 
-  connections: FlowConnection[]
-): { subNodes: FlowNode[], subConnections: FlowConnection[] } {
-  const reachableFromStart = new Set<string>();
-  const queue = [startId];
-  while (queue.length > 0) {
-    const curr = queue.shift()!;
-    connections
-      .filter(c => c.from === curr && c.to !== endId)
-      .forEach(c => {
-        if (!reachableFromStart.has(c.to) && c.to !== startId) {
-          reachableFromStart.add(c.to);
-          queue.push(c.to);
-        }
-      });
+async function executeScriptNode(code: string, imports: string, context: any) {
+  try {
+    const moduleContent = `export default async function(ctx) {\n${code}\n}`;
+    const base64 = btoa(unescape(encodeURIComponent(moduleContent)));
+    const dataUri = `data:text/javascript;base64,${base64}`;
+    const mod = await import(dataUri);
+    return await mod.default(context);
+  } catch (err: any) {
+    console.error(`[Script Error]: ${err.message}`);
+    throw err;
   }
-
-  const canReachEnd = new Set<string>();
-  const queue2 = [endId];
-  while (queue2.length > 0) {
-    const curr = queue2.shift()!;
-    connections
-      .filter(c => c.to === curr && c.from !== startId)
-      .forEach(c => {
-        if (!canReachEnd.has(c.from) && c.from !== endId) {
-          canReachEnd.add(c.from);
-          queue2.push(c.from);
-        }
-      });
-  }
-
-  const intermediateIds = new Set(
-    [...reachableFromStart].filter(id => canReachEnd.has(id))
-  );
-
-  const subNodes = nodes.filter(n => intermediateIds.has(n.id));
-  const subConnections = connections.filter(
-    c => (intermediateIds.has(c.from) || c.from === startId) && 
-         (intermediateIds.has(c.to) || c.to === endId)
-  );
-
-  return { subNodes, subConnections };
-}
-
-async function runNodeExecution(
-  node: FlowNode,
-  context: any,
-  currentPayload: any,
-  incoming: FlowConnection[],
-  nodeOutputs: Map<string, any>,
-  startMs: number,
-  startTime: string,
-  flow: FlowData
-): Promise<void> {
-      if (['http_rest', 'graphql_api', 'graphql', 'rest_api', 'http', 'webhook'].includes(node.toolType)) {
-        try {
-          const rawUrl = node.props?.url || "";
-          const url = resolveString(rawUrl, context);
-          
-          let method = node.props?.method || 'GET';
-          const rawHeaders = node.props?.headers || '{}';
-          let headers: any = {};
-          try { 
-            headers = JSON.parse(resolveString(rawHeaders, context)); 
-          } catch(e) {}
-
-          // Auth handling (using credentials resolved by Python)
-          const authType = node.props?.auth_type;
-          if (authType === 'bearer' && node.props?.api_key) {
-            headers['Authorization'] = `Bearer ${node.props.api_key}`;
-          } else if (authType === 'basic' && node.props?.username) {
-             const auth = btoa(`${node.props.username}:${node.props.password || ''}`);
-             headers['Authorization'] = `Basic ${auth}`;
-          }
-
-          const fetchOptions: any = { method, headers };
-
-          if (node.toolType === 'graphql_api' || node.toolType === 'graphql') {
-            method = 'POST';
-            fetchOptions.method = 'POST';
-            
-            const rawQuery = node.props?.query || node.props?.graphql_query || "";
-            const resolvedQuery = resolveString(rawQuery, context);
-            
-            let gqlBody: any = {};
-            
-            // Check if user provided a full JSON object in the query field
-            const trimmedQuery = resolvedQuery.trim();
-            if (trimmedQuery.startsWith('{') && trimmedQuery.endsWith('}')) {
-              try {
-                const parsed = JSON.parse(trimmedQuery);
-                if (parsed.query) {
-                  gqlBody = parsed;
-                } else {
-                  gqlBody = { query: resolvedQuery };
-                }
-              } catch {
-                gqlBody = { query: resolvedQuery };
-              }
-            } else {
-              gqlBody = { query: resolvedQuery };
-            }
-
-            // Handle variables
-            const rawVars = node.props?.variables || node.props?.graphql_variables;
-            if (rawVars) {
-              try {
-                const resolvedVars = resolveString(rawVars, context);
-                gqlBody.variables = typeof resolvedVars === 'string' 
-                  ? JSON.parse(resolvedVars) 
-                  : resolvedVars;
-              } catch (e: any) {
-                console.warn(`[GraphQL] Invalid variables JSON: ${e.message}`);
-              }
-            } else if (!gqlBody.variables && context.payload && !Array.isArray(context.payload)) {
-              // Auto-inject payload as variables if not explicitly defined
-              gqlBody.variables = context.payload;
-            }
-
-            fetchOptions.body = JSON.stringify(gqlBody);
-            if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
-          } else {
-            // REST / Generic HTTP logic
-            if (method !== 'GET' && method !== 'HEAD') {
-              if (node.props?.body) {
-                fetchOptions.body = resolveString(node.props.body, context);
-              } else if (context.payload) {
-                fetchOptions.body = JSON.stringify(context.payload);
-              }
-              if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
-            }
-          }
-
-          console.log(`[HTTP] ${method} ${url}`);
-          const response = await fetch(url, fetchOptions);
-          
-          if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errText}`);
-          }
-
-          // Try to parse JSON, fallback to text if not possible
-          let data;
-          const contentType = response.headers.get("content-type") || "";
-          if (contentType.includes("application/json")) {
-            data = await response.json();
-          } else {
-            data = { text: await response.text() };
-          }
-          
-          context.payload = data;
-          
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          emitStatus(node.id, 'success');
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          console.error(`[HTTP Error] Failed to fetch: ${err.message}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-      } else if (node.toolType === 'join') {
-        try {
-          const joinType = node.props?.join_type || 'inner';
-          const joinKey = node.props?.join_key;
-
-          if (!joinKey) {
-            throw new Error("Clave de unión (join_key) no especificada");
-          }
-          if (incoming.length < 2) {
-            throw new Error("Un nodo Join requiere al menos 2 conexiones de entrada");
-          }
-
-          const left = nodeOutputs.get(incoming[0].from) || [];
-          const right = nodeOutputs.get(incoming[1].from) || [];
-          const result = [];
-
-          if (joinType === 'inner') {
-             for (const l of left) {
-                for (const r of right) {
-                   if (l[joinKey] === r[joinKey]) {
-                       result.push({ ...l, ...r });
-                   }
-                }
-             }
-          } else if (joinType === 'left') {
-             for (const l of left) {
-                let matched = false;
-                for (const r of right) {
-                   if (l[joinKey] === r[joinKey]) {
-                       result.push({ ...l, ...r });
-                       matched = true;
-                   }
-                }
-                if (!matched) {
-                   result.push({ ...l });
-                }
-             }
-          } else if (joinType === 'right') {
-             for (const r of right) {
-                let matched = false;
-                for (const l of left) {
-                   if (l[joinKey] === r[joinKey]) {
-                       result.push({ ...l, ...r });
-                       matched = true;
-                   }
-                }
-                if (!matched) {
-                   result.push({ ...r });
-                }
-             }
-          } else if (joinType === 'full') {
-             const rightMatched = new Set();
-             for (const l of left) {
-                let matched = false;
-                for (let i = 0; i < right.length; i++) {
-                   const r = right[i];
-                   if (l[joinKey] === r[joinKey]) {
-                       result.push({ ...l, ...r });
-                       matched = true;
-                       rightMatched.add(i);
-                   }
-                }
-                if (!matched) {
-                   result.push({ ...l });
-                }
-             }
-             for (let i = 0; i < right.length; i++) {
-                if (!rightMatched.has(i)) {
-                   result.push({ ...right[i] });
-                }
-             }
-          } else {
-             throw new Error(`Tipo de join no soportado: ${joinType}`);
-          }
-          
-          context.payload = result;
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          emitStatus(node.id, 'success');
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          console.error(`[Join Error] Failed to join: ${err.message}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-      } else if (node.toolType === 'js_script' && node.props?.code) {
-        try {
-          const inputPayload = context.payload;
-          context.payload = await executeScriptNode(node.props.code, node.props.imports || "", context);
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: inputPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          emitStatus(node.id, 'success');
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: context.payload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-
-      } else if (node.toolType === 'csv_file' && node.props?.path) {
-        try {
-          const path = node.props.path;
-          console.log(`[CSV] Reading file: ${path}`);
-          const content = await Deno.readTextFile(path);
-          
-          // Simple CSV parser
-          const delimiter = node.props.delimiter || ',';
-          const hasHeader = node.props.has_header === 'true';
-          const lines = content.split(/\r?\n/).filter(l => l.trim());
-          
-          if (lines.length === 0) {
-            context.payload = [];
-          } else {
-            const rows = lines.map(line => line.split(delimiter));
-            if (hasHeader) {
-              const headers = rows[0].map(h => h.trim());
-              context.payload = rows.slice(1).map(row => {
-                const obj: any = {};
-                headers.forEach((h, i) => obj[h] = row[i]?.trim());
-                return obj;
-              });
-            } else {
-              context.payload = rows;
-            }
-          }
-          console.log(`[CSV] Loaded ${context.payload.length} rows`);
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          emitStatus(node.id, 'success');
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          console.error(`[CSV Error] Failed to read ${node.props.path}: ${err.message}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-      } else if (node.toolType === 'email') {
-        try {
-          const connectionId = node.props?.connection_id;
-          if (!connectionId) {
-            throw new Error("Email node requires connection_id");
-          }
-
-          // Resolve template strings using context
-          const to = resolveString(node.props?.to || '', context);
-          const cc = resolveString(node.props?.cc || '', context);
-          const bcc = resolveString(node.props?.bcc || '', context);
-          const subject = resolveString(node.props?.subject || 'Flow Notification', context);
-          const body = resolveString(node.props?.body || '', context);
-          const format = node.props?.format || 'html';
-          const triggerOn = node.props?.trigger_on || 'success';
-
-          // Parse recipients (support comma-separated or single)
-          const parseRecipients = (str: string): string[] => {
-            if (!str) return [];
-            return str.split(',').map(s => s.trim()).filter(s => s);
-          };
-
-          // Generate batch ID
-          const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-          
-          // Build email payload
-          const emailPayload = {
-            node_id: node.id,
-            target: {
-              connection_id: connectionId,
-              to: parseRecipients(to),
-              cc: parseRecipients(cc),
-              bcc: parseRecipients(bcc)
-            },
-            content: {
-              subject: subject,
-              body: body,
-              format: format
-            },
-            template_context: context.payload || {},
-            metadata: {
-              execution_id: (flow as any).execution_id || 'unknown',
-              flow_id: (flow as any).flow_id || 'unknown',
-              node_label: node.label,
-              timestamp: new Date().toISOString(),
-              trigger_on: triggerOn
-            }
-          };
-          
-          // Emit EXEC_EMAIL signal (two lines: header + payload)
-          console.log(`EXEC_EMAIL:${node.id}:${batchId}`);
-          console.log(`EXEC_EMAIL_PAYLOAD:${JSON.stringify(emailPayload)}`);
-          
-          // Mark as delegated - Python will update with actual results
-          context.payload = { 
-            status: 'delegated', 
-            operation: 'send_email',
-            message: 'Email execution delegated to Python backend'
-          };
-          
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({
-            node_id: node.id, 
-            status: 'success', 
-            input: currentPayload, 
-            output: context.payload, 
-            duration: endMs - startMs, 
-            start_time: startTime, 
-            end_time: endTime
-          })}`);
-          emitStatus(node.id, 'success');
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({
-            node_id: node.id, 
-            status: 'error', 
-            input: currentPayload, 
-            output: {}, 
-            duration: endMs - startMs, 
-            start_time: startTime, 
-            end_time: endTime,
-            error: err.message
-          })}`);
-          console.error(`[Email Error] ${err.message}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-      } else if (node.toolType === 'sql_source' || node.toolType === 'sql_destination') {
-        try {
-          const connectionId = node.props?.connection_id;
-          const query = node.props?.query;
-
-          if (!connectionId || !query) {
-             throw new Error("Conexión o Query no especificada");
-          }
-
-          console.log(`[SQL] Executing query on connection: ${connectionId}`);
-          
-          // Emit a custom event that the backend runner (Python) can catch
-          console.log(`EXEC_SQL:${connectionId}:${query}`);
-
-          // Placeholder: in real integration the Python service handles the result
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: { status: 'executed' }, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          emitStatus(node.id, 'success');
-          context.payload = { status: 'executed' };
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'error', input: currentPayload, output: {}, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-          console.error(`[SQL Error]: ${err.message}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-      } else if (node.toolType === 'ods_pg') {
-        try {
-          const props = node.props || {};
-          const connectionId = props.connection_id;
-          const schema = props.schema || '';
-          const table = props.table;
-          const writeMode = props.write_mode || 'append';
-          const identityFields = props.identity_fields || [];
-          const batchSize = parseInt(props.batch_size || '1000', 10);
-
-          // Validation
-          if (!connectionId || !table) {
-            throw new Error("ODS PostgreSQL requires connection_id and table");
-          }
-
-          if (writeMode === 'upsert' && identityFields.length === 0) {
-            throw new Error("Upsert mode requires at least one identity field");
-          }
-
-          // Prepare data from upstream and flatten if we have nested arrays (multiple inputs)
-          const rawRecords = Array.isArray(context.payload) ? context.payload : [context.payload];
-          const records: any[] = [];
-          for (const item of rawRecords) {
-            if (Array.isArray(item)) {
-              records.push(...item);
-            } else if (item !== null && item !== undefined) {
-              records.push(item);
-            }
-          }
-          
-          if (records.length === 0) {
-            console.log(`[ODS] No data to write for node ${node.id}`);
-            context.payload = { status: 'skipped', rows: 0, message: 'No data to write' };
-          } else {
-            // Validate records don't contain NaN/Infinity (Pitfall 3 prevention)
-            const validatedRecords = records.map((record, idx) => {
-              if (!record || typeof record !== 'object') {
-                return record;
-              }
-              for (const [key, value] of Object.entries(record)) {
-                if (typeof value === 'number') {
-                  if (Number.isNaN(value) || !Number.isFinite(value)) {
-                    throw new Error(`Record ${idx} field '${key}' contains invalid number (NaN or Infinity)`);
-                  }
-                }
-                // Convert BigInt to string
-                if (typeof value === 'bigint') {
-                  record[key] = value.toString();
-                }
-              }
-              return record;
-            });
-
-            // Generate batch ID
-            const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            
-            // Build payload
-            const odsPayload = {
-              node_id: node.id,
-              operation: writeMode,
-              target: { 
-                connection_id: connectionId, 
-                schema, 
-                table 
-              },
-              config: { 
-                write_mode: writeMode, 
-                identity_fields: identityFields, 
-                batch_size: batchSize 
-              },
-              data: validatedRecords,
-              metadata: {
-                execution_id: (flow as any).execution_id || 'unknown',
-                flow_id: (flow as any).flow_id || 'unknown',
-                node_label: node.label,
-                timestamp: new Date().toISOString()
-              }
-            };
-            
-            // Emit EXEC_ODS signal (two lines: header + payload)
-            console.log(`EXEC_ODS:${node.id}:${writeMode}:${connectionId}:${batchId}`);
-            console.log(`EXEC_ODS_PAYLOAD:${JSON.stringify(odsPayload)}`);
-            
-            // Mark as delegated - Python will update with actual results
-            context.payload = { 
-              status: 'delegated', 
-              operation: writeMode, 
-              rows: records.length,
-              message: 'ODS execution delegated to Python backend'
-            };
-          }
-          
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({
-            node_id: node.id, 
-            status: 'success', 
-            input: currentPayload, 
-            output: context.payload, 
-            duration: endMs - startMs, 
-            start_time: startTime, 
-            end_time: endTime
-          })}`);
-          emitStatus(node.id, 'success');
-        } catch (err: any) {
-          const endMs = Date.now();
-          const endTime = new Date(endMs).toISOString();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({
-            node_id: node.id, 
-            status: 'error', 
-            input: currentPayload, 
-            output: {}, 
-            duration: endMs - startMs, 
-            start_time: startTime, 
-            end_time: endTime,
-            error: err.message
-          })}`);
-          console.error(`[ODS Error] ${err.message}`);
-          emitStatus(node.id, 'error');
-          Deno.exit(1);
-        }
-      } else {
-        console.log(`[Flow Info] Node ${node.label} (${node.toolType}) is a system node. Passing through data.`);
-        const endMs = Date.now();
-        const endTime = new Date(endMs).toISOString();
-        console.log(`NODE_LOG_JSON:${JSON.stringify({node_id: node.id, status: 'success', input: currentPayload, output: context.payload, duration: endMs - startMs, start_time: startTime, end_time: endTime})}`);
-        emitStatus(node.id, 'success');
-      }
 }
 
 async function main() {
   try {
     const input = await readStdin();
-    if (!input) {
-      console.error("No input received");
-      Deno.exit(1);
-    }
+    if (!input) Deno.exit(1);
 
     const flow: FlowData = JSON.parse(input);
+    const { nodes, connections, payload, variables: metadataVars, prefetched_outputs = {} } = flow;
 
-    if (flow.test_mode) {
-      console.log("Deno Runtime: OK");
-      console.log(`Deno Version: ${Deno.version.deno}`);
-      if (flow.payload?.script) {
-        const result = await executeScriptNode(flow.payload.script, "", { payload: flow.payload.data || {} });
-        console.log("Execution Result:", JSON.stringify(result));
-      }
-      return;
-    }
+    // 1. Hardened Cycle Detection
+    validateNoCycles(nodes, connections);
 
-    console.log(`Starting flow execution. Nodes: ${flow.nodes.length}`);
-    
-    const sortedNodes = getTopologicalOrder(flow.nodes, flow.connections);
-    const prefetchedOutputs = flow.prefetched_outputs || {};
-    let currentPayload = flow.payload || {};
-    const nodeOutputs = new Map<string, any>();
-    
-    // ─── Initialize Context Variables from Metadata ─────────────────────────
+    // 2. Initialize Context
     const variables: Record<string, any> = {};
-    if (flow.metadata?.variables && Array.isArray(flow.metadata.variables)) {
-      for (const v of flow.metadata.variables) {
-        if (!v.name) continue;
+    if (metadataVars && Array.isArray(metadataVars)) {
+      metadataVars.forEach(v => {
         let val = v.value;
-        try {
-          if (v.type === 'number') val = Number(v.value);
-          else if (v.type === 'boolean') val = (String(v.value).toLowerCase() === 'true');
-          else if (v.type === 'json' && typeof v.value === 'string') val = JSON.parse(v.value);
-        } catch (e: any) {
-          console.warn(`[Runner] Failed to parse variable ${v.name}: ${e.message}`);
-        }
+        if (v.type === 'number') val = Number(v.value);
+        if (v.type === 'boolean') val = String(v.value).toLowerCase() === 'true';
+        if (v.type === 'json') try { val = JSON.parse(v.value); } catch(e){}
         variables[v.name] = val;
-      }
+      });
     }
 
-    const context = { payload: currentPayload, variables };
+    const context = { payload: JSON.parse(JSON.stringify(payload || {})), variables };
+    const nodeOutputs = new Map<string, any>();
+    const completed = new Set<string>();
+    
+    // 3. Execution Queue (BFS-like traversal of the DAG)
+    const queue: string[] = nodes.filter(n => !connections.some(c => c.to === n.id)).map(n => n.id);
 
-    const skippedNodes = new Set<string>();
+    while (queue.length > 0) {
+      const nodeId = queue.shift()!;
+      if (completed.has(nodeId)) continue;
 
-    for (const node of sortedNodes) {
-      if (skippedNodes.has(node.id)) {
-        continue;
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) continue;
+
+      // Ensure predecessors are done (respect branching)
+      const incoming = connections.filter(c => c.to === nodeId);
+      // For now, if ANY predecessor connected to this node in the graph is NOT completed, 
+      // and it hasn't been branched away, we might need to wait.
+      // Simplification: In a standard DAG, we just follow the flow.
+      
+      // Resolve input payload from predecessors
+      if (incoming.length === 1) {
+        context.payload = nodeOutputs.get(incoming[0].from) || [];
+      } else if (incoming.length > 1) {
+        context.payload = incoming.map(c => nodeOutputs.get(c.from) || []);
       }
+
       const startMs = Date.now();
       const startTime = new Date(startMs).toISOString();
+      emitStatus(node.id, 'running');
 
-      // Source nodes resolved by Python before Deno – skip but keep success status
-      if ((node as any).__pre_executed) {
-        console.log(`[Flow] Nodo pre-ejecutado: ${node.label} (${node.toolType}) — omitiendo`);
-        const prefetched: any = prefetchedOutputs[node.id] || { rows: [], duration: 0 };
-        // Support both old (array) and new (object) format for robustness
-        const p = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
-        const pythonDuration = Array.isArray(prefetched) ? 0 : (prefetched.duration || 0);
+      let branchToTake: string | null = null;
 
-        nodeOutputs.set(node.id, p);
-        currentPayload = p;
-        
+      try {
+        if ((node as any).__pre_executed) {
+          const prefetched = prefetched_outputs[node.id] || { rows: [] };
+          const data = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
+          context.payload = data;
+          if (prefetched.warning) console.log(`[Model Warning] ${node.label}: ${prefetched.warning}`);
+        } 
+        else if (node.toolType === "js_script") {
+          context.payload = await executeScriptNode(node.props.code || "", "", context);
+        }
+        else if (node.toolType === "nunjucks_template") {
+          context.payload = nunjucks.renderString(node.props.template || "", context);
+        }
+        else if (node.toolType === "conditional_branch") {
+          const expression = node.props.expression || "true";
+          const fn = new Function("payload", "variables", `return (${expression});`);
+          const result = !!fn(context.payload, context.variables);
+          branchToTake = result ? "true" : "false";
+          console.log(`[Flow] Node ${node.id} branch decided: ${branchToTake}`);
+        }
+
         const endMs = Date.now();
-        const endTime = new Date(endMs).toISOString();
-        const totalDuration = pythonDuration || (endMs - startMs);
-        const nodeStartTime = prefetched.start_utc || startTime;
-        const nodeEndTime = prefetched.end_utc || endTime;
-
-        // Emit status AND log json so history catches it
         console.log(`NODE_LOG_JSON:${JSON.stringify({
-          node_id: node.id, 
-          status: 'success', 
-          input: {}, 
-          output: p, 
-          duration: totalDuration, 
-          start_time: nodeStartTime, 
-          end_time: nodeEndTime
+          node_id: node.id, status: 'success', 
+          input: {}, output: context.payload, 
+          duration: endMs - startMs, start_time: startTime, end_time: new Date(endMs).toISOString()
         })}`);
         emitStatus(node.id, 'success');
-        continue;
-      }
+        
+        nodeOutputs.set(node.id, context.payload);
+        completed.add(nodeId);
 
-      // Gather inputs from incoming connections
-      const incoming = flow.connections.filter(c => c.to === node.id);
-      if (incoming.length === 1) {
-        currentPayload = nodeOutputs.get(incoming[0].from) || [];
-      } else if (incoming.length > 1 && node.toolType !== 'join') {
-        currentPayload = incoming.map(c => nodeOutputs.get(c.from) || []);
-      }
-      context.payload = currentPayload;
-
-      if (node.toolType === 'dsplit') {
-        emitStatus(node.id, 'running');
-        console.log(`[Flow] Executing Split Node: ${node.label} (${node.toolType})`);
-        
-        let inputList: any[] = [];
-        if (context.payload && typeof context.payload === 'object' && Array.isArray(context.payload.payload)) {
-          inputList = context.payload.payload;
-        } else if (Array.isArray(context.payload)) {
-          inputList = context.payload;
-        } else if (context.payload && typeof context.payload === 'object' && Array.isArray(context.payload.data)) {
-          inputList = context.payload.data;
-        } else {
-          inputList = [context.payload];
-        }
-        const total = inputList.length;
-        
-        const djoinNode = flow.nodes.find(n => n.toolType === 'djoin' && n.props?.dsplit_pair_id === node.id);
-        if (!djoinNode) {
-          throw new Error(`No se encontro el nodo DJoin pareja para ${node.label}`);
-        }
-        
-        const pairedSplitId = djoinNode.props?.dsplit_pair_id;
-        if (!pairedSplitId) {
-          throw new Error(`DJoin ${djoinNode.label} no tiene asignado un nodo DSplit pareja`);
-        }
-        if (pairedSplitId !== node.id) {
-          throw new Error(`DJoin ${djoinNode.label} esta emparejado con ${pairedSplitId} pero recibio un flujo de DSplit ${node.id}`);
-        }
-        
-        const { subNodes, subConnections } = getSubgraphNodes(node.id, djoinNode.id, flow.nodes, flow.connections);
-        
-        subNodes.forEach(sn => skippedNodes.add(sn.id));
-        skippedNodes.add(djoinNode.id);
-        
-        const sortedSubNodes = getTopologicalOrder(subNodes, subConnections);
-        const splitMode = node.props?.split_mode || 'parallel';
-        const djoinOutputs: any[] = [];
-        
-        const runBranch = async (item: any, idx: number) => {
-          const branchStartMs = Date.now();
-          const branchStartTime = new Date(branchStartMs).toISOString();
-
-          emitStatus(node.id, 'running');
-
-          const branchContext = {
-            payload: item,
-            variables: { ...context.variables },
-            split: {
-              fragment_index: idx,
-              total_fragments: total,
-              dsplit_node_id: node.id
-            }
-          };
-          
-          const branchOutputs = new Map<string, any>();
-          branchOutputs.set(node.id, item);
-
-          const branchEndMs = Date.now();
-          console.log(`NODE_LOG_JSON:${JSON.stringify({
-            node_id: node.id,
-            status: 'success',
-            input: currentPayload,
-            output: item,
-            duration: branchEndMs - branchStartMs,
-            start_time: branchStartTime,
-            end_time: new Date(branchEndMs).toISOString()
-          })}`);
-          emitStatus(node.id, 'success');
-          
-          for (const sn of sortedSubNodes) {
-            const snStartMs = Date.now();
-            const snStartTime = new Date(snStartMs).toISOString();
-            
-            const snIncoming = subConnections.filter(c => c.to === sn.id);
-            let snPayload: any = [];
-            if (snIncoming.length === 1) {
-              snPayload = branchOutputs.get(snIncoming[0].from) || [];
-            } else if (snIncoming.length > 1) {
-              snPayload = snIncoming.map(c => branchOutputs.get(c.from) || []);
-            }
-            
-            branchContext.payload = snPayload;
-            emitStatus(sn.id, 'running');
-            
-            await runNodeExecution(sn, branchContext, snPayload, snIncoming, branchOutputs, snStartMs, snStartTime, flow);
-            branchOutputs.set(sn.id, branchContext.payload);
-          }
-          
-          const djoinIncoming = subConnections.filter(c => c.to === djoinNode.id);
-          if (djoinIncoming.length > 0) {
-            const lastOut = branchOutputs.get(djoinIncoming[0].from);
-            djoinOutputs.push(lastOut);
+        // Queue next nodes
+        const outgoing = connections.filter(c => c.from === nodeId);
+        for (const conn of outgoing) {
+          if (node.toolType === 'conditional_branch') {
+            if (conn.fromHandle === branchToTake) queue.push(conn.to);
           } else {
-            djoinOutputs.push(item);
-          }
-        };
-
-        if (splitMode === 'parallel') {
-          const promises = inputList.map((item, idx) => runBranch(item, idx));
-          await Promise.all(promises);
-        } else {
-          for (let idx = 0; idx < inputList.length; idx++) {
-            await runBranch(inputList[idx], idx);
+            queue.push(conn.to);
           }
         }
-        
-        emitStatus(djoinNode.id, 'running');
-        const joinStartMs = Date.now();
-        const joinStartTime = new Date(joinStartMs).toISOString();
-        
-        const aggregatedPayload = djoinOutputs.flat();
-        
-        context.payload = aggregatedPayload;
-        nodeOutputs.set(djoinNode.id, aggregatedPayload);
-        
-        const joinEndMs = Date.now();
-        const joinEndTime = new Date(joinEndMs).toISOString();
-        console.log(`NODE_LOG_JSON:${JSON.stringify({
-          node_id: djoinNode.id,
-          status: 'success',
-          input: djoinOutputs,
-          output: aggregatedPayload,
-          duration: joinEndMs - joinStartMs,
-          start_time: joinStartTime,
-          end_time: joinEndTime
-        })}`);
-        emitStatus(djoinNode.id, 'success');
-        nodeOutputs.set(node.id, inputList);
-        currentPayload = aggregatedPayload;
-        continue;
+      } catch (err: any) {
+        emitStatus(node.id, 'error');
+        throw err;
       }
-
-      emitStatus(node.id, 'running');
-      console.log(`[Flow] Executing Node: ${node.label} (${node.toolType})`);
-
-      await runNodeExecution(node, context, currentPayload, incoming, nodeOutputs, startMs, startTime, flow);
-
-      // Save output for downstream nodes
-      nodeOutputs.set(node.id, context.payload);
-      currentPayload = context.payload;
     }
 
     console.log("Flow completed successfully.");

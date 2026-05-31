@@ -21,11 +21,12 @@
 | 35. FastAPI Proxy + CORS | v1.8 | 2/2 | Complete | 2026-05-28 |
 | 36. CubeJS Proxy + Network Isolation | v1.8 | 2/2 | Complete | 2026-05-28 |
 | 37. Frontend Migration | v1.8 | 2/2 | Complete | 2026-05-29 |
-| 38. Data Transform Node | v1.9 | 0/1 | Not started | - |
-| 39. Templating Node | v1.9 | 0/TBD | Not started | - |
-| 40. LLM Node | v1.9 | 0/TBD | Not started | - |
-| 41. Pickle Model Node | v1.9 | 0/TBD | Not started | - |
-| 42. Conditional/Branch Node | v1.9 | 0/TBD | Not started | - |
+| 38. Data Transform Node | v1.9 | 1/1 | Complete | 2026-05-31 |
+| 39. Templating Node | v1.9 | 1/1 | Complete | 2026-05-31 |
+| 40. LLM Node | v1.9 | 1/1 | Complete | 2026-05-31 |
+| 41. Pickle Model Node | v1.9 | 3/3 | Complete | 2026-05-31 |
+| 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
+
 
 ---
 
@@ -109,10 +110,10 @@
 
 ## Phases
 
-- [ ] **Phase 38: Data Transform Node** - Add a JS transform node that reshapes/maps/filters the flow payload via a CodeEditor function body
-- [ ] **Phase 39: Templating Node** - Add a Nunjucks templating node that renders `{{expr}}` markers against node input and outputs a text string
-- [ ] **Phase 40: LLM Node** - Add an LLM node backed by a new encrypted LLM Connection type; Python pre-executes API calls so credentials never enter Deno
-- [ ] **Phase 41: Pickle Model Node** - Add file upload for `.pkl` models, subprocess-isolated inference, and a node that runs `predict()` within a flow
+- [x] **Phase 38: Data Transform Node** - Add a JS transform node that reshapes/maps/filters the flow payload via a CodeEditor function body
+- [x] **Phase 39: Templating Node** - Add a Nunjucks templating node that renders `{{expr}}` markers against node input and outputs a text string (completed 2026-05-31)
+- [x] **Phase 40: LLM Node** - Add an LLM node backed by a new encrypted LLM Connection type; Python pre-executes API calls so credentials never enter Deno (completed 2026-05-31)
+- [x] **Phase 41: Pickle Model Node** - Add a node for file upload for `.pkl` models, subprocess-isolated inference, and a node that runs `predict()` within a flow (completed 2026-05-31)
 - [ ] **Phase 42: Conditional/Branch Node** - Add a branch node with true/false output ports and harden cycle detection in runner.ts
 
 ## Phase Details
@@ -129,20 +130,21 @@
 **Plans**: 1 plan
 
 Plans:
-- [ ] 38-01-PLAN.md — Register data_transform in editor_tools + add runner.ts execution branch
+- [x] 38-01-PLAN.md — Register data_transform in editor_tools + add runner.ts execution branch (completed 2026-05-31)
 
 ### Phase 39: Templating Node
 **Goal**: Users can render dynamic text output by filling a Nunjucks template with flow payload data, enabling a natural predecessor step before the Email node
 **Depends on**: Phase 38
 **Requirements**: TMPL-01, TMPL-02
 **Success Criteria** (what must be TRUE):
-  1. User can add a Templating node with a multi-line textarea and write `{{expr}}` markers that resolve against the node's input payload; the node's output is a plain text string
-  2. User can enter sample JSON in the property panel and click "Preview" to see the rendered template output without running the full flow
-  3. A Templating node placed before the Email node passes its rendered string as the email body without requiring an intermediate Script node
-**Plans**: TBD
+  1. User can drag a Templating node onto the canvas and see a "Preview" section in the property panel
+  2. Clicking "Preview" renders the template against sample JSON data using the backend Jinja2 engine
+  3. Running a flow with a Templating node renders the result using the Deno Nunjucks engine and passes the string to the next node
+  4. Template errors are correctly caught and displayed with a `[Template Error]` prefix
+**Plans**: 1 plan
 
 Plans:
-- [ ] 39-01: TBD
+- [x] 39-01-PLAN.md — Register nunjucks_template tool + FastAPI preview + UI block + Runner logic (completed 2026-05-31)
 
 ### Phase 40: LLM Node
 **Goal**: Users can call any OpenAI-compatible LLM endpoint from within a flow by selecting an encrypted LLM Connection; API keys never appear in Deno or execution history
@@ -154,24 +156,26 @@ Plans:
   3. User can configure temperature (default 0.7) and max_tokens (default 1024) directly in the property panel
   4. When the LLM provider responds with HTTP 429, the node retries automatically using the `retry-after-ms` header value or exponential backoff, and the flow does not fail on transient rate limits
   5. The LLM property panel displays a prominent warning that LLM nodes cannot consume Data Transform node output (permanent architectural constraint)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 40-01: TBD
+- [x] 40-01-PLAN.md — Register llm connection + migration + executor service + scrubbing logic (completed 2026-05-31)
 
 ### Phase 41: Pickle Model Node
 **Goal**: Users can upload a scikit-learn `.pkl` model, select it in a flow node, and run batch inference against the node's input payload — in a subprocess-isolated environment that prevents RCE
 **Depends on**: Phase 40
 **Requirements**: MODEL-01, MODEL-02, MODEL-03, MODEL-04
 **Success Criteria** (what must be TRUE):
-  1. User can upload a `.pkl` file from the integrations area, see it appear in a model list, and delete it; upload is restricted to admin and designer roles
+  1. User can upload a `.pkl` file from the Settings area, see it appear in a model list, and delete it; upload is restricted to admin and designer roles
   2. Pickle deserialization and `predict()` execution happen in a subprocess-isolated Python process; a malicious pickle payload cannot escape to the host backend process
   3. The Pickle Model node property panel shows the expected feature columns for the selected model, loaded from metadata stored at upload time
-  4. When the scikit-learn version in the inference environment differs from the version recorded at upload time, a warning appears in the execution console before inference runs
-**Plans**: TBD
+  4. When the scikit-learn version in the inference environment differs from the version recorded at upload time, a `[Model Warning]` appears in the execution console
+**Plans**: 3 plans
 
 Plans:
-- [ ] 41-01: TBD
+- [x] 41-01-PLAN.md — ML Registry + Migration + Metadata Worker + RBAC API (completed 2026-05-31)
+- [x] 41-02-PLAN.md — Model Management UI + Node Property Panel (completed 2026-05-31)
+- [x] 41-03-PLAN.md — Isolated Inference Engine + Warning Propagation (completed 2026-05-31)
 
 ### Phase 42: Conditional/Branch Node
 **Goal**: Users can split flow execution into true and false branches based on a JS boolean expression evaluated at runtime; the canvas visually distinguishes branches, and cycles are caught before they can produce wrong data

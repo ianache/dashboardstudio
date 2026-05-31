@@ -19,8 +19,12 @@ export async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
   
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers
+  }
+  
+  // Set JSON content type only if body is NOT FormData
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json'
   }
 
   console.log(`[API] ${options.method || 'GET'} ${url}`)
@@ -434,6 +438,37 @@ export const usersApi = {
   }
 }
 
+// ML Models API
+export const mlModelsApi = {
+  async getAll() {
+    return apiRequest('/api/v1/ml-models/')
+  },
+
+  async getById(id) {
+    return apiRequest(`/api/v1/ml-models/${id}`)
+  },
+
+  async upload(name, file) {
+    const formData = new FormData()
+    formData.append('name', name)
+    formData.append('file', file)
+    
+    // Note: apiRequest uses fetch, but we need to handle multi-part manually or ensure it doesn't set JSON header
+    // Actually our apiRequest always sets application/json by default if body is present as string.
+    // I should check if apiRequest handles FormData.
+    return apiRequest('/api/v1/ml-models/', {
+      method: 'POST',
+      body: formData // fetch handles FormData correctly if no Content-Type is set
+    })
+  },
+
+  async delete(id) {
+    return apiRequest(`/api/v1/ml-models/${id}`, {
+      method: 'DELETE'
+    })
+  }
+}
+
 export default {
   cubeConfig: cubeConfigApi,
   llmConfig: llmConfigApi,
@@ -447,4 +482,5 @@ export default {
   editorTools: editorToolsApi,
   integrationFlows: integrationFlowsApi,
   users: usersApi,
+  mlModels: mlModelsApi,
 }

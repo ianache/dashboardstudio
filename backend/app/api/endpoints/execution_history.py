@@ -1,11 +1,31 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.security import require_role
 from app.models import models
 from app.schemas import schemas
 from typing import List
 
 router = APIRouter(prefix="/execution-history", tags=["execution-history"])
+
+@router.post("/reset-running", dependencies=[Depends(require_role(["admin"]))])
+async def reset_running_executions(db: Session = Depends(get_db)):
+    """Marca todas las ejecuciones atascadas en 'running' como 'aborted'."""
+    now = datetime.utcnow()
+    affected = (
+        db.query(models.ExecutionHistory)
+        .filter(models.ExecutionHistory.status == "running")
+        .all()
+    )
+    for execution in affected:
+        execution.status = "aborted"
+        execution.end_time = now
+        if execution.start_time:
+            execution.duration = int((now - execution.start_time).total_seconds())
+    db.commit()
+    return {"reset": len(affected)}
+
 
 @router.get("/{flow_id}", response_model=List[schemas.ExecutionHistoryResponse])
 async def get_execution_history(

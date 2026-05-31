@@ -219,6 +219,149 @@ class ODSExecutor:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+
+    async def _get_table_columns(
+        self,
+        conn: asyncpg.Connection,
+        schema: str,
+        table: str
+    ) -> List[str]:
+        """Fetch all column names for the target table."""
+        query = """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = $1 AND table_name = $2
+            ORDER BY ordinal_position;
+        """
+        rows = await conn.fetch(query, schema, table)
+        return [r['column_name'] for r in rows]
+
+    async def _get_table_columns_info(
+        self,
+        conn: asyncpg.Connection,
+        schema: str,
+        table: str
+    ) -> Dict[str, str]:
+        """Fetch column names and their PostgreSQL data types."""
+        query = """
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_schema = $1 AND table_name = $2;
+        """
+        rows = await conn.fetch(query, schema, table)
+        return {r['column_name']: r['data_type'] for r in rows}
+
+    def _clean_and_align_records(
+        self,
+        records: List[Dict[str, Any]],
+        table_columns_info: Dict[str, str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Align record keys with actual table columns:
+        - Filters out keys that do not match any table column.
+        - Tries to match camelCase/PascalCase keys to snake_case table columns.
+        - Coerces types (e.g., parses ISO date strings to datetime/date for timestamp/date columns).
+        """
+        if not records or not table_columns_info:
+            return records
+            
+        columns_set = set(table_columns_info.keys())
+        
+        # Helper map: snake_case/lowercase version of each column to original column name
+        col_map = {}
+        for col in table_columns_info.keys():
+            col_map[col.lower()] = col
+            col_map[col.lower().replace('_', '')] = col
+
+        import re
+        import datetime
+        from decimal import Decimal
+
+        def to_snake_case(name):
+            s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+            return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+        def parse_datetime(val):
+            if isinstance(val, (datetime.datetime, datetime.date)):
+                return val
+            if isinstance(val, str):
+                val_str = val.strip()
+                if not val_str:
+                    return None
+                try:
+                    if val_str.endswith('Z'):
+                        val_str = val_str[:-1] + '+00:00'
+                    return datetime.datetime.fromisoformat(val_str)
+                except Exception:
+                    try:
+                        import dateutil.parser
+                        return dateutil.parser.parse(val_str)
+                    except Exception:
+                        pass
+            return val
+
+        cleaned_records = []
+        for idx, record in enumerate(records):
+            clean_rec = {}
+            for key, value in record.items():
+                matched_col = None
+                
+                if key in columns_set:
+                    matched_col = key
+                else:
+                    key_lower = key.lower()
+                    if key_lower in col_map:
+                        matched_col = col_map[key_lower]
+                    else:
+                        key_snake = to_snake_case(key)
+                        if key_snake in col_map:
+                            matched_col = col_map[key_snake]
+                        else:
+                            key_no_under = key_lower.replace('_', '')
+                            if key_no_under in col_map:
+                                matched_col = col_map[key_no_under]
+                
+                if matched_col:
+                    col_type = table_columns_info[matched_col].lower()
+                    
+                    if value is None:
+                        clean_rec[matched_col] = None
+                        continue
+                        
+                    try:
+                        if 'timestamp' in col_type:
+                            clean_rec[matched_col] = parse_datetime(value)
+                        elif col_type == 'date':
+                            dt = parse_datetime(value)
+                            if isinstance(dt, datetime.datetime):
+                                clean_rec[matched_col] = dt.date()
+                            else:
+                                clean_rec[matched_col] = dt
+                        elif 'int' in col_type:
+                            clean_rec[matched_col] = int(value)
+                        elif col_type in ['numeric', 'decimal', 'double precision', 'real']:
+                            clean_rec[matched_col] = float(value)
+                        elif col_type == 'boolean':
+                            if isinstance(value, str):
+                                clean_rec[matched_col] = value.lower() in ('true', '1', 'yes', 't')
+                            else:
+                                clean_rec[matched_col] = bool(value)
+                        else:
+                            clean_rec[matched_col] = value
+                    except Exception as coercion_err:
+                        self.logger.warning(
+                            f"Type coercion failed for column '{matched_col}' (type: {col_type}) "
+                            f"with value '{value}': {coercion_err}. Using raw value."
+                        )
+                        clean_rec[matched_col] = value
+                else:
+                    self.logger.debug(
+                        f"Record key '{key}' ignored because it does not match any column in target table."
+                    )
+            
+            cleaned_records.append(clean_rec)
+            
+        return cleaned_records
     
     def _validate_config(self, config: ODSConfig) -> None:
         """Validate ODSConfig (internal hook for validation)."""
@@ -505,18 +648,36 @@ class ODSExecutor:
         # Validate config
         self._validate_config(config)
         
-        # Validate records
+        # Validate raw records
         validated_records = self._validate_records(records)
         records = validated_records
         
         if not records:
             raise ValueError("records cannot be empty")
-        
+
         # Validate table exists
         await self._validate_table_exists(connection, config.schema, config.table)
         
+        # Fetch target table columns information to align/clean and type-coerce record keys
+        table_columns_info = await self._get_table_columns_info(connection, config.schema, config.table)
+        
+        # Clean and align record keys with PostgreSQL target table columns (e.g. camelCase -> snake_case, omit extras, coerce types)
+        records = self._clean_and_align_records(records, table_columns_info)
+            
+        # Check if record has any keys matching database columns
+        if records and not any(records[0].keys()):
+            raise ValueError(
+                f"No matching columns found between incoming record keys and target table columns. "
+                f"Table columns: {list(table_columns_info.keys())}. "
+                f"Record keys: {list(records[0].keys()) if records else []}"
+            )
+        
         # Validate unique constraint for upsert
         if config.write_mode == WriteMode.UPSERT:
+            # First, clean/align the identity fields to match the database column case
+            col_map = {col.lower(): col for col in table_columns_info.keys()}
+            config.identity_fields = [col_map.get(idf.lower(), idf) for idf in config.identity_fields]
+            
             await self._validate_unique_constraint(
                 connection, config.schema, config.table, config.identity_fields
             )
@@ -706,10 +867,10 @@ class ODSExecutor:
         ]
         
         # Execute batch insert
-        result = await connection.executemany(query, values)
+        await connection.executemany(query, values)
         
-        # executemany returns number of rows affected
-        rows_inserted = len(batch) if result else 0
+        # Since it succeeded without raising an exception, all rows in batch were inserted
+        rows_inserted = len(batch)
         
         self.logger.debug(f"Batch {batch_number}: Appended {rows_inserted} rows")
         return {'success': True, 'rows_inserted': rows_inserted}

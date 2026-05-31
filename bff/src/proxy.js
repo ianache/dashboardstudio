@@ -1,6 +1,6 @@
 'use strict';
 
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
 import config from './config.js';
 import { signCubeToken } from './cubeToken.js';
 
@@ -27,12 +27,15 @@ export const fastapiProxy = createProxyMiddleware({
       console.log(`Has tokens in session: ${!!req.session?.tokens}`);
       
       if (req.session?.tokens?.access_token) {
-        console.log(`Access Token present (len: ${req.session.tokens.access_token.length} chars)`);
-        proxyReq.setHeader('Authorization', `Bearer ${req.session.tokens.access_token}`);
+        console.log('Access Token present (len: ' + req.session.tokens.access_token.length + ' chars)');
+        proxyReq.setHeader('Authorization', 'Bearer ' + req.session.tokens.access_token);
       } else {
-        console.log(`WARNING: No access_token found in session!`);
+        console.log('WARNING: No access_token found in session!');
       }
-      console.log(`---------------------------`);
+      console.log('---------------------------');
+      
+      // Fix body-parser stream drain issue for proxied POST/PUT requests
+      fixRequestBody(proxyReq, req);
     },
     proxyRes: (proxyRes, req, res) => {
       // Strip CORS headers from backend to avoid duplication/conflict
@@ -73,6 +76,9 @@ export const cubejsProxy = createProxyMiddleware({
           console.error('CubeJS Token Signing Error:', err.message);
         }
       }
+      
+      // Fix body-parser stream drain issue for CubeJS POST requests
+      fixRequestBody(proxyReq, req);
     },
     proxyRes: (proxyRes, req, res) => {
       // Strip CORS headers from CubeJS

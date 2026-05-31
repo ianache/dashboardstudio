@@ -117,10 +117,11 @@ class DashboardResponse(DashboardBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     widgets: List[WidgetResponse] = []
+    assigned_users: List[str] = []
 
 
 class DashboardWithAssignments(DashboardResponse):
-    assigned_users: List[str] = []
+    pass
 
 
 class DashboardAssignmentRequest(BaseModel):
@@ -441,6 +442,30 @@ class EditorToolUpdate(BaseModel):
 class EditorToolResponse(EditorToolBase):
     model_config = ConfigDict(from_attributes=True)
     id: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class TemplatePreviewRequest(BaseModel):
+    template: str
+    data: Any
+
+
+# ── Machine Learning Models ───────────────────────────────────────────────────
+
+class MLModelBase(BaseModel):
+    name: str
+    sklearn_version: Optional[str] = None
+    features: Optional[List[str]] = None
+
+class MLModelCreate(MLModelBase):
+    pass
+
+class MLModelResponse(MLModelBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    filename: str
+    created_by: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

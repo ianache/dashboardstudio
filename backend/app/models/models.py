@@ -284,3 +284,17 @@ class NodeExecutionLogs(Base):
 
     execution = relationship("ExecutionHistory", back_populates="node_logs")
 
+
+class MLModel(Base):
+    __tablename__ = "machine_learning_models"
+    __table_args__ = {"schema": "biportal"}
+
+    id = Column(String(50), primary_key=True)
+    name = Column(String(255), nullable=False)
+    filename = Column(String(255), nullable=False)
+    sklearn_version = Column(String(50), nullable=True)
+    features = Column(JSON, nullable=True)  # List of feature names
+    created_by = Column(String(50), ForeignKey("biportal.users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+

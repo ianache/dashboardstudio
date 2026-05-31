@@ -120,25 +120,34 @@ class DenoService:
         logger.info(f"Launching Deno runner: {self.full_runner_path}")
 
         def _run_deno():
+            # Build command: skip deno.json as workspace config (no lock-file enforcement)
+            # but pass it explicitly as an import map so bare specifiers like 'luxon'
+            # and '@gitbeaker/rest' still resolve to their npm: mappings.
+            import_map_path = os.path.join(os.path.dirname(self.full_runner_path), "deno.json")
+            cmd = [
+                "deno", "run",
+                "--no-config",    # Don't load deno.json as workspace config
+                "--no-lock",      # Skip lock-file validation (avoids download hang)
+                "--allow-read",
+                "--allow-net",    # Required for rest_api / http nodes + npm package downloads
+                "--allow-env",    # Required for reading environment variables
+                "--allow-sys",    # Required for node:os and similar builtins
+            ]
+            if os.path.exists(import_map_path):
+                cmd.extend(["--import-map", import_map_path])
+            cmd.append(self.full_runner_path)
             return subprocess.run(
-                [
-                    "deno", "run",
-                    "--allow-read",
-                    "--allow-net",        # Required for rest_api / http nodes
-                    "--allow-env",        # Required for reading environment variables
-                    "--allow-sys",        # Required for node:os and similar builtins
-                    self.full_runner_path
-                ],
+                cmd,
                 input=input_json.encode(),
                 capture_output=True,
-                timeout=120,  # Increased from 30s to accommodate HTTP calls
+                timeout=120,
             )
 
         try:
             loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(None, _run_deno)
         except subprocess.TimeoutExpired:
-            yield {"type": "error", "message": "Execution timed out after 30 seconds"}
+            yield {"type": "error", "message": "Execution timed out after 120 seconds"}
             yield {"type": "status", "success": False, "exit_code": -1}
             return
         except FileNotFoundError:
@@ -593,6 +602,48 @@ class DenoService:
                 "recipients_count": 0,
                 "duration_ms": 0
             }
+
+
+    async def cache_runner_deps(self) -> None:
+        """
+        Pre-cache npm dependencies declared in the runtime deno.json so that
+        concurrent fork branches don't race to download the same packages.
+        Called once at backend startup via the FastAPI lifespan.
+        Uses run_in_executor because asyncio.create_subprocess_exec is
+        unavailable on Windows with SelectorEventLoop (uvicorn default).
+        """
+        import_map_path = os.path.join(os.path.dirname(self.full_runner_path), "deno.json")
+        if not os.path.exists(import_map_path) or not os.path.exists(self.full_runner_path):
+            return
+
+        logger.info("Pre-caching Deno runner npm dependencies...")
+
+        def _cache():
+            return subprocess.run(
+                [
+                    "deno", "cache",
+                    "--no-lock",
+                    "--import-map", import_map_path,
+                    self.full_runner_path,
+                ],
+                capture_output=True,
+                timeout=300,
+            )
+
+        try:
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, _cache)
+            if result.returncode == 0:
+                logger.info("Deno runner dependencies cached successfully.")
+            else:
+                stderr = result.stderr.decode(errors="replace").strip()
+                logger.warning(f"Deno cache finished with errors: {stderr}")
+        except subprocess.TimeoutExpired:
+            logger.warning("Deno cache warmup timed out after 300 s — dependencies will be fetched on first run.")
+        except FileNotFoundError:
+            logger.warning("Deno not found on PATH; skipping cache warmup.")
+        except Exception as e:
+            logger.warning(f"Deno cache warmup error: {e}")
 
 
 # Singleton instance

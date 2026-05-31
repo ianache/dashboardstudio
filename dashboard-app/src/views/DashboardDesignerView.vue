@@ -771,13 +771,29 @@ function _mapBackendUser(u) {
 
 async function openAssignModal(db) {
   assigningDashboard.value = db
-  selectedUsers.value = [...db.assignedUsers]
+  selectedUsers.value = [...(db.assignedUsers || [])]
 
   assignedUsersFull.value = []
   userSearchQuery.value = ''
   userSearchResults.value = []
   searchError.value = null
-  allBackendUsers.value = []
+  
+  try {
+    // Load all registered users from backend to identify those already assigned
+    const users = await usersApi.getAll()
+    allBackendUsers.value = users.map(_mapBackendUser)
+    
+    // Populate assignedUsersFull with complete objects for already assigned IDs
+    assignedUsersFull.value = allBackendUsers.value.filter(u => 
+      selectedUsers.value.includes(u.id)
+    )
+  } catch (err) {
+    console.error('Error al cargar usuarios:', err)
+    uiStore.addAlert({ 
+      type: 'warning', 
+      message: 'No se pudieron cargar los detalles de los usuarios asignados.' 
+    })
+  }
 
   // Feature temporarily disabled during BFF migration
   console.warn('User search and assignment is being migrated to BFF.')
@@ -821,7 +837,10 @@ async function searchUsers() {
   searchError.value = null
   try {
     const results = await usersApi.search(userSearchQuery.value.trim())
-    userSearchResults.value = results.filter(u => !selectedUsers.value.includes(u.id))
+    // Map results from Keycloak format to UI format and filter out already selected
+    userSearchResults.value = results
+      .map(_mapKcUser)
+      .filter(u => !selectedUsers.value.includes(u.id))
   } catch (err) {
     searchError.value = err?.message || 'Error al buscar usuarios'
     userSearchResults.value = []
@@ -837,12 +856,19 @@ function toggleUserFromSearch(user) {
     if (!assignedUsersFull.value.find(u => u.id === user.id)) {
       assignedUsersFull.value.push(user)
     }
+    // Remove from results
+    userSearchResults.value = userSearchResults.value.filter(u => u.id !== user.id)
   } else {
     selectedUsers.value = selectedUsers.value.filter(id => id !== user.id)
     assignedUsersFull.value = assignedUsersFull.value.filter(u => u.id !== user.id)
+    
+    // If it matches current search, add it back to results
+    const q = userSearchQuery.value.trim().toLowerCase()
+    const matches = !q || (user.name || '').toLowerCase().includes(q) || (user.email || '').toLowerCase().includes(q)
+    if (matches && !userSearchResults.value.find(u => u.id === user.id)) {
+      userSearchResults.value.push(user)
+    }
   }
-  // Keep search results in sync after selection change
-  _applyUserFilter(userSearchQuery.value)
 }
 
 async function saveAssignment() {

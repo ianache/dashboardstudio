@@ -18,6 +18,7 @@ export const CONN_TYPES = [
   { value: 'smtp',       label: 'SMTP (Email)' },
   { value: 'http',       label: 'HTTP (Basic Auth)' },
   { value: 'jwt',        label: 'JWT Token' },
+  { value: 'llm',        label: 'LLM (OpenAI Compatible)' },
   { value: 'database',   label: 'Base de Datos (Genérica)' },
   { value: 'sql_source', label: 'SQL Source' },
   { value: 'sql_destination', label: 'SQL Destination' },
@@ -39,6 +40,7 @@ export const CONN_DEFAULTS = {
   smtp:       { host: '', port: 587,   use_ssl: true, email: '', password: '' },
   http:       { url: '', username: '', password: '' },
   jwt:        { token_url: '', username: '', password: '', client_id: '', client_secret: '' },
+  llm:        { url: 'https://api.openai.com/v1', api_key: '', model: 'gpt-4o' },
   database:   { host: '', port: 5432,  username: '', password: '', database: '', schema: 'public' },
 }
 
@@ -58,6 +60,7 @@ export const CONN_META = {
   smtp:       { icon: 'email',        bg: '#fdf4ff', fg: '#9333ea', accent: '#9333ea' },
   http:       { icon: 'language',     bg: '#ecfdf5', fg: '#059669', accent: '#059669' },
   jwt:        { icon: 'vpn_key',      bg: '#fef9c3', fg: '#ca8a04', accent: '#ca8a04' },
+  llm:        { icon: 'psychology',   bg: '#f5f3ff', fg: '#7c3aed', accent: '#7c3aed' },
   database:   { icon: 'database',     bg: '#eff6ff', fg: '#2563eb', accent: '#2563eb' },
 }
 

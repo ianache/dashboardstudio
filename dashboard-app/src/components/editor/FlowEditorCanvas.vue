@@ -311,9 +311,23 @@
             <span v-else-if="node.props?.url" class="fec-node-meta">{{ node.props.url }}</span>
           </div>
 
-          <div v-if="!readOnly && node.category !== 'destination' && node.category !== 'notification'" class="fec-port fec-port--out"
-            @mousedown.stop="onPortMousedown($event, node, 'out')"
-            @mouseup="onPortMouseup($event, node, 'out')">
+          <div v-if="!readOnly && node.category !== 'destination' && node.category !== 'notification'" class="fec-ports-out">
+            <template v-if="node.toolType === 'conditional_branch'">
+              <div class="fec-port fec-port--out fec-port--true"
+                @mousedown.stop="onPortMousedown($event, node, 'out', 'true')"
+                @mouseup="onPortMouseup($event, node, 'in')">
+                <span class="fec-port-label">T</span>
+              </div>
+              <div class="fec-port fec-port--out fec-port--false"
+                @mousedown.stop="onPortMousedown($event, node, 'out', 'false')"
+                @mouseup="onPortMouseup($event, node, 'in')">
+                <span class="fec-port-label">F</span>
+              </div>
+            </template>
+            <div v-else class="fec-port fec-port--out"
+              @mousedown.stop="onPortMousedown($event, node, 'out')"
+              @mouseup="onPortMouseup($event, node, 'in')">
+            </div>
           </div>
         </div>
       </div>
@@ -512,13 +526,13 @@
             <input v-model="selectedNode.label" class="fec-prop-i" />
           </div>
 
-          <!-- ── Connection binding (source & destination nodes only) ── -->
-          <template v-if="isConnectable(selectedNode.category)">
+          <!-- ── Connection binding (source, destination, and connectable transform nodes) ── -->
+          <template v-if="isConnectable(selectedNode)">
             <div class="fec-divider"><span>Conexión de Datos</span></div>
 
             <!-- Connection Type -->
             <div class="fec-prop-g">
-              <label class="fec-prop-l">Tipo de Conexión</label>
+              <label class="fec-prop-l">TIPO DE CONEXION</label>
               <div class="fec-sel-wrap">
                 <select
                   v-model="selectedNode.props.connection_type"
@@ -535,7 +549,7 @@
             <!-- Connection -->
             <div class="fec-prop-g">
               <label class="fec-prop-l">
-                Conexión
+                CONEXION
                 <span v-if="dataSrcLoading" class="fec-conn-spin">
                   <span class="msi spin" style="font-size:12px">sync</span>
                 </span>
@@ -674,6 +688,63 @@
             </div>
           </template>
 
+          <!-- ── Templating Preview Block ── -->
+          <div v-if="selectedNode.toolType === 'nunjucks_template'" class="fec-preview-block">
+            <div class="fec-divider"><span>Vista Previa</span></div>
+            
+            <div class="fec-prop-g">
+              <label class="fec-prop-l">Datos de ejemplo (JSON)</label>
+              <textarea v-model="previewDataJson" class="fec-prop-ta fec-preview-json" rows="4"></textarea>
+            </div>
+            
+            <button class="fec-preview-btn" @click="runPreview" :disabled="previewLoading || !selectedNode.props.template">
+              <span class="msi" :class="{ spin: previewLoading }">{{ previewLoading ? 'sync' : 'play_circle' }}</span>
+              {{ previewLoading ? 'Generando...' : 'Probar Plantilla' }}
+            </button>
+
+            <div v-if="previewResult || previewError" class="fec-preview-res-wrap">
+              <label class="fec-prop-l">Resultado</label>
+              <div v-if="previewError" class="fec-preview-err">
+                <span class="msi" style="font-size:14px">error</span>
+                {{ previewError }}
+              </div>
+              <pre v-else class="fec-preview-rendered">{{ previewResult }}</pre>
+            </div>
+          </div>
+
+          <!-- ── LLM Architectural Warning ── -->
+          <div v-if="selectedNode.toolType === 'llm'" class="fec-arch-warning">
+            <span class="msi">warning</span>
+            <div>
+              <strong>Seguridad y Arquitectura</strong>
+              <p>Los nodos LLM se ejecutan en el servidor por seguridad. No pueden consumir datos dinámicos generados por nodos "Data Transform" o "Templating" en el mismo flujo.</p>
+            </div>
+          </div>
+
+          <!-- ── Pickle Model Info Block ── -->
+          <div v-if="selectedNode.toolType === 'pickle_model' && selectedNode.props.model_id" class="fec-ml-info">
+            <div class="fec-divider"><span>Detalles del Modelo</span></div>
+            <div v-if="selectedModel" class="fec-ml-details">
+              <div class="fec-ml-row">
+                <span class="msi" style="font-size:14px">history</span>
+                <span>v{{ selectedModel.sklearn_version }}</span>
+              </div>
+              <div class="fec-ml-features-wrap">
+                <label class="fec-prop-l">Columnas requeridas en el input:</label>
+                <div class="fec-ml-feature-tags">
+                  <span v-for="f in selectedModel.features" :key="f" class="fec-ml-tag">{{ f }}</span>
+                </div>
+              </div>
+              <div class="fec-arch-warning" style="margin-top:12px;background:#eff6ff;border-color:#bfdbfe;border-left-color:#2563eb;color:#1e40af">
+                <span class="msi" style="color:#2563eb">info</span>
+                <p>Este nodo añadirá una columna <code>prediction</code> al payload de salida.</p>
+              </div>
+            </div>
+            <div v-else-if="loadingModel" class="fec-ml-loading">
+              <span class="btn-spin"></span> Cargando metadatos...
+            </div>
+          </div>
+
           <div class="fec-node-del-wrap">
             <button class="fec-node-del-btn" @click="deleteSelectedNode">
               <span class="msi" style="font-size:15px">delete</span>Eliminar nodo
@@ -705,10 +776,11 @@ import DOMPurify from 'dompurify'
 import { CAT_META } from '@/stores/toolCatalog'
 import { useAuthStore } from '@/stores/auth'
 import { useIntegrationsStore } from '@/stores/integrations'
+import { mlModelsApi } from '@/services/api'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
 import ExecutionHistoryPanel from '@/components/executions/ExecutionHistoryPanel.vue'
-import { dataSourcesApi } from '@/services/api'
+import { dataSourcesApi, apiRequest } from '@/services/api'
 import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
 
 // ─── Markdown Configuration ───────────────────────────────────────────────────
@@ -869,8 +941,21 @@ async function loadDataSources() {
   }
 }
 
-function isConnectable(cat) { return cat === 'source' || cat === 'destination' }
-function connTypeLabel(v)   { return _connTypeLabel(v) }
+function isConnectable(node) { 
+  if (!node) return false
+  if (node.category === 'source' || node.category === 'destination') return true
+  
+  // Detect transform nodes that require a connection (like LLM)
+  // Check both current props and tool's default_props
+  const hasConnProp = 'connection_type' in (node.props || {})
+  if (node.category === 'transform') {
+    if (hasConnProp) return true
+    const tool = getToolByType(node.toolType)
+    const defaults = tool?.default_props ? (typeof tool.default_props === 'string' ? JSON.parse(tool.default_props) : tool.default_props) : {}
+    if ('connection_type' in defaults) return true
+  }
+  return false
+}
 
 const filteredDataSources = computed(() => {
   const type = selectedNode.value?.props?.connection_type
@@ -927,8 +1012,14 @@ function shouldShowProp(def) {
 const visiblePropDefs = computed(() => {
   const defs = getNodePropDefs(selectedNode.value?.toolType)
   const visible = {}
+  const isConn = isConnectable(selectedNode.value)
+  
   for (const [key, def] of Object.entries(defs)) {
     if (shouldShowProp(def)) {
+      // Skip connection properties if handled by standard block
+      if (isConn && (key === 'connection_id' || key === 'connection_type' || key === 'CONNECTION')) {
+        continue
+      }
       visible[key] = def
     }
   }
@@ -1026,7 +1117,12 @@ async function fetchDynamicOptions(def, key) {
   
   dynamicLoading.value[key] = true
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+    let baseUrl = import.meta.env.VITE_API_URL || ''
+    if (baseUrl.endsWith('/api') && endpoint.startsWith('/api')) {
+      baseUrl = baseUrl.slice(0, -4) // Strip '/api' from end of baseUrl
+    }
+    
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       credentials: 'include',
       headers: { 
         'Content-Type': 'application/json'
@@ -1178,6 +1274,67 @@ const selectedConn   = ref(null)
 const hoveredNode    = ref(null)
 const hoveredConn    = ref(null)
 
+// ─── Templating Preview State ────────────────────────────────────────────────
+const previewDataJson = ref('{\n  "name": "Mundo"\n}')
+const previewResult   = ref('')
+const previewLoading  = ref(false)
+const previewError    = ref(null)
+
+// ─── ML Model Details State ──────────────────────────────────────────────────
+const selectedModel   = ref(null)
+const loadingModel    = ref(false)
+
+watch(() => selectedNode.value?.props?.model_id, async (modelId) => {
+  if (selectedNode.value?.toolType === 'pickle_model' && modelId) {
+    loadingModel.value = true
+    selectedModel.value = null
+    try {
+      selectedModel.value = await mlModelsApi.getById(modelId)
+    } catch (e) {
+      console.error('Failed to fetch model details:', e)
+    } finally {
+      loadingModel.value = false
+    }
+  } else {
+    selectedModel.value = null
+  }
+})
+
+async function runPreview() {
+  if (!selectedNode.value || !selectedNode.value.props.template) return
+  
+  previewLoading.value = true
+  previewError.value = null
+  previewResult.value = ''
+  
+  try {
+    let data = {}
+    try {
+      data = JSON.parse(previewDataJson.value)
+    } catch (e) {
+      throw new Error('JSON de ejemplo inválido: ' + e.message)
+    }
+    
+    const res = await apiRequest('/api/v1/editor-tools/template-preview', {
+      method: 'POST',
+      body: JSON.stringify({
+        template: selectedNode.value.props.template,
+        data: data
+      })
+    })
+    
+    if (res.error) {
+      previewError.value = res.error
+    } else {
+      previewResult.value = res.rendered
+    }
+  } catch (e) {
+    previewError.value = e.message
+  } finally {
+    previewLoading.value = false
+  }
+}
+
 // Flag to prevent cascading clears during initial node selection
 let isInitializingNodeSelection = false
 
@@ -1230,7 +1387,7 @@ watch(selectedNode, (node) => {
   }
   
   // Load data sources for connectable nodes
-  if (isConnectable(node.category)) {
+  if (isConnectable(node)) {
     loadDataSources()
     if (!('connection_type' in node.props)) node.props.connection_type = ''
     if (!('connection_id'   in node.props)) node.props.connection_id   = ''
@@ -1449,10 +1606,33 @@ let isPanning       = false, panStart       = null
 let isDraggingNode  = false, isDraggingNote = false, draggedNode = null, nodeDragStart = null
 let isDraggingFbar  = false, fbarDragStart  = null
 let hasDragged      = false
-let isConnecting    = false, connectFrom    = null
+let isConnecting    = false, connectFrom    = null, connectFromHandle = null
 let dragTool        = null  // tool being dragged from left panel
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+function isReachable(fromNodeId, toNodeId) {
+  // BFS to check if toNodeId is reachable from fromNodeId
+  const queue = [fromNodeId]
+  const visited = new Set([fromNodeId])
+  
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (current === toNodeId) return true
+    
+    const targets = connections.value
+      .filter(c => c.from === current)
+      .map(c => c.to)
+    
+    for (const t of targets) {
+      if (!visited.has(t)) {
+        visited.add(t)
+        queue.push(t)
+      }
+    }
+  }
+  return false
+}
+
 function snapPos(x, y) {
   if (!snapToGrid.value) return { x, y }
   return { x: Math.round(x / GRID) * GRID, y: Math.round(y / GRID) * GRID }
@@ -1470,16 +1650,28 @@ function connPath(conn) {
   const f = nodes.value.find(n => n.id === conn.from)
   const t = nodes.value.find(n => n.id === conn.to)
   if (!f || !t) return ''
-  const x1 = f.x + NODE_W, y1 = f.y + NODE_H / 2
+  
+  let x1 = f.x + NODE_W, y1 = f.y + NODE_H / 2
+  if (f.toolType === 'conditional_branch') {
+    if (conn.fromHandle === 'true')  y1 = f.y + NODE_H / 2 - 12
+    if (conn.fromHandle === 'false') y1 = f.y + NODE_H / 2 + 12
+  }
+
   const x2 = t.x,          y2 = t.y + NODE_H / 2
   const dx = Math.max(60, Math.abs(x2 - x1) * 0.45)
   return `M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}`
 }
-function tempConnPath(fromNode, mx, my) {
+function tempConnPath(fromNode, mx, my, handle = null) {
   const r  = canvasAreaRef.value.getBoundingClientRect()
   const tx = (mx - r.left - panX.value) / zoom.value
   const ty = (my - r.top  - panY.value) / zoom.value
-  const x1 = fromNode.x + NODE_W, y1 = fromNode.y + NODE_H / 2
+  
+  let x1 = fromNode.x + NODE_W, y1 = fromNode.y + NODE_H / 2
+  if (fromNode.toolType === 'conditional_branch') {
+    if (handle === 'true')  y1 = fromNode.y + NODE_H / 2 - 12
+    if (handle === 'false') y1 = fromNode.y + NODE_H / 2 + 12
+  }
+
   const dx = Math.max(40, Math.abs(tx - x1) * 0.4)
   return `M ${x1} ${y1} C ${x1+dx} ${y1}, ${tx-dx} ${ty}, ${tx} ${ty}`
 }
@@ -1747,17 +1939,29 @@ function handleKeyDown(e) {
 }
 
 // ─── Port events ──────────────────────────────────────────────────────────────
-function onPortMousedown(e, node, portType) {
+function onPortMousedown(e, node, portType, handle = null) {
   if (props.readOnly) return
   if (portType !== 'out') return
-  isConnecting = true; connectFrom = node
-  tempConn.value = tempConnPath(node, e.clientX, e.clientY)
+  isConnecting = true; connectFrom = node; connectFromHandle = handle
+  tempConn.value = tempConnPath(node, e.clientX, e.clientY, handle)
 }
 function onPortMouseup(e, node, portType) {
   if (props.readOnly) return
   if (portType !== 'in' || !isConnecting || !connectFrom || connectFrom.id === node.id) return
-  if (!connections.value.find(c => c.from === connectFrom.id && c.to === node.id)) {
-    connections.value.push({ id: `c${Date.now()}`, from: connectFrom.id, to: node.id })
+
+  // Cycle detection
+  if (isReachable(node.id, connectFrom.id)) {
+    alert('Circular connections are not allowed.')
+    return
+  }
+
+  if (!connections.value.find(c => c.from === connectFrom.id && c.to === node.id && c.fromHandle === connectFromHandle)) {
+    connections.value.push({ 
+      id: `c${Date.now()}`, 
+      from: connectFrom.id, 
+      to: node.id,
+      fromHandle: connectFromHandle 
+    })
   }
   // cleanup happens in onGlobalMouseup (event bubbles there)
 }
@@ -2095,6 +2299,27 @@ onMounted(() => {
 .fec-port:hover { border-color: #2563eb; transform: translateY(-50%) scale(1.3); }
 .fec-port--in  { left: -6px; }
 .fec-port--out { right: -6px; }
+
+/* Multiple Ports */
+.fec-ports-out {
+  position: absolute; right: -8px; top: 0; bottom: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 12px;
+  z-index: 2;
+}
+.fec-ports-out .fec-port { position: static; transform: none; }
+.fec-ports-out .fec-port:hover { transform: scale(1.3); }
+
+.fec-port--true  { border-color: #22c55e !important; }
+.fec-port--true:hover { background: #dcfce7; }
+.fec-port--false { border-color: #ef4444 !important; }
+.fec-port--false:hover { background: #fef2f2; }
+
+.fec-port-label {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 9px; font-weight: 800; color: #94a3b8; pointer-events: none;
+}
+.fec-port--true .fec-port-label { color: #22c55e; }
+.fec-port--false .fec-port-label { color: #ef4444; }
 
 /* Connection action bar */
 .fec-conn-bar {
@@ -2440,5 +2665,117 @@ onMounted(() => {
 .fec-template-hint .msi {
   color: #2563eb;
   flex-shrink: 0;
+}
+
+/* ── LLM Warning Styles ────────────────────────────────────────── */
+.fec-arch-warning {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  color: #92400e;
+  line-height: 1.4;
+}
+
+.fec-arch-warning .msi {
+  color: #f59e0b;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.fec-arch-warning strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.fec-arch-warning p {
+  font-size: 11px;
+  margin: 0;
+}
+
+/* ── Templating Preview Styles ───────────────────────────────────── */
+.fec-preview-block {
+  margin-top: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+/* ── ML Info Styles ────────────────────────────────────────────── */
+.fec-ml-info { margin-top: 16px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
+.fec-ml-details { display: flex; flex-direction: column; gap: 10px; }
+.fec-ml-row { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #475569; }
+.fec-ml-row .msi { color: #6366f1; }
+.fec-ml-features-wrap { display: flex; flex-direction: column; gap: 6px; }
+.fec-ml-feature-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.fec-ml-tag { font-size: 10px; font-family: monospace; background: #fff; border: 1px solid #cbd5e1; padding: 1px 6px; border-radius: 4px; color: #2563eb; }
+.fec-ml-loading { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 11px; color: #94a3b8; }
+
+.fec-preview-json {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.fec-preview-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 12px;
+}
+
+.fec-preview-btn:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.fec-preview-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fec-preview-res-wrap {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+
+.fec-preview-err {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.fec-preview-rendered {
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #1e293b;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 0;
 }
 </style>

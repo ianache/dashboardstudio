@@ -40,7 +40,17 @@ export default defineConfig({
       '/bff': {
         target: 'http://127.0.0.1:3001',
         changeOrigin: true,
-        ws: true
+        ws: true,
+        configure: (proxy) => {
+          proxy.on('error', (err, _req, res) => {
+            console.error('[vite proxy /bff]', err.message);
+            // res is ServerResponse for HTTP, Socket for WS — only write if headers not yet sent
+            if (res && typeof res.writeHead === 'function' && !res.headersSent) {
+              res.writeHead(503, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'BFF unavailable', detail: err.message }));
+            }
+          });
+        }
       }
     }
   }

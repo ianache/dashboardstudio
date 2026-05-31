@@ -1,5 +1,14 @@
 'use strict';
 
+// Prevent unhandled errors from killing the process.
+// Log them so they remain visible without crashing the BFF.
+process.on('uncaughtException', (err) => {
+  console.error('[BFF] Uncaught exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[BFF] Unhandled promise rejection:', reason);
+});
+
 import config from './config.js';
 import express from 'express';
 import cors from 'cors';
@@ -30,7 +39,7 @@ app.use(cors({
 // Trust proxy MUST come before session middleware
 app.set('trust proxy', 1);
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(sessionMiddleware);
 
 // Mount routes

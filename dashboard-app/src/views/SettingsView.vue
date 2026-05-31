@@ -390,7 +390,70 @@
         </template>
       </PanelHeadBodyPieComponent>
 
-      <!-- Acerca de (last, expanded) -->
+        <PanelHeadBodyPieComponent
+          title="Modelos ML"
+          subtitle="Gestiona tus modelos de Machine Learning (scikit-learn .pkl)"
+          icon="psychology"
+          :expanded="expandedSections.ml"
+          :show-footer="false"
+          @expand="expandedSections.ml = true"
+          @collapse="expandedSections.ml = false"
+          @toggle="expandedSections.ml = $event"
+        >
+          <template #body>
+            <div class="ml-container">
+              <div v-if="loadingModels" class="ml-loading">
+                <span class="btn-spin"></span> Cargando modelos...
+              </div>
+              <div v-else-if="mlModels.length === 0" class="ml-empty">
+                <span class="msi" style="font-size:48px;color:var(--border)">inventory_2</span>
+                <p>No hay modelos cargados</p>
+              </div>
+              <div v-else class="ml-list">
+                <div v-for="model in mlModels" :key="model.id" class="ml-model-card">
+                  <div class="ml-model-info">
+                    <div class="ml-model-name">{{ model.name }}</div>
+                    <div class="ml-model-meta">
+                      <span>📦 {{ model.filename }}</span>
+                      <span>•</span>
+                      <span>v{{ model.sklearn_version }}</span>
+                      <span>•</span>
+                      <span>{{ new Date(model.created_at).toLocaleDateString() }}</span>
+                    </div>
+                    <div class="ml-model-features" v-if="model.features && model.features.length">
+                      <strong>Columnas esperadas:</strong>
+                      <div class="ml-feature-tags">
+                        <span v-for="f in model.features" :key="f" class="ml-feature-tag">{{ f }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn-icon" @click="confirmDeleteModel(model)" style="color:var(--error)">
+                    <span class="msi">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="ml-upload-box" v-if="authStore.isDesigner">
+                <div class="divider"></div>
+                <h4 style="font-size:14px;font-weight:600;margin-bottom:12px">Subir nuevo modelo</h4>
+                <div class="form-group">
+                  <label class="form-label">Nombre del modelo</label>
+                  <input v-model="newModelName" type="text" class="form-input" placeholder="Ej: Predictor de Ventas" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Archivo .pkl</label>
+                  <input type="file" @change="handleFileChange" accept=".pkl" class="form-input" />
+                </div>
+                <button class="btn btn-primary" @click="uploadModel" :disabled="uploading || !newModelFile || !newModelName.trim()">
+                  <span v-if="uploading" class="btn-spin"></span>
+                  <span v-else>📤 Subir y Analizar</span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </PanelHeadBodyPieComponent>
+
+        <!-- Acerca de (last, expanded) -->
       <PanelHeadBodyPieComponent
         title="Acerca de"
         subtitle="Información del sistema"
@@ -428,6 +491,7 @@ import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import { useLlmStore, PROVIDERS, LLM_OPERATIONS } from '@/stores/llm'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
+import { mlModelsApi } from '@/services/api'
 import PanelHeadBodyPieComponent from '@/components/common/PanelHeadBodyPieComponent.vue'
 
 const authStore = useAuthStore()
@@ -438,6 +502,62 @@ const uiStore = useUIStore()
 const llmStore = useLlmStore()
 
 uiStore.setBreadcrumbs([{ label: 'Configuración', path: '/settings' }])
+
+// ML Models refs
+const mlModels = ref([])
+const loadingModels = ref(false)
+const uploading = ref(false)
+const newModelName = ref('')
+const newModelFile = ref(null)
+
+async function loadMLModels() {
+  loadingModels.value = true
+  try {
+    mlModels.value = await mlModelsApi.getAll()
+  } catch (e) {
+    uiStore.addAlert({ type: 'error', message: 'Error al cargar modelos ML: ' + e.message })
+  } finally {
+    loadingModels.value = false
+  }
+}
+
+function handleFileChange(e) {
+  newModelFile.value = e.target.files[0]
+  if (newModelFile.value && !newModelName.value) {
+    // Default name from filename
+    newModelName.value = newModelFile.value.name.replace('.pkl', '')
+  }
+}
+
+async function uploadModel() {
+  if (!newModelFile.value || !newModelName.value.trim()) return
+  
+  uploading.value = true
+  try {
+    await mlModelsApi.upload(newModelName.value, newModelFile.value)
+    uiStore.addAlert({ type: 'success', message: 'Modelo subido y analizado correctamente' })
+    newModelName.value = ''
+    newModelFile.value = null
+    // Reset file input if possible (v-model doesn't work on file)
+    await loadMLModels()
+  } catch (e) {
+    uiStore.addAlert({ type: 'error', message: 'Error al subir modelo: ' + e.message })
+  } finally {
+    uploading.value = false
+  }
+}
+
+async function confirmDeleteModel(model) {
+  if (confirm(`¿Estás seguro de eliminar el modelo "${model.name}"?`)) {
+    try {
+      await mlModelsApi.delete(model.id)
+      uiStore.addAlert({ type: 'success', message: 'Modelo eliminado' })
+      await loadMLModels()
+    } catch (e) {
+      uiStore.addAlert({ type: 'error', message: 'Error al eliminar modelo: ' + e.message })
+    }
+  }
+}
 
 // CubeJS Config refs
 const apiUrl = ref('')
@@ -491,6 +611,9 @@ onMounted(async () => {
 
   // Load palette config from backend
   await paletteStore.loadFromBackend()
+  
+  // Load ML models
+  await loadMLModels()
 })
 
 // LLM providers and operations
@@ -866,4 +989,29 @@ function doDeletePalette() {
   font-size: 13px;
 }
 .pal-delete-confirm span { flex: 1; }
+
+/* ── ML Models Styles ────────────────────────────────────────── */
+.ml-container { display: flex; flex-direction: column; gap: 16px; }
+.ml-loading, .ml-empty { 
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px; color: var(--text-secondary); text-align: center;
+}
+.ml-list { display: flex; flex-direction: column; gap: 12px; }
+.ml-model-card {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 16px; background: #fff; border: 1px solid var(--border); border-radius: 12px;
+}
+.ml-model-info { flex: 1; min-width: 0; }
+.ml-model-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.ml-model-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+.ml-model-features { 
+  padding: 8px 12px; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border);
+}
+.ml-model-features strong { display: block; font-size: 11px; margin-bottom: 6px; color: var(--text-secondary); }
+.ml-feature-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.ml-feature-tag {
+  font-size: 10px; font-family: monospace; background: #fff; border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; color: var(--primary);
+}
+.ml-upload-box { margin-top: 10px; }
 </style>

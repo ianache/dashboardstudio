@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from app.core.database import get_db
 from app.core.security import get_current_user, require_role, TokenData, ensure_user_exists
@@ -35,6 +35,9 @@ async def create_dashboard(
     db.add(db_dashboard)
     db.commit()
     db.refresh(db_dashboard)
+    
+    # Initialize assigned_users as empty list for response
+    db_dashboard.assigned_users = []
     return db_dashboard
 
 
@@ -46,14 +49,21 @@ async def list_dashboards(
     current_user: TokenData = Depends(get_current_user)
 ):
     """List dashboards based on user role"""
+    query = db.query(models.Dashboard).options(joinedload(models.Dashboard.assignments))
+    
     if "admin" in current_user.roles or "designer" in current_user.roles:
-        dashboards = db.query(models.Dashboard).offset(skip).limit(limit).all()
+        dashboards = query.offset(skip).limit(limit).all()
     else:
         # Viewers see public dashboards and their assigned ones
         dashboard_ids = [a.dashboard_id for a in db.query(models.DashboardAssignment).filter(models.DashboardAssignment.user_id == current_user.sub).all()]
-        dashboards = db.query(models.Dashboard).filter(
+        dashboards = query.filter(
             (models.Dashboard.is_public == True) | (models.Dashboard.id.in_(dashboard_ids))
         ).offset(skip).limit(limit).all()
+        
+    # Map assignments to assigned_users list for Pydantic
+    for d in dashboards:
+        d.assigned_users = [a.user_id for a in d.assignments]
+        
     return dashboards
 
 
@@ -64,7 +74,7 @@ async def get_dashboard(
     current_user: TokenData = Depends(get_current_user)
 ):
     """Get dashboard by ID"""
-    dashboard = db.query(models.Dashboard).filter(models.Dashboard.id == dashboard_id).first()
+    dashboard = db.query(models.Dashboard).options(joinedload(models.Dashboard.assignments)).filter(models.Dashboard.id == dashboard_id).first()
     if not dashboard:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dashboard not found")
     
@@ -73,20 +83,14 @@ async def get_dashboard(
         if "admin" in current_user.roles or "designer" in current_user.roles:
             pass
         else:
-            assignment = db.query(models.DashboardAssignment).filter(
-                models.DashboardAssignment.dashboard_id == dashboard_id,
-                models.DashboardAssignment.user_id == current_user.sub
-            ).first()
+            assignment = next((a for a in dashboard.assignments if a.user_id == current_user.sub), None)
             if not assignment:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     
-    # Get assigned users
-    assignments = db.query(models.DashboardAssignment).filter(models.DashboardAssignment.dashboard_id == dashboard_id).all()
-    assigned_users = [a.user_id for a in assignments]
+    # Map assignments to assigned_users list
+    dashboard.assigned_users = [a.user_id for a in dashboard.assignments]
     
-    response = schemas.DashboardWithAssignments.model_validate(dashboard)
-    response.assigned_users = assigned_users
-    return response
+    return dashboard
 
 
 @router.put("/{dashboard_id}", response_model=schemas.DashboardResponse)

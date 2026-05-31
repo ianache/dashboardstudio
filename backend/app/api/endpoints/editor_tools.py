@@ -90,3 +90,29 @@ async def delete_editor_tool(
     db.delete(tool)
     db.commit()
     return None
+
+
+@router.post("/template-preview")
+async def template_preview(
+    request: schemas.TemplatePreviewRequest,
+    current_user: TokenData = Depends(get_current_user)
+):
+    """
+    Renders a Jinja2 template with provided sample data for UI preview.
+    """
+    try:
+        from jinja2 import Environment
+        env = Environment()
+        template = env.from_string(request.template)
+        
+        # Prepare context: always provide 'data' and 'payload' keys
+        # If data is a dict, also unpack it for direct access (backward compat)
+        data = request.data if request.data is not None else {}
+        context = {"data": data, "payload": data}
+        if isinstance(data, dict):
+            context.update(data)
+            
+        rendered = template.render(context)
+        return {"rendered": rendered}
+    except Exception as e:
+        return {"error": str(e)}

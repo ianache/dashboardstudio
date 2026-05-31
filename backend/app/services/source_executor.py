@@ -8,11 +8,17 @@ import httpx
 import asyncpg
 import json
 
+from app.services.llm_executor import execute_llm_node
+from app.services.ml_executor import execute_ml_node
+
 POSTGRES_TYPES = {"postgresql", "postgres"}
 MYSQL_TYPES = {"mysql", "mariadb"}
 HTTP_TYPES = {"rest_api", "http"}
 
 logger = logging.getLogger(__name__)
+
+# List of sensitive keys to remove from node props after pre-execution
+SENSITIVE_KEYS = ["password", "api_key", "token", "client_secret"]
 
 def get_db_engine(data_source: DataSource):
     try:
@@ -147,16 +153,34 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
     import copy
     import time
     nodes_copy = copy.deepcopy(flow_data.get("nodes", []))
+    connections = flow_data.get("connections", [])
     prefetched_outputs = {}
     pre_exec_ok = True
 
-    # Only pre-execute traditional DB sources. 
-    # API/HTTP sources should run in Deno to support dynamic params/methods.
-    PRE_EXECUTABLE_TYPES = POSTGRES_TYPES | MYSQL_TYPES 
+    # Identify nodes that MUST be pre-executed
+    def is_pre_executable(n):
+        return n.get("toolType") in ["llm", "pickle_model", "sql_source", "sql_destination"] or n.get("category") == "source"
 
-    for node in nodes_copy:
-        # Resolve credentials first for EVERY node that has a connection_id
-        connection_id = (node.get("props") or {}).get("connection_id", "")
+    # Sort nodes topologically to respect dependencies during pre-execution
+    # (Simple Kahn implementation for pre-execution subset)
+    try:
+        from app.runtime.runner import get_topological_order
+        # Mock FlowNode objects for the runner helper if needed, 
+        # but the helper works with Dict if IDs and connections match.
+        sorted_nodes = get_topological_order(nodes_copy, connections)
+    except Exception as e:
+        logger.warning(f"[SourceExec] Could not sort nodes for pre-execution: {e}")
+        sorted_nodes = nodes_copy
+
+    for node in sorted_nodes:
+        # Only process pre-executable nodes
+        if not is_pre_executable(node):
+            continue
+
+        # 1. Resolve credentials (existing logic)
+        props = node.get("props") or {}
+        connection_id = props.get("connection_id")
+        
         if connection_id:
             ds = db.query(DataSource).filter(DataSource.id == connection_id).first()
             if ds:
@@ -169,62 +193,87 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
                 if not node.get("props"):
                     node["props"] = {}
                 
-                # Capture custom schema if specified in node props
-                custom_schema = str(node["props"].get("schema", "") or "").strip()
-                
-                for cfg_key in ["host", "port", "username", "password", "database", "schema", "url", "email", "api_key", "token", "token_url", "client_id", "client_secret"]:
+                for cfg_key in ["host", "port", "username", "password", "database", "schema", "url", "email", "api_key", "token", "token_url", "client_id", "client_secret", "model"]:
                     if cfg_key in resolved_cfg:
                         node["props"][cfg_key] = resolved_cfg[cfg_key]
                 if ds.type:
                     node["props"]["connection_type"] = ds.type
-                
-                # Resolve schema hierarchically: Node Value > Connection Value > default
-                conn_type = (node["props"].get("connection_type") or ds.type or "").lower()
-                if custom_schema:
-                    node["props"]["schema"] = custom_schema
-                elif not node["props"].get("schema"):
-                    if conn_type in POSTGRES_TYPES:
-                        node["props"]["schema"] = "public"
-                    else:
-                        node["props"]["schema"] = ""
-                        
-                logger.info(f"[SourceExec] Credenciales resueltas desde DataSource '{ds.name}' para nodo {node['id']}")
 
-        # Now decide if we pre-execute
-        if node.get("toolType") not in ["sql_source", "sql_destination"] and node.get("category") != "source":
-            continue
-            
-        conn_type = (node.get("props") or {}).get("connection_type", "").lower()
-        if conn_type not in PRE_EXECUTABLE_TYPES:
-            continue
+        # 2. Prepare dynamic input (Chaining improvement)
+        # Check if this node has an incoming connection from another PRE-EXECUTED node
+        input_payload = flow_data.get("payload", {}) # Default to initial payload
+        incoming = [c for c in connections if c.get("to") == node["id"]]
+        
+        if incoming:
+            # If multiple inputs, we merge or take the first successful pre-executed one
+            # For v1.9, we'll take the output of the first connected pre-executed node
+            for conn in incoming:
+                prev_id = conn.get("from")
+                if prev_id in prefetched_outputs:
+                    input_payload = prefetched_outputs[prev_id].get("rows", [])
+                    logger.info(f"[SourceExec] Node {node['id']} consuming output from pre-executed node {prev_id}")
+                    break
+
+        # 3. Execution
+        is_llm = node.get("toolType") == "llm"
+        is_ml  = node.get("toolType") == "pickle_model"
 
         if websocket:
             await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "running"})
-            await websocket.send_json({"type": "info", "message": f"[Fuente] Ejecutando '{node.get('label', node['id'])}' ..."})
+            label = node.get('label', node['id'])
+            msg_prefix = "[IA]" if is_llm else ("[ML]" if is_ml else "[Fuente]")
+            await websocket.send_json({"type": "info", "message": f"{msg_prefix} Ejecutando '{label}' ..."})
 
         from datetime import datetime
         start_time = time.perf_counter()
         start_utc = datetime.utcnow().isoformat() + "Z"
-        result = await execute_source_node(node)
+        
+        if is_llm:
+            # Pass ctx-like structure (payload + variables)
+            ctx = {"payload": input_payload, "variables": flow_data.get("variables", {})}
+            result = await execute_llm_node(node["props"], ctx)
+            if result["success"]: result["rows"] = result["output"]
+        elif is_ml:
+            result = await execute_ml_node(node["props"], input_payload, db)
+            if result["success"]: result["rows"] = result["output"]
+        else:
+            result = await execute_source_node(node)
+
         duration_ms = int((time.perf_counter() - start_time) * 1000)
         end_utc = datetime.utcnow().isoformat() + "Z"
 
         if result["success"]:
             prefetched_outputs[node["id"]] = {
-                "rows": result["rows"],
+                "rows": result.get("rows", result.get("output")),
                 "duration": duration_ms,
                 "start_utc": start_utc,
-                "end_utc": end_utc
+                "end_utc": end_utc,
+                "warning": result.get("warning")
             }
             node["__pre_executed"] = True
+            
+            # Scrub credentials
+            props = node.get("props", {})
+            for key in SENSITIVE_KEYS:
+                if key in props: del props[key]
+
             if websocket:
                 await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "success"})
-                await websocket.send_json({"type": "info", "message": f"[Fuente] {result['count']} registros cargados desde '{node.get('label', '')}' ({duration_ms}ms)"})
+                label = node.get('label', '')
+                if is_llm:
+                    await websocket.send_json({"type": "info", "message": f"[IA] Completado para '{label}' ({duration_ms}ms)"})
+                elif is_ml:
+                    warn_suffix = f" (Aviso: {result['warning']})" if result.get('warning') else ""
+                    await websocket.send_json({"type": "info", "message": f"[ML] Inferencia completada para '{label}' ({duration_ms}ms){warn_suffix}"})
+                else:
+                    await websocket.send_json({"type": "info", "message": f"[Fuente] {result['count']} registros cargados desde '{label}' ({duration_ms}ms)"})
         else:
             node["__pre_executed"] = True
             if websocket:
                 await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "error"})
-                await websocket.send_json({"type": "error", "message": f"[Fuente Error] {result['error']}"})
+                err_msg = result.get('error', 'Error desconocido')
+                prefix = 'IA' if is_llm else ('ML' if is_ml else 'Fuente')
+                await websocket.send_json({"type": "error", "message": f"[{prefix} Error] {err_msg}"})
             pre_exec_ok = False
             break
 

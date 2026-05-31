@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "luxon": "npm:luxon@^3.7.2",
+    "@gitbeaker/rest": "npm:@gitbeaker/rest@^43.8.0"
+  }
+}

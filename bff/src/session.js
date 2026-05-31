@@ -11,6 +11,9 @@ const redisClient = createClient({
   password: config.redis.password,
 });
 
+// Prevent unhandled 'error' event from crashing the process on disconnect/reconnect
+redisClient.on('error', (err) => console.error('[Redis] Client error:', err.message));
+
 redisClient.connect().catch(console.error);
 
 // Initialize store
