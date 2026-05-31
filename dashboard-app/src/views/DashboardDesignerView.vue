@@ -818,8 +818,16 @@ async function searchUsers() {
     return
   }
   isSearchingUsers.value = true
-  searchError.value = 'La búsqueda de usuarios en Keycloak está siendo migrada al BFF.'
-  isSearchingUsers.value = false
+  searchError.value = null
+  try {
+    const results = await usersApi.search(userSearchQuery.value.trim())
+    userSearchResults.value = results.filter(u => !selectedUsers.value.includes(u.id))
+  } catch (err) {
+    searchError.value = err?.message || 'Error al buscar usuarios'
+    userSearchResults.value = []
+  } finally {
+    isSearchingUsers.value = false
+  }
 }
 
 function toggleUserFromSearch(user) {

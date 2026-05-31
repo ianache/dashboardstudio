@@ -1,12 +1,73 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List
+import httpx
+from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.security import get_current_user, require_role, TokenData
 from app.models import models
 from app.schemas import schemas
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+async def _keycloak_admin_token() -> str:
+    """Get a service-account token for Keycloak Admin API access."""
+    settings = get_settings()
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.post(
+            settings.keycloak_token_url,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": settings.keycloak_client_id,
+                "client_secret": settings.keycloak_client_secret,
+            },
+        )
+        resp.raise_for_status()
+        return resp.json()["access_token"]
+
+
+@router.get("/search")
+async def search_keycloak_users(
+    q: str = Query(..., min_length=2),
+    max: int = Query(20, le=50),
+    current_user: TokenData = Depends(require_role(["admin", "designer"])),
+):
+    """Search users in Keycloak by name, email or username."""
+    settings = get_settings()
+    try:
+        token = await _keycloak_admin_token()
+        url = (
+            f"{settings.keycloak_url}/admin/realms/{settings.keycloak_realm}"
+            f"/users?search={q}&max={max}"
+        )
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(url, headers={"Authorization": f"Bearer {token}"})
+            resp.raise_for_status()
+            raw = resp.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Keycloak error: {e.response.status_code}",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Could not reach Keycloak: {str(e)}",
+        )
+
+    return [
+        {
+            "id": u.get("id"),
+            "username": u.get("username", ""),
+            "email": u.get("email", ""),
+            "first_name": u.get("firstName", ""),
+            "last_name": u.get("lastName", ""),
+            "full_name": f"{u.get('firstName', '')} {u.get('lastName', '')}".strip()
+                or u.get("username", ""),
+        }
+        for u in raw
+    ]
 
 
 @router.post("/provision-batch", response_model=List[schemas.UserResponse])

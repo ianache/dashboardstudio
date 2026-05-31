@@ -409,6 +409,11 @@ export const usersApi = {
     return apiRequest('/api/v1/users/')
   },
 
+  async search(q, max = 20) {
+    const params = new URLSearchParams({ q, max })
+    return apiRequest(`/api/v1/users/search?${params}`)
+  },
+
   async getById(id) {
     return apiRequest(`/api/v1/users/${id}`)
   },
