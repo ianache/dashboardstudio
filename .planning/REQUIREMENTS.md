@@ -1,64 +1,67 @@
-# Requirements: Dashboard Studio v1.8
+# Requirements: Dashboard Studio v1.9
 
-**Defined:** 2026-05-28
-**Core Value:** BFF concentra auth y session management, expone API unificada al frontend — el browser nunca ve tokens
+**Defined:** 2026-05-31
+**Core Value:** Extender el editor de flujos con cinco nuevos tipos de nodo — lógica condicional, transformación de datos, plantillas de texto, LLM, y modelos ML
 
-## v1.8 Requirements
+## v1.9 Requirements
 
-Requirements for the BFF Service Architecture milestone. Each maps to roadmap phases.
+### Data Transform
 
-### BFF Infrastructure
+- [ ] **TRANS-01**: User can add a Data Transform node with a JS function body (CodeEditor) that receives `data` and returns the transformed payload
+- [ ] **TRANS-02**: A warning appears in the execution console when the transform input payload exceeds 10,000 rows
 
-- [ ] **BFF-01**: User can access the dashboard app through a BFF service deployed as an Express 5 Node.js server
-- [ ] **BFF-02**: BFF service is containerized and included in docker-compose alongside backend, frontend, and CubeJS
-- [ ] **BFF-03**: Server-side sessions are persisted in PostgreSQL via `connect-pg-simple` with HttpOnly secure cookie delivered to browser
-- [ ] **BFF-04**: BFF configuration is fully externalized via environment variables (Keycloak URLs, client credentials, session secret, CubeJS secret)
+### Templating
 
-### Authentication
+- [ ] **TMPL-01**: User can add a Templating node with a multi-line Nunjucks template textarea; `{{expr}}` markers resolve against node input; output is a text string
+- [ ] **TMPL-02**: User can preview the rendered template output against sample data directly in the node property panel
 
-- [ ] **AUTH-01**: User can initiate login via BFF which redirects to Keycloak (OIDC authorization code flow + PKCE)
-- [ ] **AUTH-02**: User is redirected to BFF callback after Keycloak auth; server-side session is established (state/nonce/PKCE validated)
-- [ ] **AUTH-03**: User session state can be checked via `GET /bff/auth/me`, returning user profile when authenticated
-- [ ] **AUTH-04**: User access tokens are silently refreshed server-side before expiry (transparent to frontend)
-- [ ] **AUTH-05**: User can logout via BFF which destroys local session and redirects to Keycloak end-session endpoint
+### LLM
 
-### Proxy
+- [ ] **LLM-01**: User can configure an LLM Connection with endpoint URL, API key, and default model name (free-form string — no hardcoded dropdown)
+- [ ] **LLM-02**: LLM node has separate system prompt (designer-controlled) and user prompt fields; user prompt supports `{{payload.*}}` markers for dynamic content
+- [ ] **LLM-03**: LLM node has configurable temperature (default 0.7) and max_tokens (default 1024) parameters
+- [ ] **LLM-04**: LLM node retries automatically on 429 rate-limit responses using the provider's `retry-after-ms` header or exponential backoff
 
-- [ ] **PROXY-01**: All FastAPI backend routes are accessible via BFF at `/bff/api/*` with Bearer token injected from session
-- [x] **PROXY-02**: CubeJS queries are proxied via BFF at `/bff/cubejs/*` with per-request HS256 JWT signed server-side (token never reaches browser)
-- [ ] **PROXY-03**: CORS is handled exclusively by BFF; upstream CORS headers from FastAPI are stripped on proxy response
+### Pickle Model
 
-### Frontend Migration
+- [ ] **MODEL-01**: User can upload a `.pkl` file from the integrations area and list/delete uploaded models
+- [ ] **MODEL-02**: Pickle model inference runs in a subprocess-isolated environment to prevent RCE from malicious pickle files
+- [ ] **MODEL-03**: Pickle Model node property panel shows the expected feature columns for the selected model
+- [ ] **MODEL-04**: The scikit-learn version is stored at upload time; a warning is shown if the inference environment version differs
 
-- [x] **FE-01**: Frontend no longer uses `keycloak-js` adapter; `keycloak.js` service deleted, Keycloak init removed from `main.js`
-- [x] **FE-02**: Frontend API calls (`api.js`) route through BFF base URL with `credentials: 'include'` for session cookie transmission
-- [x] **FE-03**: Frontend CubeJS store (`cubejs.js`) no longer manages tokens; queries proxied through BFF
-- [x] **FE-04**: Frontend auth store uses `authStore.initialized` flag with `/bff/auth/me` session check; router guards updated accordingly
+### Conditional/Branch
 
-### Backend Cleanup
+- [ ] **BRNCH-01**: User can add a Conditional/Branch node with a JS boolean expression; the node has two output ports (True/False) on the canvas
+- [ ] **BRNCH-02**: True/False output ports are labeled and visually differentiated (green=true, red=false) on the canvas
+- [ ] **BRNCH-03**: Flows with circular connections exit with a clear error instead of proceeding silently (fix runner.ts:153)
 
-- [ ] **BE-01**: FastAPI `CORSMiddleware` targeting SPA origin is removed (BFF is sole CORS handler)
-- [ ] **BE-02**: Backend service is restricted to internal docker network (not publicly exposed); only reachable from BFF
+## v2 Requirements
 
-## Future Requirements
+### LLM (Future)
 
-### Observability
-- **OBS-01**: BFF logs all proxied requests with user context (user ID, route, response time)
-- **OBS-02**: BFF exposes health check endpoint (`/bff/health`) for container orchestration
+- **LLM-F01**: LLM node supports streaming responses visible in the execution console
+- **LLM-F02**: LLM node supports multi-turn conversation history within a single flow run
+- **LLM-F03**: LLM node can enforce JSON response format (structured output)
 
-### Scalability
-- **SCALE-01**: BFF session store migrated to Redis for horizontal scaling support
-- **SCALE-02**: BFF stateless token validation (no session lookup for internal service calls)
+### Pickle Model (Future)
+
+- **MODEL-F01**: ONNX format supported as an alternative to pickle (safer serialization)
+- **MODEL-F02**: Model versioning — multiple versions of the same model uploadable and selectable per-node
+
+### Conditional/Branch (Future)
+
+- **BRNCH-F01**: Switch node with N configurable branches (extend IF node once validated)
+- **BRNCH-F02**: Visual expression builder UI for the branch condition (no-code)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Redis session store | PostgreSQL covers current single-instance deployment; Redis added when horizontal scaling needed |
-| Business logic in BFF | BFF is a pass-through — no domain logic; FastAPI owns all business logic |
-| JWT-signed cookies | Server-side sessions with HttpOnly cookies chosen; JWT cookies expose token data to browser |
-| Per-user CubeJS queryRewrite | Requires CubeJS schema changes; can be addressed in a follow-up if needed |
-| Keycloak admin API calls from BFF | BFF is a client, not an admin; user management stays in FastAPI/Keycloak |
+| pass_through error mode on Transform | Descoped by user — flow fails explicitly on transform errors for now |
+| Model training in the platform | Out of scope — platform is inference-only; training happens externally |
+| LLM API key in node.props | Security anti-feature — keys must always flow through encrypted DataSource |
+| Hardcoded model dropdown in LLM node | Anti-feature — breaks Ollama, Anthropic, Mistral compatibility |
+| Pickle model stored in DB blob | Performance issue >10MB; filesystem storage with Docker volume instead |
 
 ## Traceability
 
@@ -66,30 +69,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BFF-01 | Phase 33 | Pending |
-| BFF-02 | Phase 33 | Pending |
-| BFF-03 | Phase 33 | Pending |
-| BFF-04 | Phase 33 | Pending |
-| AUTH-01 | Phase 34 | Pending |
-| AUTH-02 | Phase 34 | Pending |
-| AUTH-03 | Phase 34 | Pending |
-| AUTH-04 | Phase 34 | Pending |
-| AUTH-05 | Phase 34 | Pending |
-| PROXY-01 | Phase 35 | Pending |
-| PROXY-03 | Phase 35 | Pending |
-| BE-01 | Phase 35 | Pending |
-| PROXY-02 | Phase 36 | Complete |
-| BE-02 | Phase 36 | Pending |
-| FE-01 | Phase 37 | Complete |
-| FE-02 | Phase 37 | Complete |
-| FE-03 | Phase 37 | Complete |
-| FE-04 | Phase 37 | Complete |
+| TRANS-01 | Phase 38 | Pending |
+| TRANS-02 | Phase 38 | Pending |
+| TMPL-01 | Phase 39 | Pending |
+| TMPL-02 | Phase 39 | Pending |
+| LLM-01 | Phase 40 | Pending |
+| LLM-02 | Phase 40 | Pending |
+| LLM-03 | Phase 40 | Pending |
+| LLM-04 | Phase 40 | Pending |
+| MODEL-01 | Phase 41 | Pending |
+| MODEL-02 | Phase 41 | Pending |
+| MODEL-03 | Phase 41 | Pending |
+| MODEL-04 | Phase 41 | Pending |
+| BRNCH-01 | Phase 42 | Pending |
+| BRNCH-02 | Phase 42 | Pending |
+| BRNCH-03 | Phase 42 | Pending |
 
 **Coverage:**
-- v1.8 requirements: 18 total
-- Mapped to phases: 18/18 ✓
+- v1.9 requirements: 15 total
+- Mapped to phases: 15
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-05-28*
-*Last updated: 2026-05-28 — traceability filled after roadmap creation*
+*Requirements defined: 2026-05-31*
+*Last updated: 2026-05-31 after initial definition*
