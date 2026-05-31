@@ -151,10 +151,11 @@
   2. Posting a plain text message to the `/chat` endpoint returns a structured agent response (at minimum: final answer text)
   3. The service uses the Gemini model via Google ADK orchestration — not a direct Gemini SDK call from a single function
   4. Agent configuration (model name, Gemini API key) is read from environment variables, not hardcoded
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 43-01: TBD
+- [ ] 43-01-PLAN.md — ai-analyst/ service scaffold (pyproject.toml, Dockerfile, config.py, env template)
+- [ ] 43-02-PLAN.md — Agent + endpoints + docker-compose wiring (agent.py, main.py, SSE /chat)
 
 ### Phase 44: Agent Tools
 **Goal**: The agent can answer questions about dashboard data by running CubeJS queries, and can execute skills from a dynamically loaded catalog
