@@ -134,9 +134,16 @@ Implementar un configurador de visualizaciones dinámico con:
 
 **Archive:** `.planning/milestones/v1.7-ROADMAP.md`
 
-## Current Milestone: v1.9 — TBD
+## Current Milestone: v1.9 — Advanced Node Types
 
-**Status:** Planning — run `/gsd:new-milestone` to start the next cycle.
+**Goal:** Extender el editor de flujos de integración con cinco nuevos tipos de nodos que habilitan lógica condicional, transformación de datos, generación de texto con plantillas, integración con LLMs y ejecución de modelos ML (Pickle/scikit-learn).
 
+**Target features:**
+- Conditional/Branch node — JS boolean expression → rutas true/false en el canvas
+- Data Transform node — función JS que reshape/map/filter datos en tránsito
+- Templating node — rellena una plantilla `{{expr}}` con datos → output de texto
+- LLM node — llama a un endpoint OpenAI-compatible vía Connection configurada
+- Pickle Model node — sube un .pkl file, backend ejecuta predict() con los datos del nodo
 
-
+---
+*Last updated: 2026-05-31 after starting milestone v1.9*
