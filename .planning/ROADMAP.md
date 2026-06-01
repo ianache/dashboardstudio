@@ -30,7 +30,7 @@
 | 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 44. AI Analyst Skills | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 45. BFF Integration | 1/1 | Complete   | 2026-06-01 | - |
-| 46. Chat UI | 2/3 | In Progress (gap closure) | 2026-05-31 | - |
+| 46. Chat UI | 3/3 | Complete   | 2026-06-01 | - |
 
 
 ---

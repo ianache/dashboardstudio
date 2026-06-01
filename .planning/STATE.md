@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
-status: complete
-last_updated: "2026-05-31T00:00:00.000Z"
+status: unknown
+last_updated: "2026-06-01T02:40:48.628Z"
 progress:
   total_phases: 41
   completed_phases: 26
-  total_plans: 67
-  completed_plans: 46
+  total_plans: 68
+  completed_plans: 47
 ---
 
 # Project State: Dashboard Studio v2.0
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 46 of 46 (Chat UI)
-Plan: 02 of 02
+Plan: 03 of 03
 Status: Complete — All plans done
-Last activity: 2026-05-31 — Completed 46-02 Chat UI Components (AiAnalystMessage + AiAnalystPanel)
+Last activity: 2026-06-01 — Completed 46-03 Chat UI Gap Closure (CHAT-03, CHAT-04, CHAT-05)
 
 Progress: [##########] 100% (Phase 45)
-Progress: [##########] 100% (Phase 46 — 2/2 plans complete)
+Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 
 ## Performance Metrics
 
@@ -44,7 +44,7 @@ Progress: [##########] 100% (Phase 46 — 2/2 plans complete)
 | 43 | 2/2 | 15 min | 7.5 min |
 | 44 | 2/2 | 30 min | 15 min |
 | 45 | 1/1 | 15 min | 15 min |
-| 46 | 2/2 | 20 min | 10 min |
+| 46 | 3/3 | 35 min | 11.7 min |
 
 ## Accumulated Context
 
@@ -67,6 +67,7 @@ Progress: [##########] 100% (Phase 46 — 2/2 plans complete)
 - [Phase 46-chat-ui]: credentials: include on /bff/ai/chat fetch to pass BFF session cookie for auth
 - [Phase 46-chat-ui]: AiAnalystPanel is a 380px sidebar beside DashboardRuntime (not overlay), allowing dashboard canvas to shrink
 - [Phase 46-chat-ui]: auto_awesome toolbar button repurposed to toggle AI Analyst panel; old widget generator modal retained in template
+- [Phase 46-03]: skills field populated by case 'skills' stream event; executeSkill appends new message; cache_hit stored as percentage number
 
 ### Blockers/Concerns
 
@@ -74,6 +75,6 @@ Progress: [##########] 100% (Phase 46 — 2/2 plans complete)
 
 ## Session Continuity
 
-Last session: 2026-05-31
-Stopped at: Completed 46-02-PLAN.md — Chat UI Components
-Resume file: .planning/phases/46-chat-ui/46-02-SUMMARY.md
+Last session: 2026-06-01
+Stopped at: Completed 46-03-PLAN.md — Chat UI Gap Closure
+Resume file: .planning/phases/46-chat-ui/46-03-SUMMARY.md
