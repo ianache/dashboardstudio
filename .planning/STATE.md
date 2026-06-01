@@ -89,6 +89,9 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 - [Phase 48-theme-alignment]: Phase 48 complete: all 10 CONTEXT.md-listed components verified or fixed across Plans 01-04
 - [Phase 48]: Shell layer (SideMenu, TopBar, AppLayout) fully migrated to CSS design tokens — zero hardcoded colors remain
 - [Phase 48]: Legacy tokens --text/--text-secondary replaced with --on-surface/--on-surface-variant throughout shell components
+- [Phase 48-02]: color-mix(in srgb, var(--success) 15%, transparent) used for badge tint backgrounds — no new hardcoded values
+- [Phase 48-02]: SVG fill="#1890ff" in LoginView intentionally preserved as brand color (confirmed by RESEARCH.md)
+- [Phase 48-02]: dv-* and cv-* scoped CSS helper class prefixes established for view-level token bridges in DashboardDesignerView and ConnectionsView
 
 ### Blockers/Concerns
 
@@ -97,5 +100,5 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 ## Session Continuity
 
 Last session: 2026-06-01
-Stopped at: Completed 48-01-PLAN.md — Shell Layer Theme Token Migration
-Resume file: .planning/phases/48-theme-alignment/48-01-SUMMARY.md
+Stopped at: Completed 48-02-PLAN.md — Views Theme Token Migration (ConnectionsView, SettingsView, DashboardDesignerView, LoginView)
+Resume file: .planning/phases/48-theme-alignment/48-02-SUMMARY.md
