@@ -52,9 +52,9 @@ defineEmits(['click'])
   color: var(--on-surface);
   border-color: var(--outline-variant);
 }
-.qac-default .qac-icon-wrap { background: rgba(0, 88, 190, 0.1); color: var(--primary); }
-.qac-default:hover { border-color: rgba(0, 88, 190, 0.35); }
-.qac-default:hover .qac-icon-wrap { background: rgba(0, 88, 190, 0.18); }
+.qac-default .qac-icon-wrap { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); }
+.qac-default:hover { border-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+.qac-default:hover .qac-icon-wrap { background: color-mix(in srgb, var(--primary) 18%, transparent); }
 
 /* Secondary variant */
 .qac-secondary {
@@ -62,9 +62,9 @@ defineEmits(['click'])
   color: var(--on-surface);
   border-color: var(--outline-variant);
 }
-.qac-secondary .qac-icon-wrap { background: rgba(86, 94, 116, 0.1); color: var(--secondary); }
-.qac-secondary:hover { border-color: rgba(86, 94, 116, 0.35); }
-.qac-secondary:hover .qac-icon-wrap { background: rgba(86, 94, 116, 0.18); }
+.qac-secondary .qac-icon-wrap { background: color-mix(in srgb, var(--on-surface-variant) 10%, transparent); color: var(--secondary); }
+.qac-secondary:hover { border-color: color-mix(in srgb, var(--on-surface-variant) 35%, transparent); }
+.qac-secondary:hover .qac-icon-wrap { background: color-mix(in srgb, var(--on-surface-variant) 18%, transparent); }
 
 .qac-icon-wrap {
   width: 56px;
