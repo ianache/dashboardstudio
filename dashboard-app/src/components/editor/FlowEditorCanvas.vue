@@ -1057,6 +1057,7 @@ function getSelectOptions(def) {
  */
 function canFetchDynamic(def) {
   if (!selectedNode.value) return false
+  if (!def.depends_on || (Array.isArray(def.depends_on) && def.depends_on.length === 0)) return true
   const deps = Array.isArray(def.depends_on) ? def.depends_on : [def.depends_on]
   return deps.every(dep => {
     const val = selectedNode.value.props?.[dep]
@@ -1069,16 +1070,17 @@ function canFetchDynamic(def) {
  */
 function buildEndpoint(def) {
   if (!def.fetch_endpoint || !selectedNode.value) return null
-  
+
   let endpoint = def.fetch_endpoint
+  if (!def.depends_on || (Array.isArray(def.depends_on) && def.depends_on.length === 0)) return endpoint
   const deps = Array.isArray(def.depends_on) ? def.depends_on : [def.depends_on]
-  
+
   for (const dep of deps) {
     const value = selectedNode.value.props?.[dep]
     if (!value) return null
     endpoint = endpoint.replace(`{${dep}}`, encodeURIComponent(value))
   }
-  
+
   return endpoint
 }
 
