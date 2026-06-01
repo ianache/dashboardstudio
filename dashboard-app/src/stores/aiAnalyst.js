@@ -8,7 +8,8 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
     usage: {
       input_tokens: 0,
       output_tokens: 0,
-      cost: 0
+      cost: 0,
+      cache_hit: 0
     },
     isPanelOpen: false
   }),
@@ -48,7 +49,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
       this.messages.push({ role: 'user', content: text })
 
       // Add placeholder assistant message
-      const assistantMsg = { role: 'assistant', content: '', thought: '', streaming: true, error: false }
+      const assistantMsg = { role: 'assistant', content: '', thought: '', actions: [], skills: [], streaming: true, error: false }
       this.messages.push(assistantMsg)
       const msgIndex = this.messages.length - 1
 
@@ -124,6 +125,16 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
         case 'thought':
           msg.thought = (msg.thought || '') + (event.content || '')
           break
+        case 'actions':
+          if (Array.isArray(event.data)) {
+            msg.actions = event.data
+          } else if (event.content) {
+            msg.actions = [...(msg.actions || []), event.content]
+          }
+          break
+        case 'skills':
+          msg.skills = Array.isArray(event.data) ? event.data : []
+          break
         case 'answer':
           msg.content = (msg.content || '') + (event.content || '')
           break
@@ -132,7 +143,8 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
             this.usage = {
               input_tokens: event.data.input_tokens ?? this.usage.input_tokens,
               output_tokens: event.data.output_tokens ?? this.usage.output_tokens,
-              cost: event.data.cost ?? this.usage.cost
+              cost: event.data.cost ?? this.usage.cost,
+              cache_hit: event.data.cache_hit ?? this.usage.cache_hit
             }
           }
           break
@@ -144,7 +156,46 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
 
     clearMessages() {
       this.messages = []
-      this.usage = { input_tokens: 0, output_tokens: 0, cost: 0 }
+      this.usage = { input_tokens: 0, output_tokens: 0, cost: 0, cache_hit: 0 }
+    },
+
+    async executeSkill(skillName, params = {}) {
+      const lastAssistantIdx = [...this.messages].reverse().findIndex(m => m.role === 'assistant')
+      const msgIndex = lastAssistantIdx >= 0 ? this.messages.length - 1 - lastAssistantIdx : -1
+
+      this.loading = true
+      try {
+        const response = await fetch('/bff/ai/skill', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ skill: skillName, params })
+        })
+        const result = await response.json()
+        const resultText = result.output || result.result || JSON.stringify(result)
+        this.messages.push({
+          role: 'assistant',
+          content: `**Skill ejecutada: ${skillName}**\n\n${resultText}`,
+          thought: '',
+          actions: [],
+          skills: [],
+          streaming: false,
+          error: !response.ok
+        })
+      } catch (err) {
+        console.error('[aiAnalyst] executeSkill error:', err)
+        this.messages.push({
+          role: 'assistant',
+          content: `Error al ejecutar skill "${skillName}". Intenta nuevamente.`,
+          thought: '',
+          actions: [],
+          skills: [],
+          streaming: false,
+          error: true
+        })
+      } finally {
+        this.loading = false
+      }
     }
   }
 })
