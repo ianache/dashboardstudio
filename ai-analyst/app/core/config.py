@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash-lite"
 
     # CubeJS
-    cubejs_url: str = "http://cube_api:4000/v1/load"
+    cubejs_url: str = "http://cubejs.pm.comsatel.com.pe:4000/cubejs-api/v1/load" # "http://cube_api:4000/v1/load"
     cubejs_api_secret: str = "welcome1"
 
     # Skills

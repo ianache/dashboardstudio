@@ -104,6 +104,7 @@ export const cubejsProxy = createProxyMiddleware({
 export const aiProxy = createProxyMiddleware({
   target: config.aiServiceUrl,
   changeOrigin: true,
+  ws: true,
   proxyTimeout: 0, // Disable timeout for SSE
   timeout: 0,      // Disable timeout for SSE
   pathRewrite: {

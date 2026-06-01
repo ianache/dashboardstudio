@@ -17,14 +17,14 @@
 
 - [x] **AGENT-01**: Agent can interpret visible dashboard chart data and explain trends, peaks, or anomalies in plain language
 - [x] **AGENT-02**: Agent can execute ad-hoc CubeJS queries to explore data beyond what is currently displayed on screen
-- [ ] **AGENT-03**: Agent can trigger pre-configured skills from the skills catalog (catalog.yaml) on user request or agent recommendation
+- [x] **AGENT-03**: Agent can trigger pre-configured skills from the skills catalog (catalog.yaml) on user request or agent recommendation
 
 ### AI Service
 
 - [x] **SVC-01**: A dedicated Python microservice uses Google ADK to orchestrate the agent workflow with Gemini models via native API
 - [x] **SVC-02**: The AI service integrates CubeJS as an agent tool — executes dimension/measure queries and returns structured results to the agent
-- [ ] **SVC-03**: The AI service loads the skills catalog (catalog.yaml) dynamically at startup to discover available actions
-- [ ] **SVC-04**: All AI requests are proxied through the BFF for session validation before reaching the AI service
+- [x] **SVC-03**: The AI service loads the skills catalog (catalog.yaml) dynamically at startup to discover available actions
+- [x] **SVC-04**: All AI requests are proxied through the BFF for session validation before reaching the AI service
 
 ## v2.1 Requirements (Etapa 2 — Advanced Agent)
 
@@ -51,11 +51,11 @@ Deferred to next milestone.
 |-------------|-------|--------|
 | SVC-01 | Phase 43 | Complete |
 | SVC-02 | Phase 44 | Complete |
-| SVC-03 | Phase 44 | Pending |
+| SVC-03 | Phase 44 | Complete |
 | AGENT-01 | Phase 44 | Complete |
 | AGENT-02 | Phase 44 | Complete |
-| AGENT-03 | Phase 44 | Pending |
-| SVC-04 | Phase 45 | Pending |
+| AGENT-03 | Phase 44 | Complete |
+| SVC-04 | Phase 45 | Complete |
 | CHAT-01 | Phase 46 | Pending |
 | CHAT-02 | Phase 46 | Pending |
 | CHAT-03 | Phase 46 | Pending |

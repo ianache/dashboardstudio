@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-05-31T20:39:38.355Z"
+last_updated: "2026-06-01T01:11:32.656Z"
 progress:
-  total_phases: 39
-  completed_phases: 23
-  total_plans: 64
-  completed_plans: 42
+  total_phases: 40
+  completed_phases: 25
+  total_plans: 65
+  completed_plans: 45
 ---
 
 # Project State: Dashboard Studio v2.0
@@ -18,34 +18,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-31)
 
 **Core value:** Agente BI interactivo que lee el contexto del dashboard, ejecuta consultas analíticas y dispara skills operativas — sin salir de la interfaz del diseñador
-**Current focus:** Phase 44 — AI Analyst Skills (Plan 01 — CubeJS Query Tool)
+**Current focus:** Phase 46 — Chat UI
 
 ## Current Position
 
-Phase: 44 of 46 (AI Analyst Skills)
-Plan: 02 of 02
-Status: In Progress
-Last activity: 2026-05-31 — Completed 44-01-PLAN.md
+Phase: 46 of 46 (Chat UI)
+Plan: 01 of TBD
+Status: Not started
+Last activity: 2026-05-31 — Completed Phase 45
 
-Progress: [####░░░░░░] 33%
+Progress: [##########] 100% (Phase 45)
+Progress: [░░░░░░░░░░] 0% (Phase 46)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (this milestone)
-- Average duration: 7 min
-- Total execution time: 30 min
+- Total plans completed: 6 (this milestone)
+- Average duration: 10 min
+- Total execution time: 60 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 43 | 3/3 | 15 min | 5 min |
-| 44 | 1/2 | 15 min | 15 min |
-| 45 | TBD | - | - |
+| 43 | 2/2 | 15 min | 7.5 min |
+| 44 | 2/2 | 30 min | 15 min |
+| 45 | 1/1 | 15 min | 15 min |
 | 46 | TBD | - | - |
 
-*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -60,6 +60,9 @@ Progress: [####░░░░░░] 33%
 - **43-01 decision — uv.lock committed:** Lock file is committed alongside pyproject.toml so the Dockerfile `uv sync --frozen` step is reproducible.
 - [Phase 44]: Use HS256 JWT for CubeJS authentication as required by its REST API.
 - [Phase 44]: Screen context injected as a synthetic 'user' message with [CONTEXT] prefix to guide the model.
+- [Phase 44]: Skills catalog fetched from remote URL at startup and cached globally.
+- [Phase 45]: Enabled WebSocket support for AI proxy for consistency
+- [Phase 45]: Injected X-User-Email alongside X-User-ID for service context
 
 ### Blockers/Concerns
 
@@ -68,5 +71,5 @@ Progress: [####░░░░░░] 33%
 ## Session Continuity
 
 Last session: 2026-05-31
-Stopped at: Completed 44-01-PLAN.md — CubeJS Query Tool & Context
-Resume file: .planning/phases/44-ai-analyst-skills/44-01-SUMMARY.md
+Stopped at: Completed 44-02-PLAN.md — Skills Catalog & Startup
+Resume file: .planning/phases/44-ai-analyst-skills/44-02-SUMMARY.md

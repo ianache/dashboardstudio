@@ -29,7 +29,7 @@
 | 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 44. AI Analyst Skills | v2.0 | 2/2 | Complete | 2026-05-31 |
-| 45. BFF Integration | v2.0 | 0/1 | In progress | - |
+| 45. BFF Integration | 1/1 | Complete   | 2026-06-01 | - |
 | 46. Chat UI | v2.0 | 0/TBD | Not started | - |
 
 
@@ -137,7 +137,7 @@
 
 - [x] **Phase 43: AI Service Foundation** - New Python microservice (ai-analyst/) with Google ADK, Gemini API, and a basic `/chat` endpoint that accepts a message and returns a streamed agent response
 - [x] **Phase 44: AI Analyst Skills** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation (completed 2026-05-31)
-- [ ] **Phase 45: BFF Integration** - BFF routes that proxy `/bff/ai/*` requests to the AI service with session validation and screen context passthrough
+- [x] **Phase 45: BFF Integration** - BFF routes that proxy `/bff/ai/*` requests to the AI service with session validation and screen context passthrough (completed 2026-06-01)
 - [ ] **Phase 46: Chat UI** - Vue 3 collapsible chat panel matching the Stitch design: message bubbles, expandable Thought/Actions/Result sections, live usage stats, and CTA skill buttons
 
 ## Phase Details
@@ -183,7 +183,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 45-01-PLAN.md — BFF Integration & Core Proxy Logic
+- [x] 45-01-PLAN.md — BFF Integration & Core Proxy Logic
 
 ### Phase 46: Chat UI
 **Goal**: Dashboard designers can open a chat panel, ask questions about their dashboard, and interact with agent responses including skill CTAs — without leaving the designer
