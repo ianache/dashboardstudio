@@ -3,29 +3,34 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-01T03:44:29.388Z"
+last_updated: "2026-06-01T18:58:46.712Z"
 progress:
-  total_phases: 41
-  completed_phases: 27
-  total_plans: 68
-  completed_plans: 49
+  total_phases: 42
+  completed_phases: 28
+  total_plans: 69
+  completed_plans: 50
 ---
 
 # Project State: Dashboard Studio v2.0
+
+## Accumulated Context
+
+### Roadmap Evolution
+- Phase 47 added: Multi System Design
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-05-31)
 
 **Core value:** Agente BI interactivo que lee el contexto del dashboard, ejecuta consultas analíticas y dispara skills operativas — sin salir de la interfaz del diseñador
-**Current focus:** Phase 46 — Chat UI
+**Current focus:** Phase 47 — Multi System Design
 
 ## Current Position
 
-Phase: 46 of 46 (Chat UI)
-Plan: 03 of 03
+Phase: 47 of 47 (Multi System Design)
+Plan: 01 of 01
 Status: Complete — All plans done
-Last activity: 2026-06-01 — Completed 46-03 Chat UI Gap Closure (CHAT-03, CHAT-04, CHAT-05)
+Last activity: 2026-06-01 — Completed 47-01 Light/Dark Theme Toggle
 
 Progress: [##########] 100% (Phase 45)
 Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
@@ -47,6 +52,7 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 | 46 | 3/3 | 35 min | 11.7 min |
 | Phase 41-pickle-model-node P01 | 15 | 4 tasks | 8 files |
 | Phase 41-pickle-model-node P02 | 5 | 3 tasks | 5 files |
+| Phase 47-multi-system-design P47-01 | 3 | 4 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -73,6 +79,8 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 - [Phase 41-pickle-model-node]: Subprocess isolation for Pickle deserialization prevents RCE in main FastAPI process
 - [Phase 41-pickle-model-node]: ml_worker.py dual-mode CLI (inspect/predict) isolates pickle loading in subprocess
 - [Phase 41-pickle-model-node]: dynamic_select value_field/label_field: use opt.id as stored value (not opt.name) to correctly map to backend primary key
+- [Phase 47-multi-system-design]: Theme applied via data-theme on html element — overrides :root CSS custom properties globally without component changes
+- [Phase 47-multi-system-design]: initTheme() called at start of App.vue onMounted before backend awaits to prevent flash of wrong theme
 
 ### Blockers/Concerns
 
@@ -81,5 +89,5 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 ## Session Continuity
 
 Last session: 2026-06-01
-Stopped at: Completed 41-02-PLAN.md — ML Model Management UI
-Resume file: .planning/phases/41-pickle-model-node/41-02-SUMMARY.md
+Stopped at: Completed 47-01-PLAN.md — Light/Dark Theme Toggle
+Resume file: .planning/phases/47-multi-system-design/47-01-SUMMARY.md

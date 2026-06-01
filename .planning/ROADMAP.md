@@ -202,6 +202,16 @@ Plans:
 - [x] 46-02-PLAN.md — AI Analyst UI Components
 - [ ] 46-03-PLAN.md — Gap closure: Actions Taken section, cache hit % stats, skill CTA buttons (CHAT-03, CHAT-04, CHAT-05)
 
+### Phase 47: Multi System Design
+
+**Goal:** Implementar un sistema de temas UI (claro/oscuro) con toggle en el menú lateral. El modo oscuro es el actual design system; el modo claro se basa en `design/DESIGN-light.md`. El tema persiste en localStorage y se aplica vía `data-theme` en el elemento raíz.
+**Requirements**: design/DESIGN-light.md
+**Depends on:** Phase 46
+**Plans:** 1/1 plans complete
+
+Plans:
+- [ ] 47-01-PLAN.md — CSS light theme vars + uiStore theme state + SideMenu toggle icons
+
 ---
 
 *For detailed milestone history, see .planning/milestones/*
