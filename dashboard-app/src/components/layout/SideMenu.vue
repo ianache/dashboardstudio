@@ -119,6 +119,26 @@
 
     <!-- Bottom section -->
     <div class="side-bottom">
+      <!-- Theme toggle -->
+      <div class="theme-toggle">
+        <button
+          class="theme-btn"
+          :class="{ active: uiStore.theme === 'dark' }"
+          @click="uiStore.setTheme('dark')"
+          title="Modo oscuro"
+        >
+          <MIcon icon="dark_mode" :size="18" />
+        </button>
+        <button
+          class="theme-btn"
+          :class="{ active: uiStore.theme === 'light' }"
+          @click="uiStore.setTheme('light')"
+          title="Modo claro"
+        >
+          <MIcon icon="light_mode" :size="18" />
+        </button>
+      </div>
+
       <router-link to="/settings" class="nav-item" :class="{ active: $route.name === 'Settings' }">
         <MIcon icon="settings" :size="20" class="nav-icon" />
         <span class="nav-label">Configuración</span>
@@ -394,6 +414,47 @@ function createNewDashboard() { router.push('/designer?new=1') }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .workspace-role { color: #475569; font-size: 10px; white-space: nowrap; }
+
+/* Theme toggle */
+.theme-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  justify-content: center;
+}
+
+.collapsed .theme-toggle {
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.theme-btn:hover {
+  background: var(--surface-container-high);
+  opacity: 1;
+}
+
+.theme-btn.active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border-color: var(--primary-container);
+  opacity: 1;
+}
 
 /* Expand animation */
 .expand-enter-active, .expand-leave-active {
