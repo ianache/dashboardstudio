@@ -10,6 +10,7 @@ import json
 
 from app.services.llm_executor import execute_llm_node
 from app.services.ml_executor import execute_ml_node
+from app.services.ods_executor import ODSConfig, WriteMode, ods_executor
 
 POSTGRES_TYPES = {"postgresql", "postgres"}
 MYSQL_TYPES = {"mysql", "mariadb"}
@@ -149,6 +150,54 @@ async def _execute_http(props: Dict, label: str) -> Dict:
 def _err(msg: str) -> Dict:
     return {"success": False, "rows": [], "count": 0, "error": msg}
 
+async def _pre_execute_ods_node(props: Dict, records: Any, db) -> Dict:
+    """Pre-execute an ods_pg node: writes records to PostgreSQL and returns them
+    as output so downstream nodes (e.g. pickle_model) can consume the same rows."""
+    if not isinstance(records, list) or not records:
+        return {"success": False, "error": "ODS requires a non-empty list of records as input", "rows": []}
+
+    table = props.get("table", "")
+    if not table:
+        return {"success": False, "error": "No table configured for ODS node", "rows": []}
+
+    schema = props.get("schema") or "public"
+    write_mode_str = (props.get("write_mode") or "append").lower()
+    try:
+        write_mode = WriteMode(write_mode_str)
+    except ValueError:
+        write_mode = WriteMode.APPEND
+
+    config = ODSConfig(
+        connection_id=props.get("connection_id", ""),
+        schema=schema,
+        table=table,
+        write_mode=write_mode,
+        identity_fields=props.get("identity_fields") or [],
+        batch_size=int(props.get("batch_size") or 1000),
+    )
+
+    host = props.get("host", "localhost")
+    port = int(props.get("port") or 5432)
+    user = props.get("username", "")
+    password = props.get("password", "")
+    database = props.get("database", "")
+
+    try:
+        conn = await asyncpg.connect(
+            user=user, password=password, database=database,
+            host=host, port=port, timeout=15
+        )
+        try:
+            result = await ods_executor.execute(config, records, conn, db=db)
+            if result.success:
+                return {"success": True, "rows": records, "rows_written": result.rows_affected}
+            errs = "; ".join(e.message for e in (result.errors or [])[:3])
+            return {"success": False, "error": f"ODS write failed: {errs or 'Unknown'}", "rows": []}
+        finally:
+            await conn.close()
+    except Exception as e:
+        return {"success": False, "error": f"ODS connection error: {str(e)}", "rows": []}
+
 async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) -> tuple[bool, Dict[str, Any]]:
     import copy
     import time
@@ -159,7 +208,7 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
 
     # Identify nodes that MUST be pre-executed
     def is_pre_executable(n):
-        return n.get("toolType") in ["llm", "pickle_model", "sql_source", "sql_destination"] or n.get("category") == "source"
+        return n.get("toolType") in ["llm", "pickle_model", "sql_source", "sql_destination", "ods_pg"] or n.get("category") == "source"
 
     # Sort nodes topologically to respect dependencies during pre-execution
     # (Simple Kahn implementation for pre-execution subset)
@@ -217,17 +266,18 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
         # 3. Execution
         is_llm = node.get("toolType") == "llm"
         is_ml  = node.get("toolType") == "pickle_model"
+        is_ods = node.get("toolType") == "ods_pg"
 
         if websocket:
             await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "running"})
             label = node.get('label', node['id'])
-            msg_prefix = "[IA]" if is_llm else ("[ML]" if is_ml else "[Fuente]")
+            msg_prefix = "[IA]" if is_llm else ("[ML]" if is_ml else ("[ODS]" if is_ods else "[Fuente]"))
             await websocket.send_json({"type": "info", "message": f"{msg_prefix} Ejecutando '{label}' ..."})
 
         from datetime import datetime
         start_time = time.perf_counter()
         start_utc = datetime.utcnow().isoformat() + "Z"
-        
+
         if is_llm:
             # Pass ctx-like structure (payload + variables)
             ctx = {"payload": input_payload, "variables": flow_data.get("variables", {})}
@@ -236,6 +286,8 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
         elif is_ml:
             result = await execute_ml_node(node["props"], input_payload, db)
             if result["success"]: result["rows"] = result["output"]
+        elif is_ods:
+            result = await _pre_execute_ods_node(node["props"], input_payload, db)
         else:
             result = await execute_source_node(node)
 
