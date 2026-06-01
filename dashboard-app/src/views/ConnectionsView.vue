@@ -5,8 +5,8 @@
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
         <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Data Integration</span>
-        <h1 class="font-h1 text-h1 text-slate-900">Conexiones</h1>
-        <p class="font-body-md text-slate-500 max-w-2xl">
+        <h1 class="font-h1 text-h1 page-title">Conexiones</h1>
+        <p class="font-body-md page-subtitle max-w-2xl">
           Gestiona las conexiones a fuentes y destinos de datos externos utilizados por los flujos de integración.
         </p>
       </div>
@@ -18,12 +18,12 @@
 
     <!-- Empty state -->
     <div v-if="connections.length === 0 && !loading" class="max-w-[1600px] mx-auto">
-      <div class="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center justify-center gap-4 text-center">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-3xl text-slate-400">cable</span>
+      <div class="cv-empty-box p-12 flex flex-col items-center justify-center gap-4 text-center">
+        <div class="w-16 h-16 cv-skeleton-bar rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-3xl icon-muted">cable</span>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900">Sin conexiones configuradas</h3>
-        <p class="text-sm text-slate-500 max-w-md">
+        <h3 class="text-lg font-semibold cv-empty-title">Sin conexiones configuradas</h3>
+        <p class="text-sm cv-empty-desc max-w-md">
           Agrega tu primera conexión para que los flujos de integración puedan acceder a fuentes de datos externas.
         </p>
         <button class="btn btn-primary" @click="openNew">
@@ -36,10 +36,10 @@
     <!-- Loading skeleton -->
     <div v-else-if="loading" class="max-w-[1600px] mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div v-for="i in 4" :key="i" class="bg-white border border-slate-200 rounded-xl p-5 animate-pulse min-h-[200px]">
-          <div class="h-4 bg-slate-100 rounded w-2/3 mb-3"></div>
-          <div class="h-3 bg-slate-100 rounded w-full mb-2"></div>
-          <div class="h-3 bg-slate-100 rounded w-4/5"></div>
+        <div v-for="i in 4" :key="i" class="cv-skeleton-card rounded-xl p-5 animate-pulse min-h-[200px]">
+          <div class="h-4 cv-skeleton-bar rounded w-2/3 mb-3"></div>
+          <div class="h-3 cv-skeleton-bar rounded w-full mb-2"></div>
+          <div class="h-3 cv-skeleton-bar rounded w-4/5"></div>
         </div>
       </div>
     </div>
@@ -90,7 +90,7 @@
         <!-- Add new card -->
         <button class="cv-new-card" @click="openNew">
           <div class="cv-new-ico">
-            <span class="material-symbols-outlined" style="font-size:22px;color:#94a3b8">add</span>
+            <span class="material-symbols-outlined icon-muted" style="font-size:22px">add</span>
           </div>
           <span class="cv-new-lbl">Nueva Conexión</span>
         </button>
@@ -112,7 +112,7 @@
 
         <!-- Warning icon -->
         <div class="cv-confirm-icon">
-          <span class="material-symbols-outlined" style="font-size:32px;color:#dc2626">delete_forever</span>
+          <span class="material-symbols-outlined icon-danger" style="font-size:32px">delete_forever</span>
         </div>
 
         <!-- Title -->
@@ -227,7 +227,7 @@ async function doDelete() {
 
 /* Card */
 .cv-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;
+  background: var(--card-bg); border: 1px solid var(--outline-variant); border-radius: 12px; overflow: hidden;
   display: flex; flex-direction: column; box-shadow: 0 1px 4px rgba(15,23,42,0.06);
   transition: box-shadow 0.2s, transform 0.2s;
   animation: cvFadeIn 0.35s ease forwards; opacity: 0;
@@ -241,40 +241,40 @@ async function doDelete() {
 /* Body */
 .cv-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .cv-card-ico   { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; flex-shrink: 0; }
-.cv-card-name  { font-size: 16px; font-weight: 700; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; }
-.cv-card-desc  { font-size: 13px; color: #64748b; flex: 1; margin: 0; }
+.cv-card-name  { font-size: 16px; font-weight: 700; color: var(--on-surface); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; }
+.cv-card-desc  { font-size: 13px; color: var(--on-surface-variant); flex: 1; margin: 0; }
 
 /* Meta row */
 .cv-card-meta  { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
 .cv-meta-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; border-radius: 20px; padding: 3px 10px; width: fit-content; }
-.cv-badge--ok  { background: #dcfce7; color: #16a34a; }
-.cv-badge--off { background: #f1f5f9; color: #64748b; }
-.cv-host-label { font-size: 11px; font-family: 'Fira Code', 'Consolas', monospace; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cv-badge--ok  { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+.cv-badge--off { background: var(--surface-container); color: var(--on-surface-variant); }
+.cv-host-label { font-size: 11px; font-family: 'Fira Code', 'Consolas', monospace; color: var(--on-surface-variant); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Footer */
-.cv-card-footer { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 12px 16px; border-top: 1px solid #f1f5f9; background: #fafafa; }
-.cv-action { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: #fff; border-radius: 7px; cursor: pointer; color: #64748b; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
-.cv-action:hover { color: #2563eb; background: #eff6ff; }
-.cv-action--danger:hover { color: #dc2626; background: #fef2f2; }
+.cv-card-footer { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 12px 16px; border-top: 1px solid var(--outline-variant); background: var(--surface-container); }
+.cv-action { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: var(--card-bg); border-radius: 7px; cursor: pointer; color: var(--on-surface-variant); transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+.cv-action:hover { color: var(--primary); background: var(--surface-container); }
+.cv-action--danger:hover { color: var(--error); background: var(--error-container); }
 
 /* New-card */
 .cv-new-card {
-  border: 2px dashed #e2e8f0; border-radius: 12px; padding: 32px; min-height: 220px;
+  border: 2px dashed var(--outline-variant); border-radius: 12px; padding: 32px; min-height: 220px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
   background: transparent; cursor: pointer; transition: all 0.2s;
 }
-.cv-new-card:hover { border-color: #2563eb; background: rgba(239,246,255,0.3); }
-.cv-new-ico { width: 44px; height: 44px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-.cv-new-card:hover .cv-new-ico { background: #dbeafe; }
-.cv-new-lbl { font-size: 13px; font-weight: 600; color: #64748b; }
-.cv-new-card:hover .cv-new-lbl { color: #2563eb; }
+.cv-new-card:hover { border-color: var(--primary); background: var(--surface-container); }
+.cv-new-ico { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-container); display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.cv-new-card:hover .cv-new-ico { background: var(--surface-container-high); }
+.cv-new-lbl { font-size: 13px; font-weight: 600; color: var(--on-surface-variant); }
+.cv-new-card:hover .cv-new-lbl { color: var(--primary); }
 /* Overlay (shared) */
 .cv-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.55); padding: 16px; }
 
 /* Danger confirm dialog */
 .cv-confirm {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--outline-variant);
   border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
   width: 100%; max-width: 400px;
@@ -286,18 +286,18 @@ async function doDelete() {
 .cv-confirm-icon {
   width: 64px; height: 64px;
   border-radius: 50%;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--error-container);
+  border: 1px solid var(--error);
   display: flex; align-items: center; justify-content: center;
 }
 .cv-confirm-title {
-  font-size: 18px; font-weight: 700; color: #0f172a;
+  font-size: 18px; font-weight: 700; color: var(--on-surface);
   font-family: 'Plus Jakarta Sans', sans-serif;
   margin: 0;
 }
 .cv-confirm-chip {
   display: inline-flex; align-items: center; gap: 8px;
-  background: #f8fafc; border: 1px solid #e2e8f0;
+  background: var(--surface-container); border: 1px solid var(--outline-variant);
   border-radius: 8px; padding: 8px 14px;
   width: 100%; box-sizing: border-box;
 }
@@ -306,15 +306,26 @@ async function doDelete() {
   border-radius: 6px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
-.cv-chip-name { font-size: 13px; font-weight: 600; color: #0f172a; flex: 1; text-align: left; }
-.cv-chip-type { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+.cv-chip-name { font-size: 13px; font-weight: 600; color: var(--on-surface); flex: 1; text-align: left; }
+.cv-chip-type { font-size: 11px; color: var(--on-surface-variant); white-space: nowrap; }
 .cv-confirm-msg {
-  font-size: 13px; color: #64748b; line-height: 1.6;
+  font-size: 13px; color: var(--on-surface-variant); line-height: 1.6;
   margin: 0; max-width: 320px;
 }
 .cv-confirm-actions {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; padding-top: 8px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--outline-variant);
 }
+
+/* Token-aware helper classes */
+.page-title       { color: var(--on-surface); }
+.page-subtitle    { color: var(--on-surface-variant); }
+.cv-empty-box     { background: var(--card-bg); border: 1px solid var(--outline-variant); border-radius: 12px; }
+.cv-empty-title   { color: var(--on-surface); }
+.cv-empty-desc    { color: var(--on-surface-variant); }
+.cv-skeleton-card { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.cv-skeleton-bar  { background: var(--surface-container); }
+.icon-muted       { color: var(--on-surface-variant); }
+.icon-danger      { color: var(--error); }
 </style>
