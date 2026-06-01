@@ -9,9 +9,15 @@
 
       <div class="ai-panel-header-actions">
         <!-- Usage stats -->
-        <div v-if="store.usage.input_tokens > 0" class="ai-usage-stats">
-          <span class="ai-usage-tokens" title="Tokens usados">
-            {{ formatTokens(store.usage.input_tokens + store.usage.output_tokens) }}
+        <div v-if="store.usage.input_tokens > 0 || store.usage.output_tokens > 0" class="ai-usage-stats">
+          <span class="ai-usage-tokens ai-usage-tokens--in" title="Tokens de entrada">
+            <span class="material-symbols-outlined ai-stat-icon">arrow_downward</span>{{ formatTokens(store.usage.input_tokens) }}
+          </span>
+          <span class="ai-usage-tokens ai-usage-tokens--out" title="Tokens de salida">
+            <span class="material-symbols-outlined ai-stat-icon">arrow_upward</span>{{ formatTokens(store.usage.output_tokens) }}
+          </span>
+          <span v-if="store.usage.cache_hit > 0" class="ai-usage-cache" title="Cache hit %">
+            <span class="material-symbols-outlined ai-stat-icon">cached</span>{{ store.usage.cache_hit.toFixed(0) }}%
           </span>
           <span v-if="store.usage.cost > 0" class="ai-usage-cost">
             ${{ store.usage.cost.toFixed(4) }}
@@ -198,6 +204,27 @@ watch(
   padding: 2px 8px;
   border-radius: 10px;
   font-family: ui-monospace, monospace;
+}
+
+.ai-usage-tokens--in { color: #0369a1; background: #e0f2fe; }
+.ai-usage-tokens--out { color: #7c3aed; background: #ede9fe; }
+
+.ai-usage-cache {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-family: ui-monospace, monospace;
+}
+
+.ai-stat-icon {
+  font-size: 10px;
+  vertical-align: middle;
 }
 
 .ai-panel-btn {
