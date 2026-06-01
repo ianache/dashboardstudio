@@ -208,11 +208,9 @@ const canvasStyle = computed(() => ({
 }))
 
 const gridLinesStyle = computed(() => ({
-  backgroundSize: `calc(100% / ${COL_COUNT}) ${ROW_HEIGHT + GAP}px`,
-  backgroundImage: `
-    linear-gradient(to right, rgba(24,144,255,0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(24,144,255,0.06) 1px, transparent 1px)
-  `,
+  backgroundImage: `radial-gradient(#0F172A 1px, transparent 1px)`,
+  backgroundSize: '24px 24px',
+  opacity: 0.03,
   position: 'absolute',
   inset: 0,
   pointerEvents: 'none'

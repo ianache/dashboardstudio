@@ -238,18 +238,18 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
 .dashboard-widget {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 8px;
+  background: var(--surface);
+  border-radius: 12px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   height: 100%;
   position: relative;
   transition: box-shadow 0.2s, border-color 0.2s, top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
 }
 .dashboard-widget.is-design { cursor: move; }
-.dashboard-widget.is-design:hover { box-shadow: 0 4px 16px rgba(24,144,255,0.15); border-color: #a0d4ff; }
-.dashboard-widget.is-selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
+.dashboard-widget.is-design:hover { box-shadow: 0 4px 16px rgba(0, 88, 190, 0.1); border-color: var(--primary); }
+.dashboard-widget.is-selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0, 88, 190, 0.1); }
 
 .dashboard-widget.is-maximized {
   position: fixed !important;
@@ -271,11 +271,11 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border);
-  background: #fafafa;
+  background: transparent;
   flex-shrink: 0;
-  min-height: 40px;
+  min-height: 48px;
   gap: 8px;
 }
 .drag-handle { cursor: grab; }
@@ -284,13 +284,14 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
 .widget-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--on-surface);
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  font-family: var(--font-heading);
 }
 .widget-title span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chart-type-icon { font-size: 14px; flex-shrink: 0; }
@@ -332,10 +333,10 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
 
 /* Footer */
 .widget-footer {
-  padding: 2px 12px;
+  padding: 4px 12px;
   font-size: 11px;
-  color: var(--text-secondary);
-  background: #fafafa;
+  color: var(--on-surface-variant);
+  background: transparent;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
