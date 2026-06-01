@@ -59,6 +59,7 @@ async def execute_source_node(node: Dict[str, Any]) -> Dict[str, Any]:
     props = node.get("props") or {}
     conn_type = props.get("connection_type", "").lower()
     label = node.get("label", node["id"])
+    tool_type = node.get("toolType", "")
 
     if conn_type in POSTGRES_TYPES:
         return await _execute_postgres(props, label)
@@ -66,7 +67,11 @@ async def execute_source_node(node: Dict[str, Any]) -> Dict[str, Any]:
         return await _execute_mysql(props, label)
     elif conn_type in HTTP_TYPES:
         return await _execute_http(props, label)
-    
+    elif tool_type == "csv_file" and conn_type == "s3":
+        return await _execute_csv_s3(props, label)
+    elif tool_type == "csv_file":
+        return await _execute_csv_local(props, label)
+
     return _err(f"Tipo de conexión no soportado: {conn_type}")
 
 async def _execute_postgres(props: Dict, label: str) -> Dict:
@@ -146,6 +151,65 @@ async def _execute_http(props: Dict, label: str) -> Dict:
             return {"success": True, "rows": rows, "count": len(rows), "error": None}
     except Exception as e:
         return _err(str(e))
+
+async def _execute_csv_local(props: Dict, label: str) -> Dict:
+    import pandas as pd
+    import os
+    path = props.get("path", "").strip()
+    if not path:
+        return _err("No se especificó la ruta del archivo")
+    if not os.path.exists(path):
+        return _err(f"Archivo no encontrado: {path}")
+    try:
+        ext = os.path.splitext(path)[1].lower()
+        if ext in (".xlsx", ".xls", ".xlsm"):
+            df = pd.read_excel(path, dtype=str)
+        else:
+            delimiter = props.get("delimiter") or ","
+            has_header = props.get("has_header", "true") != "false"
+            encoding = props.get("encoding") or "UTF-8"
+            df = pd.read_csv(path, sep=delimiter, header=0 if has_header else None,
+                             encoding=encoding, dtype=str)
+        df = df.where(pd.notna(df), None)
+        rows = df.to_dict(orient="records")
+        return {"success": True, "rows": rows, "count": len(rows), "error": None}
+    except Exception as e:
+        return _err(f"Error leyendo archivo: {str(e)}")
+
+
+async def _execute_csv_s3(props: Dict, label: str) -> Dict:
+    import boto3
+    import io
+    import pandas as pd
+    bucket = props.get("bucket", "").strip()
+    path = props.get("path", "").strip().lstrip("/")
+    access_key = props.get("access_key", "")
+    secret_key = props.get("secret_key", "")
+    region = props.get("region") or "us-east-1"
+    if not bucket or not path:
+        return _err("Se requiere bucket y ruta del archivo para S3")
+    try:
+        s3 = boto3.client("s3", region_name=region,
+                          aws_access_key_id=access_key,
+                          aws_secret_access_key=secret_key)
+        obj = s3.get_object(Bucket=bucket, Key=path)
+        body = obj["Body"].read()
+        ext = path.rsplit(".", 1)[-1].lower()
+        if ext in ("xlsx", "xls", "xlsm"):
+            df = pd.read_excel(io.BytesIO(body), dtype=str)
+        else:
+            delimiter = props.get("delimiter") or ","
+            has_header = props.get("has_header", "true") != "false"
+            encoding = props.get("encoding") or "UTF-8"
+            df = pd.read_csv(io.BytesIO(body), sep=delimiter,
+                             header=0 if has_header else None,
+                             encoding=encoding, dtype=str)
+        df = df.where(pd.notna(df), None)
+        rows = df.to_dict(orient="records")
+        return {"success": True, "rows": rows, "count": len(rows), "error": None}
+    except Exception as e:
+        return _err(f"Error leyendo S3 s3://{bucket}/{path}: {str(e)}")
+
 
 def _err(msg: str) -> Dict:
     return {"success": False, "rows": [], "count": 0, "error": msg}
