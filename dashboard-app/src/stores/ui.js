@@ -6,10 +6,21 @@ export const useUIStore = defineStore('ui', {
     alerts: [],
     alertsOpen: false,
     userMenuOpen: false,
-    breadcrumbs: []
+    breadcrumbs: [],
+    theme: localStorage.getItem('ui-theme') || 'dark'
   }),
 
   actions: {
+    initTheme() {
+      document.documentElement.setAttribute('data-theme', this.theme)
+    },
+
+    setTheme(t) {
+      this.theme = t
+      localStorage.setItem('ui-theme', t)
+      document.documentElement.setAttribute('data-theme', t)
+    },
+
     toggleSidebar() {
       this.sidebarCollapsed = !this.sidebarCollapsed
     },
