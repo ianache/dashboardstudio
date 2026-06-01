@@ -104,16 +104,16 @@
           <div class="model-new-field" style="position: relative;">
             <label class="model-new-label">Knowledge Space</label>
             <div class="model-new-select" @click="showKnowledgeSpaceDropdown = !showKnowledgeSpaceDropdown">
-              <span class="material-symbols-outlined" style="color: #2563eb; font-size: 20px;">hub</span>
-              <span v-if="selectedKnowledgeSpace" style="color: #0f172a; font-size: 14px;">{{ selectedKnowledgeSpace }}</span>
-              <span v-else style="color: #94a3b8; font-size: 14px;">Seleccionar Knowledge Space...</span>
-              <span class="material-symbols-outlined" style="color: #94a3b8; margin-left: auto; font-size: 20px;">expand_more</span>
+              <span class="material-symbols-outlined icon-primary" style="font-size: 20px;">hub</span>
+              <span v-if="selectedKnowledgeSpace" class="text-main" style="font-size: 14px;">{{ selectedKnowledgeSpace }}</span>
+              <span v-else class="icon-muted" style="font-size: 14px;">Seleccionar Knowledge Space...</span>
+              <span class="material-symbols-outlined icon-muted" style="margin-left: auto; font-size: 20px;">expand_more</span>
             </div>
             
             <!-- Dropdown -->
             <div v-if="showKnowledgeSpaceDropdown" class="model-new-dropdown">
               <div class="model-new-dropdown-search">
-                <span class="material-symbols-outlined" style="color: #94a3b8; font-size: 16px;">search</span>
+                <span class="material-symbols-outlined icon-muted" style="font-size: 16px;">search</span>
                 <input 
                   v-model="knowledgeSpaceSearch" 
                   type="text" 
@@ -121,15 +121,15 @@
                   @click.stop />
               </div>
               <ul class="model-new-dropdown-list">
-                <li 
-                  v-for="space in filteredKnowledgeSpaces" 
+                <li
+                  v-for="space in filteredKnowledgeSpaces"
                   :key="space.id"
                   class="model-new-dropdown-item"
                   :class="{ 'model-new-dropdown-item--selected': selectedKnowledgeSpace === space.name }"
                   @click.stop="selectKnowledgeSpace(space)">
-                  <span class="material-symbols-outlined" style="color: #2563eb; font-size: 18px;">hub</span>
-                  <span style="font-size: 14px; color: #0f172a;">{{ space.name }}</span>
-                  <span v-if="selectedKnowledgeSpace === space.name" class="material-symbols-outlined" style="color: #2563eb; margin-left: auto; font-size: 16px;">check</span>
+                  <span class="material-symbols-outlined icon-primary" style="font-size: 18px;">hub</span>
+                  <span class="text-main" style="font-size: 14px;">{{ space.name }}</span>
+                  <span v-if="selectedKnowledgeSpace === space.name" class="material-symbols-outlined icon-primary" style="margin-left: auto; font-size: 16px;">check</span>
                 </li>
               </ul>
             </div>
@@ -434,7 +434,7 @@ function doDelete() {
 }
 
 .model-new-container {
-  background: white;
+  background: var(--card-bg);
   width: 100%;
   max-width: 512px;
   border-radius: 12px;
@@ -447,8 +447,8 @@ function doDelete() {
 
 .model-new-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: white;
+  border-bottom: 1px solid var(--outline-variant);
+  background: var(--card-bg);
   flex-shrink: 0;
 }
 
@@ -462,14 +462,14 @@ function doDelete() {
 .model-new-title {
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--on-surface);
   margin: 0 0 4px 0;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 .model-new-subtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   margin: 0;
 }
 
@@ -483,14 +483,14 @@ function doDelete() {
   background: transparent;
   border-radius: 50%;
   cursor: pointer;
-  color: #64748b;
+  color: var(--on-surface-variant);
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .model-new-close:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--surface-container);
+  color: var(--on-surface);
 }
 
 .model-new-body {
@@ -507,7 +507,7 @@ function doDelete() {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--on-surface);
   margin-bottom: 6px;
 }
 
@@ -515,10 +515,11 @@ function doDelete() {
 .model-new-textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background: var(--card-bg);
+  color: var(--on-surface);
   outline: none;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -526,7 +527,7 @@ function doDelete() {
 
 .model-new-input::placeholder,
 .model-new-textarea::placeholder {
-  color: #94a3b8;
+  color: var(--on-surface-variant);
 }
 
 .model-new-input:focus,
@@ -545,15 +546,15 @@ function doDelete() {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .model-new-select:hover {
-  border-color: #94a3b8;
+  border-color: var(--outline);
 }
 
 .model-new-dropdown {
@@ -561,8 +562,8 @@ function doDelete() {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 1001;
@@ -574,8 +575,8 @@ function doDelete() {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--outline-variant);
+  background: var(--surface-container);
 }
 
 .model-new-dropdown-search input {
@@ -584,6 +585,7 @@ function doDelete() {
   background: transparent;
   outline: none;
   font-size: 14px;
+  color: var(--on-surface);
   padding: 0;
 }
 
@@ -605,11 +607,11 @@ function doDelete() {
 }
 
 .model-new-dropdown-item:hover {
-  background: #eff6ff;
+  background: var(--surface-container);
 }
 
 .model-new-dropdown-item--selected {
-  background: #eff6ff;
+  background: var(--surface-container);
 }
 
 .model-new-footer {
@@ -618,9 +620,14 @@ function doDelete() {
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: var(--surface-container);
+  border-top: 1px solid var(--outline-variant);
   flex-shrink: 0;
 }
+
+/* Token-aware icon/text helpers */
+.icon-primary { color: var(--primary); }
+.text-main    { color: var(--on-surface); }
+.icon-muted   { color: var(--on-surface-variant); }
 
 </style>

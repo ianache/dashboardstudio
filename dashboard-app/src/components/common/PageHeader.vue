@@ -44,7 +44,7 @@ defineProps({
 .ph-title {
   font-size: 24px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--on-surface);
   margin: 0 0 4px 0;
   line-height: 1.2;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -52,7 +52,7 @@ defineProps({
 
 .ph-desc {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin: 0;
   line-height: 1.5;
 }
