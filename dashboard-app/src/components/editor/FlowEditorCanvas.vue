@@ -80,7 +80,6 @@
     <main
       class="fec-canvas-area"
       ref="canvasAreaRef"
-      @wheel.prevent="onWheel"
       @mousedown="onCanvasMousedown"
       @dragover.prevent="onDragOver"
       @dragleave="isDragOver = false"
@@ -1597,6 +1596,9 @@ function runFlow() {
 onBeforeUnmount(() => {
   if (ws) ws.close()
   window.removeEventListener('keydown', handleKeyDown)
+  if (canvasAreaRef.value) {
+    canvasAreaRef.value.removeEventListener('wheel', onWheel)
+  }
 })
 
 function toggleCat(key) { openCats.value[key] = !openCats.value[key] }
@@ -1682,6 +1684,7 @@ function zoomOut() { setZoom(zoom.value * 0.87) }
 function setZoom(v) { zoom.value = Math.min(2.5, Math.max(0.15, v)) }
 
 function onWheel(e) {
+  e.preventDefault()
   const r = canvasAreaRef.value.getBoundingClientRect()
   const mx = e.clientX - r.left, my = e.clientY - r.top
   const f  = e.deltaY < 0 ? 1.1 : 0.9
@@ -2096,6 +2099,9 @@ onMounted(() => {
     centerView()
   }, 80)
   window.addEventListener('keydown', handleKeyDown)
+  if (canvasAreaRef.value) {
+    canvasAreaRef.value.addEventListener('wheel', onWheel, { passive: false })
+  }
 })
 </script>
 

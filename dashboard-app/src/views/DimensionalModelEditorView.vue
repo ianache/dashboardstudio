@@ -219,7 +219,6 @@
           @mousemove="onNodeDragMove"
           @dragover.prevent="onCanvasDragOver"
           @drop="onCanvasDrop"
-          @wheel.ctrl.prevent="onCanvasWheel"
         >
           <!-- Scaler: drives scrollbar dimensions at current zoom level -->
           <div class="canvas-scaler" :style="{ width: canvasScalerSize.w + 'px', height: canvasScalerSize.h + 'px' }">
@@ -1560,7 +1559,10 @@ function zoomOut()   { zoomLevel.value = Math.max(0.25, Math.round((zoomLevel.va
 function zoomReset() { zoomLevel.value = 1.0 }
 
 function onCanvasWheel(e) {
-  e.deltaY < 0 ? zoomIn() : zoomOut()
+  if (e.ctrlKey) {
+    e.preventDefault()
+    e.deltaY < 0 ? zoomIn() : zoomOut()
+  }
 }
 
 function centerDiagram() {
@@ -1663,11 +1665,17 @@ onMounted(() => {
       toolbarPos.value = { x: 16, y: canvasColumnEl.value.clientHeight - 80 }
     }
   })
+  if (canvasEl.value) {
+    canvasEl.value.addEventListener('wheel', onCanvasWheel, { passive: false })
+  }
 })
 onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onGlobalMouseMove)
   document.removeEventListener('mouseup', onGlobalMouseUp)
   document.removeEventListener('mousemove', onToolbarDragMove)
+  if (canvasEl.value) {
+    canvasEl.value.removeEventListener('wheel', onCanvasWheel)
+  }
 })
 
 watch(() => model.value?.name, name => { if (name) uiStore.setBreadcrumbs(['Modelos', name]) }, { immediate: true })

@@ -85,8 +85,14 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
             const trimmed = line.trim()
             if (!trimmed) continue
 
+            let cleanLine = trimmed
+            if (cleanLine.startsWith('data:')) {
+              cleanLine = cleanLine.substring(5).trim()
+            }
+            if (!cleanLine) continue
+
             try {
-              const event = JSON.parse(trimmed)
+              const event = JSON.parse(cleanLine)
               this._processStreamEvent(msgIndex, event)
             } catch {
               // Non-JSON line — skip silently
@@ -95,10 +101,17 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
         }
 
         // Process any remaining buffer content
-        if (buffer.trim()) {
+        const remaining = buffer.trim()
+        if (remaining) {
           try {
-            const event = JSON.parse(buffer.trim())
-            this._processStreamEvent(msgIndex, event)
+            let cleanLine = remaining
+            if (cleanLine.startsWith('data:')) {
+              cleanLine = cleanLine.substring(5).trim()
+            }
+            if (cleanLine) {
+              const event = JSON.parse(cleanLine)
+              this._processStreamEvent(msgIndex, event)
+            }
           } catch {
             // Ignore
           }
@@ -122,6 +135,11 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
       if (!msg) return
 
       switch (event.type) {
+        case 'error':
+          msg.error = true
+          msg.content = event.message || 'Error al obtener respuesta.'
+          msg.streaming = false
+          break
         case 'thought':
           msg.thought = (msg.thought || '') + (event.content || '')
           break

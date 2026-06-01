@@ -39,6 +39,7 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
     screen_context: dict | None = None
+    context: dict | None = None
 
 
 @app.get("/health")
@@ -57,15 +58,11 @@ async def chat(request: ChatRequest):
         session_id=session_id,
     )
 
-    # Inject screen context if provided
-    if request.screen_context:
-        await session_service.append_message(
-            app_name=APP_NAME,
-            user_id="default",
-            session_id=session_id,
-            role="user",
-            text=f"[CONTEXT] Visible data: {json.dumps(request.screen_context)}",
-        )
+    # Inject screen context if provided by prepending to the user prompt
+    prompt = request.message
+    screen_ctx = request.context or request.screen_context
+    if screen_ctx:
+        prompt = f"[CONTEXT] Visible data: {json.dumps(screen_ctx)}\n\nUser request: {prompt}"
 
     run_config = RunConfig(streaming_mode=StreamingMode.SSE)
     try:
@@ -74,7 +71,7 @@ async def chat(request: ChatRequest):
             session_id=session_id,
             new_message=types.Content(
                 role="user",
-                parts=[types.Part(text=request.message)],
+                parts=[types.Part(text=prompt)],
             ),
             run_config=run_config,
         ):
@@ -83,7 +80,7 @@ async def chat(request: ChatRequest):
                 for part in event.content.parts:
                     if hasattr(part, "text") and part.text:
                         yield ServerSentEvent(
-                            data=json.dumps({"type": "token", "text": part.text})
+                            data={"type": "answer", "content": part.text}
                         )
 
             # Emit done event on final response with usage metadata
@@ -97,11 +94,14 @@ async def chat(request: ChatRequest):
                         event.usage_metadata, "candidates_token_count", 0
                     ) or 0
                 yield ServerSentEvent(
-                    data=json.dumps({"type": "done", "usage": usage})
+                    data={"type": "usage", "data": usage}
+                )
+                yield ServerSentEvent(
+                    data={"type": "done"}
                 )
 
     except Exception as e:
         # Inline error — do not disconnect with HTTP 500
         yield ServerSentEvent(
-            data=json.dumps({"type": "error", "message": str(e)})
+            data={"type": "error", "message": str(e)}
         )

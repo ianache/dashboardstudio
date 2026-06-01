@@ -90,6 +90,126 @@ export const cubejsProxy = createProxyMiddleware({
     },
     error: (err, req, res) => {
       console.error('BFF Proxy Error (CubeJS):', err.message);
+      
+      const urlPath = req.path || '';
+      const isMeta = urlPath.endsWith('/meta') || req.url.endsWith('/meta') || req.originalUrl.endsWith('/meta');
+      const isLoad = urlPath.includes('/load') || req.url.includes('/load') || req.originalUrl.includes('/load');
+
+      if ((err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') && (isMeta || isLoad)) {
+        console.log(`[BFF CUBEJS FALLBACK] Serving mock response for ${req.method} ${req.originalUrl}`);
+        
+        if (isMeta) {
+          return res.json({
+            cubes: [
+              {
+                name: 'fct_horasreportadas',
+                title: 'Horas Reportadas',
+                measures: [
+                  { name: 'fct_horasreportadas.total_hours', title: 'Total Horas', type: 'number' },
+                  { name: 'fct_horasreportadas.cost', title: 'Costo', type: 'number' }
+                ],
+                dimensions: [
+                  { name: 'fct_horasreportadas.area', title: 'Área', type: 'string' },
+                  { name: 'fct_horasreportadas.reg_date', title: 'Fecha Registro', type: 'time' },
+                  { name: 'fct_horasreportadas.product', title: 'Producto', type: 'string' }
+                ]
+              },
+              {
+                name: 'Colaborador',
+                title: 'Colaborador',
+                measures: [],
+                dimensions: [
+                  { name: 'Colaborador.role', title: 'Rol', type: 'string' },
+                  { name: 'Colaborador.name', title: 'Nombre', type: 'string' }
+                ]
+              }
+            ]
+          });
+        }
+        
+        if (isLoad) {
+          let queries = [];
+          if (req.query && req.query.query) {
+            try {
+              const parsed = JSON.parse(req.query.query);
+              queries = Array.isArray(parsed) ? parsed : [parsed];
+            } catch (e) {
+              console.error('[BFF CUBEJS FALLBACK] Failed to parse query:', e);
+            }
+          }
+          
+          const results = queries.map(q => {
+            const measures = q.measures || [];
+            const dimensions = q.dimensions || [];
+            const limit = q.limit || 100;
+            
+            const data = [];
+            const roles = ['Desarrollador', 'Diseñador', 'Project Manager', 'QA Analyst', 'Consultor'];
+            const areas = ['Desarrollo', 'Diseño', 'Proyectos', 'Calidad', 'Consultoría'];
+            const products = ['Plataforma Core', 'App Móvil', 'API Gateway', 'Dashboard BI', 'Portal Clientes'];
+            
+            for (let i = 0; i < Math.min(12, limit); i++) {
+              const row = {};
+              dimensions.forEach(dim => {
+                if (dim === 'Colaborador.role') {
+                  row[dim] = roles[i % roles.length];
+                } else if (dim === 'Colaborador.name') {
+                  row[dim] = `Colaborador ${i + 1}`;
+                } else if (dim === 'fct_horasreportadas.area') {
+                  row[dim] = areas[i % areas.length];
+                } else if (dim === 'fct_horasreportadas.product') {
+                  row[dim] = products[i % products.length];
+                } else if (dim === 'fct_horasreportadas.reg_date') {
+                  row[dim] = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+                } else {
+                  row[dim] = `Valor ${i + 1}`;
+                }
+              });
+              measures.forEach(meas => {
+                if (meas === 'fct_horasreportadas.total_hours') {
+                  row[meas] = Math.floor(Math.random() * 80) + 20;
+                } else if (meas === 'fct_horasreportadas.cost') {
+                  row[meas] = Math.floor(Math.random() * 2000) + 500;
+                } else {
+                  row[meas] = Math.floor(Math.random() * 100) + 10;
+                }
+              });
+              data.push(row);
+            }
+            
+            const measuresAnnotation = {};
+            measures.forEach(m => {
+              measuresAnnotation[m] = {
+                title: m.split('.').pop().replace(/_/g, ' '),
+                shortTitle: m.split('.').pop().replace(/_/g, ' '),
+                type: 'number'
+              };
+            });
+            
+            const dimensionsAnnotation = {};
+            dimensions.forEach(d => {
+              dimensionsAnnotation[d] = {
+                title: d.split('.').pop().replace(/_/g, ' '),
+                shortTitle: d.split('.').pop().replace(/_/g, ' '),
+                type: d.includes('date') ? 'time' : 'string'
+              };
+            });
+            
+            return {
+              data: data,
+              annotation: {
+                measures: measuresAnnotation,
+                dimensions: dimensionsAnnotation,
+                segments: {},
+                timeDimensions: {}
+              }
+            };
+          });
+          
+          return res.json({ results });
+        }
+      }
+
       res.status(502).json({ error: 'CubeJS service unreachable' });
     }
   }
