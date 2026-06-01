@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
-        <h1 class="font-h1 text-h1 text-slate-900" style="">Tipos de Datos</h1>
-        <p class="font-body-md text-slate-500 max-w-2xl" style="">Define los tipos SQL reutilizables para
+        <h1 class="font-h1 text-h1 page-title">Tipos de Datos</h1>
+        <p class="font-body-md page-subtitle max-w-2xl">Define los tipos SQL reutilizables para
           los campos de tus modelos dimensionales.</p>
       </div>
       <div class="flex items-center gap-3">
@@ -30,33 +30,32 @@
 
     <!-- Table Container -->
     <div
-      class="max-w-[1600px] mx-auto bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] overflow-hidden">
+      class="max-w-[1600px] mx-auto dt-table-container rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.05)] overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-50/50 border-b border-slate-200">
-              <th class="px-6 py-4 font-label-md text-slate-500 uppercase tracking-wider" style="">
+            <tr class="dt-thead-row border-b">
+              <th class="px-6 py-4 font-label-md dt-th uppercase tracking-wider">
                 Nombre</th>
-              <th class="px-6 py-4 font-label-md text-slate-500 uppercase tracking-wider" style="">
+              <th class="px-6 py-4 font-label-md dt-th uppercase tracking-wider">
                 Tipo Base SQL</th>
-              <th class="px-6 py-4 font-label-md text-slate-500 uppercase tracking-wider" style="">
+              <th class="px-6 py-4 font-label-md dt-th uppercase tracking-wider">
                 Tamaño / Precisión</th>
-              <th class="px-6 py-4 font-label-md text-slate-500 uppercase tracking-wider" style="">SQL
+              <th class="px-6 py-4 font-label-md dt-th uppercase tracking-wider">SQL
                 Completo</th>
-              <th class="px-6 py-4 font-label-md text-slate-500 uppercase tracking-wider" style="">
+              <th class="px-6 py-4 font-label-md dt-th uppercase tracking-wider">
                 Descripción</th>
-              <th class="px-6 py-4 font-label-md text-slate-500 uppercase tracking-wider text-right"
-                style="">Acciones</th>
+              <th class="px-6 py-4 font-label-md dt-th uppercase tracking-wider text-right">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <!-- New row form -->
             <tr v-if="adding" class="bg-blue-50/50">
               <td class="px-6 py-4">
-                <input v-model="form.name" type="text" class="form-input w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Código" autofocus />
+                <input v-model="form.name" type="text" class="form-input w-full px-3 py-2 text-sm dt-inline-input rounded-md" placeholder="Ej: Código" autofocus />
               </td>
               <td class="px-6 py-4">
-                <select v-model="form.baseType" class="form-select w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" @change="onBaseTypeChange(form)">
+                <select v-model="form.baseType" class="form-select w-full px-3 py-2 text-sm dt-inline-input rounded-md" @change="onBaseTypeChange(form)">
                   <option v-for="b in BASE_TYPES" :key="b.value" :value="b.value">{{ b.value }}</option>
                 </select>
               </td>
@@ -66,25 +65,25 @@
                     v-if="baseMeta(form.baseType)?.hasSize"
                     v-model.number="form.size"
                     type="number" min="1" max="65535"
-                    class="form-input w-20 px-2 py-1 text-sm border border-slate-300 rounded-md"
+                    class="form-input w-20 px-2 py-1 text-sm dt-inline-input rounded-md"
                     placeholder="Tam."
                   />
-                  <span v-if="baseMeta(form.baseType)?.hasPrecision" class="text-slate-400 font-medium">,</span>
+                  <span v-if="baseMeta(form.baseType)?.hasPrecision" class="page-subtitle font-medium">,</span>
                   <input
                     v-if="baseMeta(form.baseType)?.hasPrecision"
                     v-model.number="form.precision"
                     type="number" min="0" max="30"
-                    class="form-input w-20 px-2 py-1 text-sm border border-slate-300 rounded-md"
+                    class="form-input w-20 px-2 py-1 text-sm dt-inline-input rounded-md"
                     placeholder="Prec."
                   />
-                  <span v-if="!baseMeta(form.baseType)?.hasSize" class="text-slate-400">—</span>
+                  <span v-if="!baseMeta(form.baseType)?.hasSize" class="page-subtitle">—</span>
                 </div>
               </td>
               <td class="px-6 py-4">
                 <span class="inline-block px-2 py-1 text-xs font-mono font-medium bg-emerald-50 text-emerald-700 rounded">{{ previewSql(form) }}</span>
               </td>
               <td class="px-6 py-4">
-                <input v-model="form.description" type="text" class="form-input w-full px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Descripción opcional" />
+                <input v-model="form.description" type="text" class="form-input w-full px-3 py-2 text-sm dt-inline-input rounded-md" placeholder="Descripción opcional" />
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
@@ -98,19 +97,19 @@
             <tr v-for="dt in dtStore.allTypes" :key="dt.id" :class="{ 'bg-blue-50/30': editingId === dt.id }" class="hover:bg-blue-50/30 transition-colors group">
               <!-- View mode -->
               <template v-if="editingId !== dt.id">
-                <td class="px-6 py-4 font-semibold text-slate-900">{{ dt.name }}</td>
+                <td class="px-6 py-4 font-semibold page-title">{{ dt.name }}</td>
                 <td class="px-6 py-4">
                   <span class="inline-block px-2 py-1 text-xs font-mono font-medium bg-blue-50 text-blue-600 rounded">{{ dt.baseType }}</span>
                 </td>
-                <td class="px-6 py-4 text-slate-600 font-medium">{{ sizeLabel(dt) }}</td>
+                <td class="px-6 py-4 page-subtitle font-medium">{{ sizeLabel(dt) }}</td>
                 <td class="px-6 py-4">
                   <span class="inline-block px-2 py-1 text-xs font-mono font-medium bg-emerald-50 text-emerald-700 rounded">{{ dtStore.sqlOf(dt.id) }}</span>
                 </td>
-                <td class="px-6 py-4 text-slate-500 text-sm">{{ dt.description || '—' }}</td>
+                <td class="px-6 py-4 page-subtitle text-sm">{{ dt.description || '—' }}</td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                      class="p-1.5 page-subtitle hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
                       @click="startEditRow(dt)"
                       title="Editar">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -119,7 +118,7 @@
                       </svg>
                     </button>
                     <button
-                      class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                      class="p-1.5 page-subtitle hover:text-red-600 hover:bg-red-50 rounded transition-all"
                       @click="confirmDelete(dt)"
                       title="Eliminar">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -135,10 +134,10 @@
               <!-- Edit mode -->
               <template v-else>
                 <td class="px-6 py-4">
-                  <input v-model="form.name" type="text" class="form-input w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <input v-model="form.name" type="text" class="form-input w-full px-3 py-2 text-sm dt-inline-input rounded-md" />
                 </td>
                 <td class="px-6 py-4">
-                  <select v-model="form.baseType" class="form-select w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" @change="onBaseTypeChange(form)">
+                  <select v-model="form.baseType" class="form-select w-full px-3 py-2 text-sm dt-inline-input rounded-md" @change="onBaseTypeChange(form)">
                     <option v-for="b in BASE_TYPES" :key="b.value" :value="b.value">{{ b.value }}</option>
                   </select>
                 </td>
@@ -148,25 +147,25 @@
                       v-if="baseMeta(form.baseType)?.hasSize"
                       v-model.number="form.size"
                       type="number" min="1" max="65535"
-                      class="form-input w-20 px-2 py-1 text-sm border border-slate-300 rounded-md"
+                      class="form-input w-20 px-2 py-1 text-sm dt-inline-input rounded-md"
                       placeholder="Tam."
                     />
-                    <span v-if="baseMeta(form.baseType)?.hasPrecision" class="text-slate-400 font-medium">,</span>
+                    <span v-if="baseMeta(form.baseType)?.hasPrecision" class="page-subtitle font-medium">,</span>
                     <input
                       v-if="baseMeta(form.baseType)?.hasPrecision"
                       v-model.number="form.precision"
                       type="number" min="0" max="30"
-                      class="form-input w-20 px-2 py-1 text-sm border border-slate-300 rounded-md"
+                      class="form-input w-20 px-2 py-1 text-sm dt-inline-input rounded-md"
                       placeholder="Prec."
                     />
-                    <span v-if="!baseMeta(form.baseType)?.hasSize" class="text-slate-400">—</span>
+                    <span v-if="!baseMeta(form.baseType)?.hasSize" class="page-subtitle">—</span>
                   </div>
                 </td>
                 <td class="px-6 py-4">
                   <span class="inline-block px-2 py-1 text-xs font-mono font-medium bg-emerald-50 text-emerald-700 rounded">{{ previewSql(form) }}</span>
                 </td>
                 <td class="px-6 py-4">
-                  <input v-model="form.description" type="text" class="form-input w-full px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Descripción" />
+                  <input v-model="form.description" type="text" class="form-input w-full px-3 py-2 text-sm dt-inline-input rounded-md" placeholder="Descripción" />
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
@@ -178,7 +177,7 @@
             </tr>
 
             <tr v-if="!dtStore.allTypes.length && !adding">
-              <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+              <td colspan="6" class="px-6 py-12 text-center page-subtitle">
                 Sin tipos definidos. Haz clic en "Nuevo" para añadir.
               </td>
             </tr>
@@ -187,40 +186,40 @@
       </div>
 
       <!-- Footer/Pagination -->
-      <div v-if="dtStore.allTypes.length > 0" class="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex items-center justify-between">
-        <span class="text-sm text-slate-500 font-medium">{{ dtStore.allTypes.length }} tipo(s) definido(s)</span>
+      <div v-if="dtStore.allTypes.length > 0" class="px-6 py-4 dt-footer border-t flex items-center justify-between">
+        <span class="text-sm page-subtitle font-medium">{{ dtStore.allTypes.length }} tipo(s) definido(s)</span>
       </div>
     </div>
 
     <!-- Bento Info Section -->
     <div class="max-w-[1600px] mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col gap-4">
+      <div class="p-6 dt-bento-card rounded-xl shadow-sm flex flex-col gap-4">
         <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
-          <span class="material-symbols-outlined text-indigo-600" style="">auto_awesome</span>
+          <span class="material-symbols-outlined text-indigo-600">auto_awesome</span>
         </div>
         <div>
-          <h4 class="font-bold text-slate-900" style="">Validación Automática</h4>
-          <p class="text-sm text-slate-500 mt-1" style="">Sugerencias basadas en el motor SQL seleccionado
+          <h4 class="font-bold page-title">Validación Automática</h4>
+          <p class="text-sm page-subtitle mt-1">Sugerencias basadas en el motor SQL seleccionado
             para prevenir errores de casting.</p>
         </div>
       </div>
-      <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col gap-4">
+      <div class="p-6 dt-bento-card rounded-xl shadow-sm flex flex-col gap-4">
         <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
-          <span class="material-symbols-outlined text-emerald-600" style="">terminal</span>
+          <span class="material-symbols-outlined text-emerald-600">terminal</span>
         </div>
         <div>
-          <h4 class="font-bold text-slate-900" style="">Compatibilidad ANSI</h4>
-          <p class="text-sm text-slate-500 mt-1" style="">Tipos configurados para ser portables entre
+          <h4 class="font-bold page-title">Compatibilidad ANSI</h4>
+          <p class="text-sm page-subtitle mt-1">Tipos configurados para ser portables entre
             Postgres, Snowflake y BigQuery.</p>
         </div>
       </div>
-      <div class="p-6 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col gap-4">
+      <div class="p-6 dt-bento-card rounded-xl shadow-sm flex flex-col gap-4">
         <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-          <span class="material-symbols-outlined text-orange-600" style="">security</span>
+          <span class="material-symbols-outlined text-orange-600">security</span>
         </div>
         <div>
-          <h4 class="font-bold text-slate-900" style="">Control de Precisión</h4>
-          <p class="text-sm text-slate-500 mt-1" style="">Definición estricta de escala para asegurar
+          <h4 class="font-bold page-title">Control de Precisión</h4>
+          <p class="text-sm page-subtitle mt-1">Definición estricta de escala para asegurar
             integridad en reportes financieros.</p>
         </div>
       </div>
@@ -228,15 +227,15 @@
 
     <!-- Delete confirm modal -->
     <div v-if="deleteTarget" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="deleteTarget = null">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Eliminar tipo de dato</h3>
+      <div class="dt-modal-simple rounded-xl shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 dt-modal-simple-border border-b">
+          <h3 class="text-base font-semibold page-title">Eliminar tipo de dato</h3>
         </div>
         <div class="px-6 py-5 flex flex-col gap-3">
-          <p class="text-sm text-slate-700">¿Eliminar <strong>{{ deleteTarget.name }}</strong> (<code class="px-1.5 py-0.5 text-xs font-mono bg-emerald-50 text-emerald-700 rounded">{{ dtStore.sqlOf(deleteTarget.id) }}</code>)?</p>
+          <p class="text-sm page-title">¿Eliminar <strong>{{ deleteTarget.name }}</strong> (<code class="px-1.5 py-0.5 text-xs font-mono bg-emerald-50 text-emerald-700 rounded">{{ dtStore.sqlOf(deleteTarget.id) }}</code>)?</p>
           <p class="text-xs text-amber-700 bg-amber-50 p-3 rounded-lg">Los campos que usen este tipo conservarán su referencia pero no se podrán resolver.</p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 border-t dt-modal-simple-footer">
           <button class="btn btn-ghost" @click="deleteTarget = null">Cancelar</button>
           <button class="btn btn-danger" @click="doDelete">Eliminar</button>
         </div>
@@ -245,10 +244,10 @@
 
     <!-- Import preview modal -->
     <div v-if="importPreview" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="importPreview = null">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[480px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Importar tipos de datos</h3>
-          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="importPreview = null">
+      <div class="dt-modal-simple rounded-xl shadow-xl w-[480px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b dt-modal-simple-border">
+          <h3 class="text-base font-semibold page-title">Importar tipos de datos</h3>
+          <button class="p-1 page-subtitle hover:page-title rounded" @click="importPreview = null">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -260,7 +259,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               {{ importPreview.toAdd.length }} tipo(s) nuevos a agregar
             </p>
-            <ul class="pl-5 text-sm text-slate-700 space-y-1">
+            <ul class="pl-5 text-sm page-title space-y-1">
               <li v-for="dt in importPreview.toAdd" :key="dt.name" class="flex items-center gap-2">
                 <strong>{{ dt.name }}</strong> <code class="px-1.5 py-0.5 text-xs font-mono bg-emerald-50 text-emerald-700 rounded">{{ previewSql(dt) }}</code>
               </li>
@@ -271,7 +270,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.59"/></svg>
               {{ importPreview.toReplace.length }} tipo(s) a reemplazar (mismo nombre)
             </p>
-            <ul class="pl-5 text-sm text-slate-700 space-y-1">
+            <ul class="pl-5 text-sm page-title space-y-1">
               <li v-for="dt in importPreview.toReplace" :key="dt.name" class="flex items-center gap-2">
                 <strong>{{ dt.name }}</strong> <code class="px-1.5 py-0.5 text-xs font-mono bg-emerald-50 text-emerald-700 rounded">{{ previewSql(dt) }}</code>
               </li>
@@ -281,7 +280,7 @@
             El archivo no contiene tipos de datos.
           </p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 border-t dt-modal-simple-footer">
           <button class="btn btn-ghost" @click="importPreview = null">Cancelar</button>
           <button
             class="btn btn-primary"
@@ -294,14 +293,14 @@
 
     <!-- Reset confirm modal -->
     <div v-if="showResetConfirm" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="showResetConfirm = false">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Restaurar tipos predeterminados</h3>
+      <div class="dt-modal-simple rounded-xl shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b dt-modal-simple-border">
+          <h3 class="text-base font-semibold page-title">Restaurar tipos predeterminados</h3>
         </div>
         <div class="px-6 py-5">
-          <p class="text-sm text-slate-700">Se reemplazarán todos los tipos actuales por los predeterminados. ¿Continuar?</p>
+          <p class="text-sm page-title">Se reemplazarán todos los tipos actuales por los predeterminados. ¿Continuar?</p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 border-t dt-modal-simple-footer">
           <button class="btn btn-ghost" @click="showResetConfirm = false">Cancelar</button>
           <button class="btn btn-danger" @click="doReset">Restaurar</button>
         </div>
@@ -557,4 +556,18 @@ function doReset() {
 tr.group:hover .opacity-0 {
   opacity: 1;
 }
+
+/* Token-aware helpers */
+.page-title    { color: var(--on-surface); }
+.page-subtitle { color: var(--on-surface-variant); }
+.dt-table-container { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.dt-thead-row  { background: var(--surface-container); }
+.dt-th         { color: var(--on-surface-variant); }
+.dt-footer     { background: var(--surface-container); border-color: var(--outline-variant); }
+.dt-bento-card { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.dt-modal-simple { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.dt-modal-simple-border { border-color: var(--outline-variant); }
+.dt-modal-simple-footer { background: var(--surface-container); border-color: var(--outline-variant); }
+.dt-inline-input { border: 1px solid var(--outline-variant); background: var(--card-bg); color: var(--on-surface); }
+.dt-inline-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); outline: none; }
 </style>

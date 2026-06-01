@@ -5,7 +5,7 @@
       <div class="space-y-1">
         <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Data Integration</span>
         <h1 class="tc-h1">Catálogo de Herramientas</h1>
-        <p class="tc-sub text-slate-500 max-w-2xl">Define y gestiona las herramientas disponibles en el editor visual. Cada herramienta especifica a qué tipos de diagrama aplica.</p>
+        <p class="tc-sub page-subtitle max-w-2xl">Define y gestiona las herramientas disponibles en el editor visual. Cada herramienta especifica a qué tipos de diagrama aplica.</p>
       </div>
       <button class="btn btn-primary" @click="openNew">
         <span class="msym">add</span>Nueva Herramienta
@@ -32,7 +32,7 @@
         </select>
         <span class="msym tc-sel-arr">expand_more</span>
       </div>
-      <span class="text-sm text-slate-400 ml-auto">{{ filteredTools.length }} herramienta(s)</span>
+      <span class="text-sm page-subtitle ml-auto">{{ filteredTools.length }} herramienta(s)</span>
     </div>
 
     <!-- Table -->
@@ -157,7 +157,7 @@
                 <span class="tc-check-id">{{ dt.id }}</span>
               </div>
             </label>
-            <p v-if="catalog.diagramTypes.length === 0" class="text-sm text-slate-400">No hay tipos de diagrama definidos.</p>
+            <p v-if="catalog.diagramTypes.length === 0" class="text-sm page-subtitle">No hay tipos de diagrama definidos.</p>
           </div>
 
           <div class="tc-section-title" style="margin-top:16px">
@@ -179,14 +179,14 @@
 
     <!-- Confirm delete -->
     <div v-if="deleteTarget" class="tc-overlay" @click.self="deleteTarget = null">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Eliminar Herramienta</h3>
+      <div class="tc-confirm-modal rounded-xl shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b tc-confirm-border">
+          <h3 class="text-base font-semibold tc-confirm-title">Eliminar Herramienta</h3>
         </div>
         <div class="px-6 py-5">
-          <p class="text-sm text-slate-700">¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
+          <p class="text-sm tc-confirm-title">¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 border-t tc-confirm-footer">
           <button class="btn btn-ghost" @click="deleteTarget = null">Cancelar</button>
           <button class="btn btn-danger" @click="doDelete">Eliminar</button>
         </div>
@@ -311,67 +311,73 @@ async function doDelete() {
   font-size: 20px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
   white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased;
 }
-.tc-h1  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 36px; font-weight: 700; color: #0f172a; line-height: 1.2; letter-spacing: -0.02em; }
+.tc-h1  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 36px; font-weight: 700; color: var(--on-surface); line-height: 1.2; letter-spacing: -0.02em; }
 .tc-sub { font-family: 'Inter', sans-serif; font-size: 14px; }
+.page-subtitle { color: var(--on-surface-variant); }
 
 /* Filters */
 .tc-search-wrap { position: relative; display: flex; align-items: center; }
 .tc-search-ico  { position: absolute; left: 10px; color: #94a3b8; font-size: 17px; pointer-events: none; }
-.tc-search-in   { padding: 7px 12px 7px 34px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; width: 220px; transition: all 0.15s; }
-.tc-search-in:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.tc-search-in   { padding: 7px 12px 7px 34px; border: 1px solid var(--outline-variant); border-radius: 8px; font-size: 13px; outline: none; width: 220px; background: var(--card-bg); color: var(--on-surface); transition: all 0.15s; }
+.tc-search-in:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 .tc-sel-wrap { position: relative; display: flex; align-items: center; }
-.tc-filter-sel  { padding: 7px 30px 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; appearance: none; background: #fff; cursor: pointer; }
-.tc-filter-sel:focus { border-color: #2563eb; }
-.tc-sel-arr { position: absolute; right: 7px; color: #64748b; font-size: 17px; pointer-events: none; }
+.tc-filter-sel  { padding: 7px 30px 7px 12px; border: 1px solid var(--outline-variant); border-radius: 8px; font-size: 13px; outline: none; appearance: none; background: var(--card-bg); color: var(--on-surface); cursor: pointer; }
+.tc-filter-sel:focus { border-color: var(--primary); }
+.tc-sel-arr { position: absolute; right: 7px; color: var(--on-surface-variant); font-size: 17px; pointer-events: none; }
 
 /* Table */
-.tc-table-wrap { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(15,23,42,0.06); }
+.tc-table-wrap { background: var(--card-bg); border: 1px solid var(--outline-variant); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(15,23,42,0.06); }
 .tc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tc-table th { padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-.tc-table td { padding: 13px 16px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+.tc-table th { padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.06em; background: var(--surface-container); border-bottom: 1px solid var(--outline-variant); }
+.tc-table td { padding: 13px 16px; vertical-align: middle; border-bottom: 1px solid var(--outline-variant); }
 .tc-row:last-child td { border-bottom: none; }
-.tc-row:hover td { background: #f8fafc; }
+.tc-row:hover td { background: var(--surface-container); }
 .tc-tool-cell { display: flex; align-items: center; gap: 10px; }
 .tc-tool-ico  { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.tc-tool-name { font-weight: 600; color: #0f172a; }
-.tc-tool-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+.tc-tool-name { font-weight: 600; color: var(--on-surface); }
+.tc-tool-sub  { font-size: 11px; color: var(--on-surface-variant); margin-top: 1px; }
 .tc-cat-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
 .tc-diagram-pills { display: flex; flex-wrap: wrap; gap: 4px; }
-.tc-dt-pill { font-size: 10px; font-weight: 500; padding: 2px 8px; background: #f1f5f9; color: #475569; border-radius: 4px; white-space: nowrap; }
-.tc-none { font-size: 12px; color: #cbd5e1; }
-.tc-prop-count { font-size: 12px; color: #64748b; }
+.tc-dt-pill { font-size: 10px; font-weight: 500; padding: 2px 8px; background: var(--surface-container); color: var(--on-surface-variant); border-radius: 4px; white-space: nowrap; }
+.tc-none { font-size: 12px; color: var(--on-surface-variant); }
+.tc-prop-count { font-size: 12px; color: var(--on-surface-variant); }
 .tc-row-actions { display: flex; align-items: center; gap: 4px; }
-.tc-action { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: #64748b; transition: all 0.15s; }
+.tc-action { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: var(--on-surface-variant); transition: all 0.15s; }
 .tc-action:hover { color: #2563eb; background: #eff6ff; }
 .tc-action--danger:hover { color: #dc2626; background: #fef2f2; }
-.tc-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 0; font-size: 13px; color: #94a3b8; }
+.tc-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 0; font-size: 13px; color: var(--on-surface-variant); }
 
 /* Modal */
 .tc-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.55); padding: 16px; }
-.tc-modal { background: #fff; width: 100%; max-width: 620px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: calc(100vh - 32px); overflow: hidden; }
-.tc-modal-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
-.tc-modal-title { font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; }
-.tc-modal-sub { font-size: 13px; color: #64748b; margin-top: 2px; }
-.tc-close-btn { width: 30px; height: 30px; border: none; background: transparent; border-radius: 50%; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
-.tc-close-btn:hover { background: #f1f5f9; }
+.tc-modal { background: var(--card-bg); width: 100%; max-width: 620px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: calc(100vh - 32px); overflow: hidden; }
+.tc-modal-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--outline-variant); flex-shrink: 0; }
+.tc-modal-title { font-size: 18px; font-weight: 700; color: var(--on-surface); font-family: 'Plus Jakarta Sans', sans-serif; }
+.tc-modal-sub { font-size: 13px; color: var(--on-surface-variant); margin-top: 2px; }
+.tc-close-btn { width: 30px; height: 30px; border: none; background: transparent; border-radius: 50%; cursor: pointer; color: var(--on-surface-variant); display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.tc-close-btn:hover { background: var(--surface-container); }
 .tc-modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
-.tc-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; flex-shrink: 0; }
-.tc-section-title { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; display: flex; align-items: baseline; gap: 8px; }
-.tc-hint { font-size: 10px; font-weight: 400; color: #94a3b8; text-transform: none; letter-spacing: 0; }
+.tc-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 24px; background: var(--surface-container); border-top: 1px solid var(--outline-variant); flex-shrink: 0; }
+.tc-section-title { font-size: 11px; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; display: flex; align-items: baseline; gap: 8px; }
+.tc-hint { font-size: 10px; font-weight: 400; color: var(--on-surface-variant); text-transform: none; letter-spacing: 0; }
 .tc-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .tc-field { margin-bottom: 12px; position: relative; }
-.tc-label { display: block; font-size: 12px; font-weight: 500; color: #334155; margin-bottom: 5px; }
-.tc-input { width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff; outline: none; transition: all 0.15s; font-family: inherit; }
-.tc-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-.tc-input:disabled { background: #f8fafc; color: #94a3b8; }
+.tc-label { display: block; font-size: 12px; font-weight: 500; color: var(--on-surface); margin-bottom: 5px; }
+.tc-input { width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--outline-variant); border-radius: 8px; font-size: 13px; background: var(--card-bg); color: var(--on-surface); outline: none; transition: all 0.15s; font-family: inherit; }
+.tc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.tc-input:disabled { background: var(--surface-container); color: var(--on-surface-variant); }
 .tc-sel-inp { padding-right: 28px; appearance: none; cursor: pointer; }
 .tc-json-ta { font-family: 'Fira Code', 'Courier New', monospace; font-size: 12px; resize: vertical; line-height: 1.5; }
 .tc-json-err { font-size: 11px; color: #dc2626; margin-top: 4px; }
 .tc-dt-checks { display: flex; flex-direction: column; gap: 8px; }
-.tc-check-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: background 0.12s; }
-.tc-check-item:hover { background: #f8fafc; }
-.tc-checkbox { width: 16px; height: 16px; accent-color: #2563eb; flex-shrink: 0; cursor: pointer; }
+.tc-check-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--outline-variant); border-radius: 8px; cursor: pointer; transition: background 0.12s; }
+.tc-check-item:hover { background: var(--surface-container); }
+.tc-checkbox { width: 16px; height: 16px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
 .tc-check-ico { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.tc-check-name { display: block; font-size: 13px; font-weight: 500; color: #1e293b; }
-.tc-check-id   { display: block; font-size: 10px; color: #94a3b8; }
+.tc-check-name { display: block; font-size: 13px; font-weight: 500; color: var(--on-surface); }
+.tc-check-id   { display: block; font-size: 10px; color: var(--on-surface-variant); }
+/* Confirm modal token helpers */
+.tc-confirm-modal  { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.tc-confirm-border { border-color: var(--outline-variant); }
+.tc-confirm-title  { color: var(--on-surface); }
+.tc-confirm-footer { background: var(--surface-container); border-color: var(--outline-variant); }
 </style>
