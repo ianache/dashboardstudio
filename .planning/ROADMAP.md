@@ -212,6 +212,16 @@ Plans:
 Plans:
 - [ ] 47-01-PLAN.md — CSS light theme vars + uiStore theme state + SideMenu toggle icons
 
+### Phase 48: Theme Alignment — fondos y colores de texto del menú lateral y páginas según System Design (light/dark)
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 47
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 48 to break down)
+
 ---
 
 *For detailed milestone history, see .planning/milestones/*
