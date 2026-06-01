@@ -51,6 +51,25 @@ def inspect_model(model_path):
         print(json.dumps({"error": f"Failed to inspect model: {str(e)}"}))
         sys.exit(1)
 
+def align_features(df, model):
+    """
+    Applies one-hot encoding to input columns that map to OHE features in the model,
+    then reindexes to exactly match model.feature_names_in_.
+    """
+    if not hasattr(model, "feature_names_in_"):
+        return df
+
+    expected = list(model.feature_names_in_)
+
+    # Find input columns whose values were one-hot encoded at fit time
+    ohe_cols = [col for col in df.columns if any(f.startswith(f"{col}_") for f in expected)]
+    if ohe_cols:
+        df = pd.get_dummies(df, columns=ohe_cols)
+
+    # Add missing columns as 0, drop unexpected columns
+    return df.reindex(columns=expected, fill_value=0)
+
+
 def predict_model(model_path):
     """
     Reads JSON from stdin, predicts using the model, and prints results.
@@ -58,20 +77,23 @@ def predict_model(model_path):
     try:
         # 1. Load model
         model = joblib.load(model_path)
-        
+
         # 2. Read input from stdin
         input_data = json.load(sys.stdin)
-        
+
         # 3. Prepare DataFrame
         if isinstance(input_data, list):
             df = pd.DataFrame(input_data)
         else:
             df = pd.DataFrame([input_data])
-            
-        # 4. Predict
+
+        # 4. Align features (handles OHE mismatch between raw input and trained features)
+        df = align_features(df, model)
+
+        # 5. Predict
         predictions = model.predict(df)
-        
-        # 5. Output results
+
+        # 6. Output results
         print(json.dumps(predictions.tolist()))
         
     except Exception as e:

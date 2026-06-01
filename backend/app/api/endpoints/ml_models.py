@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import json
 import subprocess
@@ -45,7 +46,7 @@ async def upload_model(
     # 2. Extract metadata using isolated worker
     try:
         result = subprocess.run(
-            ["python", WORKER_SCRIPT, "--mode", "inspect", "--model-path", file_path],
+            [sys.executable, WORKER_SCRIPT, "--mode", "inspect", "--model-path", file_path],
             capture_output=True,
             text=True,
             check=True

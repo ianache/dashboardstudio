@@ -42,7 +42,7 @@ async def execute_ml_node(props: Dict[str, Any], payload: Any, db: Session) -> D
         # We use a subprocess to prevent RCE from pickle.load
         # Communicate via stdin/stdout pipes
         process = subprocess.Popen(
-            ["python", WORKER_SCRIPT, "--mode", "predict", "--model-path", file_path],
+            [sys.executable, WORKER_SCRIPT, "--mode", "predict", "--model-path", file_path],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
