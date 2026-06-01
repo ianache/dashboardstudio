@@ -217,12 +217,13 @@ Plans:
 **Goal:** Migrate all hardcoded colors in the shell layer, all in-scope views, and common components to CSS custom property tokens so the light/dark toggle transforms the entire product visually. Excludes FlowEditorView, IntegrationsView, and FlowEditorCanvas.
 **Requirements**: THEME-01
 **Depends on:** Phase 47
-**Plans:** 3 plans
+**Plans:** 4 plans
 
 Plans:
 - [ ] 48-01-PLAN.md — Shell components: SideMenu, TopBar, AppLayout (highest density migration)
 - [ ] 48-02-PLAN.md — Heavy views: ConnectionsView, SettingsView, LoginView, DashboardDesignerView
 - [ ] 48-03-PLAN.md — Remaining views (9 files) + PageHeader and ConfirmModal
+- [ ] 48-04-PLAN.md — Verify and close 5 locked shared components (DashboardCard, KpiWidget, QuickActionCard, PanelHeadBodyPieComponent, MIcon)
 
 ---
 
