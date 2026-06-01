@@ -225,7 +225,20 @@ Plans:
 - [ ] 48-03-PLAN.md — Remaining views (9 files) + PageHeader and ConfirmModal
 - [ ] 48-04-PLAN.md — Verify and close 5 locked shared components (DashboardCard, KpiWidget, QuickActionCard, PanelHeadBodyPieComponent, MIcon)
 
+### Phase 49: Diseño Minimalista Profesional @features/FEAT5.md
+
+**Goal:** Rediseñar el Dashboard Studio para lograr un aspecto minimalista, profesional y moderno, empleando colores neutros e iconos de alta calidad, mientras se preserva la funcionalidad existente.
+**Requirements**: THEME-01
+**Depends on:** Phase 48
+**Plans:** 2/4 plans executed
+
+Plans:
+- [ ] 49-01-PLAN.md — Refactor DashboardDesignerView modals to Glassmorphism and Inter typography
+- [ ] 49-02-PLAN.md — Update global CSS tokens for minimalist shadows, borders, and outlined buttons
+- [ ] 49-03-PLAN.md — Migrate iconography to Lucide via MIcon adapter pattern
+- [ ] 49-04-PLAN.md — Visual verification of minimalist aesthetic
+
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-06-01 after Phase 48 planning*
+*Last updated: 2026-06-01 after Phase 49 planning*
