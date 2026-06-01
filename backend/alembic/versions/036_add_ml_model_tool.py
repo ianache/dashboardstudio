@@ -49,10 +49,13 @@ def upgrade() -> None:
     )
 
     prop_defs = {
-        "model_id": { 
-            "label": "ML Model", 
-            "type": "dynamic_select", 
-            "endpoint": "/api/v1/ml-models"
+        "model_id": {
+            "label": "ML Model",
+            "type": "dynamic_select",
+            "placeholder": "Seleccionar modelo...",
+            "fetch_endpoint": "/api/v1/ml-models/",
+            "value_field": "id",
+            "label_field": "name"
         }
     }
 

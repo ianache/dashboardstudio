@@ -618,7 +618,11 @@
                     :disabled="!canFetchDynamic(def) || dynamicLoading[key]"
                   >
                     <option value="">— {{ def.placeholder || 'Seleccionar' }} —</option>
-                    <option v-for="opt in getOptionsForDef(def, key)" :key="typeof opt === 'string' ? opt : opt.name" :value="typeof opt === 'string' ? opt : opt.name">{{ typeof opt === 'string' ? opt : opt.name }}</option>
+                    <option
+                      v-for="opt in getOptionsForDef(def, key)"
+                      :key="typeof opt === 'string' ? opt : (opt[def.value_field || 'id'] ?? opt.name)"
+                      :value="typeof opt === 'string' ? opt : (opt[def.value_field || 'id'] ?? opt.name)"
+                    >{{ typeof opt === 'string' ? opt : (opt[def.label_field || 'name'] ?? opt.name) }}</option>
                   </select>
                   <button 
                     v-if="def.refreshable"
