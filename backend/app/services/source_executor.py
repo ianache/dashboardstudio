@@ -242,8 +242,13 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
                 if not node.get("props"):
                     node["props"] = {}
                 
+                # Credentials always come from DataSource (security).
+                # Structural props (schema) only fill in if the node has no user-set value.
+                NODE_OVERRIDABLE = {"schema", "database", "model"}
                 for cfg_key in ["host", "port", "username", "password", "database", "schema", "url", "email", "api_key", "token", "token_url", "client_id", "client_secret", "model"]:
                     if cfg_key in resolved_cfg:
+                        if cfg_key in NODE_OVERRIDABLE and node["props"].get(cfg_key):
+                            continue  # keep the user's value
                         node["props"][cfg_key] = resolved_cfg[cfg_key]
                 if ds.type:
                     node["props"]["connection_type"] = ds.type
