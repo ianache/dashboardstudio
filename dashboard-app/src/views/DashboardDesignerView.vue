@@ -124,7 +124,7 @@
         </template>
       </PageHeader>
 
-      <div class="designer-content-row">
+      <div class="designer-content-row" :class="{ 'ai-open': aiAnalystStore.isPanelOpen }">
         <DashboardRuntime
           v-if="activeDashboard"
           :dashboard-id="activeDashboard.id"
@@ -1102,12 +1102,19 @@ async function confirmImport() {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  /* Compensate for app-main padding so the row fills to the viewport bottom/right edges */
+  margin: 0 -20px -20px 0;
 }
 
 .designer-content-row > :first-child {
   flex: 1;
   min-width: 0;
   overflow: auto;
+  transition: padding-left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.designer-content-row.ai-open > :first-child {
+  padding-left: 20px;
 }
 
 /* AI panel slide transition */
