@@ -111,7 +111,12 @@
               <button class="btn btn-primary btn-icon btn-sm" @click="addWidget" title="Añadir Widget">
                 <MIcon icon="add" :size="20" />
               </button>
-              <button class="btn-ai-assist btn-icon btn-sm" @click="aiAssistOpen = true" title="IA Assist">
+              <button
+                class="btn-ai-assist btn-icon btn-sm"
+                :class="{ 'btn-ai-assist--active': aiAnalystStore.isPanelOpen }"
+                @click="aiAnalystStore.togglePanel()"
+                title="AI Analyst"
+              >
                 <MIcon icon="auto_awesome" :size="20" />
               </button>
             </template>
@@ -119,21 +124,28 @@
         </template>
       </PageHeader>
 
-      <DashboardRuntime
-        v-if="activeDashboard"
-        :dashboard-id="activeDashboard.id"
-        :widgets="activeDashboard.widgets"
-        :filters="activeDashboard.filters || []"
-        :palette="activeDashboard.colorPalette"
-        :filter-placement="filterPlacement"
-        :is-design-mode="isDesignMode"
-        v-model:filter-values="activeFilterValues"
-        :resolved-filters="resolvedDashboardFilters"
-        @refresh="refreshDesign"
-        @configure-widget="openConfigModal"
-        @layout-widget="openLayoutModal"
-        @remove-widget="removeWidget"
-      />
+      <div class="designer-content-row">
+        <DashboardRuntime
+          v-if="activeDashboard"
+          :dashboard-id="activeDashboard.id"
+          :widgets="activeDashboard.widgets"
+          :filters="activeDashboard.filters || []"
+          :palette="activeDashboard.colorPalette"
+          :filter-placement="filterPlacement"
+          :is-design-mode="isDesignMode"
+          v-model:filter-values="activeFilterValues"
+          :resolved-filters="resolvedDashboardFilters"
+          @refresh="refreshDesign"
+          @configure-widget="openConfigModal"
+          @layout-widget="openLayoutModal"
+          @remove-widget="removeWidget"
+        />
+
+        <!-- AI Analyst side panel -->
+        <transition name="ai-panel-slide">
+          <AiAnalystPanel v-if="aiAnalystStore.isPanelOpen" />
+        </transition>
+      </div>
 
       <!-- Properties Side Drawer -->
       <transition name="slide-right">
@@ -524,6 +536,7 @@ import DesignerCard from '@/components/dashboard/DesignerCard.vue'
 import ChartConfigModal from '@/components/dashboard/ChartConfigModal.vue'
 import ChartLayoutModal from '@/components/dashboard/ChartLayoutModal.vue'
 import DashboardFilterBar from '@/components/dashboard/DashboardFilterBar.vue'
+import AiAnalystPanel from '@/components/dashboard/AiAnalystPanel.vue'
 import MIcon from '@/components/common/MIcon.vue'
 import { useDashboardFilters } from '@/composables/useDashboardFilters'
 import { useColorPaletteStore } from '@/stores/colorPalettes'
@@ -531,6 +544,7 @@ import { usersApi } from '@/services/api'
 import { useCubeStore } from '@/stores/cubejs'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
+import { useAiAnalystStore } from '@/stores/aiAnalyst'
 
 const categoryIcons = ['dashboard', 'directions_car', 'account_tree', 'campaign', 'security', 'monitoring', 'bar_chart', 'pie_chart']
 // All registered backend users (loaded once per modal open)
@@ -545,6 +559,7 @@ const uiStore = useUIStore()
 const paletteStore = useColorPaletteStore()
 const cubeStore = useCubeStore()
 const llmStore = useLlmStore()
+const aiAnalystStore = useAiAnalystStore()
 
 // Load data from backend on mount
 onMounted(async () => {
@@ -1080,6 +1095,38 @@ async function confirmImport() {
 
 <style scoped>
 .designer-view { display: flex; flex-direction: column; height: 100%; }
+
+/* Flex row containing the dashboard runtime + AI analyst panel */
+.designer-content-row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.designer-content-row > :first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+/* AI panel slide transition */
+.ai-panel-slide-enter-active,
+.ai-panel-slide-leave-active {
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;
+  overflow: hidden;
+}
+
+.ai-panel-slide-enter-from,
+.ai-panel-slide-leave-to {
+  width: 0 !important;
+  opacity: 0;
+}
+
+/* Active state for AI button */
+.btn-ai-assist--active {
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.4);
+}
 
 /* Material Symbols font */
 .material-symbols-outlined {
