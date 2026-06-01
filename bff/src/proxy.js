@@ -94,3 +94,46 @@ export const cubejsProxy = createProxyMiddleware({
     }
   }
 });
+
+/**
+ * Proxy for AI Analyst Service.
+ * Routes: /bff/ai/* -> http://ai-analyst:8001/*
+ * Injects X-User-ID and X-User-Email from session.
+ * Supports SSE (Server-Sent Events) by disabling timeouts.
+ */
+export const aiProxy = createProxyMiddleware({
+  target: config.aiServiceUrl,
+  changeOrigin: true,
+  proxyTimeout: 0, // Disable timeout for SSE
+  timeout: 0,      // Disable timeout for SSE
+  pathRewrite: {
+    '^/': '/', // Route /bff/ai/foo -> ai-analyst:8001/foo (express mounts at /bff/ai)
+  },
+  on: {
+    proxyReq: (proxyReq, req, res) => {
+      if (req.session?.user) {
+        if (req.session.user.sub) {
+          proxyReq.setHeader('X-User-ID', req.session.user.sub);
+        }
+        if (req.session.user.email) {
+          proxyReq.setHeader('X-User-Email', req.session.user.email);
+        }
+      }
+      
+      // Fix body-parser stream drain issue
+      fixRequestBody(proxyReq, req);
+    },
+    proxyRes: (proxyRes, req, res) => {
+      // Strip CORS headers from upstream
+      delete proxyRes.headers['access-control-allow-origin'];
+      delete proxyRes.headers['access-control-allow-credentials'];
+      delete proxyRes.headers['access-control-allow-methods'];
+      delete proxyRes.headers['access-control-allow-headers'];
+      delete proxyRes.headers['access-control-expose-headers'];
+    },
+    error: (err, req, res) => {
+      console.error('BFF Proxy Error (AI Service):', err.message);
+      res.status(502).json({ error: 'AI service unreachable' });
+    }
+  }
+});
