@@ -238,7 +238,7 @@
     <!-- ======= MODALS ======= -->
 
     <!-- New Dashboard Modal -->
-    <div v-if="showNewModal" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="showNewModal = false">
+    <div v-if="showNewModal" class="fixed inset-0 dv-modal-overlay flex items-center justify-center z-50" @click.self="showNewModal = false">
       <div class="dv-modal rounded-xl shadow-xl w-[460px] max-w-[95vw] overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 dv-modal-header-row">
           <h3 class="text-base font-semibold dv-modal-title">Nuevo Dashboard</h3>
@@ -390,7 +390,7 @@
     </div>
 
     <!-- Import Dashboard Modal -->
-    <div v-if="importPreview" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="importPreview = null">
+    <div v-if="importPreview" class="fixed inset-0 dv-modal-overlay flex items-center justify-center z-50" @click.self="importPreview = null">
       <div class="dv-modal rounded-xl shadow-xl w-[440px] max-w-[95vw] overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 dv-modal-header-row">
           <h3 class="text-base font-semibold dv-modal-title">Importar Dashboard</h3>
@@ -439,7 +439,7 @@
     />
 
     <!-- Delete confirm -->
-    <div v-if="deletingDashboard" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="deletingDashboard = null">
+    <div v-if="deletingDashboard" class="fixed inset-0 dv-modal-overlay flex items-center justify-center z-50" @click.self="deletingDashboard = null">
       <div class="dv-modal rounded-xl shadow-xl w-[380px] max-w-[95vw] overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 dv-modal-header-row">
           <h3 class="text-base font-semibold dv-modal-title">Eliminar Dashboard</h3>
@@ -460,7 +460,7 @@
     </div>
 
     <!-- Modal: AI Assist -->
-    <div v-if="aiAssistOpen" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="aiAssistOpen = false">
+    <div v-if="aiAssistOpen" class="fixed inset-0 dv-modal-overlay flex items-center justify-center z-50" @click.self="aiAssistOpen = false">
       <div class="dv-modal rounded-xl shadow-xl w-[600px] max-w-[95vw] overflow-hidden flex flex-col">
         <div class="flex items-center gap-3 px-6 py-4 dv-modal-ai-header">
           <span class="material-symbols-outlined dv-ai-icon">auto_awesome</span>
@@ -1206,7 +1206,7 @@ async function confirmImport() {
 }
 
 .mode-btn:hover { background: var(--bg); }
-.mode-btn.active { background: var(--primary); color: #fff; }
+.mode-btn.active { background: var(--primary); color: var(--on-primary); }
 
 /* Custom AI Assist Icon Button */
 .btn-ai-assist.btn-icon {
@@ -1375,7 +1375,8 @@ async function confirmImport() {
 
 /* Custom font classes */
 .font-h1 {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .font-mono {
@@ -1390,17 +1391,21 @@ async function confirmImport() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--on-surface) 40%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 16px;
 }
 
 .assign-modal-box {
-  background: white;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--on-surface) 10%, transparent);
   width: 100%;
   max-width: 672px;
-  border-radius: 12px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1420,7 +1425,8 @@ async function confirmImport() {
   font-weight: 700;
   color: var(--on-surface);
   margin: 0;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .assign-modal-header button {
@@ -1709,8 +1715,9 @@ async function confirmImport() {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(2px);
+  background: color-mix(in srgb, var(--on-surface) 40%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   justify-content: flex-end;
 }
@@ -1718,16 +1725,19 @@ async function confirmImport() {
 .props-drawer {
   width: 400px;
   max-width: 90vw;
-  background: var(--card-bg);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   height: 100%;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  border-left: 1px solid color-mix(in srgb, var(--on-surface) 10%, transparent);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
 }
 
 .props-drawer-header {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--outline-variant);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1738,7 +1748,8 @@ async function confirmImport() {
   font-weight: 700;
   color: var(--on-surface);
   margin: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .props-drawer-actions {
@@ -1851,7 +1862,18 @@ async function confirmImport() {
 .dv-new-sub  { color: var(--on-surface-variant); }
 
 /* Modal base */
-.dv-modal { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.dv-modal {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--on-surface) 10%, transparent);
+}
+
+.dv-modal-overlay {
+  background: color-mix(in srgb, var(--on-surface) 40%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 .dv-modal-header-row { border-bottom: 1px solid var(--outline-variant); }
 .dv-modal-title { color: var(--on-surface); }
 .dv-modal-close { color: var(--on-surface-variant); }
