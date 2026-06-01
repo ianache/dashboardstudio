@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-01T02:40:48.628Z"
+last_updated: "2026-06-01T03:36:47.825Z"
 progress:
   total_phases: 41
   completed_phases: 26
   total_plans: 68
-  completed_plans: 47
+  completed_plans: 48
 ---
 
 # Project State: Dashboard Studio v2.0
@@ -45,6 +45,7 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 | 44 | 2/2 | 30 min | 15 min |
 | 45 | 1/1 | 15 min | 15 min |
 | 46 | 3/3 | 35 min | 11.7 min |
+| Phase 41-pickle-model-node P01 | 15 | 4 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,8 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 - [Phase 46-chat-ui]: AiAnalystPanel is a 380px sidebar beside DashboardRuntime (not overlay), allowing dashboard canvas to shrink
 - [Phase 46-chat-ui]: auto_awesome toolbar button repurposed to toggle AI Analyst panel; old widget generator modal retained in template
 - [Phase 46-03]: skills field populated by case 'skills' stream event; executeSkill appends new message; cache_hit stored as percentage number
+- [Phase 41-pickle-model-node]: Subprocess isolation for Pickle deserialization prevents RCE in main FastAPI process
+- [Phase 41-pickle-model-node]: ml_worker.py dual-mode CLI (inspect/predict) isolates pickle loading in subprocess
 
 ### Blockers/Concerns
 
