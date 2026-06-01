@@ -214,15 +214,17 @@ Plans:
 
 ### Phase 48: Theme Alignment — fondos y colores de texto del menú lateral y páginas según System Design (light/dark)
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Migrate all hardcoded colors in the shell layer, all in-scope views, and common components to CSS custom property tokens so the light/dark toggle transforms the entire product visually. Excludes FlowEditorView, IntegrationsView, and FlowEditorCanvas.
+**Requirements**: THEME-01
 **Depends on:** Phase 47
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 48 to break down)
+- [ ] 48-01-PLAN.md — Shell components: SideMenu, TopBar, AppLayout (highest density migration)
+- [ ] 48-02-PLAN.md — Heavy views: ConnectionsView, SettingsView, LoginView, DashboardDesignerView
+- [ ] 48-03-PLAN.md — Remaining views (9 files) + PageHeader and ConfirmModal
 
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-05-31 after v2.0 roadmap creation*
+*Last updated: 2026-06-01 after Phase 48 planning*
