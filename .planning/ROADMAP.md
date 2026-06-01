@@ -30,7 +30,7 @@
 | 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 44. AI Analyst Skills | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 45. BFF Integration | 1/1 | Complete   | 2026-06-01 | - |
-| 46. Chat UI | 1/2 | In Progress|  | - |
+| 46. Chat UI | 2/2 | Complete   | 2026-06-01 | - |
 
 
 ---
@@ -138,7 +138,7 @@
 - [x] **Phase 43: AI Service Foundation** - New Python microservice (ai-analyst/) with Google ADK, Gemini API, and a basic `/chat` endpoint that accepts a message and returns a streamed agent response
 - [x] **Phase 44: AI Analyst Skills** - CubeJS query tool and skills catalog tool wired into the Google ADK agent, enabling ad-hoc data queries and skill execution from within a conversation (completed 2026-05-31)
 - [x] **Phase 45: BFF Integration** - BFF routes that proxy `/bff/ai/*` requests to the AI service with session validation and screen context passthrough (completed 2026-06-01)
-- [ ] **Phase 46: Chat UI** - Vue 3 collapsible chat panel matching the Stitch design: message bubbles, expandable Thought/Actions/Result sections, live usage stats, and CTA skill buttons
+- [x] **Phase 46: Chat UI** - Vue 3 collapsible chat panel matching the Stitch design: message bubbles, expandable Thought/Actions/Result sections, live usage stats, and CTA skill buttons (completed 2026-06-01)
 
 ## Phase Details
 

@@ -7,11 +7,11 @@
 
 ### Chat Interface
 
-- [ ] **CHAT-01**: User can open and close an AI Analyst panel from the dashboard designer
+- [x] **CHAT-01**: User can open and close an AI Analyst panel from the dashboard designer
 - [x] **CHAT-02**: User can submit a natural language question; the panel captures the current screen context (visible chart data) automatically with each request
 - [x] **CHAT-03**: Agent responses display in message bubbles with three expandable sections: Thought Process, Actions Taken, Final Result
-- [ ] **CHAT-04**: Panel header shows live usage stats: input tokens, output tokens, cache hit %, and session cost
-- [ ] **CHAT-05**: User can trigger an agent-recommended skill via a call-to-action button embedded in the response
+- [x] **CHAT-04**: Panel header shows live usage stats: input tokens, output tokens, cache hit %, and session cost
+- [x] **CHAT-05**: User can trigger an agent-recommended skill via a call-to-action button embedded in the response
 
 ### Agent Capabilities
 
@@ -56,11 +56,11 @@ Deferred to next milestone.
 | AGENT-02 | Phase 44 | Complete |
 | AGENT-03 | Phase 44 | Complete |
 | SVC-04 | Phase 45 | Complete |
-| CHAT-01 | Phase 46 | Pending |
+| CHAT-01 | Phase 46 | Complete |
 | CHAT-02 | Phase 46 | Complete |
 | CHAT-03 | Phase 46 | Complete |
-| CHAT-04 | Phase 46 | Pending |
-| CHAT-05 | Phase 46 | Pending |
+| CHAT-04 | Phase 46 | Complete |
+| CHAT-05 | Phase 46 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 12 total
