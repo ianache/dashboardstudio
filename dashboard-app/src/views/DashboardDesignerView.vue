@@ -5,8 +5,8 @@
       <!-- Page Header -->
       <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
         <div class="space-y-1">
-          <h1 class="font-h1 text-h1 text-slate-900">Mis Dashboards</h1>
-          <p class="font-body-md text-slate-500 max-w-2xl">Diseña y gestiona tus dashboards para obtener insights en tiempo real.</p>
+          <h1 class="font-h1 text-h1 page-title">Mis Dashboards</h1>
+          <p class="font-body-md page-subtitle max-w-2xl">Diseña y gestiona tus dashboards para obtener insights en tiempo real.</p>
         </div>
         <div class="flex items-center gap-3">
           <input ref="importFileInput" type="file" accept=".json" style="display:none" @change="handleImportFile" />
@@ -23,12 +23,12 @@
 
       <!-- Empty state -->
       <div v-if="dashboardStore.allDashboards.length === 0" class="max-w-[1600px] mx-auto">
-        <div class="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center justify-center gap-4 text-center">
-          <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-            <span class="material-symbols-outlined text-3xl text-slate-400">dashboard</span>
+        <div class="dv-empty-box p-12 flex flex-col items-center justify-center gap-4 text-center">
+          <div class="w-16 h-16 dv-empty-icon rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl dv-icon-muted">dashboard</span>
           </div>
-          <h3 class="text-lg font-semibold text-slate-900">Sin dashboards</h3>
-          <p class="text-sm text-slate-500 max-w-md">Crea tu primer dashboard para comenzar a visualizar tus datos.</p>
+          <h3 class="text-lg font-semibold dv-empty-title">Sin dashboards</h3>
+          <p class="text-sm dv-empty-desc max-w-md">Crea tu primer dashboard para comenzar a visualizar tus datos.</p>
           <button class="btn btn-primary" @click="showNewModal = true">
             <span class="material-symbols-outlined text-lg">add</span>
             Crear dashboard
@@ -58,14 +58,14 @@
 
           <!-- Create new card -->
           <button
-            class="group border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-blue-500 hover:bg-blue-50/30 transition-all min-h-[280px]"
+            class="dv-new-card rounded-xl p-8 flex flex-col items-center justify-center gap-4 transition-all min-h-[280px]"
             @click="showNewModal = true">
-            <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-              <span class="material-symbols-outlined text-2xl text-slate-400 group-hover:text-blue-600 transition-colors">add</span>
+            <div class="w-12 h-12 rounded-full dv-new-ico flex items-center justify-center transition-colors">
+              <span class="material-symbols-outlined text-2xl dv-new-ico-icon transition-colors">add</span>
             </div>
             <div class="text-center">
-              <span class="block text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">Nuevo Dashboard</span>
-              <span class="block text-xs text-slate-500">Comienza un diseño desde cero</span>
+              <span class="block text-sm font-semibold dv-new-lbl transition-colors">Nuevo Dashboard</span>
+              <span class="block text-xs dv-new-sub">Comienza un diseño desde cero</span>
             </div>
           </button>
         </div>
@@ -239,10 +239,10 @@
 
     <!-- New Dashboard Modal -->
     <div v-if="showNewModal" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="showNewModal = false">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[460px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Nuevo Dashboard</h3>
-          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="showNewModal = false">
+      <div class="dv-modal rounded-xl shadow-xl w-[460px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 dv-modal-header-row">
+          <h3 class="text-base font-semibold dv-modal-title">Nuevo Dashboard</h3>
+          <button class="p-1 dv-icon-muted dv-modal-close rounded" @click="showNewModal = false">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -250,22 +250,22 @@
         </div>
         <div class="px-6 py-5 flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium text-slate-700">Nombre *</label>
-            <input 
-              v-model="newName" 
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" 
-              placeholder="Ej: Dashboard de Ventas" 
+            <label class="text-sm font-medium dv-form-label">Nombre *</label>
+            <input
+              v-model="newName"
+              class="w-full px-3 py-2 text-sm dv-form-input rounded-lg outline-none"
+              placeholder="Ej: Dashboard de Ventas"
               autofocus />
           </div>
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium text-slate-700">Descripción</label>
-            <input 
-              v-model="newDescription" 
-              class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" 
+            <label class="text-sm font-medium dv-form-label">Descripción</label>
+            <input
+              v-model="newDescription"
+              class="w-full px-3 py-2 text-sm dv-form-input rounded-lg outline-none"
               placeholder="Descripción breve..." />
           </div>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 dv-modal-footer">
           <button class="btn btn-ghost" @click="showNewModal = false">Cancelar</button>
           <button class="btn btn-primary" @click="createDashboard" :disabled="!newName.trim()">Crear</button>
         </div>
@@ -391,20 +391,20 @@
 
     <!-- Import Dashboard Modal -->
     <div v-if="importPreview" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="importPreview = null">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[440px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Importar Dashboard</h3>
-          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="importPreview = null">
+      <div class="dv-modal rounded-xl shadow-xl w-[440px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 dv-modal-header-row">
+          <h3 class="text-base font-semibold dv-modal-title">Importar Dashboard</h3>
+          <button class="p-1 dv-icon-muted dv-modal-close rounded" @click="importPreview = null">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
         <div class="px-6 py-5">
-          <p class="text-sm text-slate-500 mb-4">Se creará una copia nueva del siguiente dashboard:</p>
-          <div class="p-4 border border-slate-200 rounded-lg bg-slate-50">
-            <div class="text-base font-semibold text-slate-900 mb-1">{{ importPreview.name }}</div>
-            <p v-if="importPreview.description" class="text-sm text-slate-500 mb-3">{{ importPreview.description }}</p>
+          <p class="text-sm dv-empty-desc mb-4">Se creará una copia nueva del siguiente dashboard:</p>
+          <div class="p-4 dv-import-preview-box rounded-lg">
+            <div class="text-base font-semibold dv-modal-title mb-1">{{ importPreview.name }}</div>
+            <p v-if="importPreview.description" class="text-sm dv-empty-desc mb-3">{{ importPreview.description }}</p>
             <div class="flex gap-2 flex-wrap">
               <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded">{{ importPreview.widgets.length }} widgets</span>
               <span v-if="importPreview.filters?.length" class="inline-flex items-center px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-600 rounded">
@@ -412,9 +412,9 @@
               </span>
             </div>
           </div>
-          <p class="text-xs text-slate-400 mt-3">Los identificadores internos serán regenerados.</p>
+          <p class="text-xs dv-icon-muted mt-3">Los identificadores internos serán regenerados.</p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 dv-modal-footer">
           <button class="btn btn-ghost" @click="importPreview = null">Cancelar</button>
           <button class="btn btn-primary" @click="confirmImport">Importar</button>
         </div>
@@ -440,19 +440,19 @@
 
     <!-- Delete confirm -->
     <div v-if="deletingDashboard" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="deletingDashboard = null">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[380px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Eliminar Dashboard</h3>
-          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="deletingDashboard = null">
+      <div class="dv-modal rounded-xl shadow-xl w-[380px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 dv-modal-header-row">
+          <h3 class="text-base font-semibold dv-modal-title">Eliminar Dashboard</h3>
+          <button class="p-1 dv-icon-muted dv-modal-close rounded" @click="deletingDashboard = null">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
         <div class="px-6 py-5">
-          <p class="text-sm text-slate-700">¿Estás seguro de eliminar <strong>{{ deletingDashboard.name }}</strong>? Esta acción no se puede deshacer.</p>
+          <p class="text-sm dv-modal-body-text">¿Estás seguro de eliminar <strong>{{ deletingDashboard.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 dv-modal-footer">
           <button class="btn btn-ghost" @click="deletingDashboard = null">Cancelar</button>
           <button class="btn btn-danger" @click="deleteDashboard">Eliminar</button>
         </div>
@@ -461,14 +461,14 @@
 
     <!-- Modal: AI Assist -->
     <div v-if="aiAssistOpen" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="aiAssistOpen = false">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[600px] max-w-[95vw] overflow-hidden flex flex-col">
-        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-indigo-50 to-purple-50">
-          <span class="material-symbols-outlined text-indigo-600">auto_awesome</span>
-          <span class="text-base font-semibold text-slate-900">IA Assist — Generador de Widgets</span>
-          <span v-if="llmStore.isConfigured" class="ml-auto text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-600">
+      <div class="dv-modal rounded-xl shadow-xl w-[600px] max-w-[95vw] overflow-hidden flex flex-col">
+        <div class="flex items-center gap-3 px-6 py-4 dv-modal-ai-header">
+          <span class="material-symbols-outlined dv-ai-icon">auto_awesome</span>
+          <span class="text-base font-semibold dv-modal-title">IA Assist — Generador de Widgets</span>
+          <span v-if="llmStore.isConfigured" class="ml-auto text-xs font-mono dv-ai-model-badge px-2 py-1 rounded">
             {{ llmStore.configFor('modelAssist').providerLabel }} · {{ llmStore.configFor('modelAssist').modelLabel }}
           </span>
-          <button class="p-1 text-slate-400 hover:text-slate-600 rounded" @click="aiAssistOpen = false">
+          <button class="p-1 dv-icon-muted dv-modal-close rounded" @click="aiAssistOpen = false">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -484,7 +484,7 @@
           </div>
           
           <div class="flex items-center gap-2 text-sm">
-            <span class="font-semibold text-slate-600">Contexto del Cubo:</span>
+            <span class="font-semibold dv-empty-desc">Contexto del Cubo:</span>
             <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded">{{ cubeStore.allMeasures.length }} métricas</span>
             <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-50 text-purple-600 rounded">{{ cubeStore.allDimensions.length }} dimensiones</span>
           </div>
@@ -492,15 +492,15 @@
           <textarea
             v-model="aiAssistPrompt"
             rows="5"
-            class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
+            class="w-full px-3 py-2 text-sm dv-form-input rounded-lg outline-none resize-none"
             placeholder="Ej: Muéstrame un gráfico de barras comparando el total de ventas por región..."
             :disabled="aiAssistLoading || !llmStore.isConfigured"
             @keydown.enter.prevent="runAIAssist"
           ></textarea>
         </div>
 
-        <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <span class="text-xs text-slate-400 italic">Usa Enter para enviar</span>
+        <div class="flex items-center justify-between px-6 py-4 dv-modal-footer">
+          <span class="text-xs dv-icon-muted italic">Usa Enter para enviar</span>
           <div class="flex items-center gap-3">
             <button class="btn btn-ghost" @click="aiAssistOpen = false" :disabled="aiAssistLoading">Cancelar</button>
             <button
@@ -1168,8 +1168,8 @@ async function confirmImport() {
 }
 
 .vh-info { flex: 1; min-width: 0; }
-.vh-title { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.2; }
-.vh-desc { font-size: 14px; color: var(--text-secondary); margin: 0; }
+.vh-title { font-size: 24px; font-weight: 700; color: var(--on-surface); margin-bottom: 4px; line-height: 1.2; }
+.vh-desc { font-size: 14px; color: var(--on-surface-variant); margin: 0; }
 
 .vh-actions-group {
   display: flex;
@@ -1189,7 +1189,7 @@ async function confirmImport() {
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .mode-btn {
@@ -1201,7 +1201,7 @@ async function confirmImport() {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: all 0.2s;
 }
 
@@ -1230,10 +1230,10 @@ async function confirmImport() {
   padding: 5px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--card-bg);
   cursor: pointer;
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   transition: border-color 0.15s;
   white-space: nowrap;
 }
@@ -1250,13 +1250,13 @@ async function confirmImport() {
 }
 .palette-trigger-label {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .palette-trigger-arrow {
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: transform 0.15s;
   flex-shrink: 0;
 }
@@ -1266,7 +1266,7 @@ async function confirmImport() {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow-md);
@@ -1284,10 +1284,10 @@ async function confirmImport() {
   gap: 12px;
 }
 .palette-option:hover { background: var(--bg); }
-.palette-option.selected { background: #e6f4ff; }
+.palette-option.selected { background: var(--primary-container); }
 .palette-option-label {
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1305,7 +1305,7 @@ async function confirmImport() {
 
 .toggle-label {
   display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--text-secondary); cursor: pointer;
+  font-size: 13px; color: var(--on-surface-variant); cursor: pointer;
   flex-shrink: 0;
 }
 .toggle-text { white-space: nowrap; }
@@ -1320,7 +1320,7 @@ async function confirmImport() {
 .mode-btn {
   display: inline-flex; align-items: center;
   padding: 6px 12px; border: none; background: transparent;
-  font-size: 13px; cursor: pointer; color: var(--text-secondary);
+  font-size: 13px; cursor: pointer; color: var(--on-surface-variant);
   transition: all 0.15s; white-space: nowrap;
 }
 .mode-btn:hover { background: var(--bg); }
@@ -1331,7 +1331,7 @@ async function confirmImport() {
 
 .editor-canvas {
   flex: 1;
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: auto;
@@ -1354,8 +1354,8 @@ async function confirmImport() {
 .widget-type-card:hover { border-color: var(--primary); background: var(--primary-light); }
 .widget-type-card.selected { border-color: var(--primary); background: var(--primary-light); }
 .wt-icon { font-size: 28px; margin-bottom: 6px; }
-.wt-label { font-size: 13px; font-weight: 600; color: var(--text); }
-.wt-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.wt-label { font-size: 13px; font-weight: 600; color: var(--on-surface); }
+.wt-desc { font-size: 11px; color: var(--on-surface-variant); margin-top: 2px; }
 
 /* AI Assist */
 .btn-ai-assist {
@@ -1412,13 +1412,13 @@ async function confirmImport() {
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .assign-modal-header h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--on-surface);
   margin: 0;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
@@ -1433,13 +1433,13 @@ async function confirmImport() {
   background: transparent;
   border-radius: 50%;
   cursor: pointer;
-  color: #64748b;
+  color: var(--on-surface-variant);
   transition: all 0.2s;
 }
 
 .assign-modal-header button:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--surface-container);
+  color: var(--on-surface);
 }
 
 .assign-modal-body {
@@ -1454,7 +1454,7 @@ async function confirmImport() {
 
 .assign-instruction {
   font-size: 14px;
-  color: #475569;
+  color: var(--on-surface-variant);
   margin: 0 0 16px 0;
 }
 
@@ -1473,7 +1473,7 @@ async function confirmImport() {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--on-surface-variant);
   font-size: 20px;
   pointer-events: none;
 }
@@ -1481,17 +1481,17 @@ async function confirmImport() {
 .assign-input-wrapper input {
   width: 100%;
   padding: 10px 12px 10px 40px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
   font-size: 14px;
-  background: #f8fafc;
+  background: var(--surface-container);
   outline: none;
   transition: all 0.2s;
 }
 
 .assign-input-wrapper input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
 }
 
 .assign-search-btn {
@@ -1499,8 +1499,8 @@ async function confirmImport() {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #3b82f6;
-  color: white;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -1511,7 +1511,7 @@ async function confirmImport() {
 }
 
 .assign-search-btn:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-container);
 }
 
 .assign-search-btn:disabled {
@@ -1528,9 +1528,9 @@ async function confirmImport() {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #fef2f2;
+  background: var(--error-container);
   border-radius: 8px;
-  color: #dc2626;
+  color: var(--error);
   font-size: 14px;
   margin-bottom: 24px;
 }
@@ -1551,7 +1551,7 @@ async function confirmImport() {
 .assign-section-header h3 {
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0;
@@ -1559,8 +1559,8 @@ async function confirmImport() {
 
 .assign-count-badge {
   padding: 2px 8px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
   border-radius: 4px;
   font-size: 10px;
   font-weight: 700;
@@ -1577,8 +1577,8 @@ async function confirmImport() {
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--outline-variant);
   border-radius: 12px;
   transition: all 0.2s;
 }
@@ -1597,8 +1597,8 @@ async function confirmImport() {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #3b82f6;
-  color: white;
+  background: var(--primary);
+  color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1616,13 +1616,13 @@ async function confirmImport() {
 .assign-user-name {
   font-size: 14px;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--on-surface);
   margin: 0;
 }
 
 .assign-user-email {
   font-size: 12px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   margin: 0;
 }
 
@@ -1636,13 +1636,13 @@ async function confirmImport() {
   background: transparent;
   border-radius: 50%;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--on-surface-variant);
   transition: all 0.2s;
 }
 
 .assign-delete-btn:hover {
-  color: #dc2626;
-  background: #fef2f2;
+  color: var(--error);
+  background: var(--error-container);
 }
 
 .assign-add-btn {
@@ -1655,13 +1655,13 @@ async function confirmImport() {
   background: transparent;
   border-radius: 50%;
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--primary);
   transition: all 0.2s;
 }
 
 .assign-add-btn:hover {
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--primary);
+  background: var(--surface-container);
 }
 
 .assign-empty-state {
@@ -1670,28 +1670,28 @@ async function confirmImport() {
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed var(--outline-variant);
   border-radius: 16px;
-  background: #f8fafc;
+  background: var(--surface-container);
   text-align: center;
 }
 
 .assign-empty-state .material-symbols-outlined {
   font-size: 48px;
-  color: #94a3b8;
+  color: var(--on-surface-variant);
   margin-bottom: 12px;
 }
 
 .assign-empty-state p {
   font-size: 14px;
   font-weight: 500;
-  color: #475569;
+  color: var(--on-surface-variant);
   margin: 0 0 4px 0;
 }
 
 .assign-empty-state span {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--on-surface-variant);
 }
 
 .assign-modal-footer {
@@ -1700,8 +1700,8 @@ async function confirmImport() {
   justify-content: flex-end;
   gap: 12px;
   padding: 20px 24px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: var(--surface-container);
+  border-top: 1px solid var(--outline-variant);
 }
 
 /* Properties Drawer */
@@ -1718,7 +1718,7 @@ async function confirmImport() {
 .props-drawer {
   width: 400px;
   max-width: 90vw;
-  background: #fff;
+  background: var(--card-bg);
   height: 100%;
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -1727,7 +1727,7 @@ async function confirmImport() {
 
 .props-drawer-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--outline-variant);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1736,7 +1736,7 @@ async function confirmImport() {
 .props-drawer-header h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--on-surface);
   margin: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
@@ -1760,8 +1760,8 @@ async function confirmImport() {
 
 .action-btn-save { background: var(--primary); color: #fff; }
 .action-btn-save:hover { background: var(--primary-dark); }
-.action-btn-close { background: #f1f5f9; color: #64748b; }
-.action-btn-close:hover { background: #e2e8f0; color: #0f172a; }
+.action-btn-close { background: var(--surface-container); color: var(--on-surface-variant); }
+.action-btn-close:hover { background: var(--surface-container-high); color: var(--on-surface); }
 
 .props-drawer-body {
   padding: 24px;
@@ -1781,19 +1781,19 @@ async function confirmImport() {
 
 .palette-option-card {
   padding: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--outline-variant);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--surface-container);
 }
 
-.palette-option-card:hover { border-color: var(--primary); background: #fff; }
-.palette-option-card.selected { border-color: var(--primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+.palette-option-card:hover { border-color: var(--primary); background: var(--card-bg); }
+.palette-option-card.selected { border-color: var(--primary); background: var(--primary-container); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 15%, transparent); }
 
 .palette-swatches-row { display: flex; gap: 4px; margin-bottom: 6px; }
 .p-swatch { width: 20px; height: 20px; border-radius: 4px; }
-.p-label { font-size: 12px; font-weight: 500; color: #475569; display: block; }
+.p-label { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); display: block; }
 
 .placement-selector {
   display: flex;
@@ -1804,9 +1804,9 @@ async function confirmImport() {
 .placement-btn {
   flex: 1;
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
-  background: #fff;
+  background: var(--card-bg);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -1816,8 +1816,8 @@ async function confirmImport() {
 }
 
 .placement-btn span { font-size: 11px; font-weight: 500; }
-.placement-btn:hover { background: #f8fafc; }
-.placement-btn.active { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+.placement-btn:hover { background: var(--surface-container); }
+.placement-btn.active { border-color: var(--primary); color: var(--primary); background: var(--primary-container); }
 
 .toggle-row {
   display: flex;
@@ -1826,7 +1826,49 @@ async function confirmImport() {
   cursor: pointer;
 }
 
-.divider-v { width: 1px; height: 24px; background: #e2e8f0; margin: 0 8px; }
+.divider-v { width: 1px; height: 24px; background: var(--outline-variant); margin: 0 8px; }
+
+/* Token-aware text and layout classes */
+.page-title    { color: var(--on-surface); }
+.page-subtitle { color: var(--on-surface-variant); }
+
+/* Empty state */
+.dv-empty-box   { background: var(--card-bg); border: 1px solid var(--outline-variant); border-radius: 12px; }
+.dv-empty-icon  { background: var(--surface-container); }
+.dv-icon-muted  { color: var(--on-surface-variant); }
+.dv-empty-title { color: var(--on-surface); }
+.dv-empty-desc  { color: var(--on-surface-variant); }
+
+/* New card button */
+.dv-new-card { border: 2px dashed var(--outline-variant); background: transparent; cursor: pointer; }
+.dv-new-card:hover { border-color: var(--primary); background: var(--surface-container); }
+.dv-new-ico  { background: var(--surface-container); }
+.dv-new-card:hover .dv-new-ico { background: var(--surface-container-high); }
+.dv-new-ico-icon { color: var(--on-surface-variant); }
+.dv-new-card:hover .dv-new-ico-icon { color: var(--primary); }
+.dv-new-lbl  { color: var(--on-surface); }
+.dv-new-card:hover .dv-new-lbl { color: var(--primary); }
+.dv-new-sub  { color: var(--on-surface-variant); }
+
+/* Modal base */
+.dv-modal { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.dv-modal-header-row { border-bottom: 1px solid var(--outline-variant); }
+.dv-modal-title { color: var(--on-surface); }
+.dv-modal-close { color: var(--on-surface-variant); }
+.dv-modal-close:hover { color: var(--on-surface); }
+.dv-modal-footer { border-top: 1px solid var(--outline-variant); background: var(--surface-container); }
+.dv-modal-body-text { color: var(--on-surface-variant); }
+.dv-form-label { color: var(--on-surface-variant); }
+.dv-form-input { border: 1px solid var(--outline-variant); background: var(--surface-container); color: var(--on-surface); }
+.dv-form-input:focus { border-color: var(--primary); }
+
+/* Import preview box */
+.dv-import-preview-box { border: 1px solid var(--outline-variant); background: var(--surface-container); }
+
+/* AI Assist modal header */
+.dv-modal-ai-header { border-bottom: 1px solid var(--outline-variant); background: var(--surface-container); }
+.dv-ai-icon { color: var(--primary); }
+.dv-ai-model-badge { background: var(--card-bg); border: 1px solid var(--outline-variant); color: var(--on-surface-variant); }
 
 .slide-right-enter-active, .slide-right-leave-active { transition: opacity 0.3s; }
 .slide-right-enter-from, .slide-right-leave-to { opacity: 0; }

@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="max-w-[1600px] mx-auto mb-8">
       <div class="space-y-1">
-        <h1 class="font-h1 text-h1 text-slate-900">Configuración</h1>
-        <p class="font-body-md text-slate-500 max-w-2xl">Gestiona las conexiones y preferencias del sistema</p>
+        <h1 class="font-h1 text-h1 page-title">Configuración</h1>
+        <p class="font-body-md page-subtitle max-w-2xl">Gestiona las conexiones y preferencias del sistema</p>
       </div>
     </div>
 
@@ -104,7 +104,7 @@
               />
               <button
                 type="button"
-                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--text-secondary)"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--on-surface-variant)"
                 @click="showToken = !showToken"
               >
                 {{ showToken ? '🙈' : '👁️' }}
@@ -124,7 +124,7 @@
               <div v-for="cube in cubeStore.cubes" :key="cube.name" class="cube-item">
                 <div class="cube-item-header" @click="toggleCube(cube.name)">
                   <span>📦 {{ cube.name }}</span>
-                  <span style="font-size:11px;color:var(--text-secondary)">
+                  <span style="font-size:11px;color:var(--on-surface-variant)">
                     {{ cube.measures.length }} medidas · {{ cube.dimensions.length }} dimensiones
                   </span>
                   <span style="margin-left:auto">{{ openCubes.includes(cube.name) ? '▲' : '▼' }}</span>
@@ -202,7 +202,7 @@
               />
               <button
                 type="button"
-                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--text-secondary)"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--on-surface-variant)"
                 @click="showLlmKey[prov.id] = !showLlmKey[prov.id]"
               >{{ showLlmKey[prov.id] ? '🙈' : '👁️' }}</button>
             </div>
@@ -744,8 +744,8 @@ function doDeletePalette() {
 .settings-view { max-width: 1100px; }
 
 .page-header { margin-bottom: 20px; }
-.page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.page-subtitle { font-size: 14px; color: var(--text-secondary); }
+.page-title { font-size: 20px; font-weight: 600; color: var(--on-surface); margin-bottom: 4px; }
+.page-subtitle { font-size: 14px; color: var(--on-surface-variant); }
 
 .settings-grid {
   display: grid;
@@ -759,25 +759,25 @@ function doDeletePalette() {
   display: flex; align-items: flex-start; gap: 14px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
-  background: #fafafa;
+  background: var(--surface-container);
   cursor: pointer;
   transition: background 0.2s;
 }
 .sc-header:hover {
-  background: #f0f0f0;
+  background: var(--surface-container-high);
 }
 .sc-header-text {
   flex: 1;
 }
 .sc-toggle {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   flex-shrink: 0;
   margin-left: auto;
 }
 .sc-icon { font-size: 28px; flex-shrink: 0; }
-.sc-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-.sc-desc { font-size: 13px; color: var(--text-secondary); }
+.sc-title { font-size: 15px; font-weight: 600; color: var(--on-surface); margin-bottom: 2px; }
+.sc-desc { font-size: 13px; color: var(--on-surface-variant); }
 
 .sc-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 
@@ -785,7 +785,7 @@ function doDeletePalette() {
 .btn-spin {
   width: 14px; height: 14px;
   border: 2px solid rgba(0,0,0,0.15);
-  border-top-color: var(--text);
+  border-top-color: var(--on-surface);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   display: inline-block;
@@ -805,34 +805,34 @@ function doDeletePalette() {
   margin-bottom: 10px;
 }
 .schema-header:hover { background: var(--primary-light); }
-.schema-title { font-size: 13px; font-weight: 600; color: var(--text); margin: 0; }
+.schema-title { font-size: 13px; font-weight: 600; color: var(--on-surface); margin: 0; }
 .schema-count {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin-left: 8px;
 }
 .schema-toggle {
   margin-left: auto;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 .cube-list { display: flex; flex-direction: column; gap: 6px; }
 .cube-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .cube-item-header {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px; background: var(--bg);
-  cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text);
+  cursor: pointer; font-size: 13px; font-weight: 500; color: var(--on-surface);
 }
 .cube-item-header:hover { background: var(--primary-light); }
 .cube-item-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
 .cube-member-group-sm { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
-.cg-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; flex-shrink: 0; }
+.cg-title { font-size: 12px; font-weight: 600; color: var(--on-surface-variant); white-space: nowrap; flex-shrink: 0; }
 .member-tag {
   font-size: 11px; padding: 2px 8px; border-radius: 10px;
   font-family: monospace;
 }
 .member-tag.measure { background: var(--primary-light); color: var(--primary); }
-.member-tag.dimension { background: #f6ffed; color: var(--success); }
+.member-tag.dimension { background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); }
 
 /* Profile */
 .profile-display { display: flex; gap: 16px; align-items: flex-start; }
@@ -842,20 +842,20 @@ function doDeletePalette() {
   font-size: 18px; font-weight: 700;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.pi-name { font-size: 16px; font-weight: 600; color: var(--text); }
-.pi-email { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.pi-name { font-size: 16px; font-weight: 600; color: var(--on-surface); }
+.pi-email { font-size: 13px; color: var(--on-surface-variant); margin-top: 2px; }
 
 .db-list-small { display: flex; flex-direction: column; gap: 6px; }
 .dbs-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 12px; background: var(--bg); border-radius: 6px;
-  font-size: 13px; color: var(--text);
+  font-size: 13px; color: var(--on-surface);
 }
 
 /* Info table */
 .info-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .info-table td { padding: 8px 0; border-bottom: 1px solid var(--border); }
-.info-table td:first-child { color: var(--text-secondary); width: 50%; }
+.info-table td:first-child { color: var(--on-surface-variant); width: 50%; }
 .info-table tr:last-child td { border-bottom: none; }
 
 /* LLM */
@@ -864,7 +864,7 @@ function doDeletePalette() {
 .llm-ops-header {
   display: grid; grid-template-columns: 1fr auto;
   padding: 8px 14px; background: var(--bg);
-  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  font-size: 11px; font-weight: 700; color: var(--on-surface-variant);
   text-transform: uppercase; letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border);
 }
@@ -875,8 +875,8 @@ function doDeletePalette() {
   border-bottom: 1px solid var(--border);
 }
 .llm-ops-row:last-child { border-bottom: none; }
-.llm-op-label { font-size: 13px; font-weight: 600; color: var(--text); }
-.llm-op-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.llm-op-label { font-size: 13px; font-weight: 600; color: var(--on-surface); }
+.llm-op-desc  { font-size: 12px; color: var(--on-surface-variant); margin-top: 2px; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -892,10 +892,10 @@ function doDeletePalette() {
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--card-bg);
   transition: border-color 0.15s;
 }
-.pal-row--default { border-color: var(--primary); background: #e6f4ff; }
+.pal-row--default { border-color: var(--primary); background: var(--primary-container); }
 
 .pal-row-swatches { display: flex; gap: 3px; flex-shrink: 0; }
 .pal-swatch {
@@ -906,7 +906,7 @@ function doDeletePalette() {
 }
 .pal-swatch--lg { width: 22px; height: 22px; border-radius: 4px; }
 
-.pal-row-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; }
+.pal-row-name { font-size: 13px; font-weight: 500; color: var(--on-surface); flex: 1; min-width: 0; }
 
 .pal-default-badge {
   font-size: 11px;
@@ -925,12 +925,12 @@ function doDeletePalette() {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
-  background: #fafafa;
+  background: var(--surface-container);
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.pal-form-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+.pal-form-title { font-size: 14px; font-weight: 600; color: var(--on-surface); margin: 0; }
 
 .pal-color-inputs {
   display: flex;
@@ -946,7 +946,7 @@ function doDeletePalette() {
   border-radius: 6px;
   padding: 2px;
   cursor: pointer;
-  background: #fff;
+  background: var(--card-bg);
 }
 .pal-color-remove {
   position: absolute; top: -6px; right: -6px;
@@ -966,7 +966,7 @@ function doDeletePalette() {
   border-radius: 6px;
   background: transparent;
   font-size: 20px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
@@ -986,7 +986,7 @@ function doDeletePalette() {
   padding: 10px 14px;
   border: 1px solid var(--error);
   border-radius: 8px;
-  background: #fff2f0;
+  background: var(--error-container);
   font-size: 13px;
 }
 .pal-delete-confirm span { flex: 1; }
@@ -995,23 +995,23 @@ function doDeletePalette() {
 .ml-container { display: flex; flex-direction: column; gap: 16px; }
 .ml-loading, .ml-empty { 
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 40px; color: var(--text-secondary); text-align: center;
+  padding: 40px; color: var(--on-surface-variant); text-align: center;
 }
 .ml-list { display: flex; flex-direction: column; gap: 12px; }
 .ml-model-card {
   display: flex; align-items: flex-start; gap: 16px;
-  padding: 16px; background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
 }
 .ml-model-info { flex: 1; min-width: 0; }
-.ml-model-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.ml-model-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
+.ml-model-name { font-size: 14px; font-weight: 600; color: var(--on-surface); margin-bottom: 4px; }
+.ml-model-meta { display: flex; gap: 8px; font-size: 11px; color: var(--on-surface-variant); margin-bottom: 8px; }
 .ml-model-features { 
-  padding: 8px 12px; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border);
+  padding: 8px 12px; background: var(--surface-container); border-radius: 8px; border: 1px dashed var(--border);
 }
-.ml-model-features strong { display: block; font-size: 11px; margin-bottom: 6px; color: var(--text-secondary); }
+.ml-model-features strong { display: block; font-size: 11px; margin-bottom: 6px; color: var(--on-surface-variant); }
 .ml-feature-tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .ml-feature-tag {
-  font-size: 10px; font-family: monospace; background: #fff; border: 1px solid var(--border);
+  font-size: 10px; font-family: monospace; background: var(--card-bg); border: 1px solid var(--border);
   padding: 1px 6px; border-radius: 4px; color: var(--primary);
 }
 .ml-upload-box { margin-top: 10px; }
