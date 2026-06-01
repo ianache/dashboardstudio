@@ -19,6 +19,19 @@ import { fastapiProxy, cubejsProxy, aiProxy } from './proxy.js';
 import { requireAuth, tokenRefresh } from './middleware/auth.js';
 import { initOIDC } from './oidc.js';
 
+// Minimal res shim for express-session in WS upgrade context (no HTTP response needed)
+function makeWsResFake() {
+  return {
+    headersSent: false,
+    getHeader: () => undefined,
+    setHeader: () => {},
+    end: () => {},
+    on: () => {},
+    once: () => {},
+    emit: () => {},
+  };
+}
+
 const app = express();
 
 console.log('--- BFF CONFIG DIAGNOSTICS ---');
@@ -62,21 +75,25 @@ async function startServer() {
     });
 
     // Handle WebSocket upgrades for proxies
+    // Session middleware must run first so req.session is populated and
+    // the proxy's proxyReq handler can inject the Authorization header.
     server.on('upgrade', (req, socket, head) => {
       console.log(`[BFF WS Upgrade] Original URL: ${req.url}`);
-      if (req.url.startsWith('/bff/api')) {
-        req.url = req.url.replace('/bff/api', '');
-        console.log(`[BFF WS Upgrade] Rewrote to FastAPI: ${req.url}`);
-        fastapiProxy.upgrade(req, socket, head);
-      } else if (req.url.startsWith('/bff/cubejs')) {
-        req.url = req.url.replace('/bff/cubejs', '');
-        console.log(`[BFF WS Upgrade] Rewrote to CubeJS: ${req.url}`);
-        cubejsProxy.upgrade(req, socket, head);
-      } else if (req.url.startsWith('/bff/ai')) {
-        req.url = req.url.replace('/bff/ai', '');
-        console.log(`[BFF WS Upgrade] Rewrote to AI Service: ${req.url}`);
-        aiProxy.upgrade(req, socket, head);
-      }
+      sessionMiddleware(req, makeWsResFake(), () => {
+        if (req.url.startsWith('/bff/api')) {
+          req.url = req.url.replace('/bff/api', '');
+          console.log(`[BFF WS Upgrade] Rewrote to FastAPI: ${req.url}`);
+          fastapiProxy.upgrade(req, socket, head);
+        } else if (req.url.startsWith('/bff/cubejs')) {
+          req.url = req.url.replace('/bff/cubejs', '');
+          console.log(`[BFF WS Upgrade] Rewrote to CubeJS: ${req.url}`);
+          cubejsProxy.upgrade(req, socket, head);
+        } else if (req.url.startsWith('/bff/ai')) {
+          req.url = req.url.replace('/bff/ai', '');
+          console.log(`[BFF WS Upgrade] Rewrote to AI Service: ${req.url}`);
+          aiProxy.upgrade(req, socket, head);
+        }
+      });
     });
   } catch (error) {
     console.error('BFF failed to start:', error);
