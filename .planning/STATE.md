@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-01T03:36:47.825Z"
+last_updated: "2026-06-01T03:44:29.388Z"
 progress:
   total_phases: 41
-  completed_phases: 26
+  completed_phases: 27
   total_plans: 68
-  completed_plans: 48
+  completed_plans: 49
 ---
 
 # Project State: Dashboard Studio v2.0
@@ -46,6 +46,7 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 | 45 | 1/1 | 15 min | 15 min |
 | 46 | 3/3 | 35 min | 11.7 min |
 | Phase 41-pickle-model-node P01 | 15 | 4 tasks | 8 files |
+| Phase 41-pickle-model-node P02 | 5 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 - [Phase 46-03]: skills field populated by case 'skills' stream event; executeSkill appends new message; cache_hit stored as percentage number
 - [Phase 41-pickle-model-node]: Subprocess isolation for Pickle deserialization prevents RCE in main FastAPI process
 - [Phase 41-pickle-model-node]: ml_worker.py dual-mode CLI (inspect/predict) isolates pickle loading in subprocess
+- [Phase 41-pickle-model-node]: dynamic_select value_field/label_field: use opt.id as stored value (not opt.name) to correctly map to backend primary key
 
 ### Blockers/Concerns
 
@@ -79,5 +81,5 @@ Progress: [##########] 100% (Phase 46 — 3/3 plans complete)
 ## Session Continuity
 
 Last session: 2026-06-01
-Stopped at: Completed 46-03-PLAN.md — Chat UI Gap Closure
-Resume file: .planning/phases/46-chat-ui/46-03-SUMMARY.md
+Stopped at: Completed 41-02-PLAN.md — ML Model Management UI
+Resume file: .planning/phases/41-pickle-model-node/41-02-SUMMARY.md

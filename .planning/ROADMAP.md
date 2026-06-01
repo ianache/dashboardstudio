@@ -25,7 +25,7 @@
 | 38. Data Transform Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 39. Templating Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 40. LLM Node | v1.9 | 1/1 | Complete | 2026-05-31 |
-| 41. Pickle Model Node | 2/3 | In Progress|  | 2026-05-31 |
+| 41. Pickle Model Node | 3/3 | Complete   | 2026-06-01 | 2026-05-31 |
 | 42. Conditional/Branch Node | v1.9 | 1/1 | Complete | 2026-05-31 |
 | 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 44. AI Analyst Skills | v2.0 | 2/2 | Complete | 2026-05-31 |
