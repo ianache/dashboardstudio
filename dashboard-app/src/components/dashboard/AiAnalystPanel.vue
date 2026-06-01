@@ -1,71 +1,92 @@
 <template>
-  <div class="ai-panel">
-    <!-- Header -->
-    <div class="ai-panel-header">
-      <div class="ai-panel-title-row">
-        <span class="material-symbols-outlined ai-panel-icon">auto_awesome</span>
-        <span class="ai-panel-title">AI Analyst</span>
-      </div>
-
-      <div class="ai-panel-header-actions">
-        <!-- Usage stats -->
-        <div v-if="store.usage.input_tokens > 0 || store.usage.output_tokens > 0" class="ai-usage-stats">
-          <span class="ai-usage-tokens ai-usage-tokens--in" title="Tokens de entrada">
-            <span class="material-symbols-outlined ai-stat-icon">arrow_downward</span>{{ formatTokens(store.usage.input_tokens) }}
-          </span>
-          <span class="ai-usage-tokens ai-usage-tokens--out" title="Tokens de salida">
-            <span class="material-symbols-outlined ai-stat-icon">arrow_upward</span>{{ formatTokens(store.usage.output_tokens) }}
-          </span>
-          <span v-if="store.usage.cache_hit > 0" class="ai-usage-cache" title="Cache hit %">
-            <span class="material-symbols-outlined ai-stat-icon">cached</span>{{ store.usage.cache_hit.toFixed(0) }}%
-          </span>
-          <span v-if="store.usage.cost > 0" class="ai-usage-cost">
-            ${{ store.usage.cost.toFixed(4) }}
-          </span>
+  <aside class="ai-panel">
+    <!-- HEADER -->
+    <header class="ai-panel-header">
+      <div class="ai-header-top">
+        <div class="ai-identity">
+          <div class="ai-avatar">
+            <span class="material-symbols-outlined">psychology</span>
+          </div>
+          <div>
+            <h1 class="ai-title">BI/AI Analyst</h1>
+            <p class="ai-subtitle">Analista BI · Dashboard Studio</p>
+          </div>
         </div>
-
-        <!-- Clear button -->
-        <button
-          v-if="store.messages.length > 0"
-          class="ai-panel-btn"
-          title="Limpiar conversación"
-          @click="store.clearMessages()"
-        >
-          <span class="material-symbols-outlined">delete_sweep</span>
-        </button>
-
-        <!-- Close button -->
-        <button class="ai-panel-btn" title="Cerrar" @click="store.togglePanel()">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+        <div class="ai-header-btns">
+          <button
+            v-if="store.messages.length > 0"
+            class="ai-icon-btn"
+            title="Limpiar conversación"
+            @click="store.clearMessages()"
+          >
+            <span class="material-symbols-outlined">delete_sweep</span>
+          </button>
+          <button class="ai-icon-btn" title="Cerrar" @click="store.togglePanel()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Messages list -->
-    <div ref="messagesContainer" class="ai-panel-messages">
+      <div class="ai-divider"></div>
+
+      <!-- Usage chips -->
+      <div class="ai-chips">
+        <div class="ai-chip">
+          <span class="ai-chip-lbl">IN</span>
+          <span class="ai-chip-val ai-chip-val--in">{{ formatTokens(store.usage.input_tokens) }}</span>
+        </div>
+        <div class="ai-chip">
+          <span class="ai-chip-lbl">OUT</span>
+          <span class="ai-chip-val ai-chip-val--out">{{ formatTokens(store.usage.output_tokens) }}</span>
+        </div>
+        <div v-if="store.usage.cache_hit > 0" class="ai-chip">
+          <span class="ai-chip-lbl">CACHE</span>
+          <span class="ai-chip-val ai-chip-val--cache">{{ store.usage.cache_hit.toFixed(0) }}%</span>
+        </div>
+        <div v-if="store.usage.cost > 0" class="ai-chip ai-chip--cost">
+          <span class="ai-chip-lbl ai-chip-lbl--cost">COST</span>
+          <span class="ai-chip-val ai-chip-val--cost">${{ store.usage.cost.toFixed(3) }}</span>
+        </div>
+      </div>
+
+      <div class="ai-divider"></div>
+    </header>
+
+    <!-- MESSAGES -->
+    <main ref="messagesContainer" class="ai-messages">
       <!-- Empty state -->
-      <div v-if="store.messages.length === 0" class="ai-empty-state">
-        <span class="material-symbols-outlined ai-empty-icon">psychology_alt</span>
-        <p class="ai-empty-title">Analista BI</p>
-        <p class="ai-empty-hint">Hazme una pregunta sobre los datos de este dashboard. Puedo analizar tendencias, explicar métricas y sugerir insights.</p>
+      <div v-if="store.messages.length === 0" class="ai-empty">
+        <div class="ai-empty-icon-wrap">
+          <span class="material-symbols-outlined">psychology</span>
+        </div>
+        <p class="ai-empty-title">BI/AI Analyst</p>
+        <p class="ai-empty-hint">
+          Hazme una pregunta sobre los datos de este dashboard. Analizo tendencias, explico métricas y sugiero insights.
+        </p>
       </div>
 
-      <!-- Message list -->
+      <!-- Date divider when there are messages -->
+      <div v-else class="ai-date-row">
+        <div class="ai-date-line"></div>
+        <span class="ai-date-text">{{ todayLabel }}</span>
+        <div class="ai-date-line"></div>
+      </div>
+
       <AiAnalystMessage
         v-for="(msg, idx) in store.messages"
         :key="idx"
         :message="msg"
       />
-    </div>
+    </main>
 
-    <!-- Footer / Input -->
-    <div class="ai-panel-footer">
-      <div class="ai-input-row" :class="{ 'ai-input-row--loading': store.loading }">
+    <!-- FOOTER -->
+    <footer class="ai-footer">
+      <div class="ai-input-wrap" :class="{ 'ai-input-wrap--loading': store.loading }">
         <textarea
           ref="inputRef"
           v-model="inputText"
           class="ai-input"
-          placeholder="Escribe una pregunta..."
+          placeholder="Pregunta al BI Analyst..."
           rows="1"
           :disabled="store.loading"
           @keydown.enter.exact.prevent="send"
@@ -77,19 +98,19 @@
           title="Enviar"
           @click="send"
         >
-          <svg v-if="store.loading" class="ai-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg v-if="store.loading" class="ai-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
           </svg>
-          <span v-else class="material-symbols-outlined">send</span>
+          <span v-else class="material-symbols-outlined">play_arrow</span>
         </button>
       </div>
-      <p class="ai-input-hint">Enter para enviar · Shift+Enter para nueva línea</p>
-    </div>
-  </div>
+      <p class="ai-footer-hint">Enter para enviar · Shift+Enter para nueva línea</p>
+    </footer>
+  </aside>
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useAiAnalystStore } from '@/stores/aiAnalyst'
 import AiAnalystMessage from '@/components/dashboard/AiAnalystMessage.vue'
 
@@ -99,9 +120,16 @@ const inputText = ref('')
 const messagesContainer = ref(null)
 const inputRef = ref(null)
 
+const todayLabel = computed(() => {
+  return new Date().toLocaleDateString('es-PE', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  })
+})
+
 function formatTokens(n) {
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k tokens'
-  return n + ' tokens'
+  if (!n) return '0'
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+  return String(n)
 }
 
 async function send() {
@@ -119,7 +147,6 @@ function autoResize() {
   inputRef.value.style.height = Math.min(inputRef.value.scrollHeight, 120) + 'px'
 }
 
-// Auto-scroll to bottom when new messages arrive or content streams in
 watch(
   () => store.messages.map(m => m.content + m.thought),
   async () => {
@@ -133,194 +160,282 @@ watch(
 </script>
 
 <style scoped>
+/* ── Design tokens (MD3 dark palette) ── */
 .ai-panel {
-  width: 380px;
+  --c-surface:      #111319;
+  --c-container:    #1d2026;
+  --c-high:         #272a30;
+  --c-low:          #191b22;
+  --c-lowest:       #0c0e14;
+  --c-outline-v:    #424753;
+  --c-primary:      #adc6ff;
+  --c-primary-c:    #0058bc;
+  --c-on-primary:   #002e69;
+  --c-on-primary-c: #c3d4ff;
+  --c-secondary:    #b7c8e1;
+  --c-secondary-c:  #3a4a5f;
+  --c-tertiary:     #ffb595;
+  --c-on-surface:   #e1e2eb;
+  --c-on-sv:        #c2c6d5;
+
+  width: 400px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-left: 1px solid #e2e8f0;
+  background: var(--c-container);
+  border-left: 1px solid var(--c-outline-v);
   flex-shrink: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--c-on-surface);
 }
 
-/* Header */
+/* ── Header ── */
 .ai-panel-header {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: rgba(39, 42, 48, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ai-header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8faff, #fdf4ff);
-  flex-shrink: 0;
+  padding: 16px;
 }
 
-.ai-panel-title-row {
+.ai-identity {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.ai-panel-icon {
-  font-size: 20px;
-  color: #6366f1;
-}
-
-.ai-panel-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-}
-
-.ai-panel-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Usage stats */
-.ai-usage-stats {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-right: 8px;
-}
-
-.ai-usage-tokens {
-  font-size: 11px;
-  font-weight: 500;
-  color: #64748b;
-  background: #f1f5f9;
-  padding: 2px 8px;
+.ai-avatar {
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
-  font-family: ui-monospace, monospace;
-}
-
-.ai-usage-cost {
-  font-size: 11px;
-  font-weight: 500;
-  color: #059669;
-  background: #ecfdf5;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-family: ui-monospace, monospace;
-}
-
-.ai-usage-tokens--in { color: #0369a1; background: #e0f2fe; }
-.ai-usage-tokens--out { color: #7c3aed; background: #ede9fe; }
-
-.ai-usage-cache {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #b45309;
-  background: #fef3c7;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-family: ui-monospace, monospace;
-}
-
-.ai-stat-icon {
-  font-size: 10px;
-  vertical-align: middle;
-}
-
-.ai-panel-btn {
+  background: var(--c-primary-c);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  color: var(--c-on-primary-c);
+  box-shadow: 0 4px 12px rgba(173, 198, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.ai-avatar .material-symbols-outlined { font-size: 24px; }
+
+.ai-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--c-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ai-subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--c-on-sv);
+  opacity: 0.6;
+  margin: 3px 0 0;
+}
+
+.ai-header-btns {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ai-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 50%;
   cursor: pointer;
-  color: #64748b;
-  transition: all 0.15s;
+  color: var(--c-on-sv);
+  transition: background 0.15s, color 0.15s;
 }
 
-.ai-panel-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+.ai-icon-btn:hover {
+  background: var(--c-outline-v);
+  color: var(--c-on-surface);
 }
 
-.ai-panel-btn .material-symbols-outlined { font-size: 18px; }
+.ai-icon-btn .material-symbols-outlined { font-size: 20px; }
 
-/* Messages area */
-.ai-panel-messages {
+.ai-divider {
+  height: 1px;
+  background: rgba(66, 71, 83, 0.3);
+}
+
+/* ── Usage chips ── */
+.ai-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  overflow-x: auto;
+}
+
+.ai-chips::-webkit-scrollbar { display: none; }
+
+.ai-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--c-lowest);
+  border: 1px solid rgba(66, 71, 83, 0.5);
+  flex-shrink: 0;
+}
+
+.ai-chip--cost {
+  background: rgba(173, 198, 255, 0.08);
+  border-color: rgba(173, 198, 255, 0.2);
+  margin-left: auto;
+}
+
+.ai-chip-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--c-on-sv);
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+}
+
+.ai-chip-lbl--cost { color: var(--c-primary); opacity: 0.8; }
+
+.ai-chip-val {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.ai-chip-val--in    { color: var(--c-primary); }
+.ai-chip-val--out   { color: var(--c-secondary); }
+.ai-chip-val--cache { color: var(--c-tertiary); }
+.ai-chip-val--cost  { color: var(--c-primary); font-weight: 700; }
+
+/* ── Messages ── */
+.ai-messages {
   flex: 1;
   overflow-y: auto;
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
   scroll-behavior: smooth;
+  background: linear-gradient(to bottom, var(--c-container), var(--c-surface));
 }
 
-.ai-panel-messages::-webkit-scrollbar { width: 4px; }
-.ai-panel-messages::-webkit-scrollbar-track { background: transparent; }
-.ai-panel-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+.ai-messages::-webkit-scrollbar { width: 4px; }
+.ai-messages::-webkit-scrollbar-track { background: transparent; }
+.ai-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-/* Empty state */
-.ai-empty-state {
+/* ── Empty state ── */
+.ai-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 40px 16px;
+  padding: 48px 20px;
   margin: auto 0;
-  gap: 8px;
+  gap: 10px;
 }
 
-.ai-empty-icon {
-  font-size: 48px;
-  color: #c7d2fe;
+.ai-empty-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(0, 88, 188, 0.2);
+  border: 1px solid rgba(173, 198, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 4px;
 }
 
+.ai-empty-icon-wrap .material-symbols-outlined {
+  font-size: 32px;
+  color: var(--c-primary);
+}
+
 .ai-empty-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--c-on-surface);
   margin: 0;
 }
 
 .ai-empty-hint {
   font-size: 13px;
-  color: #64748b;
-  line-height: 1.5;
+  color: var(--c-on-sv);
+  line-height: 1.6;
   margin: 0;
+  opacity: 0.8;
 }
 
-/* Footer / Input */
-.ai-panel-footer {
-  padding: 10px 12px 12px;
-  border-top: 1px solid #e2e8f0;
+/* ── Date divider ── */
+.ai-date-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-date-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(66, 71, 83, 0.2);
+}
+
+.ai-date-text {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-on-sv);
+  opacity: 0.4;
+  white-space: nowrap;
+}
+
+/* ── Footer ── */
+.ai-footer {
+  padding: 12px 16px 14px;
+  background: rgba(39, 42, 48, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--c-outline-v);
   flex-shrink: 0;
-  background: #fafafa;
 }
 
-.ai-input-row {
+.ai-input-wrap {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--c-lowest);
+  border: 1px solid var(--c-outline-v);
   border-radius: 12px;
-  padding: 6px 8px;
+  padding: 8px 8px 8px 14px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.ai-input-row:focus-within {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+.ai-input-wrap:focus-within {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 1px rgba(173, 198, 255, 0.2);
 }
 
-.ai-input-row--loading {
-  opacity: 0.75;
-}
+.ai-input-wrap--loading { opacity: 0.6; }
 
 .ai-input {
   flex: 1;
@@ -329,58 +444,52 @@ watch(
   resize: none;
   font-size: 14px;
   line-height: 1.5;
-  color: #0f172a;
+  color: var(--c-on-surface);
   background: transparent;
   max-height: 120px;
   overflow-y: auto;
-  font-family: inherit;
-  min-height: 24px;
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 22px;
 }
 
-.ai-input::placeholder { color: #94a3b8; }
+.ai-input::placeholder { color: rgba(194, 198, 213, 0.35); }
 .ai-input:disabled { cursor: not-allowed; }
 
 .ai-send-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 8px;
   border: none;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  color: #fff;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: transform 0.1s, opacity 0.15s;
+  box-shadow: 0 4px 12px rgba(173, 198, 255, 0.2);
 }
 
-.ai-send-btn:hover:not(:disabled) {
-  opacity: 0.85;
-  transform: translateY(-1px);
-}
+.ai-send-btn:hover:not(:disabled) { transform: scale(1.05); }
+.ai-send-btn:active:not(:disabled) { transform: scale(0.95); }
+.ai-send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.ai-send-btn .material-symbols-outlined { font-size: 20px; }
 
-.ai-send-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.ai-send-btn .material-symbols-outlined { font-size: 16px; }
-
-.ai-spin {
-  animation: ai-spin-kf 0.8s linear infinite;
-}
+.ai-spin { animation: ai-spin-kf 0.8s linear infinite; }
 
 @keyframes ai-spin-kf {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }
 
-.ai-input-hint {
-  font-size: 11px;
-  color: #94a3b8;
-  margin: 6px 0 0;
+.ai-footer-hint {
+  font-size: 10px;
+  color: var(--c-on-sv);
+  opacity: 0.35;
   text-align: center;
+  margin: 8px 0 0;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 </style>
