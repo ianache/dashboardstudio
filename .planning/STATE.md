@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-01T01:11:32.656Z"
+last_updated: "2026-06-01T01:54:57.957Z"
 progress:
-  total_phases: 40
+  total_phases: 41
   completed_phases: 25
-  total_plans: 65
+  total_plans: 67
   completed_plans: 45
 ---
 
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 46 of 46 (Chat UI)
-Plan: 01 of TBD
-Status: Not started
-Last activity: 2026-05-31 — Completed Phase 45
+Plan: 02 of 02
+Status: In Progress
+Last activity: 2026-06-01 — Completed 46-01 aiAnalyst Store with SSE Streaming
 
 Progress: [##########] 100% (Phase 45)
-Progress: [░░░░░░░░░░] 0% (Phase 46)
+Progress: [#####░░░░░] 50% (Phase 46 — 1/2 plans complete)
 
 ## Performance Metrics
 
@@ -44,8 +44,7 @@ Progress: [░░░░░░░░░░] 0% (Phase 46)
 | 43 | 2/2 | 15 min | 7.5 min |
 | 44 | 2/2 | 30 min | 15 min |
 | 45 | 1/1 | 15 min | 15 min |
-| 46 | TBD | - | - |
-
+| 46 | 1/2 | 8 min | 8 min |
 
 ## Accumulated Context
 
@@ -63,6 +62,9 @@ Progress: [░░░░░░░░░░] 0% (Phase 46)
 - [Phase 44]: Skills catalog fetched from remote URL at startup and cached globally.
 - [Phase 45]: Enabled WebSocket support for AI proxy for consistency
 - [Phase 45]: Injected X-User-Email alongside X-User-ID for service context
+- [Phase 46-chat-ui]: Buffer-based line parsing for ReadableStream ensures partial JSON chunks are handled correctly before JSON.parse
+- [Phase 46-chat-ui]: Assistant placeholder message added before await fetch so UI enters streaming state immediately
+- [Phase 46-chat-ui]: credentials: include on /bff/ai/chat fetch to pass BFF session cookie for auth
 
 ### Blockers/Concerns
 
@@ -70,6 +72,6 @@ Progress: [░░░░░░░░░░] 0% (Phase 46)
 
 ## Session Continuity
 
-Last session: 2026-05-31
-Stopped at: Completed 44-02-PLAN.md — Skills Catalog & Startup
-Resume file: .planning/phases/44-ai-analyst-skills/44-02-SUMMARY.md
+Last session: 2026-06-01
+Stopped at: Completed 46-01-PLAN.md — aiAnalyst Store with SSE Streaming
+Resume file: .planning/phases/46-chat-ui/46-01-SUMMARY.md
