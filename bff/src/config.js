@@ -22,6 +22,7 @@ const config = {
   cubejsUrl: process.env.BFF_CUBEJS_URL || 'http://cubejs:4000',
   cubejsSecret: required('BFF_CUBEJS_SECRET'),
   backendUrl: process.env.BFF_BACKEND_URL || 'http://backend:8000',
+  aiServiceUrl: process.env.BFF_AI_URL || 'http://ai-analyst:8001',
   spaOrigins: (process.env.BFF_SPA_ORIGINS || 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173').split(','),
   cookieDomain: process.env.BFF_COOKIE_DOMAIN || undefined,
   cookieSecure: process.env.BFF_COOKIE_SECURE === 'true',
