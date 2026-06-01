@@ -579,7 +579,8 @@ const expandedSections = ref({
   profile: true,
   llm: false,
   about: true,
-  palettes: false
+  palettes: false,
+  ml: false
 })
 
 function toggleSection(section) {
