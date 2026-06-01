@@ -39,11 +39,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #001529 0%, #003a8c 100%);
+  background: var(--bg);
 }
 
 .auth-redirect-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
   padding: 48px 40px;
   display: flex;
@@ -61,28 +61,28 @@ onMounted(() => {
 .auth-logo h1 {
   font-size: 20px;
   font-weight: 400;
-  color: var(--text);
+  color: var(--on-surface);
   margin: 0;
 }
 .auth-logo h1 strong { font-weight: 700; }
 .auth-logo p {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin: 4px 0 0;
 }
 
 .auth-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid #e6f4ff;
-  border-top-color: #1890ff;
+  border: 3px solid var(--outline-variant);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 .auth-message {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin: 0;
 }
 
