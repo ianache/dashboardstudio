@@ -126,8 +126,8 @@ function refreshAll() {
   flex-shrink: 0;
 }
 .vh-info { flex: 1; min-width: 0; }
-.vh-title { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.vh-desc { font-size: 14px; color: var(--text-secondary); margin: 0; }
+.vh-title { font-size: 24px; font-weight: 700; color: var(--on-surface); margin-bottom: 4px; }
+.vh-desc { font-size: 14px; color: var(--on-surface-variant); margin: 0; }
 .vh-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
 .layout-toggle {

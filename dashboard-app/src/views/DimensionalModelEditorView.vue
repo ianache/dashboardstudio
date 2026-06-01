@@ -2366,11 +2366,11 @@ function handleAddNodesToDiagram(nodeIds) {
 }
 .toolbar-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .title-text {
-  font-size: 16px; font-weight: 600; color: var(--text);
+  font-size: 16px; font-weight: 600; color: var(--on-surface);
   cursor: pointer; display: flex; align-items: center; gap: 6px;
   flex-shrink: 0;
 }
-.edit-hint { color: var(--text-secondary); opacity: 0.5; }
+.edit-hint { color: var(--on-surface-variant); opacity: 0.5; }
 .title-text:hover .edit-hint { opacity: 1; }
 .title-edit-input { font-size: 15px; font-weight: 600; max-width: 300px; }
 
@@ -2553,7 +2553,7 @@ function handleAddNodesToDiagram(nodeIds) {
   pointer-events: none;
 }
 .canvas-hint p {
-  font-size: 14px; color: var(--text-secondary);
+  font-size: 14px; color: var(--on-surface-variant);
   text-align: center; max-width: 320px; line-height: 1.6;
   background: rgba(255,255,255,0.7); padding: 16px 24px; border-radius: 8px;
 }
@@ -2621,7 +2621,7 @@ function handleAddNodesToDiagram(nodeIds) {
 .node-field {
   display: flex; align-items: center; gap: 4px;
   padding: 3px 8px 3px 4px;
-  font-size: 12px; color: var(--text);
+  font-size: 12px; color: var(--on-surface);
   border-bottom: 1px solid var(--border);
   min-height: 28px;
 }
@@ -2652,9 +2652,9 @@ function handleAddNodesToDiagram(nodeIds) {
 .field-icon { flex-shrink: 0; width: 16px; text-align: center; font-size: 11px; }
 .key-icon, .fk-icon { font-size: 11px; }
 .field-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.field-type { font-size: 10px; color: var(--text-secondary); flex-shrink: 0; }
+.field-type { font-size: 10px; color: var(--on-surface-variant); flex-shrink: 0; }
 
-.node-empty { padding: 6px 10px; font-size: 12px; color: var(--text-secondary); font-style: italic; }
+.node-empty { padding: 6px 10px; font-size: 12px; color: var(--on-surface-variant); font-style: italic; }
 .node-warn { padding: 4px 10px; font-size: 11px; color: #d46b08; background: #fff7e6; }
 
 /* Properties panel */
@@ -2696,10 +2696,10 @@ function handleAddNodesToDiagram(nodeIds) {
   background: var(--bg);
   color: var(--primary);
 }
-.icon-preview.empty { color: var(--text-secondary); }
+.icon-preview.empty { color: var(--on-surface-variant); }
 .form-hint {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin-top: 2px;
 }
 
@@ -2720,7 +2720,7 @@ function handleAddNodesToDiagram(nodeIds) {
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   user-select: none;
@@ -2740,7 +2740,7 @@ function handleAddNodesToDiagram(nodeIds) {
 
 .props-section-title {
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  font-size: 12px; font-weight: 600; color: var(--on-surface-variant);
   text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px;
 }
 
@@ -2782,15 +2782,15 @@ function handleAddNodesToDiagram(nodeIds) {
 
 .desc-toggle {
   width: 22px; height: 22px; border-radius: 4px;
-  color: var(--text-secondary); opacity: 0.6;
+  color: var(--on-surface-variant); opacity: 0.6;
   text-transform: none; letter-spacing: 0;
 }
 .desc-toggle:hover { opacity: 1; background: var(--bg); color: var(--primary); }
 .desc-toggle.active { opacity: 1; color: var(--primary); background: #e6f4ff; }
 .field-name-input { flex: 1; min-width: 0; font-size: 12px; padding: 4px 6px; height: 28px; }
 .field-type-select { width: 86px; flex-shrink: 0; font-size: 12px; padding: 4px 4px; height: 28px; }
-.field-desc-input { width: 100%; font-size: 11px; padding: 3px 6px; height: 24px; color: var(--text-secondary); }
-.field-del-btn { flex-shrink: 0; color: var(--text-secondary); }
+.field-desc-input { width: 100%; font-size: 11px; padding: 3px 6px; height: 24px; color: var(--on-surface-variant); }
+.field-del-btn { flex-shrink: 0; color: var(--on-surface-variant); }
 .field-del-btn:hover { color: var(--error); background: #fff2f0; }
 
 .add-field-btn { align-self: flex-start; font-size: 12px; }
@@ -2808,12 +2808,12 @@ function handleAddNodesToDiagram(nodeIds) {
   padding: 8px 10px; background: var(--bg); border-radius: 6px; font-size: 13px;
 }
 .rel-node-tag {
-  flex: 1; text-align: center; font-weight: 600; color: var(--text);
+  flex: 1; text-align: center; font-weight: 600; color: var(--on-surface);
   font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 .form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 12px; font-weight: 500; color: var(--text); }
+.form-label { font-size: 12px; font-weight: 500; color: var(--on-surface); }
 
 /* Global-ref nodes */
 .model-node.global-ref { border-style: dashed; border-color: #722ed1; opacity: 0.9; }
@@ -2829,7 +2829,7 @@ function handleAddNodesToDiagram(nodeIds) {
 .global-ref-fields { display: flex; flex-direction: column; gap: 2px; }
 .global-ref-field {
   display: flex; align-items: center; gap: 6px;
-  padding: 4px 6px; font-size: 12px; color: var(--text);
+  padding: 4px 6px; font-size: 12px; color: var(--on-surface);
   border-bottom: 1px solid var(--border);
 }
 .global-ref-field:last-child { border-bottom: none; }
@@ -2853,15 +2853,15 @@ function handleAddNodesToDiagram(nodeIds) {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px; border-bottom: 1px solid var(--border);
 }
-.modal-header h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 0; }
+.modal-header h3 { font-size: 15px; font-weight: 600; color: var(--on-surface); margin: 0; }
 .modal-body { padding: 16px 20px; max-height: 60vh; overflow-y: auto; }
 .modal-footer {
   display: flex; justify-content: flex-end; gap: 8px;
   padding: 12px 20px; border-top: 1px solid var(--border); background: #fafafa;
 }
 .confirm-modal { max-width: 400px; }
-.confirm-modal .modal-body p { margin: 0; font-size: 14px; color: var(--text); }
-.modal-empty { font-size: 13px; color: var(--text-secondary); }
+.confirm-modal .modal-body p { margin: 0; font-size: 14px; color: var(--on-surface); }
+.modal-empty { font-size: 13px; color: var(--on-surface-variant); }
 .global-dim-list { display: flex; flex-direction: column; gap: 6px; }
 .global-dim-option {
   display: flex; align-items: center; gap: 10px;
@@ -2871,8 +2871,8 @@ function handleAddNodesToDiagram(nodeIds) {
 .global-dim-option:hover { border-color: #722ed1; background: #f9f0ff; }
 .global-dim-option.selected { border-color: #722ed1; background: #f0e6ff; }
 .global-dim-icon { font-size: 16px; flex-shrink: 0; }
-.global-dim-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
-.global-dim-fields { font-size: 11px; color: var(--text-secondary); }
+.global-dim-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--on-surface); }
+.global-dim-fields { font-size: 11px; color: var(--on-surface-variant); }
 /* ── IA Assist toolbar button (mismo estilo que ChartConfigModal) ── */
 .btn-ai-assist {
   display: inline-flex;
@@ -2911,18 +2911,18 @@ function handleAddNodesToDiagram(nodeIds) {
 
 /* Context chips */
 .ai-context-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-.ai-ctx-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+.ai-ctx-label { font-size: 11px; font-weight: 600; color: var(--on-surface-variant); white-space: nowrap; }
 .ai-chip { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 10px; }
 .ai-chip-model  { background: #722ed1; color: #fff; }
 .ai-chip-fact   { background: #e6f4ff; color: #1890ff; border: 1px solid #91caff; }
 .ai-chip-dim    { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
-.ai-chip-more   { font-size: 11px; color: var(--text-secondary); }
+.ai-chip-more   { font-size: 11px; color: var(--on-surface-variant); }
 
 /* Result section */
 .ai-result-section { display: flex; flex-direction: column; gap: 10px; }
 .ai-result-title {
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 13px; font-weight: 600; color: var(--text);
+  font-size: 13px; font-weight: 600; color: var(--on-surface);
 }
 .ai-tables-list { display: flex; flex-direction: column; gap: 8px; }
 .ai-table-card {
@@ -2945,8 +2945,8 @@ function handleAddNodesToDiagram(nodeIds) {
 }
 .ai-table-badge.fact { background: #e6f4ff; color: #1890ff; }
 .ai-table-badge.dimension { background: #f6ffed; color: #52c41a; }
-.ai-table-name { font-weight: 600; color: var(--text); flex: 1; }
-.ai-table-count { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+.ai-table-name { font-weight: 600; color: var(--on-surface); flex: 1; }
+.ai-table-count { font-size: 11px; color: var(--on-surface-variant); white-space: nowrap; }
 .ai-table-fields {
   display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 12px;
   border-top: 1px solid var(--border);
@@ -2954,11 +2954,11 @@ function handleAddNodesToDiagram(nodeIds) {
 .ai-field-chip {
   display: inline-flex; align-items: center; gap: 3px;
   font-size: 11px; padding: 2px 7px; border-radius: 8px;
-  background: #f5f5f5; color: var(--text);
+  background: #f5f5f5; color: var(--on-surface);
 }
 .ai-field-chip.is-key { background: #fff7e6; color: #d48806; }
-.ai-field-type { color: var(--text-secondary); font-size: 10px; }
-.ai-table-desc { padding: 0 12px 8px; font-size: 12px; color: var(--text-secondary); font-style: italic; }
+.ai-field-type { color: var(--on-surface-variant); font-size: 10px; }
+.ai-table-desc { padding: 0 12px 8px; font-size: 12px; color: var(--on-surface-variant); font-style: italic; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
