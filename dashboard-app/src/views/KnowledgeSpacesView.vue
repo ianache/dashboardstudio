@@ -4,8 +4,8 @@
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
         <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Gestión de Datos</span>
-        <h1 class="font-h1 text-h1 text-slate-900">Knowledge Spaces</h1>
-        <p class="font-body-md text-slate-500 max-w-2xl">Gestiona tus espacios de conocimiento para organizar y documentar la estructura de tus datos.</p>
+        <h1 class="font-h1 text-h1 ks-title">Knowledge Spaces</h1>
+        <p class="font-body-md ks-subtitle max-w-2xl">Gestiona tus espacios de conocimiento para organizar y documentar la estructura de tus datos.</p>
       </div>
       <button class="btn btn-primary" @click="showNewModal = true">
         <span class="material-symbols-outlined text-lg">add</span>
@@ -15,12 +15,12 @@
 
     <!-- Empty state -->
     <div v-if="spacesStore.allSpaces.length === 0" class="max-w-[1600px] mx-auto">
-      <div class="bg-white border border-slate-200 rounded-xl p-12 flex flex-col items-center justify-center gap-4 text-center">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-3xl text-slate-400">hub</span>
+      <div class="ks-empty-state rounded-xl p-12 flex flex-col items-center justify-center gap-4 text-center">
+        <div class="w-16 h-16 ks-icon-bg rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-3xl ks-subtitle">hub</span>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900">Sin Knowledge Spaces</h3>
-        <p class="text-sm text-slate-500 max-w-md">Crea tu primer Knowledge Space para comenzar a organizar tus datos.</p>
+        <h3 class="text-lg font-semibold ks-title">Sin Knowledge Spaces</h3>
+        <p class="text-sm ks-subtitle max-w-md">Crea tu primer Knowledge Space para comenzar a organizar tus datos.</p>
         <button
           class="btn btn-primary"
           @click="showNewModal = true">
@@ -107,14 +107,14 @@
 
         <!-- New Knowledge Space card -->
         <button
-          class="group border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-blue-500 hover:bg-blue-50/30 transition-all min-h-[380px]"
+          class="group ks-new-card rounded-xl p-8 flex flex-col items-center justify-center gap-4 transition-all min-h-[380px]"
           @click="showNewModal = true">
-          <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-            <span class="material-symbols-outlined text-2xl text-slate-400 group-hover:text-blue-600 transition-colors">add</span>
+          <div class="w-12 h-12 rounded-full ks-new-ico flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined text-2xl ks-subtitle group-hover:text-blue-600 transition-colors">add</span>
           </div>
           <div class="text-center">
-            <span class="block text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">Nuevo Knowledge Space</span>
-            <span class="block text-xs text-slate-500">Crea un espacio para tus datos</span>
+            <span class="block text-sm font-semibold ks-title group-hover:text-blue-600 transition-colors">Nuevo Knowledge Space</span>
+            <span class="block text-xs ks-subtitle">Crea un espacio para tus datos</span>
           </div>
         </button>
       </div>
@@ -255,14 +255,14 @@
 
     <!-- Modal: Confirmar eliminar -->
     <div v-if="deleteTarget" class="fixed inset-0 bg-black/45 flex items-center justify-center z-50" @click.self="deleteTarget = null">
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h3 class="text-base font-semibold text-slate-900">Eliminar Knowledge Space</h3>
+      <div class="ks-confirm-modal rounded-xl shadow-xl w-[420px] max-w-[95vw] overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b ks-confirm-border">
+          <h3 class="text-base font-semibold ks-title">Eliminar Knowledge Space</h3>
         </div>
         <div class="px-6 py-5">
-          <p class="text-sm text-slate-700">¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
+          <p class="text-sm ks-title">¿Eliminar <strong>{{ deleteTarget.name }}</strong>? Esta acción no se puede deshacer.</p>
         </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div class="flex justify-end gap-3 px-6 py-4 border-t ks-confirm-footer">
           <button class="btn btn-ghost" @click="deleteTarget = null">Cancelar</button>
           <button class="btn btn-danger" @click="doDelete">Eliminar</button>
         </div>
@@ -457,10 +457,23 @@ async function doDelete() {
   font-weight: 700;
 }
 
+/* Token-aware helpers */
+.ks-title    { color: var(--on-surface); }
+.ks-subtitle { color: var(--on-surface-variant); }
+.ks-empty-state { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.ks-icon-bg  { background: var(--surface-container); }
+.ks-new-card { border: 2px dashed var(--outline-variant); background: transparent; cursor: pointer; }
+.ks-new-card:hover { border-color: var(--primary); background: rgba(0,88,190,0.03); }
+.ks-new-ico  { background: var(--surface-container); transition: background 0.2s; }
+.ks-new-card:hover .ks-new-ico { background: var(--surface-container-high); }
+.ks-confirm-modal  { background: var(--card-bg); border: 1px solid var(--outline-variant); }
+.ks-confirm-border { border-color: var(--outline-variant); }
+.ks-confirm-footer { background: var(--surface-container); border-color: var(--outline-variant); }
+
 /* Knowledge Space Card Styles */
 .kspace-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--outline-variant);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
@@ -492,7 +505,7 @@ async function doDelete() {
 .kspace-card-header {
   position: relative;
   height: 60px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--surface-container) 0%, var(--surface-container-high) 100%);
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
@@ -500,14 +513,14 @@ async function doDelete() {
 }
 
 .kspace-id-badge {
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--card-bg);
   backdrop-filter: blur(4px);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--outline-variant);
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--on-surface-variant);
   letter-spacing: 0.02em;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
@@ -540,7 +553,7 @@ async function doDelete() {
 .kspace-card-title {
   font-size: 18px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--on-surface);
   line-height: 1.3;
   font-family: 'Plus Jakarta Sans', sans-serif;
   margin-bottom: 8px;
@@ -548,7 +561,7 @@ async function doDelete() {
 
 .kspace-card-description {
   font-size: 13px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -562,8 +575,8 @@ async function doDelete() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
   font-size: 12px;
   font-weight: 500;
   padding: 6px 12px;
@@ -583,7 +596,7 @@ async function doDelete() {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   font-weight: 500;
 }
 
@@ -602,19 +615,19 @@ async function doDelete() {
 
 .kspace-progress-label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   font-weight: 500;
 }
 
 .kspace-progress-value {
   font-size: 12px;
-  color: #2563eb;
+  color: var(--primary);
   font-weight: 600;
 }
 
 .kspace-progress-bar {
   height: 6px;
-  background: #e2e8f0;
+  background: var(--surface-container-high);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -629,8 +642,8 @@ async function doDelete() {
 /* Card Footer */
 .kspace-card-footer {
   padding: 16px 20px;
-  border-top: 1px solid #f1f5f9;
-  background: #fafafa;
+  border-top: 1px solid var(--outline-variant);
+  background: var(--surface-container);
 }
 
 .kspace-card-actions {
@@ -647,10 +660,10 @@ async function doDelete() {
   align-items: center;
   justify-content: center;
   border: none;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 8px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--on-surface-variant);
   transition: all 0.2s;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -681,7 +694,7 @@ async function doDelete() {
 }
 
 .kspace-modal-container {
-  background: white;
+  background: var(--card-bg);
   width: 100%;
   max-width: 512px;
   border-radius: 12px;
@@ -694,8 +707,8 @@ async function doDelete() {
 
 .kspace-modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: white;
+  border-bottom: 1px solid var(--outline-variant);
+  background: var(--card-bg);
   flex-shrink: 0;
 }
 
@@ -709,14 +722,14 @@ async function doDelete() {
 .kspace-modal-title {
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--on-surface);
   margin: 0 0 4px 0;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 .kspace-modal-subtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   margin: 0;
 }
 
@@ -730,14 +743,14 @@ async function doDelete() {
   background: transparent;
   border-radius: 50%;
   cursor: pointer;
-  color: #64748b;
+  color: var(--on-surface-variant);
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .kspace-modal-close:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--surface-container);
+  color: var(--on-surface);
 }
 
 .kspace-modal-body {
@@ -754,7 +767,7 @@ async function doDelete() {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--on-surface);
   margin-bottom: 6px;
 }
 
@@ -762,10 +775,11 @@ async function doDelete() {
 .kspace-modal-textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background: var(--card-bg);
+  color: var(--on-surface);
   outline: none;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -773,12 +787,12 @@ async function doDelete() {
 
 .kspace-modal-input::placeholder,
 .kspace-modal-textarea::placeholder {
-  color: #94a3b8;
+  color: var(--on-surface-variant);
 }
 
 .kspace-modal-input:focus,
 .kspace-modal-textarea:focus {
-  border-color: #2563eb;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -795,10 +809,11 @@ async function doDelete() {
   width: 100%;
   padding: 10px 14px;
   padding-right: 40px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--outline-variant);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background: var(--card-bg);
+  color: var(--on-surface);
   outline: none;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -807,7 +822,7 @@ async function doDelete() {
 }
 
 .kspace-modal-select:focus {
-  border-color: #2563eb;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -816,7 +831,7 @@ async function doDelete() {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: var(--on-surface-variant);
   pointer-events: none;
   font-size: 20px;
 }
@@ -827,8 +842,8 @@ async function doDelete() {
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: var(--surface-container);
+  border-top: 1px solid var(--outline-variant);
   flex-shrink: 0;
 }
 

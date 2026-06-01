@@ -996,7 +996,7 @@ const handleCancel = () => {
 .header-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--on-surface);
   flex: 1;
   max-width: 400px;
 }
@@ -1007,19 +1007,19 @@ const handleCancel = () => {
   background: transparent;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--on-surface);
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.2s;
 }
 
 .title-input:hover {
-  background: #f0f0f0;
+  background: var(--surface-container);
 }
 
 .title-input:focus {
   outline: none;
-  background: white;
+  background: var(--card-bg);
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
 }
@@ -1062,14 +1062,14 @@ const handleCancel = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
 }
 
 .toggle-btn:hover {
-  background: #f0f0f0;
+  background: var(--surface-container);
   color: var(--primary);
 }
 
@@ -1094,13 +1094,13 @@ const handleCancel = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fafafa;
+  background: var(--surface-container);
 }
 
 .panel-header h3 {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--on-surface);
   margin: 0;
 }
 
@@ -1145,7 +1145,7 @@ const handleCancel = () => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   height: 100%;
   gap: 12px;
 }
@@ -1158,7 +1158,7 @@ const handleCancel = () => {
 .empty-state h3 {
   font-size: 16px;
   font-weight: 500;
-  color: var(--text);
+  color: var(--on-surface);
   margin-bottom: 4px;
 }
 
@@ -1177,7 +1177,7 @@ const handleCancel = () => {
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin-bottom: 4px;
 }
 
@@ -1202,7 +1202,7 @@ const handleCancel = () => {
 .section-header h4 {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0;
@@ -1260,7 +1260,7 @@ const handleCancel = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   opacity: 0.3;
   cursor: grab;
   flex-shrink: 0;
@@ -1294,7 +1294,7 @@ const handleCancel = () => {
 
 .field-label {
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1302,7 +1302,7 @@ const handleCancel = () => {
 
 .no-results {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   text-align: center;
   padding: 12px;
   font-style: italic;
@@ -1315,7 +1315,7 @@ const handleCancel = () => {
   justify-content: center;
   padding: 40px 0;
   gap: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 .spinner-sm {
   width: 24px;
@@ -1352,7 +1352,7 @@ const handleCancel = () => {
   gap: 12px;
   z-index: 100;
   backdrop-filter: blur(2px);
-  color: var(--text);
+  color: var(--on-surface);
   font-weight: 500;
 }
 
@@ -1403,17 +1403,17 @@ const handleCancel = () => {
 .section-label span {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--on-surface);
 }
 
 .section-label small {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 
 .drop-zone {
   min-height: 50px;
-  background: #fcfcfc;
+  background: var(--surface-container);
   border: 1px dashed var(--border);
   border-radius: 8px;
   padding: 8px;
@@ -1433,7 +1433,7 @@ const handleCancel = () => {
   justify-content: center;
   height: 32px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   opacity: 0.6;
 }
 
@@ -1453,7 +1453,7 @@ const handleCancel = () => {
   border: none;
   padding: 4px;
   border-radius: 4px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1480,7 +1480,7 @@ const handleCancel = () => {
   border: none;
   padding: 4px;
   border-radius: 4px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1537,7 +1537,7 @@ const handleCancel = () => {
   border: none;
   font-size: 24px;
   line-height: 1;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   cursor: pointer;
 }
 
@@ -1557,7 +1557,7 @@ const handleCancel = () => {
 .form-group label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 
 .modal-footer {
@@ -1566,7 +1566,7 @@ const handleCancel = () => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: #fafafa;
+  background: var(--surface-container);
 }
 
 .filter-field-config {
@@ -1613,7 +1613,7 @@ const handleCancel = () => {
   gap: 4px;
   margin-top: 6px;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 .used-cube-tag {
   background: rgba(24,144,255,0.1);
@@ -1626,7 +1626,7 @@ const handleCancel = () => {
 
 /* ---- Source panel: toggle cube name ---- */
 .toggle-cube-name {
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: color 0.15s;
 }
 .toggle-cube-name:hover,
@@ -1644,7 +1644,7 @@ const handleCancel = () => {
   padding: 6px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   transition: border-color 0.15s;
   user-select: none;
@@ -1652,9 +1652,9 @@ const handleCancel = () => {
 .ct-combobox-trigger:hover,
 .ct-combobox.open .ct-combobox-trigger { border-color: var(--primary); }
 .ct-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
-.ct-name { flex: 1; font-size: 13px; color: var(--text); }
+.ct-name { flex: 1; font-size: 13px; color: var(--on-surface); }
 .ct-arrow {
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: transform 0.2s;
   flex-shrink: 0;
 }
@@ -1665,7 +1665,7 @@ const handleCancel = () => {
   left: 0;
   right: 0;
   z-index: 300;
-  background: white;
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow-md);
@@ -1679,9 +1679,9 @@ const handleCancel = () => {
   cursor: pointer;
   transition: background 0.1s;
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
 }
-.ct-combobox-option:hover { background: #f5f7fa; }
+.ct-combobox-option:hover { background: var(--surface-container); }
 .ct-combobox-option.selected { background: rgba(24,144,255,0.06); color: var(--primary); font-weight: 500; }
 .ct-check { margin-left: auto; color: var(--primary); flex-shrink: 0; }
 
@@ -1699,7 +1699,7 @@ const handleCancel = () => {
 .preview-table th {
   position: sticky;
   top: 0;
-  background: #f5f5f5;
+  background: var(--surface-container);
   padding: 8px 12px;
   text-align: left;
   font-weight: 600;
@@ -1714,7 +1714,7 @@ const handleCancel = () => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.preview-table tbody tr:hover { background: #fafafa; }
+.preview-table tbody tr:hover { background: var(--surface-container); }
 
 /* ---- Filter multiselect ---- */
 .filter-multiselect { position: relative; flex: 1; }
@@ -1727,7 +1727,7 @@ const handleCancel = () => {
   padding: 3px 8px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   font-size: 11px;
   text-align: left;
@@ -1739,7 +1739,7 @@ const handleCancel = () => {
   top: calc(100% + 2px);
   left: 0;
   z-index: 200;
-  background: white;
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: var(--shadow-md);
@@ -1757,9 +1757,9 @@ const handleCancel = () => {
   font-size: 12px;
   transition: background 0.1s;
 }
-.filter-ms-option:hover { background: #f5f5f5; }
+.filter-ms-option:hover { background: var(--surface-container); }
 .filter-ms-option input[type="checkbox"] { margin: 0; cursor: pointer; }
-.filter-ms-empty { padding: 8px 12px; color: var(--text-secondary); font-size: 11px; }
+.filter-ms-empty { padding: 8px 12px; color: var(--on-surface-variant); font-size: 11px; }
 
 /* ---- Form helpers ---- */
 .form-row { display: flex; gap: 10px; }
@@ -1770,8 +1770,8 @@ const handleCancel = () => {
   border: 1.5px solid var(--border);
   border-radius: 6px;
   font-size: 13px;
-  color: var(--text);
-  background: #fff;
+  color: var(--on-surface);
+  background: var(--card-bg);
   transition: border-color 0.15s, box-shadow 0.15s;
   box-sizing: border-box;
 }
@@ -1783,7 +1783,7 @@ const handleCancel = () => {
 .field-config-modal label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin-bottom: 4px;
   display: block;
 }
@@ -1797,7 +1797,7 @@ const handleCancel = () => {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   cursor: pointer;
 }
 .pie-opt input[type="checkbox"] { cursor: pointer; }
@@ -1809,10 +1809,10 @@ const handleCancel = () => {
   padding: 5px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: white;
+  background: var(--card-bg);
   cursor: pointer;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: all 0.15s;
 }
 .series-type-btn:hover { border-color: var(--primary); color: var(--primary); }
