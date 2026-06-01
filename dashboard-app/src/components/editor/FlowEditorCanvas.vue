@@ -527,7 +527,9 @@
 
           <!-- ── Connection binding (source, destination, and connectable transform nodes) ── -->
           <template v-if="isConnectable(selectedNode)">
-            <div class="fec-divider"><span>Conexión de Datos</span></div>
+            <div class="fec-divider">
+              <span>Conexión de Datos<span v-if="isConnOptional" class="fec-optional-tag"> (Opcional)</span></span>
+            </div>
 
             <!-- Connection Type -->
             <div class="fec-prop-g">
@@ -539,7 +541,7 @@
                   @change="onConnectionTypeChange"
                 >
                   <option value="">— Seleccionar tipo —</option>
-                  <option v-for="ct in CONN_TYPES" :key="ct.value" :value="ct.value">{{ ct.label }}</option>
+                  <option v-for="ct in nodeConnTypes" :key="ct.value" :value="ct.value">{{ ct.label }}</option>
                 </select>
                 <span class="msi fec-sel-arr" style="font-size:17px">expand_more</span>
               </div>
@@ -959,6 +961,16 @@ function isConnectable(node) {
   }
   return false
 }
+
+// csv_file only supports S3; all other connectable nodes use the full list
+const nodeConnTypes = computed(() => {
+  if (selectedNode.value?.toolType === 'csv_file') {
+    return CONN_TYPES.filter(ct => ct.value === 's3')
+  }
+  return CONN_TYPES
+})
+
+const isConnOptional = computed(() => selectedNode.value?.toolType === 'csv_file')
 
 const filteredDataSources = computed(() => {
   const type = selectedNode.value?.props?.connection_type
@@ -2406,6 +2418,7 @@ onMounted(() => {
   font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;
 }
 .fec-divider::before, .fec-divider::after { content: ''; flex: 1; height: 1px; background: #f1f5f9; }
+.fec-optional-tag { font-weight: 400; color: #cbd5e1; text-transform: none; letter-spacing: 0; }
 
 .fec-flow-stats { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 7px; }
 .fec-stat-row  { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #64748b; }
