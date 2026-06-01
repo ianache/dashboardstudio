@@ -15,7 +15,7 @@ import cors from 'cors';
 import { sessionMiddleware } from './session.js';
 import healthRouter from './routes/health.js';
 import authRouter from './routes/auth.js';
-import { fastapiProxy, cubejsProxy } from './proxy.js';
+import { fastapiProxy, cubejsProxy, aiProxy } from './proxy.js';
 import { requireAuth, tokenRefresh } from './middleware/auth.js';
 import { initOIDC } from './oidc.js';
 
@@ -49,6 +49,7 @@ app.use('/bff/auth', authRouter);
 // Proxy routes (protected)
 app.use('/bff/api', requireAuth, tokenRefresh, fastapiProxy);
 app.use('/bff/cubejs', requireAuth, tokenRefresh, cubejsProxy);
+app.use('/bff/ai', requireAuth, tokenRefresh, aiProxy);
 
 // Initialize OIDC and start server
 async function startServer() {
@@ -71,6 +72,10 @@ async function startServer() {
         req.url = req.url.replace('/bff/cubejs', '');
         console.log(`[BFF WS Upgrade] Rewrote to CubeJS: ${req.url}`);
         cubejsProxy.upgrade(req, socket, head);
+      } else if (req.url.startsWith('/bff/ai')) {
+        req.url = req.url.replace('/bff/ai', '');
+        console.log(`[BFF WS Upgrade] Rewrote to AI Service: ${req.url}`);
+        aiProxy.upgrade(req, socket, head);
       }
     });
   } catch (error) {
