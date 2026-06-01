@@ -3,7 +3,7 @@
     <!-- Logo / Brand -->
     <div class="side-logo">
       <div class="logo-icon-wrap">
-        <MIcon icon="analytics" :size="22" :fill="1" style="color:#fff" />
+        <MIcon icon="analytics" :size="22" :fill="1" class="icon-on-primary" />
       </div>
       <div class="logo-text-block">
         <span class="logo-title">Dashboard<strong>Studio</strong></span>
@@ -146,7 +146,7 @@
 
       <div class="workspace-info">
         <div class="workspace-avatar">
-          <MIcon icon="person" :size="18" style="color:#64748b" />
+          <MIcon icon="person" :size="18" class="icon-muted" />
         </div>
         <div class="workspace-text">
           <p class="workspace-name">{{ authStore.user?.name || 'Usuario' }}</p>
@@ -205,7 +205,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
   z-index: 100;
   transition: width 0.25s ease;
   overflow: hidden;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-md);
   font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
 }
 .side-menu.collapsed { width: var(--sidebar-collapsed-width); }
@@ -224,7 +224,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .logo-icon-wrap {
   width: 38px;
   height: 38px;
-  background: #2563eb;
+  background: var(--primary-container);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -239,14 +239,14 @@ function createNewDashboard() { router.push('/designer?new=1') }
 }
 .side-menu.collapsed .logo-text-block { opacity: 0; pointer-events: none; }
 .logo-title {
-  color: #fff;
+  color: var(--on-primary-container);
   font-size: 15px;
   white-space: nowrap;
   line-height: 1.2;
 }
 .logo-title strong { font-weight: 700; }
 .logo-subtitle {
-  color: #475569;
+  color: var(--on-surface-variant);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -262,14 +262,15 @@ function createNewDashboard() { router.push('/designer?new=1') }
   padding: 12px 0 8px;
 }
 .side-nav::-webkit-scrollbar { width: 4px; }
-.side-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.side-nav::-webkit-scrollbar-thumb { background: var(--outline); border-radius: 2px; }
 
 .nav-section { margin-bottom: 4px; }
 
 .nav-section-title {
   font-size: 10px;
   font-weight: 700;
-  color: rgba(255,255,255,0.25);
+  color: var(--on-surface-variant);
+  opacity: 0.6;
   padding: 8px 20px 4px;
   letter-spacing: 0.1em;
   white-space: nowrap;
@@ -284,7 +285,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
   gap: 10px;
   padding: 9px 12px;
   margin: 2px 8px;
-  color: #94a3b8;
+  color: var(--on-surface-variant);
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
@@ -292,11 +293,11 @@ function createNewDashboard() { router.push('/designer?new=1') }
   border-radius: 8px;
   border-left: 3px solid transparent;
 }
-.nav-item:hover { color: #f1f5f9; background: rgba(15,23,42,0.6); }
+.nav-item:hover { color: var(--on-surface); background: var(--surface-container-high); }
 .nav-item.active {
-  color: #fff;
-  background: rgba(37,99,235,0.12);
-  border-left-color: #3b82f6;
+  color: var(--on-primary-container);
+  background: var(--primary-container);
+  border-left-color: var(--primary);
 }
 
 .nav-icon {
@@ -314,7 +315,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .side-menu.collapsed .nav-label { opacity: 0; pointer-events: none; }
 
 .nav-arrow {
-  color: rgba(255,255,255,0.25);
+  color: var(--on-surface-variant);
+  opacity: 0.6;
   transition: transform 0.2s;
   flex-shrink: 0;
 }
@@ -322,8 +324,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .side-menu.collapsed .nav-arrow { opacity: 0; }
 
 .nav-badge {
-  background: #2563eb;
-  color: #fff;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
   font-size: 11px;
   font-weight: 600;
   padding: 1px 6px;
@@ -336,7 +338,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 /* Sub nav */
 .nav-sub {
   overflow: hidden;
-  background: rgba(0,0,0,0.2);
+  background: var(--surface-container);
   margin: 0 8px;
   border-radius: 6px;
 }
@@ -347,7 +349,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
   align-items: center;
   gap: 8px;
   padding: 8px 12px 8px 38px;
-  color: rgba(255,255,255,0.4);
+  color: var(--on-surface-variant);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
@@ -356,10 +358,10 @@ function createNewDashboard() { router.push('/designer?new=1') }
   overflow: hidden;
   border-radius: 6px;
 }
-.nav-sub-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
-.nav-sub-item.active { color: #93c5fd; }
-.nav-sub-action { color: rgba(96,165,250,0.8); }
-.nav-sub-action:hover { color: #60a5fa; }
+.nav-sub-item:hover { color: var(--on-surface); background: var(--surface-container-high); }
+.nav-sub-item.active { color: var(--primary); }
+.nav-sub-action { color: var(--primary); opacity: 0.8; }
+.nav-sub-action:hover { color: var(--primary); opacity: 1; }
 
 .sub-dot {
   width: 5px; height: 5px;
@@ -375,7 +377,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .sub-label { overflow: hidden; text-overflow: ellipsis; }
 .nav-sub-empty {
   padding: 8px 12px 8px 38px;
-  color: rgba(255,255,255,0.2);
+  color: var(--on-surface-variant);
+  opacity: 0.5;
   font-size: 12px;
   font-style: italic;
 }
@@ -400,8 +403,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .workspace-avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--surface-container-high);
+  border: 1px solid var(--outline);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,11 +412,11 @@ function createNewDashboard() { router.push('/designer?new=1') }
 }
 .workspace-text { overflow: hidden; }
 .workspace-name {
-  color: #fff;
+  color: var(--on-surface);
   font-size: 12px; font-weight: 700;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.workspace-role { color: #475569; font-size: 10px; white-space: nowrap; }
+.workspace-role { color: var(--on-surface-variant); font-size: 10px; white-space: nowrap; }
 
 /* Theme toggle */
 .theme-toggle {
@@ -462,4 +465,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
   max-height: 400px;
 }
 .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
+
+/* Icon semantic classes */
+.icon-on-primary { color: var(--on-primary-container); }
+.icon-muted      { color: var(--on-surface-variant); }
 </style>
