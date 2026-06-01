@@ -13,7 +13,6 @@ import { signCubeToken } from './cubeToken.js';
 export const fastapiProxy = createProxyMiddleware({
   target: config.backendUrl,
   changeOrigin: true,
-  ws: true,
   pathRewrite: {
     '^/': '/api/', // Prepends '/api' since '/bff/api' is already stripped by Express mount
   },
@@ -62,7 +61,6 @@ export const fastapiProxy = createProxyMiddleware({
 export const cubejsProxy = createProxyMiddleware({
   target: config.cubejsUrl,
   changeOrigin: true,
-  ws: true,
   pathRewrite: {
     '^/': '/cubejs-api/', // Prepends '/cubejs-api' since '/bff/cubejs' is already stripped by Express mount
   },
@@ -224,7 +222,6 @@ export const cubejsProxy = createProxyMiddleware({
 export const aiProxy = createProxyMiddleware({
   target: config.aiServiceUrl,
   changeOrigin: true,
-  ws: true,
   proxyTimeout: 0, // Disable timeout for SSE
   timeout: 0,      // Disable timeout for SSE
   pathRewrite: {
