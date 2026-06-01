@@ -30,7 +30,7 @@
 | 43. AI Service Foundation | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 44. AI Analyst Skills | v2.0 | 2/2 | Complete | 2026-05-31 |
 | 45. BFF Integration | 1/1 | Complete   | 2026-06-01 | - |
-| 46. Chat UI | v2.0 | 0/TBD | Not started | - |
+| 46. Chat UI | v2.0 | 0/2 | Not started | - |
 
 
 ---
@@ -195,10 +195,11 @@ Plans:
   3. Agent responses render in message bubbles with three independently expandable sections: Thought Process, Actions Taken, and Final Result
   4. The panel header shows live usage stats that update after each response: input tokens, output tokens, cache hit %, and session cost
   5. When an agent response includes a recommended skill, a call-to-action button appears inside the message bubble; clicking it triggers that skill and shows the result inline
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 46-01: TBD
+- [ ] 46-01-PLAN.md — Chat Logic & State Management
+- [ ] 46-02-PLAN.md — AI Analyst UI Components
 
 ---
 
