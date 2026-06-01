@@ -24,6 +24,22 @@
           <div class="ai-section-body ai-thought-body">{{ message.thought }}</div>
         </details>
 
+        <!-- Actions Taken section (collapsible) -->
+        <details v-if="message.actions && message.actions.length > 0" class="ai-section ai-section--actions">
+          <summary class="ai-section-summary ai-section-summary--actions">
+            <span class="material-symbols-outlined ai-section-icon">bolt</span>
+            <span class="ai-section-label">Acciones realizadas</span>
+            <span class="ai-section-badge">{{ message.actions.length }}</span>
+            <span class="material-symbols-outlined ai-section-chevron">expand_more</span>
+          </summary>
+          <div class="ai-section-body ai-actions-body">
+            <div v-for="(action, i) in message.actions" :key="i" class="ai-action-item">
+              <span class="material-symbols-outlined ai-action-icon">check_circle</span>
+              <span class="ai-action-text">{{ typeof action === 'string' ? action : (action.name || action.tool || JSON.stringify(action)) }}</span>
+            </div>
+          </div>
+        </details>
+
         <!-- Streaming indicator -->
         <div v-if="message.streaming && !message.content" class="ai-streaming-indicator">
           <span class="ai-dot"></span>
@@ -38,6 +54,20 @@
           v-html="renderedContent"
         ></div>
 
+        <!-- Skill CTA buttons -->
+        <div v-if="message.skills && message.skills.length > 0" class="ai-skill-ctas">
+          <button
+            v-for="skill in message.skills"
+            :key="skill.name"
+            class="ai-skill-btn"
+            :disabled="store.loading"
+            @click="store.executeSkill(skill.name, skill.params || {})"
+          >
+            <span class="material-symbols-outlined ai-skill-btn-icon">play_arrow</span>
+            {{ skill.label || skill.name }}
+          </button>
+        </div>
+
         <!-- Streaming cursor -->
         <span v-if="message.streaming && message.content" class="ai-cursor"></span>
       </div>
@@ -49,6 +79,9 @@
 import { computed } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import { useAiAnalystStore } from '@/stores/aiAnalyst'
+
+const store = useAiAnalystStore()
 
 const props = defineProps({
   message: {
@@ -285,4 +318,87 @@ details[open] .ai-section-chevron {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+
+/* Actions section */
+.ai-section--actions {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.ai-section-summary--actions {
+  color: #15803d;
+}
+
+.ai-section-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: #bbf7d0;
+  color: #15803d;
+  border-radius: 8px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.ai-actions-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-top: 1px solid #bbf7d0;
+}
+
+.ai-action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  color: #166534;
+  line-height: 1.4;
+}
+
+.ai-action-icon {
+  font-size: 14px;
+  color: #22c55e;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ai-action-text { flex: 1; word-break: break-word; }
+
+/* Skill CTA buttons */
+.ai-skill-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ai-skill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 16px;
+  border: 1px solid #6366f1;
+  background: transparent;
+  color: #6366f1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.ai-skill-btn:hover:not(:disabled) {
+  background: #6366f1;
+  color: #fff;
+}
+
+.ai-skill-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-skill-btn-icon { font-size: 14px; }
 </style>
