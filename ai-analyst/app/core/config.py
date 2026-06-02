@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     google_api_key: str = ""
     google_genai_use_vertexai: str = "FALSE"
     gemini_model: str = "gemini-2.5-flash-lite"
+    deepseek_api_key: str = ""  # BYOK — empty means DeepSeek models disabled
 
     # CubeJS
     cubejs_url: str = "http://cubejs.pm.comsatel.com.pe:4000/cubejs-api/v1/load" # "http://cube_api:4000/v1/load"
