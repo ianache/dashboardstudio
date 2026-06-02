@@ -132,7 +132,7 @@ const gradients = [
 .text-xl { font-size: 22px; }
 
 .mcard {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--outline-variant);
   border-radius: 12px;
   overflow: hidden;
@@ -174,7 +174,7 @@ const gradients = [
   top: 12px;
   left: 12px;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.92);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(4px);
   border-radius: 8px;
   padding: 6px;
@@ -237,7 +237,7 @@ const gradients = [
   align-items: center;
   justify-content: space-between;
   padding-top: 14px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
   margin-top: auto;
   gap: 8px;
 }
@@ -251,7 +251,7 @@ const gradients = [
   font-size: 11px;
   font-weight: 500;
   color: var(--primary);
-  background: rgba(0, 88, 190, 0.08);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
   padding: 3px 8px;
   border-radius: 20px;
 }
@@ -266,12 +266,12 @@ const gradients = [
   border-radius: 20px;
 }
 .mcard-status-pill--public {
-  color: #059669;
-  background: rgba(5, 150, 105, 0.08);
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 8%, transparent);
 }
 .mcard-status-pill--private {
-  color: #64748b;
-  background: rgba(100, 116, 139, 0.08);
+  color: var(--on-surface-variant);
+  background: color-mix(in srgb, var(--on-surface-variant) 8%, transparent);
 }
 
 /* ── Actions ── */
@@ -292,16 +292,16 @@ const gradients = [
   background: transparent;
   border-radius: 7px;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--on-surface-variant);
   transition: color 0.15s, background 0.15s;
 }
 .mcard-action:hover {
   color: var(--primary);
-  background: rgba(0, 88, 190, 0.07);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 .mcard-action--danger:hover {
   color: var(--error);
-  background: rgba(186, 26, 26, 0.07);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
 }
 
 /* Tooltips — appear above */
@@ -311,8 +311,8 @@ const gradients = [
   bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  background: #1e293b;
-  color: #fff;
+  background: var(--inverse-surface);
+  color: var(--inverse-on-surface);
   font-size: 11px;
   padding: 3px 7px;
   border-radius: 5px;
