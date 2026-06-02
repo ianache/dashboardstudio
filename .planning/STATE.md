@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-01T23:45:58.683Z"
+last_updated: "2026-06-02T03:55:09.460Z"
 progress:
-  total_phases: 45
-  completed_phases: 29
-  total_plans: 77
-  completed_plans: 57
+  total_phases: 47
+  completed_phases: 30
+  total_plans: 83
+  completed_plans: 60
 ---
 
 # Project State: Dashboard Studio v2.0
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 
 ## Current Position
 
-Phase: 50 of 50 (Add DeepSeek to BI/AI Analyst)
-Plan: 01 of 03 — COMPLETE
-Status: In Progress
-Last activity: 2026-06-01 — Completed 50-01 GET /models endpoint and per-request model routing in main.py
+Phase: 50 of 50 (Add DeepSeek to BI/AI Analyst) — COMPLETE
+Plan: 03 of 03 — COMPLETE
+Status: Complete
+Last activity: 2026-06-02 — Completed 50-03 Frontend model selector, gear icon dropdown, model badges, BFF CORS fix
 
 Progress: [##########] 100% (Phase 48)
 Progress: [##########] 100% (Phase 49)
@@ -55,6 +55,7 @@ Progress: [##########] 100% (Phase 49)
 | 46 | 3/3 | 35 min | 11.7 min |
 | 49 | 5/5 | 60 min | 12.0 min |
 | Phase 49 P05 | 15m | 3 tasks | 5 files |
+| Phase 50 P03 | 3 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 49-Refinement]: Eliminated project-wide hardcoded hex colors and legacy tokens. Refactored SideMenu, TopBar, FilterBar, and Designer views for absolute theme compliance using semantic tokens and color-mix().
 - [Phase 50-02]: DeepSeek added to PROVIDERS only, not LLM_OPERATIONS — it is AI Analyst panel only, not chart/model assist.
 - [Phase 50-02]: state.keys and loadConfigFromBackend reset must both include deepseek slot for key persistence to work correctly.
+- [Phase 50]: Model badge shown on ALL assistant messages (v-if='message.model') — not filtered to DeepSeek only
+- [Phase 50]: selectedModel not reset on clearMessages() — user model choice persists across conversation clears
+- [Phase 50]: role='divider' is a first-class message type in aiAnalyst.messages — divider row inserted on switchModel() without HTTP request
 
 ### Blockers/Concerns
 
@@ -106,7 +110,7 @@ Progress: [##########] 100% (Phase 49)
 
 ## Session Continuity
 
-Last session: 2026-06-01
-Stopped at: Completed 50-01-PLAN.md — GET /models endpoint and per-request model routing in main.py.
+Last session: 2026-06-02
+Stopped at: Completed 50-03-PLAN.md — Frontend model selector (gear icon, dropdown, model badges, BFF CORS allowedHeaders). Phase 50 COMPLETE.
 Resume file: .planning/STATE.md
 
