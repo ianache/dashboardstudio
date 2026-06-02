@@ -243,7 +243,7 @@ Plans:
 **Goal:** Add DeepSeek V4 Flash and DeepSeek V4 Pro as selectable models alongside Gemini Flash in the BI Analyst chat panel. Includes a LiteLLM adapter (per-request agent factory), a GET /models endpoint, BYOK key storage via the existing LlmConfig infrastructure, and a gear-icon model selector with per-message model badges.
 **Requirements**: DEEPSEEK-01, DEEPSEEK-02, DEEPSEEK-03, DEEPSEEK-04, DEEPSEEK-05, DEEPSEEK-06, DEEPSEEK-07
 **Depends on:** Phase 49
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 50-01-PLAN.md — ai-analyst service: LiteLLM install, create_runner() factory, /models endpoint, cost tracking
