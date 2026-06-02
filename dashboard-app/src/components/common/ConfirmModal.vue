@@ -55,7 +55,7 @@ defineEmits(['cancel', 'accept'])
 
 .cm-overlay {
   position: fixed; inset: 0; z-index: 2000;
-  background: rgba(15, 23, 42, 0.55);
+  background: color-mix(in srgb, var(--on-surface) 40%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex; align-items: center; justify-content: center;
@@ -65,13 +65,12 @@ defineEmits(['cancel', 'accept'])
 @keyframes cm-fade-in { from { opacity: 0 } to { opacity: 1 } }
 
 .cm-dialog {
-  background: var(--surface-container-high);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--outline-variant);
+  box-shadow: var(--shadow-lg);
   width: 100%; max-width: 420px;
   overflow: hidden;
   animation: cm-slide-in 0.18s ease;
@@ -85,7 +84,8 @@ defineEmits(['cancel', 'accept'])
 
 .cm-question-ico {
   width: 40px; height: 40px; border-radius: var(--radius-md);
-  background: rgba(250, 173, 20, 0.1); color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  color: var(--warning);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .cm-question-ico .cm-msi { font-size: 22px; }
@@ -117,17 +117,29 @@ defineEmits(['cancel', 'accept'])
   background: transparent; color: var(--on-surface);
   border-color: var(--outline);
 }
-.cm-btn--cancel:hover { background: rgba(173, 198, 255, 0.05); border-color: var(--primary); color: var(--primary); box-shadow: inset 0 0 8px rgba(173, 198, 255, 0.1); }
+.cm-btn--cancel:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border-color: var(--primary);
+  color: var(--primary);
+}
 
 .cm-btn--primary {
   background: var(--primary-container); color: var(--on-primary-container);
   border-color: var(--primary-container);
 }
-.cm-btn--primary:hover { background: #0066d6; border-color: #0066d6; box-shadow: 0 0 12px rgba(173, 198, 255, 0.3); }
+.cm-btn--primary:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
 
 .cm-btn--danger {
   background: var(--error-container); color: var(--on-error-container);
   border-color: var(--error-container);
 }
-.cm-btn--danger:hover { background: #ab000d; border-color: #ab000d; box-shadow: 0 0 12px rgba(255, 180, 171, 0.3); }
+.cm-btn--danger:hover {
+  background: var(--error);
+  border-color: var(--error);
+  color: var(--on-error);
+}
 </style>
