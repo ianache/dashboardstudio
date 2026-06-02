@@ -15,10 +15,12 @@ from pydantic import BaseModel
 
 from google.genai import types
 from google.adk.agents.run_config import RunConfig, StreamingMode
+from google.adk.errors.already_exists_error import AlreadyExistsError
 
 from app.core.config import get_settings
 from app.agent import APP_NAME, create_runner, session_service
 from app.tools.skills import load_catalog
+import app.tools.cube as cube_tool
 
 settings = get_settings()
 
@@ -38,10 +40,27 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     message: str
+    session_id: str | None = None        # stable dashboard+user key from frontend
+    filters: list | None = None           # active CubeJS filter objects (ANALYST-01)
     screen_context: dict | None = None
     context: dict | None = None
     model: str = "gemini-2.5-flash-lite"
     deepseek_api_key: str | None = None
+
+
+async def ensure_session(user_id: str, session_id: str) -> None:
+    """Get-or-create: only create if session does not already exist."""
+    existing = await session_service.get_session(
+        app_name=APP_NAME,
+        user_id=user_id,
+        session_id=session_id,
+    )
+    if existing is None:
+        await session_service.create_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+        )
 
 
 PRICING = {
@@ -87,15 +106,15 @@ async def get_models(x_deepseek_api_key: str | None = Header(default=None)):
 
 
 @app.post("/chat", response_class=EventSourceResponse)
-async def chat(request: ChatRequest):
-    session_id = str(uuid.uuid4())
+async def chat(
+    request: ChatRequest,
+    x_user_id: str | None = Header(default=None)
+):
+    user_id = x_user_id or "default"
+    session_id = request.session_id or str(uuid.uuid4())
 
-    # Create a fresh session per request — Phase 43 has no conversation history
-    await session_service.create_session(
-        app_name=APP_NAME,
-        user_id="default",
-        session_id=session_id,
-    )
+    # Get-or-create session (safe against AlreadyExistsError)
+    await ensure_session(user_id, session_id)
 
     # Inject screen context if provided by prepending to the user prompt
     prompt = request.message
@@ -103,11 +122,25 @@ async def chat(request: ChatRequest):
     if screen_ctx:
         prompt = f"[CONTEXT] Visible data: {json.dumps(screen_ctx)}\n\nUser request: {prompt}"
 
+    # Inject active dashboard filters: prepend to prompt and store for query_data tool
+    if request.filters:
+        filter_parts = []
+        for f in request.filters:
+            member = f.get("member", "")
+            op = f.get("operator", "")
+            vals = f.get("values", [])
+            filter_parts.append(f"{member} {op} {vals}")
+        filter_str = "[ACTIVE FILTERS] " + "; ".join(filter_parts)
+        prompt = filter_str + "\n\n" + prompt
+        cube_tool._active_filters = request.filters
+    else:
+        cube_tool._active_filters = None
+
     active_runner = create_runner(request.model, request.deepseek_api_key)
     run_config = RunConfig(streaming_mode=StreamingMode.SSE)
     try:
         async for event in active_runner.run_async(
-            user_id="default",
+            user_id=user_id,
             session_id=session_id,
             new_message=types.Content(
                 role="user",
