@@ -11,12 +11,53 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
       cost: 0,
       cache_hit: 0
     },
-    isPanelOpen: false
+    isPanelOpen: false,
+    selectedModel: 'gemini-2.5-flash-lite',  // default — backward compatible
+    availableModels: []                        // populated from /bff/ai/models
   }),
 
   actions: {
     togglePanel() {
       this.isPanelOpen = !this.isPanelOpen
+    },
+
+    async fetchModels() {
+      try {
+        // Read user's DeepSeek key from llm store (loaded in SettingsView)
+        const { useLlmStore } = await import('@/stores/llm')
+        const llmStore = useLlmStore()
+        const deepseekKey = llmStore.keys?.deepseek || ''
+
+        const headers = { 'Content-Type': 'application/json' }
+        if (deepseekKey) {
+          headers['X-Deepseek-Api-Key'] = deepseekKey
+        }
+        const res = await fetch('/bff/ai/models', { credentials: 'include', headers })
+        if (res.ok) {
+          const data = await res.json()
+          this.availableModels = data.models || []
+        }
+      } catch (err) {
+        console.warn('[aiAnalyst] fetchModels error:', err)
+        // Fallback: just Gemini
+        this.availableModels = [
+          { id: 'gemini-2.5-flash-lite', label: 'Gemini Flash', provider: 'google', enabled: true }
+        ]
+      }
+    },
+
+    switchModel(modelId) {
+      if (modelId === this.selectedModel) return
+      const model = this.availableModels.find(m => m.id === modelId)
+      if (!model || !model.enabled) return
+      this.selectedModel = modelId
+      if (this.messages.length > 0) {
+        this.messages.push({
+          role: 'divider',
+          model: modelId,
+          label: `Switched to ${model.label}`
+        })
+      }
     },
 
     captureScreenContext() {
@@ -49,18 +90,31 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
       this.messages.push({ role: 'user', content: text })
 
       // Add placeholder assistant message
-      const assistantMsg = { role: 'assistant', content: '', thought: '', actions: [], skills: [], streaming: true, error: false }
+      const assistantMsg = {
+        role: 'assistant', content: '', thought: '', actions: [], skills: [],
+        streaming: true, error: false,
+        model: this.selectedModel   // track which model produced this message
+      }
       this.messages.push(assistantMsg)
       const msgIndex = this.messages.length - 1
 
       this.loading = true
 
       try {
+        const { useLlmStore } = await import('@/stores/llm')
+        const llmStore = useLlmStore()
+        const deepseekKey = this.selectedModel.startsWith('deepseek/') ? (llmStore.keys?.deepseek || '') : undefined
+
         const response = await fetch('/bff/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ message: text, context })
+          body: JSON.stringify({
+            message: text,
+            context,
+            model: this.selectedModel,
+            ...(deepseekKey !== undefined ? { deepseek_api_key: deepseekKey } : {})
+          })
         })
 
         if (!response.ok) {
