@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AIAnalyticsPlatform - Dashboard Designer</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2d3133",
+                        "tertiary": "#4648d4",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-container": "#5c647a",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9fb",
+                        "on-primary-fixed": "#001a42",
+                        "surface-container": "#eceef0",
+                        "secondary": "#565e74",
+                        "outline": "#727785",
+                        "on-surface": "#191c1e",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-primary": "#adc6ff",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#0058be",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-fixed": "#e1e0ff",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-dim": "#d8dadc",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-surface-variant": "#424754",
+                        "on-primary-container": "#fefcff",
+                        "primary-container": "#2170e4",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#dae2fd",
+                        "on-background": "#191c1e",
+                        "tertiary-container": "#6063ee",
+                        "inverse-on-surface": "#eff1f3",
+                        "outline-variant": "#c2c6d6",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#131b2e",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-container-high": "#e6e8ea",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-container": "#dae2fd",
+                        "surface-tint": "#005ac2",
+                        "on-secondary-fixed-variant": "#3f465c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "h3": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "h2": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "h3": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "fontWeight": "500" }],
+                        "h1": ["36px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+    <!-- Sidebar Navigation (SideNavBar Anchor) -->
+    <aside
+        class="fixed left-0 top-0 h-screen w-[280px] bg-[#0F172A] border-r border-slate-800 shadow-2xl flex flex-col py-8 z-50">
+        <div class="px-6 mb-10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined">memory</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black text-white leading-none">AIAnalytics</h1>
+                    <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-1">Command Center</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 flex flex-col space-y-1">
+            <a class="text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer"
+                href="#">
+                <span class="material-symbols-outlined">home</span>
+                <span class="font-plus-jakarta-sans text-sm">Home</span>
+            </a>
+            <a class="bg-blue-600/10 text-white border-r-4 border-blue-500 flex items-center gap-3 px-6 py-3 transition-all cursor-pointer"
+                href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                <span class="font-plus-jakarta-sans text-sm font-semibold">Dashboards</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer"
+                href="#">
+                <span class="material-symbols-outlined">memory</span>
+                <span class="font-plus-jakarta-sans text-sm">Models</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer"
+                href="#">
+                <span class="material-symbols-outlined">insights</span>
+                <span class="font-plus-jakarta-sans text-sm">Analytics</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer"
+                href="#">
+                <span class="material-symbols-outlined">database</span>
+                <span class="font-plus-jakarta-sans text-sm">Knowledge Spaces</span>
+            </a>
+            <a class="text-slate-400 flex items-center gap-3 px-6 py-3 hover:bg-slate-800 hover:text-slate-200 transition-all cursor-pointer"
+                href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-plus-jakarta-sans text-sm">Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <button
+                class="w-full bg-primary-container text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform duration-150">
+                <span class="material-symbols-outlined text-lg">add</span>
+                New Analysis
+            </button>
+            <div class="mt-8 pt-6 border-t border-slate-800 flex flex-col space-y-1">
+                <a class="text-slate-400 flex items-center gap-3 py-2 hover:text-white transition-colors" href="#">
+                    <span class="material-symbols-outlined">help</span>
+                    <span class="font-plus-jakarta-sans text-sm">Support</span>
+                </a>
+                <a class="text-slate-400 flex items-center gap-3 py-2 hover:text-white transition-colors" href="#">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-plus-jakarta-sans text-sm">Sign Out</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+    <!-- Main Workspace Container -->
+    <main class="flex-1 ml-[280px] flex flex-col h-screen overflow-hidden">
+        <!-- Top Navigation (TopNavBar Anchor) -->
+        <header
+            class="bg-white/80 backdrop-blur-md sticky top-0 z-40 h-16 px-8 border-b border-slate-200 flex justify-between items-center w-full shadow-sm">
+            <div class="flex items-center gap-4">
+                <h2 class="font-h2 text-h2 text-slate-900 tracking-tight">Dashboard Designer</h2>
+                <span
+                    class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase tracking-wider">Editor
+                    Mode</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                    <input
+                        class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 transition-all"
+                        placeholder="Search templates..." type="text" />
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="text-slate-600 hover:bg-slate-50 p-2 rounded-full transition-colors relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+                    </button>
+                    <button class="text-slate-600 hover:bg-slate-50 p-2 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                    <div class="h-8 w-[1px] bg-slate-200 mx-1"></div>
+                    <button
+                        class="bg-primary text-white px-5 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-primary-container transition-colors shadow-lg shadow-primary/10">
+                        Create Dashboard
+                    </button>
+                </div>
+            </div>
+        </header>
+        <!-- Dynamic Content Canvas + Right Sidebar Filter -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- WIDGET ZONE (Main Canvas) -->
+            <section class="flex-1 overflow-y-auto bg-surface-bright p-8 relative">
+                <!-- Grid Overlay Background -->
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+                    style="background-image: radial-gradient(#0F172A 1px, transparent 1px); background-size: 24px 24px;">
+                </div>
+                <div class="max-w-[1200px] mx-auto space-y-8 relative z-10">
+                    <!-- Dashboard Header Placeholder -->
+                    <div class="flex justify-between items-end mb-10">
+                        <div>
+                            <!--p class="text-primary font-bold text-xs uppercase tracking-widest mb-1">Project Delta</p-->
+                            <h3 class="text-h1 font-h1 text-on-surface">Revenue Performance Optimization</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                class="bg-white border border-slate-200 p-2 rounded-lg text-slate-600 hover:bg-slate-50 shadow-sm transition-all">
+                                <span class="material-symbols-outlined">undo</span>
+                            </button>
+                            <button
+                                class="bg-white border border-slate-200 p-2 rounded-lg text-slate-600 hover:bg-slate-50 shadow-sm transition-all">
+                                <span class="material-symbols-outlined">redo</span>
+                            </button>
+                            <button
+                                class="bg-white border border-slate-200 px-4 py-2 rounded-lg text-slate-700 font-medium hover:bg-slate-50 shadow-sm transition-all flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">share</span> Share
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Bento Grid Layout -->
+                    <div class="grid grid-cols-12 gap-6">
+                        <!-- Metric Card 1 -->
+                        <div
+                            class="col-span-4 bg-white p-6 rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] group hover:border-primary/30 transition-all cursor-move">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-blue-50 p-2 rounded-lg">
+                                    <span class="material-symbols-outlined text-primary">trending_up</span>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+                            </div>
+                            <p class="text-slate-500 font-label-sm text-label-sm">Conversion Rate</p>
+                            <h4 class="text-2xl font-bold text-slate-900 mt-1">24.8%</h4>
+                            <div class="mt-4 flex items-center gap-2 text-green-600 font-semibold text-sm">
+                                <span class="material-symbols-outlined text-sm">arrow_upward</span>
+                                12.5%
+                                <span class="text-slate-400 font-normal">vs last month</span>
+                            </div>
+                        </div>
+                        <!-- Metric Card 2 -->
+                        <div
+                            class="col-span-4 bg-white p-6 rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] group hover:border-primary/30 transition-all cursor-move">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-indigo-50 p-2 rounded-lg">
+                                    <span class="material-symbols-outlined text-indigo-600">group</span>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+                            </div>
+                            <p class="text-slate-500 font-label-sm text-label-sm">Active Users</p>
+                            <h4 class="text-2xl font-bold text-slate-900 mt-1">1,204</h4>
+                            <div class="mt-4 flex items-center gap-2 text-green-600 font-semibold text-sm">
+                                <span class="material-symbols-outlined text-sm">arrow_upward</span>
+                                4.2%
+                                <span class="text-slate-400 font-normal">vs last month</span>
+                            </div>
+                        </div>
+                        <!-- Metric Card 3 -->
+                        <div
+                            class="col-span-4 bg-white p-6 rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] group hover:border-primary/30 transition-all cursor-move">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-error-container/30 p-2 rounded-lg">
+                                    <span class="material-symbols-outlined text-error">timer</span>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">drag_indicator</span>
+                            </div>
+                            <p class="text-slate-500 font-label-sm text-label-sm">Avg. Response Time</p>
+                            <h4 class="text-2xl font-bold text-slate-900 mt-1">1.2s</h4>
+                            <div class="mt-4 flex items-center gap-2 text-error font-semibold text-sm">
+                                <span class="material-symbols-outlined text-sm">arrow_downward</span>
+                                2.1%
+                                <span class="text-slate-400 font-normal">vs last month</span>
+                            </div>
+                        </div>
+                        <!-- Main Visualization Chart Placeholder -->
+                        <div
+                            class="col-span-8 h-[400px] bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(15,23,42,0.05)] overflow-hidden flex flex-col relative group">
+                            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                                <h4 class="font-h3 text-h3 text-on-surface">Growth Projection</h4>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="text-xs font-bold px-3 py-1 bg-primary text-white rounded">Daily</button>
+                                    <button
+                                        class="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-600 rounded">Weekly</button>
+                                </div>
+                            </div>
+                            <div class="flex-1 bg-slate-50 relative p-8">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-full h-full p-4 flex flex-col justify-end gap-2">
+                                        <div class="flex items-end gap-3 h-full px-4">
+                                            <div class="flex-1 bg-primary-container rounded-t-lg h-[40%]"></div>
+                                            <div class="flex-1 bg-primary rounded-t-lg h-[65%]"></div>
+                                            <div class="flex-1 bg-primary-container rounded-t-lg h-[45%]"></div>
+                                            <div class="flex-1 bg-primary rounded-t-lg h-[80%]"></div>
+                                            <div class="flex-1 bg-primary-container rounded-t-lg h-[55%]"></div>
+                                            <div class="flex-1 bg-primary rounded-t-lg h-[95%]"></div>
+                                            <div class="flex-1 bg-primary-container rounded-t-lg h-[60%]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Insights Panel -->
+                        <div
+                            class="col-span-4 bg-gradient-to-br from-primary-container to-tertiary-container rounded-xl p-8 text-white flex flex-col justify-between shadow-xl shadow-primary/20">
+                            <div>
+                                <span class="material-symbols-outlined text-4xl mb-4"
+                                    style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                                <h4 class="text-2xl font-bold mb-4 font-h2">AI Insights</h4>
+                                <p class="text-white/80 font-body-sm text-body-sm leading-relaxed">
+                                    Based on current trends, your conversion rate is expected to increase by <span
+                                        class="font-bold text-white">4.2%</span> if the current marketing campaign
+                                    continues for another 14 days.
+                                </p>
+                            </div>
+                            <button
+                                class="mt-8 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white py-3 px-6 rounded-xl font-semibold transition-all border border-white/20">
+                                Generate Full Report
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Placeholder for next widgets -->
+                    <div
+                        class="border-2 border-dashed border-slate-300 rounded-2xl h-48 flex flex-col items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all cursor-pointer group">
+                        <span
+                            class="material-symbols-outlined text-3xl mb-2 group-hover:scale-110 transition-transform">add_circle</span>
+                        <p class="font-semibold">Drop a new widget here</p>
+                    </div>
+                </div>
+            </section>
+            <!-- RIGHT FILTER SIDEBAR (Vertical Filter Bar) -->
+            <aside
+                class="w-[320px] bg-white border-l border-slate-200 flex flex-col h-full shadow-[-10px_0px_30px_rgba(15,23,42,0.03)] z-30">
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-900">filter_list</span>
+                        <h3 class="font-bold text-slate-900">Editor Filters</h3>
+                    </div>
+                    <button class="text-slate-400 hover:text-slate-900 transition-colors">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                    <!-- Filter: Area -->
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Area</label>
+                        <div class="space-y-2">
+                            <label
+                                class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors bg-surface-container-lowest">
+                                <input checked=""
+                                    class="rounded border-slate-300 text-primary focus:ring-primary h-5 w-5"
+                                    type="checkbox" />
+                                <span class="text-on-surface-variant font-medium text-sm">Marketing &amp; Sales</span>
+                            </label>
+                            <label
+                                class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                <input class="rounded border-slate-300 text-primary focus:ring-primary h-5 w-5"
+                                    type="checkbox" />
+                                <span class="text-on-surface-variant font-medium text-sm">Customer Success</span>
+                            </label>
+                            <label
+                                class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                <input class="rounded border-slate-300 text-primary focus:ring-primary h-5 w-5"
+                                    type="checkbox" />
+                                <span class="text-on-surface-variant font-medium text-sm">Product Development</span>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Filter: Periodo -->
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Periodo</label>
+                        <div class="relative">
+                            <select
+                                class="w-full bg-surface-container-low border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none">
+                                <option>Last 30 Days</option>
+                                <option>This Quarter</option>
+                                <option>Year to Date</option>
+                                <option>Custom Range</option>
+                            </select>
+                            <span
+                                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+                        </div>
+                    </div>
+                    <!-- Filter: Colaborador -->
+                    <div class="space-y-4">
+                        <label
+                            class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Colaborador</label>
+                        <div class="flex -space-x-2">
+                            <img alt="Team Member" class="w-10 h-10 rounded-full border-2 border-white"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIX46iYlvrlSI7ol3JpUUJQFfQREpGCqN6TtFlgXnXiwlMNt2sskl1wW_7dU8aNqUDxeBR2AQKA1t3jZDbX5MXqpzeARBN63HPv_iqn_V50mweZpms_n71CNgVHx3Hmu0Fq6xEhvlYGjsoseb0TYY9KhkjphtKKuWzEYz0Q1WO3SkLbFcyOWOE5imvHm25cubbUPn2PvuwwFc29mzwPniQDWz4mNCJo36TGjMqFz1_fzgp5GMgtF44_P-CVfvSM8Seq-xlN2E49Q4" />
+                            <img alt="Team Member" class="w-10 h-10 rounded-full border-2 border-white"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJtTVAXVRznJTsJaczeN2-0tvl5opmnqvL5mt2ZFvbAgmw57UtgiytEDL1r2mJLxGBH1O56Uejy0-WQ2jNwQLJX5IYSqt8E3fOm1gQsJg0MqbeGl-vStHI8R_lWWzFLqY3MIrfij8eU4I-0gviEH6g2VB0RZUpU0zYOr8shFN25qKIdLFoikKH0olppBIeEAbS5iHHrkK5dZoE63aBrJp1mK6eznxoJp8S7C6yFcTLOtXZvyz4kz2k8XbRbjNM46YzpkzPwgc3_lw" />
+                            <img alt="Team Member" class="w-10 h-10 rounded-full border-2 border-white"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi_sHfihxnsqcewfyJ0-sJKDmrJBSN8Cz5_oWuM3auQnBv78dBgUkizZqB274kI2UqQy-acYJdCTmiz-xZ6keQtHREGewzbC4VRYobCt1qrief5PHOZpWtYv9Do3glrrZqjaX2xxfoF5x384uTvdvcDBCzwJMyx-J7QODtp0Ha-o0vujVy3FCrxSb1SGoatZ-8e5NIYzxIJzHG3UtiJprtcSB5quO_6ccMZypJOOs0DA6Om0bfFwzqefpIbfq9t86kbTgru2ZO51Y" />
+                            <div
+                                class="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+                                +12</div>
+                        </div>
+                        <button
+                            class="w-full py-2 px-4 border border-dashed border-slate-300 rounded-lg text-xs font-bold text-slate-500 hover:border-primary hover:text-primary transition-all">Add
+                            Contributor</button>
+                    </div>
+                    <!-- Filter: Producto -->
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Producto</label>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                    <span class="text-sm font-medium text-slate-700">Enterprise Suite</span>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-slate-400 text-sm">remove_circle_outline</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                    <span class="text-sm font-medium text-slate-700">API Gateway</span>
+                                </div>
+                                <span
+                                    class="material-symbols-outlined text-slate-400 text-sm">remove_circle_outline</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Action Footer -->
+                <div class="p-6 border-t border-slate-100 bg-surface-container-low">
+                    <button
+                        class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors">
+                        Apply Filters
+                    </button>
+                    <button
+                        class="w-full mt-4 text-slate-500 text-sm font-semibold hover:text-slate-900 transition-colors">
+                        Reset All Changes
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+
+</html>

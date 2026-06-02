@@ -1,0 +1,922 @@
+[    1376ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/bff/auth/me:0
+[   44411ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[   44412ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[   44960ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dashboards/ @ http://localhost:3000/src/services/api.js:29
+[   55494ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55499ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55505ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55515ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55520ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55526ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55529ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55536ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55542ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/currencies/ @ http://localhost:3000/src/services/api.js:29
+[   55669ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/palettes/ @ http://localhost:3000/src/services/api.js:29
+[  395538ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358143759 @ http://localhost:3000/src/services/api.js:29
+[  395539ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  406610ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358154832 @ http://localhost:3000/src/services/api.js:29
+[  412462ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  412463ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[  412464ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-rp7fw1u8q @ http://localhost:3000/src/services/api.js:29
+[  416741ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358164964 @ http://localhost:3000/src/services/api.js:29
+[  416742ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  420993ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dashboards/ @ http://localhost:3000/src/services/api.js:29
+[  442166ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dimensional-models/ @ http://localhost:3000/src/services/api.js:29
+[  442167ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/knowledge-spaces/ @ http://localhost:3000/src/services/api.js:29
+[  443459ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/palettes/ @ http://localhost:3000/src/services/api.js:29
+[  445390ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dimensional-models/ @ http://localhost:3000/src/services/api.js:29
+[  445391ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/knowledge-spaces/ @ http://localhost:3000/src/services/api.js:29
+[  447152ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/palettes/ @ http://localhost:3000/src/services/api.js:29
+[  786398ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dimensional-models/ @ http://localhost:3000/src/services/api.js:29
+[  786399ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/knowledge-spaces/ @ http://localhost:3000/src/services/api.js:29
+[  805462ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dashboards/ @ http://localhost:3000/src/services/api.js:29
+[  805462ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/palettes/ @ http://localhost:3000/src/services/api.js:29
+[  813023ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358561245 @ http://localhost:3000/src/services/api.js:29
+[  813024ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  817634ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  817635ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[  817637ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-rp7fw1u8q @ http://localhost:3000/src/services/api.js:29
+[  820111ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358568333 @ http://localhost:3000/src/services/api.js:29
+[  820111ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  824582ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  824582ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[  824583ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-oxgkyfg1s @ http://localhost:3000/src/services/api.js:29
+[  827734ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358575956 @ http://localhost:3000/src/services/api.js:29
+[  827734ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  832538ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  832539ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[  832540ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-z4pdmlqo8 @ http://localhost:3000/src/services/api.js:29
+[  891235ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358639457 @ http://localhost:3000/src/services/api.js:29
+[  891236ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[  896764ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dashboards/ @ http://localhost:3000/src/services/api.js:29
+[  896765ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/palettes/ @ http://localhost:3000/src/services/api.js:29
+[  912525ms] [LOG] [API] PUT http://localhost:3000/bff/api/v1/dashboards/ws5jtxkusb/widgets/jbx4g4kzl @ http://localhost:3000/src/services/api.js:29
+[ 1013945ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dashboards/ @ http://localhost:3000/src/services/api.js:29
+[ 1013946ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/palettes/ @ http://localhost:3000/src/services/api.js:29
+[ 1026448ms] [LOG] [API] PUT http://localhost:3000/bff/api/v1/dashboards/ws5jtxkusb/widgets/jbx4g4kzl @ http://localhost:3000/src/services/api.js:29
+[ 1132580ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dimensional-models/ @ http://localhost:3000/src/services/api.js:29
+[ 1132581ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/knowledge-spaces/ @ http://localhost:3000/src/services/api.js:29
+[ 1135616ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/dimensional-models/ @ http://localhost:3000/src/services/api.js:29
+[ 1195660ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780358943883 @ http://localhost:3000/src/services/api.js:29
+[ 1195662ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1202080ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1202080ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1215838ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1215839ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1263823ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359012046 @ http://localhost:3000/src/services/api.js:29
+[ 1263825ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1274308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359022531 @ http://localhost:3000/src/services/api.js:29
+[ 1279669ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1279670ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1279670ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-ngdyv353r @ http://localhost:3000/src/services/api.js:29
+[ 1283500ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/data-sources/ @ http://localhost:3000/src/services/api.js:29
+[ 1375536ms] [LOG] [WebSocket] Connecting to: ws://localhost:3000/bff/api/v1/integration-flows/flow-ngdyv353r/logs @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:790
+[ 1375659ms] [LOG] [WebSocket] Connection opened @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:794
+[ 1375720ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779059751976","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375723ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[Fuente] Ejecutando 'PostgreSQL' ..."} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375881ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779059751976","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375890ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[Fuente] 4 registros cargados desde 'PostgreSQL' (161ms)"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375925ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779063448882","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375935ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[ODS] Ejecutando 'Data Load' ..."} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375938ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779063448882","status":"error"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375940ms] [LOG] [WebSocket] Message received: {"type":"error","message":"[Fuente Error] ODS requires a non-empty list of records as input"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375945ms] [LOG] [WebSocket] Message received: {"type":"status","success":false,"exit_code":1} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:803
+[ 1375960ms] [LOG] [WebSocket] Connection closed (Code: 1000, Reason: ) @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue:830
+[ 1442838ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359191060 @ http://localhost:3000/src/services/api.js:29
+[ 1442838ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1446660ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1446661ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1446661ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-gcsg4ylcs @ http://localhost:3000/src/services/api.js:29
+[ 1450934ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359199156 @ http://localhost:3000/src/services/api.js:29
+[ 1450935ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1455389ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1455390ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1455391ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-rp7fw1u8q @ http://localhost:3000/src/services/api.js:29
+[ 1458071ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359206294 @ http://localhost:3000/src/services/api.js:29
+[ 1458072ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1459176ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359207398 @ http://localhost:3000/src/services/api.js:29
+[ 1459177ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1462099ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1462100ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1462100ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-ngdyv353r @ http://localhost:3000/src/services/api.js:29
+[ 1472874ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/data-sources/ @ http://localhost:3000/src/services/api.js:29
+[ 1486301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-ngdyv353r @ http://localhost:3000/src/services/api.js:29
+[ 1488167ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/detail/exec-4tqdlljdy27s @ http://localhost:3000/src/services/api.js:29
+[ 1517998ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1518521ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519437ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519502ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519535ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519834ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519885ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519903ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1519936ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1520210ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1520252ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1526669ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1526677ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1526708ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1526963ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527010ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527034ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527068ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527366ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527399ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527416ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527449ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527830ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527866ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1527900ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1529068ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1543159ms] [INFO] Autofocus processing was blocked because a document already has a focused element. @ http://localhost:3000/integrations/flow-ngdyv353r/editor:0
+[ 1587533ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-ngdyv353r @ http://localhost:3000/src/services/api.js:29
+[ 1616948ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359365170 @ http://localhost:3000/src/services/api.js:29
+[ 1616949ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1627322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359375545 @ http://localhost:3000/src/services/api.js:29
+[ 1627845ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1627845ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1627846ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-2baz5sx1b @ http://localhost:3000/src/services/api.js:29
+[ 1646451ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/editor.api-CalNCsUg.js:4
+[ 1652994ms] [LOG] [WebSocket] Connecting to: ws://localhost:3000/bff/api/v1/integration-flows/flow-2baz5sx1b/logs @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:790
+[ 1653077ms] [LOG] [WebSocket] Connection opened @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:794
+[ 1653136ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779165806969","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1653139ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[Fuente] Ejecutando 'PostgreSQL' ..."} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1653281ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779165806969","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1653288ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[Fuente] 4 registros cargados desde 'PostgreSQL' (144ms)"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655404ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779165806969","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655411ms] [LOG] [WebSocket] Message received: {"type":"node_log","node_id":"n1779165806969","status":"success","input":{},"output":[{"id":65,"path":"comsatel/development/products/sigo/collaboration","name":"sigo"},{"id":63,"path":"comsatel/development/products/clocator/collaboration","name":"clocator"},{"id":411,"path":"comsatel/development/products/clocator2/svr-basico/collaboration","name":"cl2-svrbasico"},{"id":64,"path":"comsatel/development/products/smart-suite/collaboration","name":"smart-suite"}],"duration":5,"start_time":"2026-06-02T00:16:43.568Z","end_time":"2026-06-02T00:16:43.573Z"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655416ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":25.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655419ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779165806969","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655427ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":25.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655430ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779167119889","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655437ms] [LOG] [WebSocket] Message received: {"type":"node_log","node_id":"n1779167119889","status":"success","input":{},"output":[{"id":65,"path":"comsatel/development/products/sigo/collaboration","name":"sigo"},{"id":63,"path":"comsatel/development/products/clocator/collaboration","name":"clocator"},{"id":411,"path":"comsatel/development/products/clocator2/svr-basico/collaboration","name":"cl2-svrbasico"},{"id":64,"path":"comsatel/development/products/smart-suite/collaboration","name":"smart-suite"}],"duration":0,"start_time":"2026-06-02T00:16:43.574Z","end_time":"2026-06-02T00:16:43.574Z"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655444ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":50.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655447ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779167119889","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655450ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":50.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655454ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779169404952","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655461ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1779169404952","status":"error"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655465ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":75.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655470ms] [LOG] [WebSocket] Message received: {"type":"error","message":"[Script Error]: The module's source code could not be parsed: 'import', and 'export' cannot be used outside of module code at data:text/javascript;base64,ZXhwb3J0IGRlZmF1bHQgYXN5bmMgZnVuY3Rpb24oY3R4KSB7CmV4cG9ydCBkZWZhdWx0IGFzeW5jIGZ1bmN0aW9uKGN0eCkgewogIGNvbnN0IHsgcGF5bG9hZCB9ID0gY3R4OwogIGNvbnNvbGUubG9nKCJQcm9jZXNhbmRvIGRhdG9zIGVuIEpTLi4uIik7CiAgCiAgLy8gVHUgbMOzZ2ljYSBhcXXDrQogIAogIHJldHVybiB7CiAgICAuLi5wYXlsb2FkLAogICAgZnJhZ21lbnRfaWQ6IGN0eC5zcGxpdC5mcmFnbWVudF9pbmRleAogIH07Cn0KfQ==:2:1"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655488ms] [LOG] [WebSocket] Message received: {"type":"error","message":"export default async function(ctx) {"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655493ms] [LOG] [WebSocket] Message received: {"type":"error","message":"~~~~~~"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655498ms] [LOG] [WebSocket] Message received: {"type":"error","message":"Fatal error: The module's source code could not be parsed: 'import', and 'export' cannot be used outside of module code at data:text/javascript;base64,ZXhwb3J0IGRlZmF1bHQgYXN5bmMgZnVuY3Rpb24oY3R4KSB7CmV4cG9ydCBkZWZhdWx0IGFzeW5jIGZ1bmN0aW9uKGN0eCkgewogIGNvbnN0IHsgcGF5bG9hZCB9ID0gY3R4OwogIGNvbnNvbGUubG9nKCJQcm9jZXNhbmRvIGRhdG9zIGVuIEpTLi4uIik7CiAgCiAgLy8gVHUgbMOzZ2ljYSBhcXXDrQogIAogIHJldHVybiB7CiAgICAuLi5wYXlsb2FkLAogICAgZnJhZ21lbnRfaWQ6IGN0eC5zcGxpdC5mcmFnbWVudF9pbmRleAogIH07Cn0KfQ==:2:1"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655504ms] [LOG] [WebSocket] Message received: {"type":"error","message":"export default async function(ctx) {"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655509ms] [LOG] [WebSocket] Message received: {"type":"error","message":"~~~~~~"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655514ms] [LOG] [WebSocket] Message received: {"type":"status","success":false,"exit_code":1} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1655706ms] [LOG] [WebSocket] Connection closed (Code: 1000, Reason: ) @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:830
+[ 1668049ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-2baz5sx1b @ http://localhost:3000/src/services/api.js:29
+[ 1669933ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/detail/exec-t8kzo2fel9gz @ http://localhost:3000/src/services/api.js:29
+[ 1709544ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-2baz5sx1b @ http://localhost:3000/src/services/api.js:29
+[ 1712232ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/detail/exec-t8kzo2fel9gz @ http://localhost:3000/src/services/api.js:29
+[ 1731833ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359480056 @ http://localhost:3000/src/services/api.js:29
+[ 1731834ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1738895ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-gcsg4ylcs @ http://localhost:3000/src/services/api.js:29
+[ 1741092ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/?diagram_type=data-integration @ http://localhost:3000/src/services/api.js:29
+[ 1741265ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/executions/exec-exwg1oyqljl6/logs @ http://localhost:3000/src/services/api.js:29
+[ 1741471ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-gcsg4ylcs @ http://localhost:3000/src/services/api.js:29
+[ 1742904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359491126 @ http://localhost:3000/src/services/api.js:29
+[ 1752911ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359501134 @ http://localhost:3000/src/services/api.js:29
+[ 1753593ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-rp7fw1u8q @ http://localhost:3000/src/services/api.js:29
+[ 1755314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/?diagram_type=data-integration @ http://localhost:3000/src/services/api.js:29
+[ 1755575ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/executions/exec-q9b4r5e9hyhm/logs @ http://localhost:3000/src/services/api.js:29
+[ 1755772ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-rp7fw1u8q @ http://localhost:3000/src/services/api.js:29
+[ 1762121ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/execution-history/flow-a81lh3ydd @ http://localhost:3000/src/services/api.js:29
+[ 1762904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359511127 @ http://localhost:3000/src/services/api.js:29
+[ 1763779ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/?diagram_type=data-integration @ http://localhost:3000/src/services/api.js:29
+[ 1763975ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/executions/exec-6yyk6t38qruh/logs @ http://localhost:3000/src/services/api.js:29
+[ 1764236ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-a81lh3ydd @ http://localhost:3000/src/services/api.js:29
+[ 1772916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359521138 @ http://localhost:3000/src/services/api.js:29
+[ 1782905ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359531127 @ http://localhost:3000/src/services/api.js:29
+[ 1792906ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359541128 @ http://localhost:3000/src/services/api.js:29
+[ 1802910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359551133 @ http://localhost:3000/src/services/api.js:29
+[ 1812906ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359561128 @ http://localhost:3000/src/services/api.js:29
+[ 1822915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359571138 @ http://localhost:3000/src/services/api.js:29
+[ 1832919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359581142 @ http://localhost:3000/src/services/api.js:29
+[ 1842919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359591141 @ http://localhost:3000/src/services/api.js:29
+[ 1852913ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359601136 @ http://localhost:3000/src/services/api.js:29
+[ 1862916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359611138 @ http://localhost:3000/src/services/api.js:29
+[ 1872918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359621140 @ http://localhost:3000/src/services/api.js:29
+[ 1882909ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359631132 @ http://localhost:3000/src/services/api.js:29
+[ 1892907ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359641129 @ http://localhost:3000/src/services/api.js:29
+[ 1894142ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 1894143ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 1894144ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-jenb7ylv7 @ http://localhost:3000/src/services/api.js:29
+[ 1897068ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/ml-models/ml-058a70d9 @ http://localhost:3000/src/services/api.js:29
+[ 1949836ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/data-sources/ @ http://localhost:3000/src/services/api.js:29
+[ 1959718ms] [LOG] [WebSocket] Connecting to: ws://localhost:3000/bff/api/v1/integration-flows/flow-jenb7ylv7/logs @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:790
+[ 1959786ms] [LOG] [WebSocket] Connection opened @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:794
+[ 1959791ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290121810","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1959793ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[Fuente] Ejecutando 'CSV / Excel' ..."} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1959852ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290121810","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1959855ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[Fuente] 4 registros cargados desde 'CSV / Excel' (59ms)"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1959857ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290944603","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1959859ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[ML] Ejecutando 'Pickle Model Inference' ..."} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988321ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290944603","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988325ms] [LOG] [WebSocket] Message received: {"type":"info","message":"[ML] Inferencia completada para 'Pickle Model Inference' (28467ms)"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988901ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290121810","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988903ms] [LOG] [WebSocket] Message received: {"type":"node_log","node_id":"n1780290121810","status":"success","input":{},"output":[{"id":"53623","code":"EQP-0085"},{"id":"53623","code":"LIC-0001"},{"id":"53623","code":"LIC-0002"},{"id":"53623","code":"LIC-0006"}],"duration":1,"start_time":"2026-06-02T00:22:17.083Z","end_time":"2026-06-02T00:22:17.084Z"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988906ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":50.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988909ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290121810","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988913ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":50.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988918ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290944603","status":"running"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988920ms] [LOG] [WebSocket] Message received: {"type":"node_log","node_id":"n1780290944603","status":"success","input":{},"output":[{"id":"53623","code":"EQP-0085","prediction":0},{"id":"53623","code":"LIC-0001","prediction":0},{"id":"53623","code":"LIC-0002","prediction":0},{"id":"53623","code":"LIC-0006","prediction":0}],"duration":0,"start_time":"2026-06-02T00:22:17.085Z","end_time":"2026-06-02T00:22:17.085Z"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988923ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":100.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988926ms] [LOG] [WebSocket] Message received: {"type":"node_status","node_id":"n1780290944603","status":"success"} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988928ms] [LOG] [WebSocket] Message received: {"type":"progress","progress":100.0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988933ms] [LOG] [WebSocket] Message received: {"type":"info","message":"Flow completed successfully."} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988936ms] [LOG] [WebSocket] Message received: {"type":"result","data":[{"id":"53623","code":"EQP-0085","prediction":0},{"id":"53623","code":"LIC-0001","prediction":0},{"id":"53623","code":"LIC-0002","prediction":0},{"id":"53623","code":"LIC-0006","prediction":0}]} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1988952ms] [LOG] [WebSocket] Message received: {"type":"status","success":true,"exit_code":0} @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:803
+[ 1989148ms] [LOG] [WebSocket] Connection closed (Code: 1000, Reason: ) @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:830
+[ 1991530ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 1991633ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 1992779ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 1992830ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 1993238ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 2008404ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 2008440ms] [ERROR] Unable to preventDefault inside passive event listener invocation. @ http://localhost:3000/src/components/editor/FlowEditorCanvas.vue?t=1780359352540:934
+[ 2016329ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359764552 @ http://localhost:3000/src/services/api.js:29
+[ 2016331ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 2021472ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 2021475ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/editor-tools/ @ http://localhost:3000/src/services/api.js:29
+[ 2021475ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/flow-z4pdmlqo8 @ http://localhost:3000/src/services/api.js:29
+[ 2064926ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359813148 @ http://localhost:3000/src/services/api.js:29
+[ 2064927ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 2075368ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359823590 @ http://localhost:3000/src/services/api.js:29
+[ 2085368ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359833590 @ http://localhost:3000/src/services/api.js:29
+[ 2095374ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359843597 @ http://localhost:3000/src/services/api.js:29
+[ 2103921ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:559
+[ 2103935ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/:0
+[ 2105606ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359853829 @ http://localhost:3000/src/services/api.js:29
+[ 2106062ms] [ERROR] Failed to refresh flows: TypeError: Failed to fetch
+    at apiRequest (http://localhost:3000/src/services/api.js:32:26)
+    at Object.getAll (http://localhost:3000/src/services/api.js:390:12)
+    at Proxy.refreshFlows (http://localhost:3000/src/stores/integrations.js:51:48)
+    at Proxy.wrappedAction (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:1094:18)
+    at store.<computed> (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:772:44)
+    at http://localhost:3000/src/views/IntegrationsView.vue?t=1780359207155:33:15 @ http://localhost:3000/src/stores/integrations.js:52
+[ 2107115ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[ 2107116ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[ 2108446ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780359856668 @ http://localhost:3000/src/services/api.js:29
+[ 2108447ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 2110600ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:559
+[ 2110607ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/:0
+[ 2362897ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780360111119 @ http://localhost:3000/src/services/api.js:29
+[ 2364998ms] [ERROR] Failed to refresh flows: TypeError: Failed to fetch
+    at apiRequest (http://localhost:3000/src/services/api.js:32:26)
+    at Object.getAll (http://localhost:3000/src/services/api.js:390:12)
+    at Proxy.refreshFlows (http://localhost:3000/src/stores/integrations.js:51:48)
+    at Proxy.wrappedAction (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:1094:18)
+    at store.<computed> (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:772:44)
+    at http://localhost:3000/src/views/IntegrationsView.vue?t=1780359445622:33:15 @ http://localhost:3000/src/stores/integrations.js:52
+[ 2367596ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:559
+[ 2367599ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/bff/auth/me:0
+[ 2367599ms] [ERROR] Auth initialization failed: TypeError: Failed to fetch
+    at Proxy.initialize (http://localhost:3000/src/stores/auth.js:68:32)
+    at Proxy.wrappedAction (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:1094:18)
+    at store.<computed> (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:772:44)
+    at http://localhost:3000/src/main.js?t=1780359816428:71:11 @ http://localhost:3000/src/stores/auth.js:82
+[ 8572430ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/:0
+[ 8649571ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[ 8649571ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[ 8650187ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366398409 @ http://localhost:3000/src/services/api.js:29
+[ 8650188ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[ 8669287ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366417509 @ http://localhost:3000/src/services/api.js:29
+[ 8679290ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366427512 @ http://localhost:3000/src/services/api.js:29
+[ 8689300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366437522 @ http://localhost:3000/src/services/api.js:29
+[ 8699280ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366447503 @ http://localhost:3000/src/services/api.js:29
+[ 8709281ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366457504 @ http://localhost:3000/src/services/api.js:29
+[ 8719283ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366467505 @ http://localhost:3000/src/services/api.js:29
+[ 8729280ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366477503 @ http://localhost:3000/src/services/api.js:29
+[ 8739284ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366487506 @ http://localhost:3000/src/services/api.js:29
+[ 8749283ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366497506 @ http://localhost:3000/src/services/api.js:29
+[ 8759292ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366507514 @ http://localhost:3000/src/services/api.js:29
+[ 8769283ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366517505 @ http://localhost:3000/src/services/api.js:29
+[ 8779282ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366527505 @ http://localhost:3000/src/services/api.js:29
+[ 8789293ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366537516 @ http://localhost:3000/src/services/api.js:29
+[ 8799283ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366547505 @ http://localhost:3000/src/services/api.js:29
+[ 8809290ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366557512 @ http://localhost:3000/src/services/api.js:29
+[ 8819297ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366567519 @ http://localhost:3000/src/services/api.js:29
+[ 8829284ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366577506 @ http://localhost:3000/src/services/api.js:29
+[ 8839288ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366587510 @ http://localhost:3000/src/services/api.js:29
+[ 8849293ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366597516 @ http://localhost:3000/src/services/api.js:29
+[ 8859286ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366607509 @ http://localhost:3000/src/services/api.js:29
+[ 8869290ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366617513 @ http://localhost:3000/src/services/api.js:29
+[ 8879286ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366627508 @ http://localhost:3000/src/services/api.js:29
+[ 8889297ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366637519 @ http://localhost:3000/src/services/api.js:29
+[ 8899294ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366647517 @ http://localhost:3000/src/services/api.js:29
+[ 8909287ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366657509 @ http://localhost:3000/src/services/api.js:29
+[ 8919288ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366667510 @ http://localhost:3000/src/services/api.js:29
+[ 8929284ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366677506 @ http://localhost:3000/src/services/api.js:29
+[ 8939283ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366687506 @ http://localhost:3000/src/services/api.js:29
+[ 8949293ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366697515 @ http://localhost:3000/src/services/api.js:29
+[ 8959291ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366707514 @ http://localhost:3000/src/services/api.js:29
+[ 8969286ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366717508 @ http://localhost:3000/src/services/api.js:29
+[ 8979282ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366727504 @ http://localhost:3000/src/services/api.js:29
+[ 8989297ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366737520 @ http://localhost:3000/src/services/api.js:29
+[ 8999283ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366747506 @ http://localhost:3000/src/services/api.js:29
+[ 9009282ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366757504 @ http://localhost:3000/src/services/api.js:29
+[ 9019289ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366767511 @ http://localhost:3000/src/services/api.js:29
+[ 9029284ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366777506 @ http://localhost:3000/src/services/api.js:29
+[ 9039290ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366787512 @ http://localhost:3000/src/services/api.js:29
+[ 9049286ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366797508 @ http://localhost:3000/src/services/api.js:29
+[ 9059291ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366807513 @ http://localhost:3000/src/services/api.js:29
+[ 9069290ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366817512 @ http://localhost:3000/src/services/api.js:29
+[ 9079287ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366827510 @ http://localhost:3000/src/services/api.js:29
+[ 9089289ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366837511 @ http://localhost:3000/src/services/api.js:29
+[ 9099299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366847521 @ http://localhost:3000/src/services/api.js:29
+[ 9109298ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366857520 @ http://localhost:3000/src/services/api.js:29
+[ 9119299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366867521 @ http://localhost:3000/src/services/api.js:29
+[ 9129295ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366877518 @ http://localhost:3000/src/services/api.js:29
+[ 9139295ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366887518 @ http://localhost:3000/src/services/api.js:29
+[ 9149303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366897525 @ http://localhost:3000/src/services/api.js:29
+[ 9159300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366907523 @ http://localhost:3000/src/services/api.js:29
+[ 9169300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366917522 @ http://localhost:3000/src/services/api.js:29
+[ 9179303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366927526 @ http://localhost:3000/src/services/api.js:29
+[ 9189302ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366937524 @ http://localhost:3000/src/services/api.js:29
+[ 9199294ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366947516 @ http://localhost:3000/src/services/api.js:29
+[ 9209301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366957524 @ http://localhost:3000/src/services/api.js:29
+[ 9219297ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366967520 @ http://localhost:3000/src/services/api.js:29
+[ 9229299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366977521 @ http://localhost:3000/src/services/api.js:29
+[ 9239300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366987522 @ http://localhost:3000/src/services/api.js:29
+[ 9249301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780366997524 @ http://localhost:3000/src/services/api.js:29
+[ 9259296ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367007519 @ http://localhost:3000/src/services/api.js:29
+[ 9269299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367017521 @ http://localhost:3000/src/services/api.js:29
+[ 9279305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367027528 @ http://localhost:3000/src/services/api.js:29
+[ 9289300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367037523 @ http://localhost:3000/src/services/api.js:29
+[ 9299311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367047533 @ http://localhost:3000/src/services/api.js:29
+[ 9309309ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367057531 @ http://localhost:3000/src/services/api.js:29
+[ 9319299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367067522 @ http://localhost:3000/src/services/api.js:29
+[ 9329299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367077521 @ http://localhost:3000/src/services/api.js:29
+[ 9339299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367087521 @ http://localhost:3000/src/services/api.js:29
+[ 9349312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367097534 @ http://localhost:3000/src/services/api.js:29
+[ 9359302ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367107524 @ http://localhost:3000/src/services/api.js:29
+[ 9369316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367117539 @ http://localhost:3000/src/services/api.js:29
+[ 9379315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367127537 @ http://localhost:3000/src/services/api.js:29
+[ 9389305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367137527 @ http://localhost:3000/src/services/api.js:29
+[ 9399299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367147521 @ http://localhost:3000/src/services/api.js:29
+[ 9409301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367157524 @ http://localhost:3000/src/services/api.js:29
+[ 9419307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367167529 @ http://localhost:3000/src/services/api.js:29
+[ 9429305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367177527 @ http://localhost:3000/src/services/api.js:29
+[ 9439305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367187527 @ http://localhost:3000/src/services/api.js:29
+[ 9449309ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367197531 @ http://localhost:3000/src/services/api.js:29
+[ 9459310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367207532 @ http://localhost:3000/src/services/api.js:29
+[ 9469310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367217532 @ http://localhost:3000/src/services/api.js:29
+[ 9479305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367227528 @ http://localhost:3000/src/services/api.js:29
+[ 9489302ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367237524 @ http://localhost:3000/src/services/api.js:29
+[ 9499304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367247527 @ http://localhost:3000/src/services/api.js:29
+[ 9509299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367257521 @ http://localhost:3000/src/services/api.js:29
+[ 9519302ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367267524 @ http://localhost:3000/src/services/api.js:29
+[ 9529303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367277525 @ http://localhost:3000/src/services/api.js:29
+[ 9539301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367287524 @ http://localhost:3000/src/services/api.js:29
+[ 9549307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367297529 @ http://localhost:3000/src/services/api.js:29
+[ 9559304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367307527 @ http://localhost:3000/src/services/api.js:29
+[ 9569301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367317523 @ http://localhost:3000/src/services/api.js:29
+[ 9579314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367327536 @ http://localhost:3000/src/services/api.js:29
+[ 9589313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367337535 @ http://localhost:3000/src/services/api.js:29
+[ 9599305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367347527 @ http://localhost:3000/src/services/api.js:29
+[ 9609310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367357532 @ http://localhost:3000/src/services/api.js:29
+[ 9619308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367367531 @ http://localhost:3000/src/services/api.js:29
+[ 9629313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367377536 @ http://localhost:3000/src/services/api.js:29
+[ 9639304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367387527 @ http://localhost:3000/src/services/api.js:29
+[ 9649311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367397534 @ http://localhost:3000/src/services/api.js:29
+[ 9659300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367407522 @ http://localhost:3000/src/services/api.js:29
+[ 9669307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367417530 @ http://localhost:3000/src/services/api.js:29
+[ 9679314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367427537 @ http://localhost:3000/src/services/api.js:29
+[ 9689308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367437531 @ http://localhost:3000/src/services/api.js:29
+[ 9699310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367447533 @ http://localhost:3000/src/services/api.js:29
+[ 9709299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367457521 @ http://localhost:3000/src/services/api.js:29
+[ 9719302ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367467524 @ http://localhost:3000/src/services/api.js:29
+[ 9729318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367477540 @ http://localhost:3000/src/services/api.js:29
+[ 9739299ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367487521 @ http://localhost:3000/src/services/api.js:29
+[ 9749312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367497535 @ http://localhost:3000/src/services/api.js:29
+[ 9759310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367507533 @ http://localhost:3000/src/services/api.js:29
+[ 9769300ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367517522 @ http://localhost:3000/src/services/api.js:29
+[ 9779301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367527523 @ http://localhost:3000/src/services/api.js:29
+[ 9789315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367537537 @ http://localhost:3000/src/services/api.js:29
+[ 9799318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367547540 @ http://localhost:3000/src/services/api.js:29
+[ 9809314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367557536 @ http://localhost:3000/src/services/api.js:29
+[ 9819302ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367567524 @ http://localhost:3000/src/services/api.js:29
+[ 9829301ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367577523 @ http://localhost:3000/src/services/api.js:29
+[ 9839303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367587525 @ http://localhost:3000/src/services/api.js:29
+[ 9849315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367597537 @ http://localhost:3000/src/services/api.js:29
+[ 9859313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367607535 @ http://localhost:3000/src/services/api.js:29
+[ 9869304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367617526 @ http://localhost:3000/src/services/api.js:29
+[ 9879304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367627527 @ http://localhost:3000/src/services/api.js:29
+[ 9889303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367637525 @ http://localhost:3000/src/services/api.js:29
+[ 9899305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367647528 @ http://localhost:3000/src/services/api.js:29
+[ 9909307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367657529 @ http://localhost:3000/src/services/api.js:29
+[ 9919309ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367667531 @ http://localhost:3000/src/services/api.js:29
+[ 9929310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367677532 @ http://localhost:3000/src/services/api.js:29
+[ 9939304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367687526 @ http://localhost:3000/src/services/api.js:29
+[ 9949310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367697532 @ http://localhost:3000/src/services/api.js:29
+[ 9959314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367707537 @ http://localhost:3000/src/services/api.js:29
+[ 9969315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367717537 @ http://localhost:3000/src/services/api.js:29
+[ 9979308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367727530 @ http://localhost:3000/src/services/api.js:29
+[ 9989305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367737527 @ http://localhost:3000/src/services/api.js:29
+[ 9999307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367747529 @ http://localhost:3000/src/services/api.js:29
+[10009306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367757528 @ http://localhost:3000/src/services/api.js:29
+[10019304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367767526 @ http://localhost:3000/src/services/api.js:29
+[10029305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367777527 @ http://localhost:3000/src/services/api.js:29
+[10039305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367787528 @ http://localhost:3000/src/services/api.js:29
+[10049305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367797528 @ http://localhost:3000/src/services/api.js:29
+[10059304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367807526 @ http://localhost:3000/src/services/api.js:29
+[10069303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367817526 @ http://localhost:3000/src/services/api.js:29
+[10079310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367827532 @ http://localhost:3000/src/services/api.js:29
+[10089317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367837539 @ http://localhost:3000/src/services/api.js:29
+[10099308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367847530 @ http://localhost:3000/src/services/api.js:29
+[10109306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367857528 @ http://localhost:3000/src/services/api.js:29
+[10119307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367867529 @ http://localhost:3000/src/services/api.js:29
+[10129307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367877529 @ http://localhost:3000/src/services/api.js:29
+[10139304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367887526 @ http://localhost:3000/src/services/api.js:29
+[10149314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367897536 @ http://localhost:3000/src/services/api.js:29
+[10159307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367907529 @ http://localhost:3000/src/services/api.js:29
+[10169308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367917530 @ http://localhost:3000/src/services/api.js:29
+[10179305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367927527 @ http://localhost:3000/src/services/api.js:29
+[10189313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367937536 @ http://localhost:3000/src/services/api.js:29
+[10199318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367947540 @ http://localhost:3000/src/services/api.js:29
+[10209312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367957534 @ http://localhost:3000/src/services/api.js:29
+[10219307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367967529 @ http://localhost:3000/src/services/api.js:29
+[10229306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367977529 @ http://localhost:3000/src/services/api.js:29
+[10239315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367987538 @ http://localhost:3000/src/services/api.js:29
+[10249307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780367997530 @ http://localhost:3000/src/services/api.js:29
+[10259304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368007526 @ http://localhost:3000/src/services/api.js:29
+[10269306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368017529 @ http://localhost:3000/src/services/api.js:29
+[10279305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368027527 @ http://localhost:3000/src/services/api.js:29
+[10289313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368037536 @ http://localhost:3000/src/services/api.js:29
+[10299316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368047538 @ http://localhost:3000/src/services/api.js:29
+[10309307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368057530 @ http://localhost:3000/src/services/api.js:29
+[10319306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368067528 @ http://localhost:3000/src/services/api.js:29
+[10329315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368077537 @ http://localhost:3000/src/services/api.js:29
+[10339315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368087537 @ http://localhost:3000/src/services/api.js:29
+[10349312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368097535 @ http://localhost:3000/src/services/api.js:29
+[10359303ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368107525 @ http://localhost:3000/src/services/api.js:29
+[10369316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368117538 @ http://localhost:3000/src/services/api.js:29
+[10379305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368127527 @ http://localhost:3000/src/services/api.js:29
+[10389310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368137533 @ http://localhost:3000/src/services/api.js:29
+[10399305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368147527 @ http://localhost:3000/src/services/api.js:29
+[10409312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368157534 @ http://localhost:3000/src/services/api.js:29
+[10419321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368167543 @ http://localhost:3000/src/services/api.js:29
+[10429307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368177528 @ http://localhost:3000/src/services/api.js:29
+[10439308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368187530 @ http://localhost:3000/src/services/api.js:29
+[10449304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368197526 @ http://localhost:3000/src/services/api.js:29
+[10459327ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368207549 @ http://localhost:3000/src/services/api.js:29
+[10469306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368217528 @ http://localhost:3000/src/services/api.js:29
+[10479308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368227530 @ http://localhost:3000/src/services/api.js:29
+[10489304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368237527 @ http://localhost:3000/src/services/api.js:29
+[10499304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368247526 @ http://localhost:3000/src/services/api.js:29
+[10509304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368257526 @ http://localhost:3000/src/services/api.js:29
+[10519307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368267530 @ http://localhost:3000/src/services/api.js:29
+[10529304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368277526 @ http://localhost:3000/src/services/api.js:29
+[10539308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368287530 @ http://localhost:3000/src/services/api.js:29
+[10549314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368297536 @ http://localhost:3000/src/services/api.js:29
+[10559305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368307527 @ http://localhost:3000/src/services/api.js:29
+[10569315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368317538 @ http://localhost:3000/src/services/api.js:29
+[10579312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368327534 @ http://localhost:3000/src/services/api.js:29
+[10589318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368337540 @ http://localhost:3000/src/services/api.js:29
+[10599305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368347527 @ http://localhost:3000/src/services/api.js:29
+[10609307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368357529 @ http://localhost:3000/src/services/api.js:29
+[10619322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368367544 @ http://localhost:3000/src/services/api.js:29
+[10629305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368377527 @ http://localhost:3000/src/services/api.js:29
+[10639304ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368387527 @ http://localhost:3000/src/services/api.js:29
+[10649314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368397537 @ http://localhost:3000/src/services/api.js:29
+[10659313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368407535 @ http://localhost:3000/src/services/api.js:29
+[10669305ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368417527 @ http://localhost:3000/src/services/api.js:29
+[10679308ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368427530 @ http://localhost:3000/src/services/api.js:29
+[10689318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368437541 @ http://localhost:3000/src/services/api.js:29
+[10699310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368447532 @ http://localhost:3000/src/services/api.js:29
+[10709315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368457538 @ http://localhost:3000/src/services/api.js:29
+[10719317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368467539 @ http://localhost:3000/src/services/api.js:29
+[10729309ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368477531 @ http://localhost:3000/src/services/api.js:29
+[10739321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368487543 @ http://localhost:3000/src/services/api.js:29
+[10749307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368497529 @ http://localhost:3000/src/services/api.js:29
+[10759316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368507538 @ http://localhost:3000/src/services/api.js:29
+[10769318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368517540 @ http://localhost:3000/src/services/api.js:29
+[10779314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368527536 @ http://localhost:3000/src/services/api.js:29
+[10789319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368537541 @ http://localhost:3000/src/services/api.js:29
+[10799317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368547538 @ http://localhost:3000/src/services/api.js:29
+[10809306ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368557528 @ http://localhost:3000/src/services/api.js:29
+[10819320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368567542 @ http://localhost:3000/src/services/api.js:29
+[10829316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368577537 @ http://localhost:3000/src/services/api.js:29
+[10839307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368587530 @ http://localhost:3000/src/services/api.js:29
+[10849319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368597541 @ http://localhost:3000/src/services/api.js:29
+[10859307ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368607529 @ http://localhost:3000/src/services/api.js:29
+[10869320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368617542 @ http://localhost:3000/src/services/api.js:29
+[10879321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368627543 @ http://localhost:3000/src/services/api.js:29
+[10889310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368637532 @ http://localhost:3000/src/services/api.js:29
+[10899316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368647538 @ http://localhost:3000/src/services/api.js:29
+[10909311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368657534 @ http://localhost:3000/src/services/api.js:29
+[10919323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368667545 @ http://localhost:3000/src/services/api.js:29
+[10929319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368677541 @ http://localhost:3000/src/services/api.js:29
+[10939320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368687542 @ http://localhost:3000/src/services/api.js:29
+[10949311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368697533 @ http://localhost:3000/src/services/api.js:29
+[10959311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368707533 @ http://localhost:3000/src/services/api.js:29
+[10969316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368717539 @ http://localhost:3000/src/services/api.js:29
+[10979320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368727542 @ http://localhost:3000/src/services/api.js:29
+[10989310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368737532 @ http://localhost:3000/src/services/api.js:29
+[10999326ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368747549 @ http://localhost:3000/src/services/api.js:29
+[11009315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368757537 @ http://localhost:3000/src/services/api.js:29
+[11019322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368767544 @ http://localhost:3000/src/services/api.js:29
+[11029323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368777545 @ http://localhost:3000/src/services/api.js:29
+[11039321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368787543 @ http://localhost:3000/src/services/api.js:29
+[11049312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368797534 @ http://localhost:3000/src/services/api.js:29
+[11059311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368807533 @ http://localhost:3000/src/services/api.js:29
+[11069313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368817535 @ http://localhost:3000/src/services/api.js:29
+[11079323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368827545 @ http://localhost:3000/src/services/api.js:29
+[11089314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368837536 @ http://localhost:3000/src/services/api.js:29
+[11099312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368847534 @ http://localhost:3000/src/services/api.js:29
+[11109315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368857538 @ http://localhost:3000/src/services/api.js:29
+[11119311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368867533 @ http://localhost:3000/src/services/api.js:29
+[11129323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368877545 @ http://localhost:3000/src/services/api.js:29
+[11139321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368887543 @ http://localhost:3000/src/services/api.js:29
+[11149321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368897543 @ http://localhost:3000/src/services/api.js:29
+[11159311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368907534 @ http://localhost:3000/src/services/api.js:29
+[11169311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368917533 @ http://localhost:3000/src/services/api.js:29
+[11179316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368927538 @ http://localhost:3000/src/services/api.js:29
+[11189319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368937541 @ http://localhost:3000/src/services/api.js:29
+[11199322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368947544 @ http://localhost:3000/src/services/api.js:29
+[11209324ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368957547 @ http://localhost:3000/src/services/api.js:29
+[11219318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368967540 @ http://localhost:3000/src/services/api.js:29
+[11229312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368977534 @ http://localhost:3000/src/services/api.js:29
+[11239314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368987536 @ http://localhost:3000/src/services/api.js:29
+[11249311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780368997534 @ http://localhost:3000/src/services/api.js:29
+[11259314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369007536 @ http://localhost:3000/src/services/api.js:29
+[11269322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369017544 @ http://localhost:3000/src/services/api.js:29
+[11279312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369027534 @ http://localhost:3000/src/services/api.js:29
+[11289311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369037534 @ http://localhost:3000/src/services/api.js:29
+[11299322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369047545 @ http://localhost:3000/src/services/api.js:29
+[11309311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369057534 @ http://localhost:3000/src/services/api.js:29
+[11319311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369067534 @ http://localhost:3000/src/services/api.js:29
+[11329320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369077543 @ http://localhost:3000/src/services/api.js:29
+[11339310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369087533 @ http://localhost:3000/src/services/api.js:29
+[11349316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369097538 @ http://localhost:3000/src/services/api.js:29
+[11359322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369107545 @ http://localhost:3000/src/services/api.js:29
+[11369324ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369117547 @ http://localhost:3000/src/services/api.js:29
+[11379316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369127539 @ http://localhost:3000/src/services/api.js:29
+[11389324ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369137546 @ http://localhost:3000/src/services/api.js:29
+[11399310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369147532 @ http://localhost:3000/src/services/api.js:29
+[11409326ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369157548 @ http://localhost:3000/src/services/api.js:29
+[11419321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369167543 @ http://localhost:3000/src/services/api.js:29
+[11429310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369177532 @ http://localhost:3000/src/services/api.js:29
+[11439311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369187533 @ http://localhost:3000/src/services/api.js:29
+[11449325ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369197547 @ http://localhost:3000/src/services/api.js:29
+[11459312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369207534 @ http://localhost:3000/src/services/api.js:29
+[11469322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369217545 @ http://localhost:3000/src/services/api.js:29
+[11479320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369227542 @ http://localhost:3000/src/services/api.js:29
+[11489316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369237538 @ http://localhost:3000/src/services/api.js:29
+[11499315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369247538 @ http://localhost:3000/src/services/api.js:29
+[11509318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369257540 @ http://localhost:3000/src/services/api.js:29
+[11519311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369267533 @ http://localhost:3000/src/services/api.js:29
+[11529323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369277546 @ http://localhost:3000/src/services/api.js:29
+[11539330ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369287552 @ http://localhost:3000/src/services/api.js:29
+[11549312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369297534 @ http://localhost:3000/src/services/api.js:29
+[11559313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369307535 @ http://localhost:3000/src/services/api.js:29
+[11569310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369317533 @ http://localhost:3000/src/services/api.js:29
+[11579312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369327535 @ http://localhost:3000/src/services/api.js:29
+[11589321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369337543 @ http://localhost:3000/src/services/api.js:29
+[11599312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369347534 @ http://localhost:3000/src/services/api.js:29
+[11609324ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369357546 @ http://localhost:3000/src/services/api.js:29
+[11619317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369367540 @ http://localhost:3000/src/services/api.js:29
+[11629314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369377537 @ http://localhost:3000/src/services/api.js:29
+[11639314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369387536 @ http://localhost:3000/src/services/api.js:29
+[11649325ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369397547 @ http://localhost:3000/src/services/api.js:29
+[11659324ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369407546 @ http://localhost:3000/src/services/api.js:29
+[11669321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369417543 @ http://localhost:3000/src/services/api.js:29
+[11679311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369427533 @ http://localhost:3000/src/services/api.js:29
+[11689311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369437533 @ http://localhost:3000/src/services/api.js:29
+[11699310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369447532 @ http://localhost:3000/src/services/api.js:29
+[11709311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369457534 @ http://localhost:3000/src/services/api.js:29
+[11719322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369467544 @ http://localhost:3000/src/services/api.js:29
+[11729310ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369477532 @ http://localhost:3000/src/services/api.js:29
+[11739318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369487540 @ http://localhost:3000/src/services/api.js:29
+[11749325ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369497547 @ http://localhost:3000/src/services/api.js:29
+[11759321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369507543 @ http://localhost:3000/src/services/api.js:29
+[11769320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369517542 @ http://localhost:3000/src/services/api.js:29
+[11779315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369527537 @ http://localhost:3000/src/services/api.js:29
+[11789314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369537536 @ http://localhost:3000/src/services/api.js:29
+[11799314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369547536 @ http://localhost:3000/src/services/api.js:29
+[11809312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369557534 @ http://localhost:3000/src/services/api.js:29
+[11819311ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369567534 @ http://localhost:3000/src/services/api.js:29
+[11829322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369577544 @ http://localhost:3000/src/services/api.js:29
+[11839313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369587535 @ http://localhost:3000/src/services/api.js:29
+[11849312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369597534 @ http://localhost:3000/src/services/api.js:29
+[11859312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369607534 @ http://localhost:3000/src/services/api.js:29
+[11869326ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369617548 @ http://localhost:3000/src/services/api.js:29
+[11879322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369627544 @ http://localhost:3000/src/services/api.js:29
+[11889313ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369637535 @ http://localhost:3000/src/services/api.js:29
+[11899315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369647537 @ http://localhost:3000/src/services/api.js:29
+[11909327ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369657549 @ http://localhost:3000/src/services/api.js:29
+[11919319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369667542 @ http://localhost:3000/src/services/api.js:29
+[11929315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369677537 @ http://localhost:3000/src/services/api.js:29
+[11939316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369687538 @ http://localhost:3000/src/services/api.js:29
+[11949312ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369697534 @ http://localhost:3000/src/services/api.js:29
+[11959322ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369707545 @ http://localhost:3000/src/services/api.js:29
+[11969327ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369717549 @ http://localhost:3000/src/services/api.js:29
+[11979321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369727543 @ http://localhost:3000/src/services/api.js:29
+[11989317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369737539 @ http://localhost:3000/src/services/api.js:29
+[11999316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369747538 @ http://localhost:3000/src/services/api.js:29
+[12009315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369757537 @ http://localhost:3000/src/services/api.js:29
+[12019330ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369767552 @ http://localhost:3000/src/services/api.js:29
+[12029317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369777539 @ http://localhost:3000/src/services/api.js:29
+[12039318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369787541 @ http://localhost:3000/src/services/api.js:29
+[12049333ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369797555 @ http://localhost:3000/src/services/api.js:29
+[12059314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369807537 @ http://localhost:3000/src/services/api.js:29
+[12069326ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369817548 @ http://localhost:3000/src/services/api.js:29
+[12079317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369827539 @ http://localhost:3000/src/services/api.js:29
+[12089319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369837542 @ http://localhost:3000/src/services/api.js:29
+[12099324ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369847547 @ http://localhost:3000/src/services/api.js:29
+[12109321ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369857543 @ http://localhost:3000/src/services/api.js:29
+[12119317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369867539 @ http://localhost:3000/src/services/api.js:29
+[12129314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369877536 @ http://localhost:3000/src/services/api.js:29
+[12139329ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369887551 @ http://localhost:3000/src/services/api.js:29
+[12149315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369897538 @ http://localhost:3000/src/services/api.js:29
+[12159314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369907536 @ http://localhost:3000/src/services/api.js:29
+[12169328ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369917550 @ http://localhost:3000/src/services/api.js:29
+[12179317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369927539 @ http://localhost:3000/src/services/api.js:29
+[12189314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369937536 @ http://localhost:3000/src/services/api.js:29
+[12199325ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369947548 @ http://localhost:3000/src/services/api.js:29
+[12209315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369957537 @ http://localhost:3000/src/services/api.js:29
+[12219326ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369967548 @ http://localhost:3000/src/services/api.js:29
+[12229325ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369977547 @ http://localhost:3000/src/services/api.js:29
+[12239317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369987539 @ http://localhost:3000/src/services/api.js:29
+[12249317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780369997539 @ http://localhost:3000/src/services/api.js:29
+[12259327ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370007550 @ http://localhost:3000/src/services/api.js:29
+[12269316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370017538 @ http://localhost:3000/src/services/api.js:29
+[12279316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370027537 @ http://localhost:3000/src/services/api.js:29
+[12289320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370037543 @ http://localhost:3000/src/services/api.js:29
+[12299327ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370047549 @ http://localhost:3000/src/services/api.js:29
+[12309318ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370057541 @ http://localhost:3000/src/services/api.js:29
+[12319319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370067541 @ http://localhost:3000/src/services/api.js:29
+[12329317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370077539 @ http://localhost:3000/src/services/api.js:29
+[12339317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370087539 @ http://localhost:3000/src/services/api.js:29
+[12349315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370097538 @ http://localhost:3000/src/services/api.js:29
+[12359315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370107537 @ http://localhost:3000/src/services/api.js:29
+[12369316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370117538 @ http://localhost:3000/src/services/api.js:29
+[12379317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370127539 @ http://localhost:3000/src/services/api.js:29
+[12389325ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370137547 @ http://localhost:3000/src/services/api.js:29
+[12399316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370147539 @ http://localhost:3000/src/services/api.js:29
+[12409323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370157546 @ http://localhost:3000/src/services/api.js:29
+[12419323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370167545 @ http://localhost:3000/src/services/api.js:29
+[12429319ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370177541 @ http://localhost:3000/src/services/api.js:29
+[12439320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370187542 @ http://localhost:3000/src/services/api.js:29
+[12449316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370197538 @ http://localhost:3000/src/services/api.js:29
+[12459323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370207545 @ http://localhost:3000/src/services/api.js:29
+[12469315ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370217537 @ http://localhost:3000/src/services/api.js:29
+[12479316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370227538 @ http://localhost:3000/src/services/api.js:29
+[12489316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370237538 @ http://localhost:3000/src/services/api.js:29
+[12499316ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370247538 @ http://localhost:3000/src/services/api.js:29
+[12509327ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370257550 @ http://localhost:3000/src/services/api.js:29
+[12519323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370267545 @ http://localhost:3000/src/services/api.js:29
+[12529317ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370277539 @ http://localhost:3000/src/services/api.js:29
+[12539328ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370287550 @ http://localhost:3000/src/services/api.js:29
+[12549323ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370297545 @ http://localhost:3000/src/services/api.js:29
+[12559320ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370307542 @ http://localhost:3000/src/services/api.js:29
+[12569314ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370317536 @ http://localhost:3000/src/services/api.js:29
+[12570872ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370319094 @ http://localhost:3000/src/services/api.js:29
+[12570873ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[12570874ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[12570874ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[12576743ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370324965 @ http://localhost:3000/src/services/api.js:29
+[12576745ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[12576746ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[12576748ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[12580503ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370328726 @ http://localhost:3000/src/services/api.js:29
+[12580505ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[12580506ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[12580507ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[12591691ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370339913 @ http://localhost:3000/src/services/api.js:29
+[12601689ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370349912 @ http://localhost:3000/src/services/api.js:29
+[12611688ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370359910 @ http://localhost:3000/src/services/api.js:29
+[12621684ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370369906 @ http://localhost:3000/src/services/api.js:29
+[12631692ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370379914 @ http://localhost:3000/src/services/api.js:29
+[12641690ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370389912 @ http://localhost:3000/src/services/api.js:29
+[12651692ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370399914 @ http://localhost:3000/src/services/api.js:29
+[12661693ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370409915 @ http://localhost:3000/src/services/api.js:29
+[12671682ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370419904 @ http://localhost:3000/src/services/api.js:29
+[12681687ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370429909 @ http://localhost:3000/src/services/api.js:29
+[12691685ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780370439907 @ http://localhost:3000/src/services/api.js:29
+[12701058ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:559
+[12701065ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/:0
+[13736488ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780371484710 @ http://localhost:3000/src/services/api.js:29
+[13738044ms] [ERROR] Failed to refresh flows: TypeError: Failed to fetch
+    at apiRequest (http://localhost:3000/src/services/api.js:32:26)
+    at Object.getAll (http://localhost:3000/src/services/api.js:390:12)
+    at Proxy.refreshFlows (http://localhost:3000/src/stores/integrations.js:51:48)
+    at Proxy.wrappedAction (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:1094:18)
+    at store.<computed> (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:772:44)
+    at http://localhost:3000/src/views/IntegrationsView.vue?t=1780359445622:33:15 @ http://localhost:3000/src/stores/integrations.js:52
+[13741474ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/bff/auth/me:0
+[13741475ms] [ERROR] Auth initialization failed: TypeError: Failed to fetch
+    at Proxy.initialize (http://localhost:3000/src/stores/auth.js:68:32)
+    at Proxy.wrappedAction (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:1094:18)
+    at store.<computed> (http://localhost:3000/node_modules/.vite/deps/pinia.js?v=9962f106:772:44)
+    at http://localhost:3000/src/main.js?t=1780370328620:71:11 @ http://localhost:3000/src/stores/auth.js:82
+[13741477ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:3000/@vite/client:559
+[13741485ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/:0
+[13741474ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/bff/auth/me:0
+[13741485ms] [ERROR] Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/:0
+[14301424ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/cube-config/active @ http://localhost:3000/src/services/api.js:29
+[14301425ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/llm-config/ @ http://localhost:3000/src/services/api.js:29
+[14304540ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372052762 @ http://localhost:3000/src/services/api.js:29
+[14304541ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/diagram-types/ @ http://localhost:3000/src/services/api.js:29
+[14316925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372065147 @ http://localhost:3000/src/services/api.js:29
+[14326910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372075133 @ http://localhost:3000/src/services/api.js:29
+[14336916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372085138 @ http://localhost:3000/src/services/api.js:29
+[14346916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372095138 @ http://localhost:3000/src/services/api.js:29
+[14356912ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372105134 @ http://localhost:3000/src/services/api.js:29
+[14366910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372115132 @ http://localhost:3000/src/services/api.js:29
+[14376923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372125146 @ http://localhost:3000/src/services/api.js:29
+[14386916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372135139 @ http://localhost:3000/src/services/api.js:29
+[14396917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372145139 @ http://localhost:3000/src/services/api.js:29
+[14406914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372155136 @ http://localhost:3000/src/services/api.js:29
+[14416910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372165132 @ http://localhost:3000/src/services/api.js:29
+[14426921ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372175143 @ http://localhost:3000/src/services/api.js:29
+[14436920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372185142 @ http://localhost:3000/src/services/api.js:29
+[14446917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372195140 @ http://localhost:3000/src/services/api.js:29
+[14456913ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372205136 @ http://localhost:3000/src/services/api.js:29
+[14466911ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372215133 @ http://localhost:3000/src/services/api.js:29
+[14476924ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372225146 @ http://localhost:3000/src/services/api.js:29
+[14486918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372235141 @ http://localhost:3000/src/services/api.js:29
+[14496910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372245133 @ http://localhost:3000/src/services/api.js:29
+[14506912ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372255134 @ http://localhost:3000/src/services/api.js:29
+[14516910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372265132 @ http://localhost:3000/src/services/api.js:29
+[14526920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372275142 @ http://localhost:3000/src/services/api.js:29
+[14536920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372285142 @ http://localhost:3000/src/services/api.js:29
+[14546915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372295138 @ http://localhost:3000/src/services/api.js:29
+[14556914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372305136 @ http://localhost:3000/src/services/api.js:29
+[14566910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372315132 @ http://localhost:3000/src/services/api.js:29
+[14576921ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372325144 @ http://localhost:3000/src/services/api.js:29
+[14586920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372335142 @ http://localhost:3000/src/services/api.js:29
+[14596914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372345136 @ http://localhost:3000/src/services/api.js:29
+[14606913ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372355135 @ http://localhost:3000/src/services/api.js:29
+[14616909ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372365131 @ http://localhost:3000/src/services/api.js:29
+[14626920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372375143 @ http://localhost:3000/src/services/api.js:29
+[14636919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372385141 @ http://localhost:3000/src/services/api.js:29
+[14646916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372395138 @ http://localhost:3000/src/services/api.js:29
+[14656913ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372405135 @ http://localhost:3000/src/services/api.js:29
+[14666923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372415146 @ http://localhost:3000/src/services/api.js:29
+[14676917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372425139 @ http://localhost:3000/src/services/api.js:29
+[14686913ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372435135 @ http://localhost:3000/src/services/api.js:29
+[14686930ms] [ERROR] Failed to load resource: the server responded with a status of 503 (Service Unavailable) @ http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372435135:0
+[14686931ms] [ERROR] [API] Error 503: {error: BFF unavailable, detail: connect ECONNREFUSED 127.0.0.1:3001} @ http://localhost:3000/src/services/api.js:39
+[14686931ms] [ERROR] Failed to refresh flows: ApiError: connect ECONNREFUSED 127.0.0.1:3001
+    at apiRequest (http://localhost:3000/src/services/api.js:41:11)
+    at async Proxy.refreshFlows (http://localhost:3000/src/stores/integrations.js:51:22) @ http://localhost:3000/src/stores/integrations.js:52
+[14696910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372445133 @ http://localhost:3000/src/services/api.js:29
+[14706906ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372455128 @ http://localhost:3000/src/services/api.js:29
+[14716905ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372465127 @ http://localhost:3000/src/services/api.js:29
+[14726917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372475139 @ http://localhost:3000/src/services/api.js:29
+[14736915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372485137 @ http://localhost:3000/src/services/api.js:29
+[14746906ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372495129 @ http://localhost:3000/src/services/api.js:29
+[14756904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372505126 @ http://localhost:3000/src/services/api.js:29
+[14766902ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372515124 @ http://localhost:3000/src/services/api.js:29
+[14776912ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372525135 @ http://localhost:3000/src/services/api.js:29
+[14786910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372535133 @ http://localhost:3000/src/services/api.js:29
+[14796906ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372545129 @ http://localhost:3000/src/services/api.js:29
+[14806898ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372555120 @ http://localhost:3000/src/services/api.js:29
+[14816910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372565133 @ http://localhost:3000/src/services/api.js:29
+[14826904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372575126 @ http://localhost:3000/src/services/api.js:29
+[14836905ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372585128 @ http://localhost:3000/src/services/api.js:29
+[14846903ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372595125 @ http://localhost:3000/src/services/api.js:29
+[14856898ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372605120 @ http://localhost:3000/src/services/api.js:29
+[14866908ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372615130 @ http://localhost:3000/src/services/api.js:29
+[14876904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372625126 @ http://localhost:3000/src/services/api.js:29
+[14886902ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372635124 @ http://localhost:3000/src/services/api.js:29
+[14896897ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372645119 @ http://localhost:3000/src/services/api.js:29
+[14906893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372655115 @ http://localhost:3000/src/services/api.js:29
+[14916893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372665115 @ http://localhost:3000/src/services/api.js:29
+[14926901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372675123 @ http://localhost:3000/src/services/api.js:29
+[14936896ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372685119 @ http://localhost:3000/src/services/api.js:29
+[14946894ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372695116 @ http://localhost:3000/src/services/api.js:29
+[14956893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372705115 @ http://localhost:3000/src/services/api.js:29
+[14966890ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372715113 @ http://localhost:3000/src/services/api.js:29
+[14976899ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372725122 @ http://localhost:3000/src/services/api.js:29
+[14986899ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372735121 @ http://localhost:3000/src/services/api.js:29
+[14996893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372745115 @ http://localhost:3000/src/services/api.js:29
+[15006891ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372755113 @ http://localhost:3000/src/services/api.js:29
+[15016902ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372765125 @ http://localhost:3000/src/services/api.js:29
+[15026899ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372775122 @ http://localhost:3000/src/services/api.js:29
+[15036898ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372785120 @ http://localhost:3000/src/services/api.js:29
+[15046893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372795115 @ http://localhost:3000/src/services/api.js:29
+[15056890ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372805113 @ http://localhost:3000/src/services/api.js:29
+[15066904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372815126 @ http://localhost:3000/src/services/api.js:29
+[15076899ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372825122 @ http://localhost:3000/src/services/api.js:29
+[15086895ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372835118 @ http://localhost:3000/src/services/api.js:29
+[15096892ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372845115 @ http://localhost:3000/src/services/api.js:29
+[15106890ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372855113 @ http://localhost:3000/src/services/api.js:29
+[15116904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372865126 @ http://localhost:3000/src/services/api.js:29
+[15126901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372875123 @ http://localhost:3000/src/services/api.js:29
+[15136897ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372885119 @ http://localhost:3000/src/services/api.js:29
+[15146894ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372895116 @ http://localhost:3000/src/services/api.js:29
+[15156889ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372905112 @ http://localhost:3000/src/services/api.js:29
+[15166903ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372915125 @ http://localhost:3000/src/services/api.js:29
+[15176901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372925123 @ http://localhost:3000/src/services/api.js:29
+[15186895ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372935118 @ http://localhost:3000/src/services/api.js:29
+[15196894ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372945116 @ http://localhost:3000/src/services/api.js:29
+[15206904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372955126 @ http://localhost:3000/src/services/api.js:29
+[15216902ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372965124 @ http://localhost:3000/src/services/api.js:29
+[15226900ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372975123 @ http://localhost:3000/src/services/api.js:29
+[15236901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372985119 @ http://localhost:3000/src/services/api.js:29
+[15246893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780372995115 @ http://localhost:3000/src/services/api.js:29
+[15256891ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373005113 @ http://localhost:3000/src/services/api.js:29
+[15266901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373015124 @ http://localhost:3000/src/services/api.js:29
+[15276901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373025124 @ http://localhost:3000/src/services/api.js:29
+[15286895ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373035118 @ http://localhost:3000/src/services/api.js:29
+[15296892ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373045115 @ http://localhost:3000/src/services/api.js:29
+[15306890ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373055112 @ http://localhost:3000/src/services/api.js:29
+[15316901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373065124 @ http://localhost:3000/src/services/api.js:29
+[15326897ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373075119 @ http://localhost:3000/src/services/api.js:29
+[15336898ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373085120 @ http://localhost:3000/src/services/api.js:29
+[15346892ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373095115 @ http://localhost:3000/src/services/api.js:29
+[15356890ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373105112 @ http://localhost:3000/src/services/api.js:29
+[15366904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373115127 @ http://localhost:3000/src/services/api.js:29
+[15376900ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373125123 @ http://localhost:3000/src/services/api.js:29
+[15386898ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373135120 @ http://localhost:3000/src/services/api.js:29
+[15396893ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373145115 @ http://localhost:3000/src/services/api.js:29
+[15406907ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373155129 @ http://localhost:3000/src/services/api.js:29
+[15416901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373165124 @ http://localhost:3000/src/services/api.js:29
+[15426901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373175123 @ http://localhost:3000/src/services/api.js:29
+[15436904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373185127 @ http://localhost:3000/src/services/api.js:29
+[15446900ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373195123 @ http://localhost:3000/src/services/api.js:29
+[15456897ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373205119 @ http://localhost:3000/src/services/api.js:29
+[15466910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373215133 @ http://localhost:3000/src/services/api.js:29
+[15476904ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373225126 @ http://localhost:3000/src/services/api.js:29
+[15486901ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373235124 @ http://localhost:3000/src/services/api.js:29
+[15496903ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373245126 @ http://localhost:3000/src/services/api.js:29
+[15506917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373255140 @ http://localhost:3000/src/services/api.js:29
+[15516915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373265137 @ http://localhost:3000/src/services/api.js:29
+[15526910ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373275133 @ http://localhost:3000/src/services/api.js:29
+[15536907ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373285129 @ http://localhost:3000/src/services/api.js:29
+[15546905ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373295128 @ http://localhost:3000/src/services/api.js:29
+[15556908ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373305130 @ http://localhost:3000/src/services/api.js:29
+[15566917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373315140 @ http://localhost:3000/src/services/api.js:29
+[15576916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373325139 @ http://localhost:3000/src/services/api.js:29
+[15586914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373335136 @ http://localhost:3000/src/services/api.js:29
+[15596908ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373345130 @ http://localhost:3000/src/services/api.js:29
+[15606923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373355145 @ http://localhost:3000/src/services/api.js:29
+[15616922ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373365144 @ http://localhost:3000/src/services/api.js:29
+[15626920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373375142 @ http://localhost:3000/src/services/api.js:29
+[15636917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373385140 @ http://localhost:3000/src/services/api.js:29
+[15646914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373395136 @ http://localhost:3000/src/services/api.js:29
+[15656926ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373405149 @ http://localhost:3000/src/services/api.js:29
+[15666923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373415146 @ http://localhost:3000/src/services/api.js:29
+[15676920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373425143 @ http://localhost:3000/src/services/api.js:29
+[15686918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373435141 @ http://localhost:3000/src/services/api.js:29
+[15696916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373445139 @ http://localhost:3000/src/services/api.js:29
+[15706929ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373455151 @ http://localhost:3000/src/services/api.js:29
+[15716925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373465147 @ http://localhost:3000/src/services/api.js:29
+[15726922ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373475145 @ http://localhost:3000/src/services/api.js:29
+[15736919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373485141 @ http://localhost:3000/src/services/api.js:29
+[15746915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373495138 @ http://localhost:3000/src/services/api.js:29
+[15756929ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373505151 @ http://localhost:3000/src/services/api.js:29
+[15766925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373515147 @ http://localhost:3000/src/services/api.js:29
+[15776921ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373525143 @ http://localhost:3000/src/services/api.js:29
+[15786918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373535140 @ http://localhost:3000/src/services/api.js:29
+[15796916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373545138 @ http://localhost:3000/src/services/api.js:29
+[15806927ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373555150 @ http://localhost:3000/src/services/api.js:29
+[15816925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373565147 @ http://localhost:3000/src/services/api.js:29
+[15826922ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373575145 @ http://localhost:3000/src/services/api.js:29
+[15836918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373585140 @ http://localhost:3000/src/services/api.js:29
+[15846916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373595138 @ http://localhost:3000/src/services/api.js:29
+[15856927ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373605150 @ http://localhost:3000/src/services/api.js:29
+[15866923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373615145 @ http://localhost:3000/src/services/api.js:29
+[15876920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373625143 @ http://localhost:3000/src/services/api.js:29
+[15886918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373635140 @ http://localhost:3000/src/services/api.js:29
+[15896914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373645137 @ http://localhost:3000/src/services/api.js:29
+[15906928ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373655151 @ http://localhost:3000/src/services/api.js:29
+[15916924ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373665146 @ http://localhost:3000/src/services/api.js:29
+[15926919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373675141 @ http://localhost:3000/src/services/api.js:29
+[15936917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373685139 @ http://localhost:3000/src/services/api.js:29
+[15946914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373695137 @ http://localhost:3000/src/services/api.js:29
+[15956928ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373705150 @ http://localhost:3000/src/services/api.js:29
+[15966924ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373715146 @ http://localhost:3000/src/services/api.js:29
+[15976920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373725142 @ http://localhost:3000/src/services/api.js:29
+[15986916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373735139 @ http://localhost:3000/src/services/api.js:29
+[15996915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373745138 @ http://localhost:3000/src/services/api.js:29
+[16006928ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373755151 @ http://localhost:3000/src/services/api.js:29
+[16016925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373765147 @ http://localhost:3000/src/services/api.js:29
+[16026921ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373775143 @ http://localhost:3000/src/services/api.js:29
+[16036918ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373785141 @ http://localhost:3000/src/services/api.js:29
+[16046916ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373795138 @ http://localhost:3000/src/services/api.js:29
+[16056925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373805147 @ http://localhost:3000/src/services/api.js:29
+[16066925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373815147 @ http://localhost:3000/src/services/api.js:29
+[16076922ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373825145 @ http://localhost:3000/src/services/api.js:29
+[16086917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373835139 @ http://localhost:3000/src/services/api.js:29
+[16096915ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373845138 @ http://localhost:3000/src/services/api.js:29
+[16106927ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373855150 @ http://localhost:3000/src/services/api.js:29
+[16116924ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373865146 @ http://localhost:3000/src/services/api.js:29
+[16126920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373875143 @ http://localhost:3000/src/services/api.js:29
+[16136917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373885139 @ http://localhost:3000/src/services/api.js:29
+[16146929ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373895151 @ http://localhost:3000/src/services/api.js:29
+[16156928ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373905150 @ http://localhost:3000/src/services/api.js:29
+[16166923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373915145 @ http://localhost:3000/src/services/api.js:29
+[16176919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373925141 @ http://localhost:3000/src/services/api.js:29
+[16186917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373935140 @ http://localhost:3000/src/services/api.js:29
+[16196928ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373945150 @ http://localhost:3000/src/services/api.js:29
+[16206927ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373955149 @ http://localhost:3000/src/services/api.js:29
+[16216923ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373965145 @ http://localhost:3000/src/services/api.js:29
+[16226919ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373975142 @ http://localhost:3000/src/services/api.js:29
+[16236917ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373985140 @ http://localhost:3000/src/services/api.js:29
+[16246914ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780373995136 @ http://localhost:3000/src/services/api.js:29
+[16256925ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780374005147 @ http://localhost:3000/src/services/api.js:29
+[16266924ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780374015146 @ http://localhost:3000/src/services/api.js:29
+[16276920ms] [LOG] [API] GET http://localhost:3000/bff/api/v1/integration-flows/?_t=1780374025142 @ http://localhost:3000/src/services/api.js:29
