@@ -120,6 +120,6 @@ Progress: [##########] 100% (Phase 49)
 ## Session Continuity
 
 Last session: 2026-06-02
-Stopped at: Completed 51-01-PLAN.md — Dashboard filter context for AI Analyst (ANALYST-01). Filters forwarded from Vue to ai-analyst service and merged into CubeJS queries.
+Stopped at: Completed 51-02-PLAN.md — Per-dashboard session isolation (aiAnalyst store sessions{} + ensure_session backend). Phase 51 plan 2/3.
 Resume file: .planning/STATE.md
 
