@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Add DeepSeek models (DeepSeek-V3 and DeepSeek-R1) as selectable options alongside Gemini in the BI Analyst chat panel, available in both the Dashboard Designer and Dashboard Viewer. Includes:
+Add DeepSeek models (DeepSeek V4 Flash and DeepSeek V4 Pro) as selectable options alongside Gemini in the BI Analyst chat panel, available in both the Dashboard Designer and Dashboard Viewer. Includes:
 - UI model selector (gear menu in AiAnalystPanel)
 - Backend LiteLLM adapter to make Google ADK model-agnostic
 - BYOK: user-managed DeepSeek API key stored in SettingsView
@@ -22,7 +22,7 @@ Add DeepSeek models (DeepSeek-V3 and DeepSeek-R1) as selectable options alongsid
 ### Model selector UI
 - Located behind the **gear/settings icon** in AiAnalystPanel header — keeps the chat header clean
 - Shows all available models fetched from the new `/models` endpoint
-- Friendly display names: "Gemini Flash", "DeepSeek V3", "DeepSeek R1"
+- Friendly display names: "Gemini Flash", "DeepSeek V4 Flash", "DeepSeek V4 Pro"
 - **Default model:** Gemini Flash (backward compatible — existing behavior unchanged)
 
 ### Mid-conversation model switching
@@ -30,18 +30,19 @@ Add DeepSeek models (DeepSeek-V3 and DeepSeek-R1) as selectable options alongsid
 - A small visual **divider** with the model name is inserted in the chat to mark the switch point
 
 ### Message model badge
-- Each **assistant message** shows a small badge indicating which model produced it (e.g., "Gemini Flash" / "DeepSeek V3")
-- Allows users to compare responses from different models in the same conversation
+- Each **assistant message** shows a small badge indicating which model produced it (e.g., "Gemini Flash" / "DeepSeek V4 Flash")
+- Badge is shown for ALL assistant messages including Gemini — allows users to compare responses from different models in the same conversation
 
 ### DeepSeek models exposed
-- **DeepSeek V3** (`deepseek-chat`) — fast, strong at code and data analysis, BI chat primary use
-- **DeepSeek R1** (`deepseek-reasoner`) — chain-of-thought reasoning, slower, for complex multi-step analysis
+- **DeepSeek V4 Flash** (`deepseek-v4-flash` via LiteLLM string `deepseek/deepseek-v4-flash`) — fast, strong at code and data analysis, BI chat primary use
+- **DeepSeek V4 Pro** (`deepseek-v4-pro` via LiteLLM string `deepseek/deepseek-v4-pro`) — chain-of-thought reasoning, slower, for complex multi-step analysis
 - Both exposed in the selector alongside Gemini Flash
+- NOTE: The older V3/R1 alias names (`deepseek-chat` / `deepseek-reasoner`) are deprecated and hard-removed by DeepSeek on July 24, 2026. V4 Flash and V4 Pro are the current canonical model names.
 
 ### Backend integration — LiteLLM adapter
 - Add **LiteLLM** as a dependency in `pyproject.toml`
 - Use LiteLLM as the model backend for Google ADK — ADK supports LiteLLM natively
-- DeepSeek accessed via LiteLLM using its OpenAI-compatible API (`deepseek/deepseek-chat`, `deepseek/deepseek-reasoner`)
+- DeepSeek accessed via LiteLLM using its OpenAI-compatible API (`deepseek/deepseek-v4-flash`, `deepseek/deepseek-v4-pro`)
 - **No pre-built agent instances per model** — agent is constructed per-request with the selected model string; keeps the service stateless
 
 ### /models endpoint
@@ -70,7 +71,7 @@ Add DeepSeek models (DeepSeek-V3 and DeepSeek-R1) as selectable options alongsid
 
 ### Claude's Discretion
 - Exact DB schema for storing user AI keys (extend existing User model or separate table)
-- Exact pricing constants for DeepSeek V3 and R1 (use published API pricing at implementation time)
+- Exact pricing constants for DeepSeek V4 Flash and V4 Pro (use published API pricing at implementation time)
 - LiteLLM version pin and any config options needed for the DeepSeek provider
 - Design of the "AI Models" section in SettingsView (layout, input field style)
 - Whether the model divider in chat is a horizontal line, a label, or a chip
@@ -103,7 +104,7 @@ Add DeepSeek models (DeepSeek-V3 and DeepSeek-R1) as selectable options alongsid
 <specifics>
 ## Specific Ideas
 
-- DeepSeek V3 and R1 should both be available — the user explicitly wants both in the selector
+- DeepSeek V4 Flash and V4 Pro should both be available — the user explicitly wants both in the selector
 - Gemini Flash stays the default; no regression for existing users
 - The `/models` endpoint is driven by config — if `DEEPSEEK_API_KEY` is set (or user has BYOK key), DeepSeek models appear enabled
 - When no DeepSeek key is set, models show as disabled with a "Add key in Settings" tooltip — don't hide them, just grey them out so users know they exist
@@ -125,3 +126,4 @@ Add DeepSeek models (DeepSeek-V3 and DeepSeek-R1) as selectable options alongsid
 
 *Phase: 50-add-a-new-model-based-on-deepseek-to-bi-ai-analyst-in-dashboard-designer-viewer*
 *Context gathered: 2026-06-01*
+*Context revised: 2026-06-01 — Updated model names from V3/R1 aliases (deepseek-chat, deepseek-reasoner) to canonical V4 names (DeepSeek V4 Flash, DeepSeek V4 Pro). The old aliases are deprecated and hard-removed by DeepSeek on July 24, 2026.*
