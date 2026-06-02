@@ -143,7 +143,10 @@
 
         <!-- AI Analyst side panel -->
         <transition name="ai-panel-slide">
-          <AiAnalystPanel v-if="aiAnalystStore.isPanelOpen" />
+          <AiAnalystPanel
+            v-if="aiAnalystStore.isPanelOpen"
+            :resolved-filters="resolvedDashboardFilters"
+          />
         </transition>
       </div>
 
@@ -1323,15 +1326,15 @@ async function confirmImport() {
   font-size: 13px; cursor: pointer; color: var(--on-surface-variant);
   transition: all 0.15s; white-space: nowrap;
 }
-.mode-btn:hover { background: var(--bg); }
-.mode-btn.active { background: var(--primary); color: #fff; }
+.mode-btn:hover { background: var(--surface-container-low); }
+.mode-btn.active { background: var(--primary); color: var(--on-primary); }
 
 .description-bar { margin-bottom: 10px; }
 .description-input { font-size: 13px; }
 
 .editor-canvas {
   flex: 1;
-  background: var(--card-bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: auto;
@@ -1350,9 +1353,10 @@ async function confirmImport() {
   display: flex; flex-direction: column; align-items: center;
   padding: 14px 8px; border: 2px solid var(--border);
   border-radius: 8px; cursor: pointer; transition: all 0.15s; text-align: center;
+  background: var(--surface);
 }
-.widget-type-card:hover { border-color: var(--primary); background: var(--primary-light); }
-.widget-type-card.selected { border-color: var(--primary); background: var(--primary-light); }
+.widget-type-card:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 5%, transparent); }
+.widget-type-card.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
 .wt-icon { font-size: 28px; margin-bottom: 6px; }
 .wt-label { font-size: 13px; font-weight: 600; color: var(--on-surface); }
 .wt-desc { font-size: 11px; color: var(--on-surface-variant); margin-top: 2px; }
@@ -1360,15 +1364,16 @@ async function confirmImport() {
 /* AI Assist */
 .btn-ai-assist {
   display: inline-flex; align-items: center; gap: 6px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  color: white; border: none; padding: 6px 14px;
+  background: linear-gradient(135deg, var(--primary), var(--tertiary));
+  color: var(--on-primary); border: none; padding: 6px 14px;
   border-radius: 8px; font-size: 13px; font-weight: 600;
-  cursor: pointer; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+  cursor: pointer; box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 25%, transparent);
   transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-.btn-ai-assist:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(168, 85, 247, 0.35); }
+.btn-ai-assist:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 35%, transparent); }
 .btn-ai-assist:active:not(:disabled) { transform: translateY(0); }
 .btn-ai-assist:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; filter: grayscale(50%); }
+
 
 .animate-spin { animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -1769,8 +1774,8 @@ async function confirmImport() {
   transition: all 0.2s;
 }
 
-.action-btn-save { background: var(--primary); color: #fff; }
-.action-btn-save:hover { background: var(--primary-dark); }
+.action-btn-save { background: var(--primary); color: var(--on-primary); }
+.action-btn-save:hover { opacity: 0.9; }
 .action-btn-close { background: var(--surface-container); color: var(--on-surface-variant); }
 .action-btn-close:hover { background: var(--surface-container-high); color: var(--on-surface); }
 

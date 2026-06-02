@@ -144,6 +144,13 @@ import { ref, watch, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import { useAiAnalystStore } from '@/stores/aiAnalyst'
 import AiAnalystMessage from '@/components/dashboard/AiAnalystMessage.vue'
 
+const props = defineProps({
+  resolvedFilters: {
+    type: Array,
+    default: () => []
+  }
+})
+
 const store = useAiAnalystStore()
 
 const inputText = ref('')
@@ -168,7 +175,7 @@ async function send() {
   inputText.value = ''
   await nextTick()
   autoResize()
-  store.sendMessage(text)
+  store.sendMessage(text, props.resolvedFilters)
 }
 
 function autoResize() {
