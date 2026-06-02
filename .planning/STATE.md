@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-02T04:17:21.833Z"
+last_updated: "2026-06-02T04:48:02.401Z"
 progress:
-  total_phases: 47
+  total_phases: 48
   completed_phases: 30
-  total_plans: 83
-  completed_plans: 60
+  total_plans: 86
+  completed_plans: 62
 ---
 
 # Project State: Dashboard Studio v2.0
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 
 ## Current Position
 
-Phase: 50 of 50 (Add DeepSeek to BI/AI Analyst) — COMPLETE
-Plan: 03 of 03 — COMPLETE
-Status: Complete
-Last activity: 2026-06-02 — Completed 50-03 Frontend model selector, gear icon dropdown, model badges, BFF CORS fix
+Phase: 51 of 51 (AI Analyst Chat Enhancements) — In Progress
+Plan: 01 of 03 — COMPLETE
+Status: In Progress
+Last activity: 2026-06-02 — Completed 51-01 Dashboard filter context for AI Analyst (ANALYST-01)
 
 Progress: [##########] 100% (Phase 48)
 Progress: [##########] 100% (Phase 49)
@@ -56,6 +56,8 @@ Progress: [##########] 100% (Phase 49)
 | 49 | 5/5 | 60 min | 12.0 min |
 | Phase 49 P05 | 15m | 3 tasks | 5 files |
 | Phase 50 P03 | 3 | 3 tasks | 4 files |
+| Phase 51 P02 | 12 | 2 tasks | 2 files |
+| Phase 51 P01 | 15 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -103,6 +105,13 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 50]: Model badge shown on ALL assistant messages (v-if='message.model') — not filtered to DeepSeek only
 - [Phase 50]: selectedModel not reset on clearMessages() — user model choice persists across conversation clears
 - [Phase 50]: role='divider' is a first-class message type in aiAnalyst.messages — divider row inserted on switchModel() without HTTP request
+- [Phase 51]: sessions{} keyed by dashboardId with getters preserves identical AiAnalystPanel.vue interface — no template changes needed
+- [Phase 51]: session_id = dashboardId-userSub (not uuid4 per request) enables ADK conversation continuity across messages
+- [Phase 51]: ensure_session() uses get_session() + conditional create_session() to avoid AlreadyExistsError on reconnect
+- [Phase 51]: x_user_id header from BFF used as ADK user_id; falls back to default if absent
+- [Phase 51]: Module-level _active_filters in cube.py is safe for single-process async — no threading races within a coroutine chain
+- [Phase 51]: Filter objects passed as native CubeJS format from frontend — no transformation layer needed between Vue and Python
+- [Phase 51]: Dual injection pattern: filter string in prompt for LLM reasoning + filter objects merged into query_data for data accuracy
 
 ### Blockers/Concerns
 
@@ -111,6 +120,6 @@ Progress: [##########] 100% (Phase 49)
 ## Session Continuity
 
 Last session: 2026-06-02
-Stopped at: Completed 50-03-PLAN.md — Frontend model selector (gear icon, dropdown, model badges, BFF CORS allowedHeaders). Phase 50 COMPLETE.
+Stopped at: Completed 51-01-PLAN.md — Dashboard filter context for AI Analyst (ANALYST-01). Filters forwarded from Vue to ai-analyst service and merged into CubeJS queries.
 Resume file: .planning/STATE.md
 
