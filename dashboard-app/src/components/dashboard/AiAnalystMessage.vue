@@ -37,53 +37,74 @@
       <!-- Normal card -->
       <div v-else class="ai-card">
         <!-- Streaming dots (no content yet) -->
-        <div v-if="message.streaming && !message.content && !message.thought" class="ai-dots">
+        <div v-if="message.streaming && !hasAnyContent" class="ai-dots">
           <span class="ai-dot"></span>
           <span class="ai-dot"></span>
           <span class="ai-dot"></span>
         </div>
 
-        <!-- Thought Process -->
-        <details v-if="message.thought" class="ai-section ai-section--thought" open>
-          <summary class="ai-section-sum">
-            <span class="material-symbols-outlined ai-section-icon">visibility</span>
-            <span class="ai-section-lbl">Thought Process</span>
-            <span class="material-symbols-outlined ai-section-chevron">expand_more</span>
-          </summary>
-          <div class="ai-thought-body">{{ message.thought }}</div>
-        </details>
-
-        <!-- Actions Taken -->
-        <details v-if="message.actions && message.actions.length" class="ai-section ai-section--actions" open>
-          <summary class="ai-section-sum">
-            <span class="material-symbols-outlined ai-section-icon">terminal</span>
-            <span class="ai-section-lbl">Actions Taken</span>
-            <span class="material-symbols-outlined ai-section-chevron">expand_more</span>
-          </summary>
-          <ul class="ai-actions-list">
-            <li v-for="(action, i) in message.actions" :key="i" class="ai-action-item">
-              <span class="ai-action-dot"></span>
-              <span class="ai-action-text">{{ typeof action === 'string' ? action : (action.name || action.tool || JSON.stringify(action)) }}</span>
-            </li>
-          </ul>
-        </details>
-
-        <!-- Final Result -->
-        <div
-          v-if="message.content"
-          class="ai-result"
-          :class="{ 'ai-result--with-top': message.thought || (message.actions && message.actions.length) }"
+        <!-- ── Analyzing panel (tool calls + intermediate thinking) ── -->
+        <AiCollapsiblePanel
+          v-if="hasAnalyzingContent"
+          label="Analyzing"
+          icon="manage_search"
+          variant="analyzing"
+          :expanded="false"
+          :streaming="message.streaming && !message.content"
+          :badge="analyzingBadge"
+          class="acp-incard"
         >
-          <div class="ai-result-header">
-            <span
-              class="material-symbols-outlined ai-result-icon"
-              style="font-variation-settings:'FILL' 1"
-            >check_circle</span>
-            <span class="ai-result-lbl">Final Result</span>
+          <div class="ai-analyzing-body">
+            <!-- Tool calls -->
+            <div
+              v-for="(tc, i) in message.toolCalls"
+              :key="'tc' + i"
+              class="ai-tool-row ai-tool-row--call"
+            >
+              <span class="ai-tool-arrow material-symbols-outlined">arrow_forward</span>
+              <span class="ai-tool-name">{{ formatToolName(tc.name) }}</span>
+              <span v-if="tc.args && Object.keys(tc.args).length" class="ai-tool-args">
+                {{ formatArgs(tc.args) }}
+              </span>
+            </div>
+            <!-- Tool results -->
+            <div
+              v-for="(tr, i) in message.toolResults"
+              :key="'tr' + i"
+              class="ai-tool-row ai-tool-row--result"
+            >
+              <span class="ai-tool-arrow material-symbols-outlined">arrow_back</span>
+              <span class="ai-tool-name">{{ formatToolName(tr.name) }}</span>
+              <span v-if="tr.rows != null" class="ai-tool-rows">{{ tr.rows }} rows</span>
+            </div>
+            <!-- Thinking text -->
+            <div v-if="message.thinking" class="ai-thinking-text">
+              {{ message.thinking }}
+            </div>
           </div>
-          <div class="ai-content" v-html="renderedContent"></div>
-          <span v-if="message.streaming" class="ai-cursor"></span>
-        </div>
+        </AiCollapsiblePanel>
+
+        <!-- ── Results panel ── -->
+        <AiCollapsiblePanel
+          v-if="message.content || message.streaming"
+          label="Results"
+          icon="check_circle"
+          variant="results"
+          :expanded="true"
+          :streaming="message.streaming && !!message.content"
+          class="acp-incard"
+          :class="{ 'acp-incard--top': hasAnalyzingContent }"
+        >
+          <div class="ai-result-body">
+            <div v-if="message.content" class="ai-content" v-html="renderedContent"></div>
+            <div v-else-if="message.streaming" class="ai-dots ai-dots--inline">
+              <span class="ai-dot"></span>
+              <span class="ai-dot"></span>
+              <span class="ai-dot"></span>
+            </div>
+            <span v-if="message.streaming && message.content" class="ai-cursor"></span>
+          </div>
+        </AiCollapsiblePanel>
 
         <!-- Skill CTA buttons -->
         <div v-if="message.skills && message.skills.length" class="ai-skill-ctas">
@@ -108,6 +129,7 @@ import { computed } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useAiAnalystStore } from '@/stores/aiAnalyst'
+import AiCollapsiblePanel from '@/components/dashboard/AiCollapsiblePanel.vue'
 
 const store = useAiAnalystStore()
 
@@ -116,14 +138,51 @@ const props = defineProps({
 })
 
 const MODEL_LABELS = {
-  'gemini-2.5-flash-lite': 'Gemini Flash',
+  'gemini-2.5-flash-lite':     'Gemini Flash',
   'deepseek/deepseek-v4-flash': 'DeepSeek V4 Flash',
-  'deepseek/deepseek-v4-pro': 'DeepSeek V4 Pro',
+  'deepseek/deepseek-v4-pro':   'DeepSeek V4 Pro',
+  'groq/llama-3.3-70b-versatile': 'Llama 3.3 70B',
 }
 
 function modelLabel(modelId) {
   return MODEL_LABELS[modelId] || modelId
 }
+
+function formatToolName(name) {
+  if (!name) return '?'
+  return name.replace(/_/g, ' ')
+}
+
+function formatArgs(args) {
+  if (!args) return ''
+  // Show only the most informative fields, truncated
+  const entries = Object.entries(args)
+    .map(([k, v]) => {
+      const val = typeof v === 'object' ? JSON.stringify(v) : String(v)
+      return `${k}: ${val.length > 40 ? val.slice(0, 40) + '…' : val}`
+    })
+    .slice(0, 3)
+  return entries.join(' · ')
+}
+
+const hasAnalyzingContent = computed(() =>
+  (props.message.toolCalls && props.message.toolCalls.length > 0) ||
+  (props.message.toolResults && props.message.toolResults.length > 0) ||
+  !!props.message.thinking
+)
+
+const hasAnyContent = computed(() =>
+  !!props.message.content ||
+  !!props.message.thinking ||
+  (props.message.toolCalls && props.message.toolCalls.length > 0)
+)
+
+const analyzingBadge = computed(() => {
+  const calls = (props.message.toolCalls || []).length
+  const results = (props.message.toolResults || []).length
+  const total = calls + results
+  return total > 0 ? total : null
+})
 
 marked.setOptions({ breaks: true, gfm: true })
 
@@ -219,6 +278,7 @@ const renderedContent = computed(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  gap: 0;
   transition: border-color 0.2s;
 }
 
@@ -240,12 +300,30 @@ const renderedContent = computed(() => {
 .ai-card--error .ai-error-icon { font-size: 18px; flex-shrink: 0; }
 .ai-card--error p { margin: 0; }
 
+/* ── AiCollapsiblePanel inside the card ── */
+.acp-incard {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(66, 71, 83, 0.25);
+  background: transparent;
+}
+
+.acp-incard:last-child { border-bottom: none; }
+
+.acp-incard--top {
+  border-top: 1px solid rgba(66, 71, 83, 0.25);
+}
+
 /* ── Streaming dots ── */
 .ai-dots {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 16px;
+}
+
+.ai-dots--inline {
+  padding: 12px 14px;
 }
 
 .ai-dot {
@@ -265,116 +343,75 @@ const renderedContent = computed(() => {
   40%            { transform: scale(1.2); opacity: 1; }
 }
 
-/* ── Collapsible sections ── */
-.ai-section {
-  border-bottom: 1px solid rgba(66, 71, 83, 0.3);
-}
-
-.ai-section-sum {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  opacity: 0.6;
-  transition: opacity 0.15s;
-}
-
-.ai-section-sum:hover { opacity: 1; }
-.ai-section-sum::-webkit-details-marker { display: none; }
-
-.ai-section-icon { font-size: 16px; }
-.ai-section-lbl  { flex: 1; }
-
-.ai-section-chevron {
-  font-size: 18px;
-  transition: transform 0.2s;
-}
-
-details[open] .ai-section-chevron { transform: rotate(180deg); }
-
-/* Thought: blue */
-.ai-section--thought .ai-section-sum { color: var(--c-primary); }
-
-.ai-thought-body {
-  padding: 10px 14px 12px;
-  background: rgba(25, 27, 34, 0.6);
-  font-size: 13px;
-  color: var(--c-on-sv);
-  font-style: italic;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  border-top: 1px solid rgba(66, 71, 83, 0.3);
-}
-
-/* Actions: secondary */
-.ai-section--actions .ai-section-sum { color: var(--c-secondary); }
-
-.ai-actions-list {
-  list-style: none;
-  margin: 0;
+/* ── Analyzing body ── */
+.ai-analyzing-body {
   padding: 10px 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(25, 27, 34, 0.6);
-  border-top: 1px solid rgba(66, 71, 83, 0.3);
+  background: rgba(25, 27, 34, 0.5);
 }
 
-.ai-action-item {
+.ai-tool-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 13px;
+  gap: 7px;
+  font-size: 12px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  color: var(--c-on-sv);
   line-height: 1.4;
 }
 
-.ai-action-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--c-primary);
+.ai-tool-row--call   { color: var(--c-secondary); }
+.ai-tool-row--result { color: var(--c-on-sv); opacity: 0.75; }
+
+.ai-tool-arrow {
+  font-size: 13px;
   flex-shrink: 0;
-  margin-top: 4px;
+  margin-top: 1px;
 }
 
-.ai-action-text { flex: 1; }
+.ai-tool-name {
+  font-weight: 600;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
 
-/* ── Final Result ── */
-.ai-result {
+.ai-tool-args {
+  opacity: 0.6;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.ai-tool-rows {
+  background: rgba(173, 198, 255, 0.08);
+  color: var(--c-primary);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(173, 198, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.ai-thinking-text {
+  font-size: 12px;
+  color: var(--c-on-sv);
+  opacity: 0.65;
+  font-style: italic;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  border-top: 1px solid rgba(66, 71, 83, 0.2);
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
+/* ── Results body ── */
+.ai-result-body {
   padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.ai-result--with-top {
-  border-top: 1px solid rgba(66, 71, 83, 0.3);
-}
-
-.ai-result-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--c-secondary);
-  opacity: 0.8;
-}
-
-.ai-result-icon { font-size: 16px; }
-
-.ai-result-lbl {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  gap: 4px;
 }
 
 /* ── Markdown content ── */
@@ -475,9 +512,7 @@ details[open] .ai-section-chevron { transform: rotate(180deg); }
 .ai-skill-icon         { font-size: 14px; }
 
 /* ── Model switch divider ── */
-.ai-msg--divider {
-  align-items: stretch;
-}
+.ai-msg--divider { align-items: stretch; }
 
 .ai-switch-divider {
   display: flex;

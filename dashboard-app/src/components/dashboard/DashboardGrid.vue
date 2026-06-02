@@ -31,6 +31,7 @@
           @remove="$emit('remove-widget', widget.id)"
           @drag-start="(e) => startDrag(e, widget)"
           @resize-start="(dir, e) => startResize(e, widget, dir)"
+          @widget-data="onWidgetData"
         />
       </div>
 
@@ -77,7 +78,7 @@ const props = defineProps({
   dashboardPalette: { type: String, default: null }
 })
 
-const emit = defineEmits(['configure-widget', 'layout-widget', 'remove-widget', 'widget-moved'])
+const emit = defineEmits(['configure-widget', 'layout-widget', 'remove-widget', 'widget-moved', 'widget-data-updated'])
 
 const dashboardStore = useDashboardStore()
 
@@ -322,6 +323,10 @@ function selectWidget(id) {
   selectedWidgetId.value = id
 }
 
+function onWidgetData({ widgetId, data }) {
+  emit('widget-data-updated', { widgetId, data })
+}
+
 onMounted(() => {
   document.addEventListener('mousemove', onMouseMove)
   document.addEventListener('mouseup',   onMouseUp)
@@ -383,7 +388,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   font-size: 14px;
   pointer-events: none;
 }
@@ -396,10 +401,10 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   text-align: center;
 }
 .grid-empty-view .empty-icon { font-size: 48px; opacity: 0.4; }
-.grid-empty-view h3 { font-size: 16px; font-weight: 500; color: var(--text); }
+.grid-empty-view h3 { font-size: 16px; font-weight: 500; color: var(--on-surface); }
 .grid-empty-view p { font-size: 14px; max-width: 280px; }
 </style>

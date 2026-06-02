@@ -320,8 +320,8 @@ function save() {
 
 .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 
-.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-.form-hint  { font-size: 11px; color: var(--text-secondary); margin-top: 4px; display: block; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--on-surface-variant); margin-bottom: 6px; }
+.form-hint  { font-size: 11px; color: var(--on-surface-variant); margin-top: 4px; display: block; }
 
 .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
 
@@ -331,7 +331,7 @@ function save() {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-.margin-field label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+.margin-field label { font-size: 12px; color: var(--on-surface-variant); display: block; margin-bottom: 4px; }
 .margin-input { width: 100%; }
 .legend-positions { display: flex; gap: 16px; flex-wrap: wrap; }
 .legend-option { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
@@ -354,7 +354,7 @@ function save() {
   flex-shrink: 0;
   transition: border-color 0.15s;
 }
-.icon-preview:not(.empty) { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, #fff); }
+.icon-preview:not(.empty) { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--surface)); }
 .kpi-preview-icon { font-size: 20px; color: var(--primary); font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
 .kpi-emoji-preview { font-size: 20px; line-height: 1; }
 
@@ -371,7 +371,7 @@ function save() {
   border-radius: 8px;
   cursor: pointer;
   padding: 2px;
-  background: #fff;
+  background: var(--surface);
   flex-shrink: 0;
 }
 .btn-icon-sm {
@@ -379,9 +379,9 @@ function save() {
   height: 28px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -429,13 +429,13 @@ function save() {
 .toggle-label {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text);
+  color: var(--on-surface);
   line-height: 1.3;
 }
 .toggle-hint {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin-top: 2px;
   line-height: 1.4;
 }
@@ -448,19 +448,19 @@ function save() {
 /* Gauge variant picker */
 .gauge-variant-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
 .gauge-variant-card { display: flex; flex-direction: column; align-items: center; padding: 10px 6px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; text-align: center; }
-.gauge-variant-card:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, #fff); }
-.gauge-variant-card.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, #fff); }
+.gauge-variant-card:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
+.gauge-variant-card.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
 .gv-icon { font-size: 22px; margin-bottom: 4px; }
-.gv-label { font-size: 11px; font-weight: 600; color: var(--text); }
+.gv-label { font-size: 11px; font-weight: 600; color: var(--on-surface); }
 
 /* Gauge scale row */
 .gauge-scale-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
-.gauge-scale-field label { font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 3px; }
+.gauge-scale-field label { font-size: 11px; color: var(--on-surface-variant); display: block; margin-bottom: 3px; }
 
 /* Zones */
 .zones-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .zone-row { display: flex; align-items: center; gap: 8px; }
-.zone-label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; min-width: 80px; }
+.zone-label { font-size: 12px; color: var(--on-surface-variant); white-space: nowrap; min-width: 80px; }
 .zone-slider { flex: 1; }
-.zone-pct { font-size: 11px; color: var(--text-secondary); width: 32px; text-align: right; }
+.zone-pct { font-size: 11px; color: var(--on-surface-variant); width: 32px; text-align: right; }
 </style>

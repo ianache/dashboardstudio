@@ -3,10 +3,10 @@
     <div class="auth-redirect-card">
       <div class="auth-logo">
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <rect width="48" height="48" rx="12" fill="#1890ff"/>
-          <rect x="8" y="18" width="8" height="20" rx="2" fill="white"/>
-          <rect x="20" y="10" width="8" height="28" rx="2" fill="white"/>
-          <rect x="32" y="22" width="8" height="16" rx="2" fill="white"/>
+          <rect width="48" height="48" rx="12" fill="var(--primary)"/>
+          <rect x="8" y="18" width="8" height="20" rx="2" fill="var(--on-primary)"/>
+          <rect x="20" y="10" width="8" height="28" rx="2" fill="var(--on-primary)"/>
+          <rect x="32" y="22" width="8" height="16" rx="2" fill="var(--on-primary)"/>
         </svg>
         <div>
           <h1>Dashboard<strong>Studio</strong></h1>

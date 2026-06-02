@@ -239,14 +239,14 @@ function createNewDashboard() { router.push('/designer?new=1') }
 }
 .side-menu.collapsed .logo-text-block { opacity: 0; pointer-events: none; }
 .logo-title {
-  color: #ffffff;
+  color: var(--on-surface);
   font-size: 15px;
   white-space: nowrap;
   line-height: 1.2;
 }
 .logo-title strong { font-weight: 700; }
 .logo-subtitle {
-  color: var(--sidebar-text);
+  color: var(--on-surface-variant);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -269,7 +269,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .nav-section-title {
   font-size: 10px;
   font-weight: 700;
-  color: var(--sidebar-text);
+  color: var(--on-surface-variant);
   opacity: 0.5;
   padding: 8px 20px 4px;
   letter-spacing: 0.1em;
@@ -285,7 +285,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
   gap: 10px;
   padding: 9px 12px;
   margin: 2px 8px;
-  color: var(--sidebar-text);
+  color: var(--on-surface-variant);
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
@@ -294,12 +294,12 @@ function createNewDashboard() { router.push('/designer?new=1') }
   border-left: 3px solid transparent;
 }
 .nav-item:hover { 
-  color: var(--sidebar-text-active); 
-  background: var(--sidebar-item-hover); 
+  color: var(--on-surface); 
+  background: var(--surface-container-low); 
 }
 .nav-item.active {
-  color: var(--sidebar-text-active);
-  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
   border-left-color: var(--primary);
 }
 
@@ -318,7 +318,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .side-menu.collapsed .nav-label { opacity: 0; pointer-events: none; }
 
 .nav-arrow {
-  color: var(--sidebar-text);
+  color: var(--on-surface-variant);
   opacity: 0.6;
   transition: transform 0.2s;
   flex-shrink: 0;
@@ -328,7 +328,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 
 .nav-badge {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   font-size: 11px;
   font-weight: 600;
   padding: 1px 6px;
@@ -341,7 +341,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 /* Sub nav */
 .nav-sub {
   overflow: hidden;
-  background: color-mix(in srgb, var(--sidebar-bg) 95%, white);
+  background: color-mix(in srgb, var(--surface) 95%, var(--on-surface));
   margin: 0 8px;
   border-radius: 6px;
 }
@@ -352,7 +352,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
   align-items: center;
   gap: 8px;
   padding: 8px 12px 8px 38px;
-  color: var(--sidebar-text);
+  color: var(--on-surface-variant);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
@@ -361,8 +361,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
   overflow: hidden;
   border-radius: 6px;
 }
-.nav-sub-item:hover { color: var(--sidebar-text-active); background: var(--sidebar-item-hover); }
-.nav-sub-item.active { color: #ffffff; font-weight: 600; }
+.nav-sub-item:hover { color: var(--on-surface); background: var(--surface-container-low); }
+.nav-sub-item.active { color: var(--primary); font-weight: 600; }
 .nav-sub-action { color: var(--primary); }
 .nav-sub-action:hover { opacity: 0.9; }
 
@@ -380,7 +380,7 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .sub-label { overflow: hidden; text-overflow: ellipsis; }
 .nav-sub-empty {
   padding: 8px 12px 8px 38px;
-  color: var(--sidebar-text);
+  color: var(--on-surface-variant);
   opacity: 0.5;
   font-size: 12px;
   font-style: italic;
@@ -406,8 +406,8 @@ function createNewDashboard() { router.push('/designer?new=1') }
 .workspace-avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: var(--sidebar-item-hover);
-  border: 1px solid var(--sidebar-border);
+  background: var(--surface-container-low);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -415,11 +415,11 @@ function createNewDashboard() { router.push('/designer?new=1') }
 }
 .workspace-text { overflow: hidden; }
 .workspace-name {
-  color: #ffffff;
+  color: var(--on-surface);
   font-size: 12px; font-weight: 700;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.workspace-role { color: var(--sidebar-text); font-size: 10px; white-space: nowrap; }
+.workspace-role { color: var(--on-surface-variant); font-size: 10px; white-space: nowrap; }
 
 /* Theme toggle */
 .theme-toggle {

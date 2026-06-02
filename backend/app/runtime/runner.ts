@@ -90,15 +90,55 @@ function validateNoCycles(nodes: FlowNode[], connections: FlowConnection[]) {
 
 async function executeScriptNode(code: string, imports: string, context: any) {
   try {
-    const moduleContent = `export default async function(ctx) {\n${code}\n}`;
+    let moduleContent = code;
+    
+    // Heuristic: If user code already has 'export default', don't wrap it.
+    // This allows advanced users to include imports or custom logic outside the main function.
+    const hasExportDefault = /\bexport\s+default\b/.test(code);
+    
+    if (!hasExportDefault) {
+      moduleContent = `export default async function(ctx) {\n${code}\n}`;
+    }
+
     const base64 = btoa(unescape(encodeURIComponent(moduleContent)));
     const dataUri = `data:text/javascript;base64,${base64}`;
     const mod = await import(dataUri);
+    
+    if (typeof mod.default !== 'function') {
+      throw new Error("Script execution failed: The script must have a default export that is a function.");
+    }
+
     return await mod.default(context);
   } catch (err: any) {
-    console.error(`[Script Error]: ${err.message}`);
+    // Provide cleaner error messages for common parsing/execution issues
+    const errorPrefix = (err.name === 'SyntaxError' || err.message.includes('could not be parsed')) 
+      ? "[Script Syntax Error]" 
+      : "[Script Error]";
+    
+    console.error(`${errorPrefix}: ${err.message}`);
     throw err;
   }
+}
+
+function resolveTemplates(obj: any, context: any): any {
+  if (typeof obj === 'string') {
+    try {
+      return nunjucks.renderString(obj, context);
+    } catch (e) {
+      return obj;
+    }
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => resolveTemplates(item, context));
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const res: any = {};
+    for (const key in obj) {
+      res[key] = resolveTemplates(obj[key], context);
+    }
+    return res;
+  }
+  return obj;
 }
 
 async function main() {
@@ -138,17 +178,20 @@ async function main() {
       const node = nodes.find(n => n.id === nodeId);
       if (!node) continue;
 
-      // Ensure predecessors are done (respect branching)
+      // Ensure predecessors are done
       const incoming = connections.filter(c => c.to === nodeId);
-      // For now, if ANY predecessor connected to this node in the graph is NOT completed, 
-      // and it hasn't been branched away, we might need to wait.
-      // Simplification: In a standard DAG, we just follow the flow.
+      if (incoming.length > 0 && !incoming.every(c => completed.has(c.from))) {
+        // Not ready yet, skip for now (it will be queued again when predecessors finish)
+        continue;
+      }
       
       // Resolve input payload from predecessors
+      let currentPayload: any = [];
       if (incoming.length === 1) {
-        context.payload = nodeOutputs.get(incoming[0].from) || [];
+        currentPayload = nodeOutputs.get(incoming[0].from) || [];
       } else if (incoming.length > 1) {
-        context.payload = incoming.map(c => nodeOutputs.get(c.from) || []);
+        // Multi-input: default behavior is array of payloads
+        currentPayload = incoming.map(c => nodeOutputs.get(c.from) || []);
       }
 
       const startMs = Date.now();
@@ -156,37 +199,146 @@ async function main() {
       emitStatus(node.id, 'running');
 
       let branchToTake: string | null = null;
+      let outputPayload = currentPayload;
 
       try {
         if ((node as any).__pre_executed) {
           const prefetched = prefetched_outputs[node.id] || { rows: [] };
-          const data = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
-          context.payload = data;
+          outputPayload = Array.isArray(prefetched) ? prefetched : (prefetched.rows || []);
           if (prefetched.warning) console.log(`[Model Warning] ${node.label}: ${prefetched.warning}`);
         } 
         else if (node.toolType === "js_script") {
-          context.payload = await executeScriptNode(node.props.code || "", "", context);
+          outputPayload = await executeScriptNode(node.props.code || "", "", { payload: currentPayload, variables });
+        }
+        else if (node.toolType === "data_transform") {
+          // data_transform expects async function(payload, ctx) { ... }
+          outputPayload = await executeScriptNode(node.props.code || "", "", { payload: currentPayload, variables });
         }
         else if (node.toolType === "nunjucks_template") {
-          context.payload = nunjucks.renderString(node.props.template || "", context);
+          // Prepare context: avoid spreading arrays
+          const templateData = {
+            ...variables,
+            payload: currentPayload,
+            variables: variables
+          };
+          // Only spread if it's a plain object (not array, not null)
+          if (typeof currentPayload === 'object' && currentPayload !== null && !Array.isArray(currentPayload)) {
+            Object.assign(templateData, currentPayload);
+          }
+          outputPayload = nunjucks.renderString(node.props.template || "", templateData);
+        }
+        else if (node.toolType === "email") {
+          const connectionId = node.props.connection_id;
+          if (!connectionId) throw new Error("Email node requires connection_id");
+
+          const parseRecipients = (val: any): string[] => {
+            if (!val) return [];
+            const resolved = resolveTemplates(val, { payload: currentPayload, variables });
+            if (typeof resolved !== 'string') return [String(resolved)];
+            return resolved.split(',').map(s => s.trim()).filter(s => s);
+          };
+
+          const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          const emailPayload = {
+            node_id: node.id,
+            target: {
+              connection_id: connectionId,
+              to: parseRecipients(node.props.to),
+              cc: parseRecipients(node.props.cc),
+              bcc: parseRecipients(node.props.bcc),
+            },
+            content: {
+              subject: resolveTemplates(node.props.subject || "Flow Notification", { payload: currentPayload, variables }),
+              body: resolveTemplates(node.props.body || "", { payload: currentPayload, variables }),
+              format: node.props.format || "html"
+            },
+            template_context: currentPayload || {},
+            metadata: {
+              execution_id: (flow.metadata as any)?.execution_id || "unknown",
+              node_label: node.label,
+              timestamp: new Date().toISOString()
+            }
+          };
+
+          console.log(`EXEC_EMAIL:${node.id}:${batchId}`);
+          console.log(`EXEC_EMAIL_PAYLOAD:${JSON.stringify(emailPayload)}`);
+          outputPayload = { status: "delegated", operation: "send_email" };
+        }
+        else if (node.toolType === "ods_pg") {
+          const { connection_id, table, write_mode = "append", schema = "public" } = node.props;
+          if (!connection_id || !table) throw new Error("ODS PostgreSQL requires connection_id and table");
+
+          const records = Array.isArray(currentPayload) ? currentPayload : [currentPayload];
+          const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          const odsPayload = {
+            node_id: node.id,
+            operation: write_mode,
+            target: { connection_id, schema, table },
+            config: { write_mode, identity_fields: node.props.identity_fields || [], batch_size: node.props.batch_size || 1000 },
+            data: records,
+            metadata: {
+              execution_id: (flow as any).metadata?.execution_id || "unknown",
+              node_label: node.label,
+              timestamp: new Date().toISOString()
+            }
+          };
+
+          console.log(`EXEC_ODS:${node.id}:${write_mode}:${connection_id}:${batchId}`);
+          console.log(`EXEC_ODS_PAYLOAD:${JSON.stringify(odsPayload)}`);
+          outputPayload = { status: "delegated", operation: write_mode, rows: records.length };
+        }
+        else if (['http_rest', 'rest_api', 'http', 'webhook'].includes(node.toolType)) {
+          const nodeContext = { payload: currentPayload, variables };
+          const url = resolveTemplates(node.props.url, nodeContext);
+          const method = (node.props.method || "GET").toUpperCase();
+          const headers = resolveTemplates(node.props.headers || {}, nodeContext);
+          const body = (method !== "GET" && method !== "HEAD") ? resolveTemplates(node.props.body, nodeContext) : undefined;
+
+          const response = await fetch(url, {
+            method,
+            headers,
+            body: typeof body === 'object' ? JSON.stringify(body) : body
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP Error ${response.status}: ${await response.text()}`);
+          }
+
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            outputPayload = await response.json();
+          } else {
+            outputPayload = await response.text();
+          }
+        }
+        else if (['join', 'djoin'].includes(node.toolType)) {
+          // Aggregation logic for DJoin/Join
+          if (Array.isArray(currentPayload) && incoming.length > 1) {
+             // currentPayload is [[results1], [results2], ...]
+             outputPayload = currentPayload.flat();
+          } else {
+             outputPayload = currentPayload;
+          }
         }
         else if (node.toolType === "conditional_branch") {
           const expression = node.props.expression || "true";
           const fn = new Function("payload", "variables", `return (${expression});`);
-          const result = !!fn(context.payload, context.variables);
+          const result = !!fn(currentPayload, variables);
           branchToTake = result ? "true" : "false";
           console.log(`[Flow] Node ${node.id} branch decided: ${branchToTake}`);
+          outputPayload = currentPayload;
         }
 
         const endMs = Date.now();
         console.log(`NODE_LOG_JSON:${JSON.stringify({
           node_id: node.id, status: 'success', 
-          input: {}, output: context.payload, 
+          input: (typeof currentPayload === 'object' && currentPayload !== null && JSON.stringify(currentPayload).length < 2000) ? currentPayload : {}, 
+          output: outputPayload, 
           duration: endMs - startMs, start_time: startTime, end_time: new Date(endMs).toISOString()
         })}`);
         emitStatus(node.id, 'success');
         
-        nodeOutputs.set(node.id, context.payload);
+        nodeOutputs.set(node.id, outputPayload);
         completed.add(nodeId);
 
         // Queue next nodes
@@ -204,8 +356,14 @@ async function main() {
       }
     }
 
+    // Resolve final result (output of nodes with no outgoing connections)
+    const leafNodes = nodes.filter(n => !connections.some(c => c.from === n.id));
+    const finalResult = leafNodes.length === 1 
+      ? nodeOutputs.get(leafNodes[0].id) 
+      : Object.fromEntries(leafNodes.map(n => [n.label || n.id, nodeOutputs.get(n.id)]));
+
     console.log("Flow completed successfully.");
-    console.log("FINAL_RESULT:" + JSON.stringify(context.payload));
+    console.log("FINAL_RESULT:" + JSON.stringify(finalResult));
 
   } catch (err: any) {
     console.error(`Fatal error: ${err.message}`);

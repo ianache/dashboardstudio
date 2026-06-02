@@ -119,16 +119,16 @@ function toggleExpand() {
 
 <style scoped>
 .panel-head-body-pie {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
   transition: box-shadow 0.2s ease;
 }
 
 .panel-head-body-pie:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 /* Header Styles */
@@ -137,25 +137,25 @@ function toggleExpand() {
   align-items: flex-start;
   gap: 14px;
   padding: 16px 20px;
-  background: #fafafa;
+  background: var(--surface-container-high);
   border-bottom: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .panel-header:hover {
-  background: #f0f0f0;
+  background: rgba(173, 198, 255, 0.05);
 }
 
 .is-expanded .panel-header {
-  border-bottom-color: #e2e8f0;
+  border-bottom-color: var(--outline);
 }
 
 .panel-header-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-radius: 10px;
+  background: rgba(173, 198, 255, 0.1);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,7 +164,7 @@ function toggleExpand() {
 
 .panel-header-icon .material-symbols-outlined {
   font-size: 22px;
-  color: #2563eb;
+  color: var(--primary);
 }
 
 .panel-header-content {
@@ -175,14 +175,16 @@ function toggleExpand() {
 .panel-title {
   font-size: 16px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--on-surface);
   margin: 0 0 4px 0;
   line-height: 1.3;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .panel-subtitle {
   font-size: 13px;
-  color: #64748b;
+  color: var(--on-surface-variant);
   margin: 0;
   line-height: 1.4;
 }
@@ -196,7 +198,7 @@ function toggleExpand() {
 
 .panel-toggle-icon {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--on-surface-variant);
   width: 24px;
   height: 24px;
   display: flex;
@@ -208,7 +210,7 @@ function toggleExpand() {
 /* Body Styles */
 .panel-body {
   padding: 20px;
-  background: white;
+  background: var(--card-bg);
 }
 
 .panel-body-default {
@@ -221,8 +223,8 @@ function toggleExpand() {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: var(--surface-container-low);
+  border-top: 1px solid var(--outline);
   gap: 16px;
 }
 
@@ -240,7 +242,7 @@ function toggleExpand() {
 /* Button Styles */
 .panel-btn {
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -249,25 +251,25 @@ function toggleExpand() {
 }
 
 .panel-btn-secondary {
-  background: white;
-  color: #475569;
-  border-color: #cbd5e1;
+  background: transparent;
+  color: var(--on-surface);
+  border-color: var(--outline);
 }
 
 .panel-btn-secondary:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: rgba(173, 198, 255, 0.05);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .panel-btn-primary {
-  background: #2563eb;
-  color: white;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
 }
 
 .panel-btn-primary:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+  background: #0066d6;
+  box-shadow: 0 0 12px rgba(173, 198, 255, 0.3);
 }
 
 /* Material Symbols Font */

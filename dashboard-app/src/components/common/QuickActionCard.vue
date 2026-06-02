@@ -82,7 +82,8 @@ defineEmits(['click'])
   font-size: 18px;
   font-weight: 600;
   line-height: 1.3;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .qac-desc {

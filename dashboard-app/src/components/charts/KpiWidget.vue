@@ -205,7 +205,7 @@ const accentStyle = computed(() => {
 .kpi-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary, #8c8c8c);
+  color: var(--on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   overflow: hidden;
@@ -217,7 +217,7 @@ const accentStyle = computed(() => {
 .kpi-value {
   font-size: clamp(24px, 4cqw, 40px);
   font-weight: 700;
-  color: var(--text, #1a1a2e);
+  color: var(--on-surface);
   line-height: 1.1;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -239,29 +239,29 @@ const accentStyle = computed(() => {
   align-items: center;
   gap: 2px;
   padding: 2px 7px;
-  border-radius: 100px;
+  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
 }
 
 .kpi-badge--good {
-  background: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
+  background: rgba(82, 196, 26, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(82, 196, 26, 0.3);
 }
 .kpi-badge--bad {
-  background: #fff2f0;
-  color: #f5222d;
-  border: 1px solid #ffa39e;
+  background: rgba(255, 180, 171, 0.1);
+  color: var(--error);
+  border: 1px solid var(--error-container);
 }
 
 .kpi-comparison-label {
   font-size: 11px;
-  color: var(--text-secondary, #8c8c8c);
+  color: var(--on-surface-variant);
 }
 
 .kpi-comparison-value {
   font-size: 12px;
-  color: var(--text-secondary, #8c8c8c);
+  color: var(--on-surface-variant);
 }
 </style>

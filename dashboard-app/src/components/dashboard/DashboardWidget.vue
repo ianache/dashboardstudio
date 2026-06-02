@@ -161,7 +161,7 @@ const props = defineProps({
   dashboardPalette: { type: String, default: null }
 })
 
-const emit = defineEmits(['configure', 'layout', 'remove', 'select', 'resize-start', 'drag-start', 'toggle-maximize'])
+const emit = defineEmits(['configure', 'layout', 'remove', 'select', 'resize-start', 'drag-start', 'toggle-maximize', 'widget-data'])
 
 const cubeStore = useCubeStore()
 const dashboardFiltersRef = computed(() => props.dashboardFilters)
@@ -231,6 +231,12 @@ watch(() => props.widget.cubeQuery, () => fetchData(), { deep: true })
 watch(() => props.widget.useMockData, () => fetchData())
 watch(() => props.dashboardFilters, () => fetchData())
 watch(() => cubeStore.token, (token) => { if (token) fetchData() })
+
+watch(data, (newData) => {
+  if (newData && newData.length > 0) {
+    emit('widget-data', { widgetId: props.widget.id, data: newData })
+  }
+}, { immediate: true })
 </script>
 
 
@@ -248,8 +254,8 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
   transition: box-shadow 0.2s, border-color 0.2s, top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
 }
 .dashboard-widget.is-design { cursor: move; }
-.dashboard-widget.is-design:hover { box-shadow: 0 4px 16px rgba(0, 88, 190, 0.1); border-color: var(--primary); }
-.dashboard-widget.is-selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0, 88, 190, 0.1); }
+.dashboard-widget.is-design:hover { box-shadow: 0 4px 16px color-mix(in srgb, var(--primary) 10%, transparent); border-color: var(--primary); }
+.dashboard-widget.is-selected { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 10%, transparent); }
 
 .dashboard-widget.is-maximized {
   position: fixed !important;
@@ -262,7 +268,7 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
   z-index: 9999 !important;
   margin: 0 !important;
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-xl);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -310,16 +316,16 @@ watch(() => cubeStore.token, (token) => { if (token) fetchData() })
   background: transparent;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
   position: relative;
 }
-.widget-action-btn:hover { background: var(--bg); color: var(--primary); }
+.widget-action-btn:hover { background: var(--surface-container-low); color: var(--primary); }
 .widget-action-btn.spinning svg { animation: spin 0.8s linear infinite; }
-.widget-action-danger:hover { color: var(--error); background: #fff2f0; }
+.widget-action-danger:hover { color: var(--error); background: color-mix(in srgb, var(--error) 10%, transparent); }
 
 /* Body */
 .widget-body {

@@ -24,6 +24,7 @@
         @configure-widget="$emit('configure-widget', $event)"
         @layout-widget="$emit('layout-widget', $event)"
         @remove-widget="$emit('remove-widget', $event)"
+        @widget-data-updated="$emit('widget-data-updated', $event)"
       />
     </div>
   </div>
@@ -51,7 +52,8 @@ const emit = defineEmits([
   'refresh',
   'configure-widget',
   'layout-widget',
-  'remove-widget'
+  'remove-widget',
+  'widget-data-updated'
 ])
 
 const filterValues = computed({

@@ -408,7 +408,7 @@ function deepMerge(target, source, depth = 0) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #ff4d4f;
+  color: var(--error);
   font-size: 13px;
   text-align: center;
   padding: 16px;

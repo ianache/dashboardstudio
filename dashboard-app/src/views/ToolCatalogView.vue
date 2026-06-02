@@ -3,7 +3,6 @@
     <!-- Header -->
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
-        <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Data Integration</span>
         <h1 class="tc-h1">Catálogo de Herramientas</h1>
         <p class="tc-sub page-subtitle max-w-2xl">Define y gestiona las herramientas disponibles en el editor visual. Cada herramienta especifica a qué tipos de diagrama aplica.</p>
       </div>

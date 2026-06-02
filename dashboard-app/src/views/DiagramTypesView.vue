@@ -3,7 +3,6 @@
     <!-- Header -->
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
-        <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Data Integration</span>
         <h1 class="dt-h1">Tipos de Diagrama</h1>
         <p class="dt-sub page-subtitle max-w-2xl">Gestiona los tipos de diagrama disponibles en el editor visual. Cada tipo define el contexto de diseño.</p>
       </div>

@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
-        <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Gestión de Datos</span>
         <h1 class="font-h1 text-h1 ks-title">Knowledge Spaces</h1>
         <p class="font-body-md ks-subtitle max-w-2xl">Gestiona tus espacios de conocimiento para organizar y documentar la estructura de tus datos.</p>
       </div>

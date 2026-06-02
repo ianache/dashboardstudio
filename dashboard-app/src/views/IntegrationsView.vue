@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
-        <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Data Integration</span>
         <h1 class="intg-h1 text-slate-900">Integrations</h1>
         <p class="intg-subtitle text-slate-500 max-w-2xl">Gestiona los flujos de integración de datos desde los sistemas transaccionales hacia el ODS.</p>
       </div>

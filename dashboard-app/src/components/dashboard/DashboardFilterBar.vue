@@ -474,7 +474,7 @@ function removeFilter(filterId) {
 .filter-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   white-space: nowrap;
 }
 
@@ -495,10 +495,10 @@ function removeFilter(filterId) {
   padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   min-width: 120px;
   transition: border-color 0.15s;
 }
@@ -508,7 +508,7 @@ function removeFilter(filterId) {
 }
 .multiselect-trigger:hover,
 .multiselect-trigger.active { border-color: var(--primary); }
-.multiselect-trigger svg { margin-left: auto; color: var(--text-secondary); flex-shrink: 0; }
+.multiselect-trigger svg { margin-left: auto; color: var(--on-surface-variant); flex-shrink: 0; }
 
 .multiselect-summary {
   flex: 1;
@@ -525,7 +525,7 @@ function removeFilter(filterId) {
   min-width: 180px;
   max-height: 240px;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow-md);
@@ -537,7 +537,7 @@ function removeFilter(filterId) {
 .multiselect-empty {
   padding: 10px 12px;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 
 .multiselect-option {
@@ -546,12 +546,12 @@ function removeFilter(filterId) {
   gap: 8px;
   padding: 6px 12px;
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   cursor: pointer;
   user-select: none;
   transition: background 0.1s;
 }
-.multiselect-option:hover { background: var(--bg); }
+.multiselect-option:hover { background: var(--surface-container-low); }
 .multiselect-option input[type="checkbox"] { cursor: pointer; accent-color: var(--primary); }
 
 .multiselect-all { font-weight: 600; }
@@ -576,7 +576,7 @@ function removeFilter(filterId) {
 
 .filter-date-sep {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 
 .filter-remove-btn {
@@ -589,12 +589,12 @@ function removeFilter(filterId) {
   background: transparent;
   border-radius: 4px;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   padding: 0;
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.filter-remove-btn:hover { background: #fff2f0; color: var(--error); }
+.filter-remove-btn:hover { background: var(--error-container); color: var(--error); }
 
 .filter-add-area { }
 
@@ -620,15 +620,15 @@ function removeFilter(filterId) {
   padding: 0 9px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: border-color 0.15s, color 0.15s;
   white-space: nowrap;
 }
 .refresh-trigger:hover { border-color: var(--primary); color: var(--primary); }
-.refresh-trigger.is-auto { border-color: var(--primary); color: var(--primary); background: rgba(24,144,255,0.05); }
+.refresh-trigger.is-auto { border-color: var(--primary); color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
 
 .refresh-icon { flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -641,7 +641,7 @@ function removeFilter(filterId) {
   top: calc(100% + 4px);
   right: 0;
   min-width: 160px;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow-md);
@@ -655,19 +655,20 @@ function removeFilter(filterId) {
   justify-content: space-between;
   padding: 7px 12px;
   font-size: 13px;
-  color: var(--text);
+  color: var(--on-surface);
   cursor: pointer;
   transition: background 0.1s;
 }
-.refresh-option:hover { background: #f5f7fa; }
-.refresh-option.selected { color: var(--primary); font-weight: 500; background: rgba(24,144,255,0.05); }
+.refresh-option:hover { background: var(--surface-container-low); }
+.refresh-option.selected { color: var(--primary); font-weight: 500; background: color-mix(in srgb, var(--primary) 8%, transparent); }
 .refresh-check { color: var(--primary); flex-shrink: 0; }
 
 /* ── Custom interval modal ── */
 .custom-refresh-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: color-mix(in srgb, var(--on-surface) 40%, transparent);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -675,9 +676,10 @@ function removeFilter(filterId) {
 }
 
 .custom-refresh-box {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
   width: 320px;
   max-width: 95vw;
   overflow: hidden;
@@ -690,20 +692,20 @@ function removeFilter(filterId) {
   padding: 14px 16px 10px;
   border-bottom: 1px solid var(--border);
 }
-.crb-header h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.crb-header h4 { margin: 0; font-size: 15px; font-weight: 600; color: var(--on-surface); }
 .crb-close {
   background: none;
   border: none;
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   padding: 0 2px;
 }
-.crb-close:hover { color: var(--text); }
+.crb-close:hover { color: var(--on-surface); }
 
 .crb-body { padding: 16px; }
-.crb-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.crb-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--on-surface-variant); }
 
 .crb-input-row {
   display: flex;
@@ -711,8 +713,8 @@ function removeFilter(filterId) {
   gap: 8px;
 }
 .crb-input { width: 100px; }
-.crb-unit { font-size: 13px; color: var(--text-secondary); }
-.crb-hint { font-size: 12px; color: var(--text-secondary); margin: 8px 0 0; }
+.crb-unit { font-size: 13px; color: var(--on-surface-variant); }
+.crb-hint { font-size: 12px; color: var(--on-surface-variant); margin: 8px 0 0; opacity: 0.7; }
 
 .crb-footer {
   display: flex;

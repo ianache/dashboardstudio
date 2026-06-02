@@ -46,7 +46,7 @@ app.use(cors({
   origin: config.spaOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-Deepseek-Api-Key'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-Deepseek-Api-Key', 'X-Groq-Api-Key'],
 }));
 
 // Trust proxy MUST come before session middleware

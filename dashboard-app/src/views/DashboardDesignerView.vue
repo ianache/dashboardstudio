@@ -139,6 +139,7 @@
           @configure-widget="openConfigModal"
           @layout-widget="openLayoutModal"
           @remove-widget="removeWidget"
+          @widget-data-updated="onWidgetDataUpdated"
         />
 
         <!-- AI Analyst side panel -->
@@ -624,6 +625,9 @@ const { activeFilterValues, resolvedDashboardFilters, resetFilters } = useDashbo
 // Watch active dashboard to sync UI and breadcrumbs
 watch(activeDashboard, (db) => {
   if (db) {
+    // Sync activeDashboardId into the store so aiAnalystStore can read it
+    dashboardStore.activeDashboardId = db.id
+
     // Sync local edit state with active dashboard
     editTitleValue.value = db.name || ''
     editDescription.value = db.description || ''
@@ -634,12 +638,14 @@ watch(activeDashboard, (db) => {
       { label: db.name, path: `/designer/${db.id}` }
     ])
   } else if (!route.params.id) {
+    dashboardStore.activeDashboardId = null
     uiStore.setBreadcrumbs([
       { label: 'Diseño', path: '/designer' },
       { label: 'Mis Dashboards', path: '/designer' }
     ])
   }
 }, { immediate: true })
+
 
 // Check for ?new=1 in query
 watch(() => route.query.new, (v) => {
@@ -951,6 +957,10 @@ function addWidget() {
 function removeWidget(widgetId) {
   if (!activeDashboard.value) return
   dashboardStore.removeWidget(activeDashboard.value.id, widgetId)
+}
+
+function onWidgetDataUpdated({ widgetId, data }) {
+  aiAnalystStore.setWidgetData(widgetId, data)
 }
 
 function openConfigModal(widget) {

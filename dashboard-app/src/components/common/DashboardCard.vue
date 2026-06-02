@@ -114,9 +114,9 @@ const gradients = [
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
-.db-badge-active   { background: var(--primary-container); color: #fff; }
-.db-badge-priority { background: var(--tertiary-container); color: #fff; }
-.db-badge-public   { background: #059669; color: #fff; }
+.db-badge-active   { background: rgba(173, 198, 255, 0.1); color: var(--primary); }
+.db-badge-priority { background: rgba(255, 181, 149, 0.1); color: var(--tertiary); }
+.db-badge-public   { background: rgba(82, 196, 26, 0.1); color: var(--success); }
 
 /* Body */
 .db-card-body {
@@ -141,7 +141,8 @@ const gradients = [
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 .db-card-desc {
   font-size: 13px;

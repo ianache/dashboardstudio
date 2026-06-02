@@ -160,7 +160,7 @@ function formatTime(iso) {
   position: sticky;
   top: 0;
   z-index: 90;
-  box-shadow: 0 1px 4px rgba(0,21,41,0.06);
+  box-shadow: var(--shadow);
   flex-shrink: 0;
 }
 
@@ -243,7 +243,7 @@ function formatTime(iso) {
   top: 4px;
   right: 4px;
   background: var(--error);
-  color: var(--on-primary-container);
+  color: var(--on-error);
   font-size: 10px;
   font-weight: 700;
   width: 16px;
@@ -274,7 +274,7 @@ function formatTime(iso) {
   height: 32px;
   border-radius: 50%;
   background: var(--primary);
-  color: var(--on-primary-container);
+  color: var(--on-primary);
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -301,7 +301,7 @@ function formatTime(iso) {
   top: calc(100% + 8px);
   right: 0;
   background: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-md);
   z-index: 200;
@@ -370,7 +370,7 @@ function formatTime(iso) {
   height: 40px;
   border-radius: 50%;
   background: var(--primary);
-  color: var(--on-primary-container);
+  color: var(--on-primary);
   font-size: 14px;
   font-weight: 700;
   display: flex;
@@ -403,4 +403,5 @@ function formatTime(iso) {
 /* Dropdown animation */
 .dropdown-enter-active, .dropdown-leave-active { transition: opacity 0.15s, transform 0.15s; }
 .dropdown-enter-from, .dropdown-leave-to { opacity: 0; transform: translateY(-8px); }
+
 </style>

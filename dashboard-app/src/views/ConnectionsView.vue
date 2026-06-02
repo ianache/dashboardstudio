@@ -4,7 +4,6 @@
     <!-- Page Header -->
     <div class="max-w-[1600px] mx-auto mb-8 flex items-end justify-between">
       <div class="space-y-1">
-        <span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">Data Integration</span>
         <h1 class="font-h1 text-h1 page-title">Conexiones</h1>
         <p class="font-body-md page-subtitle max-w-2xl">
           Gestiona las conexiones a fuentes y destinos de datos externos utilizados por los flujos de integración.

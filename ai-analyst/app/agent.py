@@ -52,7 +52,7 @@ AGENT_INSTRUCTION = (
 )
 
 
-def create_runner(model_str: str, deepseek_api_key: str | None = None) -> Runner:
+def create_runner(model_str: str, deepseek_api_key: str | None = None, groq_api_key: str | None = None) -> Runner:
     """Factory: constructs a fresh LlmAgent + Runner for the requested model.
 
     Uses api_key constructor param (not os.environ) to avoid race conditions
@@ -64,9 +64,22 @@ def create_runner(model_str: str, deepseek_api_key: str | None = None) -> Runner
             api_key=deepseek_api_key or "",
             stream_options={"include_usage": True},
         )
-    else:
-        # Gemini — plain string, ADK resolves natively
+    elif model_str.startswith("groq/"):
+        model = LiteLlm(
+            model=model_str,
+            api_key=groq_api_key or "",
+            stream_options={"include_usage": True},
+        )
+    elif model_str.startswith("gemini"):
+        # Gemini native - use string directly (ADK handles auth via GOOGLE_API_KEY env)
         model = model_str
+    else:
+        # Fallback to LiteLlm for other providers
+        model = LiteLlm(
+            model=model_str,
+            api_key=deepseek_api_key or "",
+            stream_options={"include_usage": True},
+        )
 
     agent = LlmAgent(
         name="bi_analyst",
