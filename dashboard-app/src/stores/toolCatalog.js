@@ -3,13 +3,13 @@ import { diagramTypesApi, editorToolsApi } from '@/services/api'
 
 // ─── Category display metadata (UI only, not stored in DB) ────────────────────
 export const CAT_META = {
-  source:       { label: 'Fuentes',          icon: 'input',         color: '#2563eb', bg: '#eff6ff' },
-  transform:    { label: 'Transformaciones', icon: 'transform',     color: '#7c3aed', bg: '#f5f3ff' },
-  destination:  { label: 'Destinos',         icon: 'output',        color: '#059669', bg: '#f0fdf4' },
-  notification: { label: 'Notificaciones',   icon: 'notifications', color: '#d97706', bg: '#fffbeb' },
-  validator:    { label: 'Validadores',      icon: 'verified',      color: '#dc2626', bg: '#fef2f2' },
-  processor:    { label: 'Procesadores',     icon: 'memory',        color: '#0891b2', bg: '#ecfeff' },
-  annotations:  { label: 'Anotaciones',     icon: 'edit_note',     color: '#d97706', bg: '#fffbeb' },
+  source:       { label: 'Fuentes',          icon: 'input',         color: 'var(--primary)', bg: 'color-mix(in srgb, var(--primary) 10%, transparent)' },
+  transform:    { label: 'Transformaciones', icon: 'transform',     color: 'var(--tertiary)', bg: 'color-mix(in srgb, var(--tertiary) 10%, transparent)' },
+  destination:  { label: 'Destinos',         icon: 'output',        color: 'var(--success)', bg: 'color-mix(in srgb, var(--success) 10%, transparent)' },
+  notification: { label: 'Notificaciones',   icon: 'notifications', color: 'var(--warning)', bg: 'color-mix(in srgb, var(--warning) 10%, transparent)' },
+  validator:    { label: 'Validadores',      icon: 'verified',      color: 'var(--error)', bg: 'color-mix(in srgb, var(--error) 10%, transparent)' },
+  processor:    { label: 'Procesadores',     icon: 'memory',        color: 'var(--secondary)', bg: 'color-mix(in srgb, var(--secondary) 10%, transparent)' },
+  annotations:  { label: 'Anotaciones',     icon: 'edit_note',     color: 'var(--warning)', bg: 'color-mix(in srgb, var(--warning) 10%, transparent)' },
 }
 
 export const useToolCatalogStore = defineStore('toolCatalog', {
