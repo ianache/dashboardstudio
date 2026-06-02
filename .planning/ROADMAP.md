@@ -233,12 +233,24 @@ Plans:
 **Plans:** 3/4 plans executed
 
 Plans:
-- [ ] 49-01-PLAN.md — Refactor DashboardDesignerView modals to Glassmorphism and Inter typography
-- [ ] 49-02-PLAN.md — Update global CSS tokens for minimalist shadows, borders, and outlined buttons
-- [ ] 49-03-PLAN.md — Migrate iconography to Lucide via MIcon adapter pattern
+- [x] 49-01-PLAN.md — Refactor DashboardDesignerView modals to Glassmorphism and Inter typography
+- [x] 49-02-PLAN.md — Update global CSS tokens for minimalist shadows, borders, and outlined buttons
+- [x] 49-03-PLAN.md — Migrate iconography to Lucide via MIcon adapter pattern
 - [ ] 49-04-PLAN.md — Visual verification of minimalist aesthetic
+
+### Phase 50: Add a new model based on DeepSeek to BI/AI Analyst in dashboard designer / viewer
+
+**Goal:** Add DeepSeek V4 Flash and DeepSeek V4 Pro as selectable models alongside Gemini Flash in the BI Analyst chat panel. Includes a LiteLLM adapter (per-request agent factory), a GET /models endpoint, BYOK key storage via the existing LlmConfig infrastructure, and a gear-icon model selector with per-message model badges.
+**Requirements**: DEEPSEEK-01, DEEPSEEK-02, DEEPSEEK-03, DEEPSEEK-04, DEEPSEEK-05, DEEPSEEK-06, DEEPSEEK-07
+**Depends on:** Phase 49
+**Plans:** 3 plans
+
+Plans:
+- [ ] 50-01-PLAN.md — ai-analyst service: LiteLLM install, create_runner() factory, /models endpoint, cost tracking
+- [ ] 50-02-PLAN.md — SettingsView: add DeepSeek provider to llm.js PROVIDERS (BYOK key storage)
+- [ ] 50-03-PLAN.md — Frontend: aiAnalyst store model state + AiAnalystPanel gear selector + AiAnalystMessage badges
 
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-06-01 after Phase 49 planning*
+*Last updated: 2026-06-01 after Phase 50 planning*
