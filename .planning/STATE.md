@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-02T03:55:09.460Z"
+last_updated: "2026-06-02T04:17:21.833Z"
 progress:
   total_phases: 47
   completed_phases: 30
