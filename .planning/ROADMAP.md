@@ -250,7 +250,19 @@ Plans:
 - [ ] 50-02-PLAN.md — SettingsView: add DeepSeek provider to llm.js PROVIDERS (BYOK key storage)
 - [ ] 50-03-PLAN.md — Frontend: aiAnalyst store model state + AiAnalystPanel gear selector + AiAnalystMessage badges
 
+### Phase 51: AI Analyst chat enhancements: dashboard filters, session history, context summarization
+
+**Goal:** Improve BI AI Analyst usability: (1) pass active dashboard filters as context so the agent analyzes the same data the user sees, (2) maintain per-dashboard chat history within a session so users can ask follow-up questions, (3) auto-summarize chat history when it exceeds 200KB to prevent context window overflow.
+**Requirements**: ANALYST-01, ANALYST-02, ANALYST-03
+**Depends on:** Phase 50
+**Plans:** 3 plans
+
+Plans:
+- [ ] 51-01-PLAN.md — Filter context: AiAnalystPanel resolvedFilters prop + aiAnalyst.js + cube.py merge + main.py ChatRequest (ANALYST-01)
+- [ ] 51-02-PLAN.md — Per-dashboard sessions: aiAnalyst.js sessions map + backend get-or-create + stable session_id (ANALYST-02)
+- [ ] 51-03-PLAN.md — Context summarization: 200KB size check + _summarize_session() + context_summarized SSE event (ANALYST-03)
+
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-06-01 after Phase 50 planning*
+*Last updated: 2026-06-02 after Phase 51 plans created*
