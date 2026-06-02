@@ -54,6 +54,28 @@ export const PROVIDERS = [
       { id: 'llama3-groq-8b-8192-tool-use-preview', label: 'Llama 3 8B Tools', description: 'Balance rendimiento / velocidad con tool-use.',         tier: 'balanced' },
       { id: 'gemma2-9b-it',             label: 'Gemma 2 9B',         description: 'Google Gemma 2 9B rápido y eficiente.',                     tier: 'fast'     }
     ]
+  },
+  {
+    id: 'deepseek',
+    label: 'DeepSeek',
+    icon: '🔷',
+    apiKeyLabel: 'API Key DeepSeek',
+    apiKeyPlaceholder: 'sk-...',
+    docsUrl: 'https://platform.deepseek.com/api_keys',
+    models: [
+      {
+        id: 'deepseek-v4-flash',
+        label: 'DeepSeek V4 Flash',
+        description: 'Rápido y potente. Ideal para análisis BI y código.',
+        tier: 'balanced'
+      },
+      {
+        id: 'deepseek-v4-pro',
+        label: 'DeepSeek V4 Pro',
+        description: 'Razonamiento avanzado paso a paso para análisis complejos.',
+        tier: 'premium'
+      }
+    ]
   }
 ]
 
@@ -110,7 +132,8 @@ export const useLlmStore = defineStore('llm', {
       anthropic: '',
       gemini: '',
       moonshot: '',
-      groq: ''
+      groq: '',
+      deepseek: ''
     },
     // "providerId:modelId" per operation
     models: { ...buildDefaultModels() },
@@ -176,7 +199,7 @@ export const useLlmStore = defineStore('llm', {
       try {
         const configs = await llmConfigApi.getAll()
         // Reset keys first
-        this.keys = { anthropic: '', gemini: '', moonshot: '', groq: '' }
+        this.keys = { anthropic: '', gemini: '', moonshot: '', groq: '', deepseek: '' }
         // Populate from backend response
         for (const config of configs) {
           if (config.provider in this.keys) {
