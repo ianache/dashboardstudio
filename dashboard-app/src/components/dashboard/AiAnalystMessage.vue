@@ -1,19 +1,31 @@
 <template>
-  <div class="ai-msg" :class="message.role === 'user' ? 'ai-msg--user' : 'ai-msg--assistant'">
+  <div class="ai-msg" :class="message.role === 'user' ? 'ai-msg--user' : (message.role === 'divider' ? 'ai-msg--divider' : 'ai-msg--assistant')">
+
+    <!-- DIVIDER — model switch marker -->
+    <template v-if="message.role === 'divider'">
+      <div class="ai-switch-divider">
+        <div class="ai-switch-line"></div>
+        <span class="ai-switch-label">{{ message.label }}</span>
+        <div class="ai-switch-line"></div>
+      </div>
+    </template>
 
     <!-- USER message -->
-    <template v-if="message.role === 'user'">
+    <template v-else-if="message.role === 'user'">
       <div class="ai-bubble-user">{{ message.content }}</div>
     </template>
 
     <!-- ASSISTANT message -->
     <template v-else>
-      <!-- Avatar + "AI ANALYST" label -->
+      <!-- Avatar + "AI ANALYST" label + model badge -->
       <div class="ai-agent-id">
         <div class="ai-agent-avatar">
           <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">psychology</span>
         </div>
         <span class="ai-agent-label">AI ANALYST</span>
+        <span v-if="message.model" class="ai-model-badge">
+          {{ modelLabel(message.model) }}
+        </span>
       </div>
 
       <!-- Error state -->
@@ -102,6 +114,16 @@ const store = useAiAnalystStore()
 const props = defineProps({
   message: { type: Object, required: true }
 })
+
+const MODEL_LABELS = {
+  'gemini-2.5-flash-lite': 'Gemini Flash',
+  'deepseek/deepseek-v4-flash': 'DeepSeek V4 Flash',
+  'deepseek/deepseek-v4-pro': 'DeepSeek V4 Pro',
+}
+
+function modelLabel(modelId) {
+  return MODEL_LABELS[modelId] || modelId
+}
 
 marked.setOptions({ breaks: true, gfm: true })
 
@@ -451,4 +473,47 @@ details[open] .ai-section-chevron { transform: rotate(180deg); }
 
 .ai-skill-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .ai-skill-icon         { font-size: 14px; }
+
+/* ── Model switch divider ── */
+.ai-msg--divider {
+  align-items: stretch;
+}
+
+.ai-switch-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.ai-switch-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(66, 71, 83, 0.3);
+}
+
+.ai-switch-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-on-sv);
+  opacity: 0.4;
+  white-space: nowrap;
+}
+
+/* ── Model badge ── */
+.ai-model-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-tertiary);
+  opacity: 0.7;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 181, 149, 0.2);
+  background: rgba(255, 181, 149, 0.06);
+}
 </style>

@@ -13,6 +13,36 @@
           </div>
         </div>
         <div class="ai-header-btns">
+          <!-- Model selector -->
+          <div class="ai-model-selector">
+            <button
+              class="ai-icon-btn"
+              title="Seleccionar modelo"
+              @click.stop="showModelMenu = !showModelMenu"
+            >
+              <span class="material-symbols-outlined">settings</span>
+            </button>
+            <div v-if="showModelMenu" class="ai-model-menu">
+              <div class="ai-model-menu-title">Modelo de IA</div>
+              <button
+                v-for="m in store.availableModels"
+                :key="m.id"
+                class="ai-model-option"
+                :class="{ 'ai-model-option--active': store.selectedModel === m.id, 'ai-model-option--disabled': !m.enabled }"
+                :disabled="!m.enabled"
+                :title="m.enabled ? m.label : (m.disabled_reason || 'API key no configurada')"
+                @click="selectModel(m.id)"
+              >
+                <span class="ai-model-option-label">{{ m.label }}</span>
+                <span v-if="!m.enabled" class="ai-model-lock">
+                  <span class="material-symbols-outlined" style="font-size:12px">lock</span>
+                </span>
+                <span v-if="store.selectedModel === m.id" class="ai-model-check">
+                  <span class="material-symbols-outlined" style="font-size:14px">check</span>
+                </span>
+              </button>
+            </div>
+          </div>
           <button
             v-if="store.messages.length > 0"
             class="ai-icon-btn"
@@ -110,7 +140,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import { useAiAnalystStore } from '@/stores/aiAnalyst'
 import AiAnalystMessage from '@/components/dashboard/AiAnalystMessage.vue'
 
@@ -157,6 +187,32 @@ watch(
   },
   { deep: false }
 )
+
+const showModelMenu = ref(false)
+
+// Close model menu when clicking outside
+function onDocClick(e) {
+  if (!e.target.closest('.ai-model-selector')) {
+    showModelMenu.value = false
+  }
+}
+
+function selectModel(modelId) {
+  store.switchModel(modelId)
+  showModelMenu.value = false
+}
+
+function modelLabel(modelId) {
+  const m = store.availableModels.find(m => m.id === modelId)
+  return m ? m.label : modelId
+}
+
+onMounted(async () => {
+  await store.fetchModels()
+  document.addEventListener('click', onDocClick)
+})
+
+onUnmounted(() => document.removeEventListener('click', onDocClick))
 </script>
 
 <style scoped>
@@ -492,4 +548,65 @@ watch(
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
+
+/* ── Model selector ── */
+.ai-model-selector {
+  position: relative;
+}
+
+.ai-model-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 200px;
+  background: var(--c-container);
+  border: 1px solid var(--c-outline-v);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.ai-model-menu-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-on-sv);
+  opacity: 0.5;
+  padding: 10px 12px 6px;
+}
+
+.ai-model-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--c-on-surface);
+  font-size: 13px;
+  font-family: 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  gap: 6px;
+}
+
+.ai-model-option:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ai-model-option--active {
+  color: var(--c-primary);
+}
+
+.ai-model-option--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-model-option-label { flex: 1; }
+.ai-model-lock  { color: var(--c-on-sv); opacity: 0.5; }
+.ai-model-check { color: var(--c-primary); margin-left: auto; }
 </style>
