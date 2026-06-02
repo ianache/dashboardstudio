@@ -1,24 +1,43 @@
 import { defineStore } from 'pinia'
 import { useDashboardStore } from '@/stores/dashboard'
 
+function defaultUsage() {
+  return { input_tokens: 0, output_tokens: 0, cost: 0, cache_hit: 0 }
+}
+
+function ensureSession(sessions, id) {
+  if (!sessions[id]) sessions[id] = { messages: [], usage: defaultUsage() }
+  return sessions[id]
+}
+
 export const useAiAnalystStore = defineStore('aiAnalyst', {
   state: () => ({
-    messages: [],
+    sessions: {},           // { [dashboardId]: { messages: [], usage: defaultUsage() } }
+    activeDashboardId: null,
     loading: false,
-    usage: {
-      input_tokens: 0,
-      output_tokens: 0,
-      cost: 0,
-      cache_hit: 0
-    },
     isPanelOpen: false,
     selectedModel: 'gemini-2.5-flash-lite',  // default — backward compatible
     availableModels: []                        // populated from /bff/ai/models
   }),
 
+  getters: {
+    messages: (state) => {
+      const id = state.activeDashboardId
+      return id ? (state.sessions[id]?.messages || []) : []
+    },
+    usage: (state) => {
+      const id = state.activeDashboardId
+      return id ? (state.sessions[id]?.usage || defaultUsage()) : defaultUsage()
+    }
+  },
+
   actions: {
     togglePanel() {
       this.isPanelOpen = !this.isPanelOpen
+      if (this.isPanelOpen) {
+        const dashboardStore = useDashboardStore()
+        this.activeDashboardId = dashboardStore.activeDashboardId
+      }
     },
 
     async fetchModels() {
@@ -51,8 +70,9 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
       const model = this.availableModels.find(m => m.id === modelId)
       if (!model || !model.enabled) return
       this.selectedModel = modelId
-      if (this.messages.length > 0) {
-        this.messages.push({
+      const id = this.activeDashboardId
+      if (id && this.sessions[id]?.messages.length > 0) {
+        this.sessions[id].messages.push({
           role: 'divider',
           model: modelId,
           label: `Switched to ${model.label}`
@@ -83,11 +103,23 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
       }
     },
 
-    async sendMessage(text) {
+    async sendMessage(text, resolvedFilters = []) {
+      const dashboardStore = useDashboardStore()
+      if (!this.activeDashboardId) {
+        this.activeDashboardId = dashboardStore.activeDashboardId
+      }
+      const id = this.activeDashboardId
+      if (!id) return  // no active dashboard, ignore
+
+      const { useAuthStore } = await import('@/stores/auth')
+      const authStore = useAuthStore()
+      const sessionId = `${id}-${authStore.user?.sub || 'anon'}`
+
+      ensureSession(this.sessions, id)
       const context = this.captureScreenContext()
 
       // Add user message
-      this.messages.push({ role: 'user', content: text })
+      this.sessions[id].messages.push({ role: 'user', content: text })
 
       // Add placeholder assistant message
       const assistantMsg = {
@@ -95,8 +127,8 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
         streaming: true, error: false,
         model: this.selectedModel   // track which model produced this message
       }
-      this.messages.push(assistantMsg)
-      const msgIndex = this.messages.length - 1
+      this.sessions[id].messages.push(assistantMsg)
+      const msgIndex = this.sessions[id].messages.length - 1
 
       this.loading = true
 
@@ -111,8 +143,10 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
           credentials: 'include',
           body: JSON.stringify({
             message: text,
+            session_id: sessionId,
             context,
             model: this.selectedModel,
+            ...(resolvedFilters.length > 0 ? { filters: resolvedFilters } : {}),
             ...(deepseekKey !== undefined ? { deepseek_api_key: deepseekKey } : {})
           })
         })
@@ -147,7 +181,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
 
             try {
               const event = JSON.parse(cleanLine)
-              this._processStreamEvent(msgIndex, event)
+              this._processStreamEvent(id, msgIndex, event)
             } catch {
               // Non-JSON line — skip silently
             }
@@ -164,7 +198,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
             }
             if (cleanLine) {
               const event = JSON.parse(cleanLine)
-              this._processStreamEvent(msgIndex, event)
+              this._processStreamEvent(id, msgIndex, event)
             }
           } catch {
             // Ignore
@@ -172,20 +206,20 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
         }
       } catch (err) {
         console.error('[aiAnalyst] sendMessage error:', err)
-        this.messages[msgIndex].error = true
-        this.messages[msgIndex].content = 'Error al obtener respuesta. Intenta nuevamente.'
-        this.messages[msgIndex].streaming = false
+        this.sessions[id].messages[msgIndex].error = true
+        this.sessions[id].messages[msgIndex].content = 'Error al obtener respuesta. Intenta nuevamente.'
+        this.sessions[id].messages[msgIndex].streaming = false
       } finally {
         // Ensure streaming flag is cleared
-        if (this.messages[msgIndex]?.streaming) {
-          this.messages[msgIndex].streaming = false
+        if (this.sessions[id]?.messages[msgIndex]?.streaming) {
+          this.sessions[id].messages[msgIndex].streaming = false
         }
         this.loading = false
       }
     },
 
-    _processStreamEvent(msgIndex, event) {
-      const msg = this.messages[msgIndex]
+    _processStreamEvent(id, msgIndex, event) {
+      const msg = this.sessions[id]?.messages[msgIndex]
       if (!msg) return
 
       switch (event.type) {
@@ -212,11 +246,12 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
           break
         case 'usage':
           if (event.data) {
-            this.usage = {
-              input_tokens: event.data.input_tokens ?? this.usage.input_tokens,
-              output_tokens: event.data.output_tokens ?? this.usage.output_tokens,
-              cost: event.data.cost ?? this.usage.cost,
-              cache_hit: event.data.cache_hit ?? this.usage.cache_hit
+            const currentUsage = this.sessions[id].usage
+            this.sessions[id].usage = {
+              input_tokens: event.data.input_tokens ?? currentUsage.input_tokens,
+              output_tokens: event.data.output_tokens ?? currentUsage.output_tokens,
+              cost: event.data.cost ?? currentUsage.cost,
+              cache_hit: event.data.cache_hit ?? currentUsage.cache_hit
             }
           }
           break
@@ -227,13 +262,17 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
     },
 
     clearMessages() {
-      this.messages = []
-      this.usage = { input_tokens: 0, output_tokens: 0, cost: 0, cache_hit: 0 }
+      const id = this.activeDashboardId
+      if (id) {
+        this.sessions[id] = { messages: [], usage: defaultUsage() }
+      }
     },
 
     async executeSkill(skillName, params = {}) {
-      const lastAssistantIdx = [...this.messages].reverse().findIndex(m => m.role === 'assistant')
-      const msgIndex = lastAssistantIdx >= 0 ? this.messages.length - 1 - lastAssistantIdx : -1
+      const id = this.activeDashboardId
+      if (!id) return
+
+      ensureSession(this.sessions, id)
 
       this.loading = true
       try {
@@ -245,7 +284,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
         })
         const result = await response.json()
         const resultText = result.output || result.result || JSON.stringify(result)
-        this.messages.push({
+        this.sessions[id].messages.push({
           role: 'assistant',
           content: `**Skill ejecutada: ${skillName}**\n\n${resultText}`,
           thought: '',
@@ -256,7 +295,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', {
         })
       } catch (err) {
         console.error('[aiAnalyst] executeSkill error:', err)
-        this.messages.push({
+        this.sessions[id].messages.push({
           role: 'assistant',
           content: `Error al ejecutar skill "${skillName}". Intenta nuevamente.`,
           thought: '',
