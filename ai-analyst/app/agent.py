@@ -45,6 +45,9 @@ AGENT_INSTRUCTION = (
     "Check available skills if a user asks to perform an action.\n"
     "3. Screen Context: You may receive messages starting with [CONTEXT] containing the visible dashboard state. "
     "Use this information to provide context-aware answers without asking the user for details they already see.\n"
+    "4. Active Filters: When a message starts with [ACTIVE FILTERS], those filter constraints define the data scope "
+    "the user is looking at. Always pass these filters to query_data calls to ensure your analysis matches what the "
+    "user sees on screen.\n"
     "\nProvide clear, analytical, and professional guidance based on user queries and available context."
 )
 

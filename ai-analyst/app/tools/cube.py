@@ -7,6 +7,10 @@ from app.core.config import get_settings
 settings = get_settings()
 logger = logging.getLogger(__name__)
 
+# Module-level variable set per request by main.py
+_active_filters: list | None = None
+
+
 async def query_data(query: dict):
     """
     Fetches business data from CubeJS using the provided JSON query format.
@@ -25,6 +29,11 @@ async def query_data(query: dict):
     Returns:
         list: The 'data' array from CubeJS response.
     """
+    # Merge active dashboard filters into the query
+    if _active_filters:
+        existing = query.get("filters", [])
+        query = {**query, "filters": existing + _active_filters}
+
     payload = {
         "sub": "ai-analyst",
         "iat": int(time.time()),
