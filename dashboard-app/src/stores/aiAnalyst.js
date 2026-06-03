@@ -11,6 +11,9 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
   const selectedModel = ref('gemini-2.5-flash-lite')
   const availableModels = ref([])
   const widgetData = reactive({})
+  // Tracks how many divider splices occurred during current sendMessage call,
+  // so msgIndex references after a splice remain accurate.
+  let _indexOffset = 0
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
   function defaultUsage() {
@@ -148,6 +151,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
     const msgIndex = sessions[id].messages.length - 1
 
     loading.value = true
+    _indexOffset = 0
 
     try {
       const { useLlmStore } = await import('@/stores/llm')
@@ -197,7 +201,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
 
           try {
             const event = JSON.parse(cleanLine)
-            _processStreamEvent(id, msgIndex, event)
+            _processStreamEvent(id, msgIndex + _indexOffset, event)
           } catch {
             // Ignore
           }
@@ -213,7 +217,7 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
           }
           if (cleanLine) {
             const event = JSON.parse(cleanLine)
-            _processStreamEvent(id, msgIndex, event)
+            _processStreamEvent(id, msgIndex + _indexOffset, event)
           }
         } catch {
           // Ignore
@@ -221,12 +225,14 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
       }
     } catch (err) {
       console.error('[aiAnalyst] sendMessage error:', err)
-      sessions[id].messages[msgIndex].error = true
-      sessions[id].messages[msgIndex].content = 'Error al obtener respuesta. Intenta nuevamente.'
-      sessions[id].messages[msgIndex].streaming = false
+      const effectiveMsgIndex = msgIndex + _indexOffset
+      sessions[id].messages[effectiveMsgIndex].error = true
+      sessions[id].messages[effectiveMsgIndex].content = 'Error al obtener respuesta. Intenta nuevamente.'
+      sessions[id].messages[effectiveMsgIndex].streaming = false
     } finally {
-      if (sessions[id]?.messages[msgIndex]?.streaming) {
-        sessions[id].messages[msgIndex].streaming = false
+      const effectiveMsgIndex = msgIndex + _indexOffset
+      if (sessions[id]?.messages[effectiveMsgIndex]?.streaming) {
+        sessions[id].messages[effectiveMsgIndex].streaming = false
       }
       loading.value = false
     }
@@ -237,6 +243,17 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
     if (!msg) return
 
     switch (event.type) {
+      case 'context_summarized':
+        // Insert a visual divider before the current streaming placeholder.
+        // After splice, the streaming message shifts to msgIndex+1.
+        // _indexOffset is incremented so all subsequent accesses use the correct index.
+        sessions[id].messages.splice(msgIndex, 0, {
+          role: 'divider',
+          label: 'Contexto resumido para mantener respuestas precisas',
+          model: null
+        })
+        _indexOffset += 1
+        break
       case 'error':
         msg.error = true
         msg.content = event.message || 'Error al obtener respuesta.'
