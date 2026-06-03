@@ -9,6 +9,7 @@ import json
 import uuid
 import logging
 
+import httpx
 from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.sse import EventSourceResponse, ServerSentEvent
@@ -154,6 +155,24 @@ async def _summarize_session(user_id: str, session_id: str, model: str = FALLBAC
     return summary_text
 
 
+async def _probe_ollama() -> tuple[bool, bool]:
+    """
+    Returns (ollama_running, model_available).
+    Uses a 0.5s timeout so /models stays fast.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=0.5) as client:
+            resp = await client.get("http://localhost:11434/api/tags")
+            if resp.status_code != 200:
+                return False, False
+            data = resp.json()
+            names = [m.get("name", "") for m in data.get("models", [])]
+            model_available = any("llama3.2:3b" in n for n in names)
+            return True, model_available
+    except Exception:
+        return False, False
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -196,6 +215,25 @@ async def get_models(
             {"id": "groq/llama-3.3-70b-versatile", "label": "Llama 3.3 70B",
              "provider": "groq", "enabled": False,
              "disabled_reason": "Add Groq API key in Settings"},
+        ]
+    # ── Ollama (local) ────────────────────────────────────────────────────────
+    ollama_running, model_available = await _probe_ollama()
+    if ollama_running and model_available:
+        models += [
+            {"id": "ollama/llama3.2:3b", "label": "Llama 3.2 3B (Local)",
+             "provider": "ollama", "enabled": True},
+        ]
+    elif ollama_running and not model_available:
+        models += [
+            {"id": "ollama/llama3.2:3b", "label": "Llama 3.2 3B (Local)",
+             "provider": "ollama", "enabled": False,
+             "disabled_reason": "Run: ollama pull llama3.2:3b"},
+        ]
+    else:
+        models += [
+            {"id": "ollama/llama3.2:3b", "label": "Llama 3.2 3B (Local)",
+             "provider": "ollama", "enabled": False,
+             "disabled_reason": "Start Ollama to use local models"},
         ]
     return {"models": models}
 
