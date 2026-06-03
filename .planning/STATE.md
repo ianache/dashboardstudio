@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
-last_updated: "2026-06-03T01:28:45.260Z"
+last_updated: "2026-06-03T02:19:38.371Z"
 progress:
   total_phases: 48
   completed_phases: 31
-  total_plans: 87
-  completed_plans: 64
+  total_plans: 88
+  completed_plans: 65
 ---
 
 ---
@@ -57,9 +57,9 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 51 of 51 (AI Analyst Chat Enhancements) — COMPLETE
-Plan: 03 of 03 — COMPLETE
+Plan: 05 of 05 — COMPLETE
 Status: Phase Complete
-Last activity: 2026-06-02 — Completed 51-03 Context summarization at 200 KB threshold (ANALYST-03)
+Last activity: 2026-06-02 — Completed 51-05 Ollama local model provider (llama3.2:3b) for AI Analyst
 
 Progress: [##########] 100% (Phase 48)
 Progress: [##########] 100% (Phase 49)
@@ -86,6 +86,7 @@ Progress: [##########] 100% (Phase 49)
 | Phase 51 P01 | 15 | 2 tasks | 5 files |
 | Phase 51 P03 | 12 | 2 tasks | 1 files |
 | Phase 51 P04 | 5 | 1 tasks | 1 files |
+| Phase 51 P05 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,8 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 51]: _indexOffset is a plain let variable (not reactive ref) — transient per-call state reset on each sendMessage call
 - [Phase 51]: context_summarized is always the first SSE event (before run_async), so divider splice at msgIndex before any answer chunks arrive
 - [Phase 51]: FALLBACK_SUMMARY_MODEL constant defined near CONTEXT_SIZE_LIMIT; _summarize_session uses model.startswith('gemini') guard so non-Gemini models (DeepSeek, Groq) fall back to gemini-2.5-flash-lite; chat() passes request.model explicitly
+- [Phase 51]: ollama/ branch uses LiteLlm with api_base='http://localhost:11434' — no api_key, no stream_options; Ollama streaming does not return token usage
+- [Phase 51]: _probe_ollama() uses 0.5s timeout and returns (False, False) on any exception — three-state logic: (True,True)=enabled, (True,False)=disabled+pull hint, (False,False)=disabled+start hint
 
 ### Blockers/Concerns
 
@@ -151,6 +154,6 @@ Progress: [##########] 100% (Phase 49)
 ## Session Continuity
 
 Last session: 2026-06-02
-Stopped at: Completed 51-03-PLAN.md — Context summarization at 200 KB threshold (ANALYST-03). Phase 51 COMPLETE (3/3).
+Stopped at: Completed 51-05-PLAN.md — Ollama local model provider for AI Analyst (llama3.2:3b). Phase 51 COMPLETE (5/5).
 Resume file: .planning/STATE.md
 

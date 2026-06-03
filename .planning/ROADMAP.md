@@ -255,7 +255,7 @@ Plans:
 **Goal:** Improve BI AI Analyst usability: (1) pass active dashboard filters as context so the agent analyzes the same data the user sees, (2) maintain per-dashboard chat history within a session so users can ask follow-up questions, (3) auto-summarize chat history when it exceeds 200KB to prevent context window overflow.
 **Requirements**: ANALYST-01, ANALYST-02, ANALYST-03
 **Depends on:** Phase 50
-**Plans:** 4/4 plans complete
+**Plans:** 5/5 plans complete
 
 Plans:
 - [ ] 51-01-PLAN.md — Filter context: AiAnalystPanel resolvedFilters prop + aiAnalyst.js + cube.py merge + main.py ChatRequest (ANALYST-01)
