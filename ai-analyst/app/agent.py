@@ -70,6 +70,13 @@ def create_runner(model_str: str, deepseek_api_key: str | None = None, groq_api_
             api_key=groq_api_key or "",
             stream_options={"include_usage": True},
         )
+    elif model_str.startswith("ollama/"):
+        model = LiteLlm(
+            model=model_str,
+            api_base="http://localhost:11434",
+            # No api_key — Ollama does not require authentication
+            # No stream_options — Ollama does not return usage in streaming
+        )
     elif model_str.startswith("gemini"):
         # Gemini native - use string directly (ADK handles auth via GOOGLE_API_KEY env)
         model = model_str
