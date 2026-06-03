@@ -74,6 +74,7 @@ PRICING = {
 }
 
 CONTEXT_SIZE_LIMIT = 200_000  # 200 KB in bytes
+FALLBACK_SUMMARY_MODEL = "gemini-2.5-flash-lite"
 
 
 def calculate_cost(model_str: str, input_tokens: int, output_tokens: int) -> float:
@@ -104,12 +105,17 @@ def _events_to_text(events) -> str:
     return "\n".join(lines)
 
 
-async def _summarize_session(user_id: str, session_id: str) -> str:
+async def _summarize_session(user_id: str, session_id: str, model: str = FALLBACK_SUMMARY_MODEL) -> str:
     """
     Summarize the current session history and clear the session events.
     Returns the summary text to be injected into the next prompt.
     Called only when session byte size exceeds CONTEXT_SIZE_LIMIT.
+
+    Uses `model` for summarization if it is a Gemini model; otherwise falls back
+    to FALLBACK_SUMMARY_MODEL since non-Gemini models require ADK runner infrastructure.
     """
+    logger = logging.getLogger(__name__)
+
     try:
         svc_sessions = session_service.sessions
         session = svc_sessions[APP_NAME][user_id][session_id]
@@ -124,10 +130,14 @@ async def _summarize_session(user_id: str, session_id: str) -> str:
         + history_text
     )
 
+    # Use the active model when it is a Gemini model; otherwise fall back
+    summary_model = model if model.startswith("gemini") else FALLBACK_SUMMARY_MODEL
+    logger.info(f"Summarizing session {session_id} using model {summary_model}")
+
     try:
         client = genai.Client()
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
+            model=summary_model,
             contents=summary_prompt
         )
         summary_text = response.text or ""
@@ -208,7 +218,7 @@ async def chat(
     # Check session size and summarize if needed (before building prompt)
     summary_prefix = ""
     if _session_byte_size(user_id, session_id) > CONTEXT_SIZE_LIMIT:
-        summary_text = await _summarize_session(user_id, session_id)
+        summary_text = await _summarize_session(user_id, session_id, model=request.model)
         if summary_text:
             summary_prefix = f"[CONTEXT SUMMARY — prior conversation] {summary_text}\n\n"
 
