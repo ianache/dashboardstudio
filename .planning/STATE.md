@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
+last_updated: "2026-06-03T00:58:43.713Z"
+progress:
+  total_phases: 48
+  completed_phases: 31
+  total_plans: 86
+  completed_plans: 63
+---
+
+---
+gsd_state_version: 1.0
+milestone: v2.0
+milestone_name: BI Analyst
+status: unknown
 last_updated: "2026-06-02T04:48:02.401Z"
 progress:
   total_phases: 48
@@ -26,14 +39,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-31)
 
 **Core value:** Agente BI interactivo que lee el contexto del dashboard, ejecuta consultas analíticas y dispara skills operativas — sin salir de la interfaz del diseñador
-**Current focus:** Phase 49 — Dashboard Designer Styling
+**Current focus:** Phase 51 — AI Analyst Chat Enhancements (COMPLETE)
 
 ## Current Position
 
-Phase: 51 of 51 (AI Analyst Chat Enhancements) — In Progress
-Plan: 01 of 03 — COMPLETE
-Status: In Progress
-Last activity: 2026-06-02 — Completed 51-01 Dashboard filter context for AI Analyst (ANALYST-01)
+Phase: 51 of 51 (AI Analyst Chat Enhancements) — COMPLETE
+Plan: 03 of 03 — COMPLETE
+Status: Phase Complete
+Last activity: 2026-06-02 — Completed 51-03 Context summarization at 200 KB threshold (ANALYST-03)
 
 Progress: [##########] 100% (Phase 48)
 Progress: [##########] 100% (Phase 49)
@@ -58,6 +71,7 @@ Progress: [##########] 100% (Phase 49)
 | Phase 50 P03 | 3 | 3 tasks | 4 files |
 | Phase 51 P02 | 12 | 2 tasks | 2 files |
 | Phase 51 P01 | 15 | 2 tasks | 5 files |
+| Phase 51 P03 | 12 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -112,6 +126,8 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 51]: Module-level _active_filters in cube.py is safe for single-process async — no threading races within a coroutine chain
 - [Phase 51]: Filter objects passed as native CubeJS format from frontend — no transformation layer needed between Vue and Python
 - [Phase 51]: Dual injection pattern: filter string in prompt for LLM reasoning + filter objects merged into query_data for data accuracy
+- [Phase 51]: _indexOffset is a plain let variable (not reactive ref) — transient per-call state reset on each sendMessage call
+- [Phase 51]: context_summarized is always the first SSE event (before run_async), so divider splice at msgIndex before any answer chunks arrive
 
 ### Blockers/Concerns
 
@@ -120,6 +136,6 @@ Progress: [##########] 100% (Phase 49)
 ## Session Continuity
 
 Last session: 2026-06-02
-Stopped at: Completed 51-02-PLAN.md — Per-dashboard session isolation (aiAnalyst store sessions{} + ensure_session backend). Phase 51 plan 2/3.
+Stopped at: Completed 51-03-PLAN.md — Context summarization at 200 KB threshold (ANALYST-03). Phase 51 COMPLETE (3/3).
 Resume file: .planning/STATE.md
 
