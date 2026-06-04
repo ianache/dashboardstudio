@@ -2749,24 +2749,35 @@ function handleAddNodesToDiagram(nodeIds) {
 .ft-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .ft-btn:disabled:hover { background: transparent; color: var(--on-surface-variant); }
 
-.ft-btn[data-tooltip]::after {
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 6px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(4px);
   background: #1e293b;
   color: #fff;
   font-size: 11px;
-  padding: 3px 7px;
-  border-radius: 5px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-.ft-btn[data-tooltip]:hover::after { opacity: 1; }
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
 .ft-zoom-label {
   font-size: 12px;
