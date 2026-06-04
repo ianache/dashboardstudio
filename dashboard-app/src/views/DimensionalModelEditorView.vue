@@ -311,7 +311,7 @@
                 @click.stop="onNodeClick(node)"
                 @mousedown.stop="startDrag(node, $event)"
               >
-                <div class="node-header" :class="node.type">
+                <div class="node-header" :class="[node.type, { 'has-remove-btn': activeDiagram && !activeDiagram.isMain }]">
                   <span class="node-badge">{{ node.type === 'fact' ? 'HECHO' : 'DIM' }}</span>
                   <MIcon v-if="node.icon" :icon="node.icon" :size="13" style="opacity:0.9;flex-shrink:0" />
                   <span class="node-name">{{ node.name }}</span>
@@ -325,7 +325,9 @@
                   class="node-btn-remove-diagram"
                   title="Quitar del diagrama"
                   @click.stop="removeNodeFromActiveDiagram(node)"
-                >−</button>
+                >
+                  <MIcon icon="close" :size="12" />
+                </button>
                 <div class="node-fields">
                   <div
                     v-for="f in node.fields"
@@ -2832,6 +2834,10 @@ function handleAddNodesToDiagram(nodeIds) {
   padding: 8px 10px;
   font-size: 13px; font-weight: 600; color: #fff;
   cursor: move;
+  transition: padding-right 0.2s ease;
+}
+.node-header.has-remove-btn {
+  padding-right: 36px;
 }
 .node-header.fact { background: var(--primary); }
 .node-header.dimension { background: #52c41a; }
@@ -3291,26 +3297,38 @@ function handleAddNodesToDiagram(nodeIds) {
 /* Sub-diagram node remove button */
 .node-btn-remove-diagram {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: none;
-  border: 1px solid #f5222d44;
-  border-radius: 3px;
-  color: #f5222d;
-  font-size: 14px;
-  width: 20px;
-  height: 20px;
+  top: 11px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.95);
+  width: 22px;
+  height: 22px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.15s;
+  transform: scale(0.9);
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
+}
+
+.node-btn-remove-diagram:hover {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.4);
 }
 
 .model-node:hover .node-btn-remove-diagram {
   opacity: 1;
+  transform: scale(1);
 }
 
 /* Sub-diagram empty hint */
