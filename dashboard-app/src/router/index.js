@@ -92,6 +92,12 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Conexiones'] }
       },
       {
+        path: 'integrations/:id/editor',
+        name: 'IntegrationEditor',
+        component: () => import('@/views/FlowEditorView.vue'),
+        meta: { requiresDesigner: true, breadcrumbs: ['Data Integration', 'Integrations', 'Editor de Diagrama'] }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/SettingsView.vue'),
@@ -99,12 +105,6 @@ const routes = [
         meta: { requiresDesigner: true, breadcrumbs: ['Configuración'] }
       }
     ]
-  },
-  {
-    path: '/integrations/:id/editor',
-    name: 'IntegrationEditor',
-    component: () => import('@/views/FlowEditorView.vue'),
-    meta: { requiresAuth: true, requiresDesigner: true }
   },
   {
     path: '/:pathMatch(.*)*',

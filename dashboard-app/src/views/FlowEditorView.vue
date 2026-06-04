@@ -344,11 +344,11 @@ onMounted(async () => {
 
 <style scoped>
 .fe-root {
-  position: fixed; inset: 0;
   display: flex; flex-direction: column;
+  height: 100%;
   background: #f8fafc;
   font-family: 'Inter', system-ui, sans-serif;
-  z-index: 200; overflow: hidden;
+  overflow: hidden;
 }
 
 /* Top Bar */
