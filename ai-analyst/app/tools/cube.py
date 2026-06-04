@@ -11,6 +11,45 @@ logger = logging.getLogger(__name__)
 _active_filters: list | None = None
 
 
+def normalize_filter(f: dict) -> dict:
+    normalized = {}
+    
+    # 1. Map member/dimension/field/column
+    member = f.get("member") or f.get("dimension") or f.get("field") or f.get("column")
+    
+    # Robust fallback: check if any key contains a dot (e.g. 'cube.field')
+    if not member:
+        for k in f.keys():
+            if isinstance(k, str) and "." in k and k not in ("operator", "values", "value", "member", "dimension", "field", "column"):
+                member = k
+                break
+                
+    if member:
+        normalized["member"] = str(member)
+        
+    # 2. Map operator
+    operator = f.get("operator") or "equals"
+    normalized["operator"] = str(operator)
+    
+    # 3. Map values
+    raw_values = f.get("values")
+    if raw_values is None:
+        raw_values = f.get("value")
+        
+    # Use the value of the member key if values was not explicitly set
+    if raw_values is None and member in f:
+        raw_values = f[member]
+        
+    if raw_values is None:
+        normalized["values"] = []
+    elif isinstance(raw_values, list):
+        normalized["values"] = [str(v) for v in raw_values]
+    else:
+        normalized["values"] = [str(raw_values)]
+        
+    return normalized
+
+
 async def query_data(
     query: dict | None = None,
     measures: list | str | None = None,
@@ -57,7 +96,10 @@ async def query_data(
         if timeDimensions is not None:
             query["timeDimensions"] = [timeDimensions] if isinstance(timeDimensions, dict) else timeDimensions
         if filters is not None:
-            query["filters"] = [filters] if isinstance(filters, dict) else filters
+            if isinstance(filters, list):
+                query["filters"] = filters
+            else:
+                query["filters"] = [filters]
         if limit is not None:
             query["limit"] = int(limit) if isinstance(limit, str) else limit
         if offset is not None:
@@ -72,8 +114,8 @@ async def query_data(
             query["dimensions"] = [query["dimensions"]]
         if "timeDimensions" in query and isinstance(query["timeDimensions"], dict):
             query["timeDimensions"] = [query["timeDimensions"]]
-        if "filters" in query and isinstance(query["filters"], dict):
-            query["filters"] = [query["filters"]]
+        if "filters" in query and not isinstance(query["filters"], list):
+            query["filters"] = [query["filters"]] if query["filters"] is not None else []
         if "limit" in query and isinstance(query["limit"], str):
             query["limit"] = int(query["limit"])
         if "offset" in query and isinstance(query["offset"], str):
@@ -82,13 +124,26 @@ async def query_data(
     # Merge active dashboard filters into the query
     if _active_filters:
         existing = query.get("filters", [])
-        if isinstance(existing, dict):
-            existing = [existing]
-        query = {**query, "filters": existing + _active_filters}
-    else:
-        # Just normalize filters in query if no active filters
-        if "filters" in query and isinstance(query["filters"], dict):
-            query["filters"] = [query["filters"]]
+        if isinstance(existing, list):
+            query = {**query, "filters": existing + _active_filters}
+        else:
+            query = {**query, "filters": ([existing] if existing else []) + _active_filters}
+
+    # Normalize final filters list to conform strictly to CubeJS specification
+    if "filters" in query:
+        if isinstance(query["filters"], list):
+            seen = set()
+            normalized_filters = []
+            for f in query["filters"]:
+                if isinstance(f, dict):
+                    norm = normalize_filter(f)
+                    if "member" in norm:
+                        values_tuple = tuple(sorted(norm["values"]))
+                        key = (norm["member"], norm["operator"], values_tuple)
+                        if key not in seen:
+                            seen.add(key)
+                            normalized_filters.append(norm)
+            query["filters"] = normalized_filters
 
     payload = {
         "sub": "ai-analyst",

@@ -22,38 +22,6 @@
       />
     </section>
 
-    <!-- Quick Actions -->
-    <section class="home-section">
-      <h3 class="section-heading">Acceso rápido</h3>
-      <div class="quick-actions-grid">
-        <QuickActionCard
-          v-if="authStore.isDesigner"
-          icon="add_circle"
-          title="Nuevo Dashboard"
-          description="Crea un dashboard desde cero"
-          variant="primary"
-          @click="router.push('/designer?new=1')"
-        />
-
-        <QuickActionCard
-          v-if="authStore.isDesigner"
-          icon="grid_view"
-          title="Mis Dashboards"
-          description="Ver y gestionar todos los dashboards"
-          variant="default"
-          @click="router.push('/designer')"
-        />
-
-        <QuickActionCard
-          icon="settings"
-          title="Configuración"
-          description="Configura la conexión a CubeJS"
-          variant="secondary"
-          @click="router.push('/settings')"
-        />
-      </div>
-    </section>
-
     <!-- Dashboards -->
     <section class="home-section">
       <div class="section-header">
@@ -66,11 +34,10 @@
         </button>
       </div>
 
-      <div v-if="myDashboards.length === 0" class="empty-state card">
+      <div v-if="myDashboards.length === 0 && !authStore.isDesigner" class="empty-state card">
         <div class="empty-icon">📊</div>
         <h3>Sin dashboards</h3>
-        <p v-if="authStore.isDesigner">Crea tu primer dashboard desde el menú lateral.</p>
-        <p v-else>No tienes dashboards asignados aún. Contacta con tu administrador.</p>
+        <p>No tienes dashboards asignados aún. Contacta con tu administrador.</p>
       </div>
 
       <div v-else class="db-grid">
@@ -87,6 +54,21 @@
           @share="() => {}"
           @menu="authStore.isDesigner ? router.push(`/designer/${db.id}`) : undefined"
         />
+
+        <!-- New dashboard card -->
+        <button
+          v-if="authStore.isDesigner"
+          class="group border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-blue-500 hover:bg-blue-50 transition-all"
+          style="min-height: 340px; cursor: pointer; background: transparent; font-family: inherit;"
+          @click="router.push('/designer?new=1')">
+          <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined text-2xl text-slate-400 group-hover:text-blue-600 transition-colors">add</span>
+          </div>
+          <div class="text-center">
+            <span class="block text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">Nuevo Dashboard</span>
+            <span class="block text-xs text-slate-500">Crea un dashboard desde cero</span>
+          </div>
+        </button>
       </div>
     </section>
   </div>
@@ -99,7 +81,6 @@ import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useUIStore } from '@/stores/ui'
 import KpiCard from '@/components/common/KpiCard.vue'
-import QuickActionCard from '@/components/common/QuickActionCard.vue'
 import DashboardCard from '@/components/common/DashboardCard.vue'
 
 const router = useRouter()
