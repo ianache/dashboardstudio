@@ -304,7 +304,7 @@
                 :class="[
                   node.type,
                   { selected: selectedNode?.id === node.id },
-                  { 'drop-target': dragField && node.type === 'fact' && node.id === dropTargetId },
+                  { 'drop-target': dragField && node.type === 'fact' && node.id === dropTargetId && !hoverField },
                   { 'global-ref': node.globalRef }
                 ]"
                 :style="{ left: node.x + 'px', top: node.y + 'px' }"
@@ -327,7 +327,16 @@
                   @click.stop="removeNodeFromActiveDiagram(node)"
                 >−</button>
                 <div class="node-fields">
-                  <div v-for="f in node.fields" :key="f.id" class="node-field" :class="{ 'is-key': f.isKey, 'is-fk': f.isFk }">
+                  <div
+                    v-for="f in node.fields"
+                    :key="f.id"
+                    class="node-field"
+                    :class="{
+                      'is-key': f.isKey,
+                      'is-fk': f.isFk,
+                      'is-hover-target': hoverField?.nodeId === node.id && hoverField?.fieldId === f.id
+                    }"
+                  >
                     <span
                       v-if="node.type === 'dimension' && f.isKey"
                       class="key-drag-handle"
@@ -1677,6 +1686,7 @@ const dragging = ref(null)  // { nodeId, startX, startY, origX, origY }
 const dragField = ref(null)  // { nodeId, nodeName, fieldId, fieldName, startPos:{x,y} }
 const dropTargetId = ref(null)
 const mousePos = ref({ x: 0, y: 0 })
+const hoverField = ref(null) // { nodeId, fieldId }
 
 // ── Left panel state ─────────────────────────────────────────
 const leftPanelOpen = ref(true)
@@ -1882,6 +1892,40 @@ function onNodeDragMove(e) {
   hasUnsavedChanges.value = true
 }
 
+// ── Datatype Compatibility Helper ────────────────────────────
+function areDatatypesCompatible(typeId1, typeId2) {
+  if (typeId1 === typeId2) return true
+  const dt1 = dtStore.getById(typeId1)
+  const dt2 = dtStore.getById(typeId2)
+  if (!dt1 || !dt2) return false
+
+  const getBaseType = (dt) => {
+    if (dt.baseType === 'SERIAL') return 'INTEGER'
+    if (dt.baseType === 'BIGSERIAL') return 'BIGINT'
+    return dt.baseType
+  }
+
+  return getBaseType(dt1) === getBaseType(dt2) && dt1.size === dt2.size && dt1.precision === dt2.precision
+}
+
+// ── Field Coordinate Hover Utility ───────────────────────────
+function fieldAt(pos) {
+  const node = activeDiagramNodes.value.find(n => {
+    const h = nodeHeight(n)
+    return pos.x >= n.x && pos.x <= n.x + NODE_WIDTH && pos.y >= n.y && pos.y <= n.y + h
+  })
+  if (!node) return null
+
+  const relativeY = pos.y - node.y
+  if (relativeY >= HEADER_H) {
+    const fieldIdx = Math.floor((relativeY - HEADER_H) / FIELD_H)
+    if (fieldIdx >= 0 && fieldIdx < node.fields.length) {
+      return { node, field: node.fields[fieldIdx], index: fieldIdx }
+    }
+  }
+  return null
+}
+
 // ── Field drag start ─────────────────────────────────────────
 function startFieldDrag(dimNode, field, e) {
   if (!field.isKey) return
@@ -1896,9 +1940,11 @@ function startFieldDrag(dimNode, field, e) {
     nodeName: dimNode.name,
     fieldId: field.id,
     fieldName: field.name,
+    dataType: field.dataType,
     startPos: keyFieldStartPos(dimNode, field)
   }
   mousePos.value = pos
+  hoverField.value = null
 }
 
 // ── Global mouse move (field drag tracking) ──────────────────
@@ -1909,18 +1955,46 @@ function onGlobalMouseMove(e) {
   // Highlight fact node under cursor
   const target = factNodeAt(pos)
   dropTargetId.value = target?.id || null
+
+  // Identify field under cursor
+  const targetFieldInfo = fieldAt(pos)
+  if (targetFieldInfo) {
+    const { node, field } = targetFieldInfo
+    if (node.id !== dragField.value.nodeId) {
+      if (areDatatypesCompatible(dragField.value.dataType, field.dataType)) {
+        hoverField.value = {
+          nodeId: node.id,
+          fieldId: field.id
+        }
+        return
+      }
+    }
+  }
+  hoverField.value = null
 }
 
 // ── Global mouse up ───────────────────────────────────────────
 function onGlobalMouseUp(e) {
   if (dragField.value && canvasEl.value) {
     const pos = canvasPos(e.clientX, e.clientY)
-    const factNode = factNodeAt(pos)
-    if (factNode) handleFieldDrop(factNode)
+    if (hoverField.value) {
+      const targetNode = model.value?.nodes.find(n => n.id === hoverField.value.nodeId)
+      const targetField = targetNode?.fields.find(f => f.id === hoverField.value.fieldId)
+      if (targetNode && targetField && areDatatypesCompatible(dragField.value.dataType, targetField.dataType)) {
+        handleFieldDropOnExisting(targetNode.id, targetField.id)
+      } else {
+        const factNode = factNodeAt(pos)
+        if (factNode) handleFieldDrop(factNode)
+      }
+    } else {
+      const factNode = factNodeAt(pos)
+      if (factNode) handleFieldDrop(factNode)
+    }
   }
   dragField.value = null
   dropTargetId.value = null
   dragging.value = null
+  hoverField.value = null
 }
 
 // ── Left panel drag-and-drop ──────────────────────────────────
@@ -2009,6 +2083,30 @@ function handleFieldDrop(factNode) {
       cardinality: '1:N',
       fromFieldId: dragField.value.fieldId,
       toFieldId: toField?.id
+    })
+  }
+  hasUnsavedChanges.value = true
+}
+
+// ── Drop: link dim key → existing field ──────────────────────
+function handleFieldDropOnExisting(targetNodeId, targetFieldId) {
+  const dimNode = model.value?.nodes.find(n => n.id === dragField.value.nodeId)
+  if (!dimNode) return
+
+  // Create relationship if not already exists for this combination
+  const relExists = model.value?.relationships.some(
+    r => r.fromNodeId === dimNode.id &&
+         r.toNodeId === targetNodeId &&
+         r.fromFieldId === dragField.value.fieldId &&
+         r.toFieldId === targetFieldId
+  )
+  if (!relExists) {
+    modelStore.addRelationship(modelId, {
+      fromNodeId: dimNode.id,
+      toNodeId: targetNodeId,
+      cardinality: '1:N',
+      fromFieldId: dragField.value.fieldId,
+      toFieldId: targetFieldId
     })
   }
   hasUnsavedChanges.value = true
@@ -2757,6 +2855,12 @@ function handleAddNodesToDiagram(nodeIds) {
 .node-field:last-child { border-bottom: none; }
 .node-field.is-key { background: #f6ffed; }
 .node-field.is-fk { background: #e6f7ff; }
+.node-field.is-hover-target {
+  background: #f0f5ff !important;
+  outline: 2px dashed #1890ff;
+  outline-offset: -2px;
+  box-shadow: 0 0 8px rgba(24,144,255,0.4);
+}
 
 /* Drag handle for key field */
 .key-drag-handle {
