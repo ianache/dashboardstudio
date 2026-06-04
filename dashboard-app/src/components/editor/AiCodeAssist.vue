@@ -1,7 +1,5 @@
 <template>
-  <Teleport to="body">
-    <div class="aca-overlay">
-      <div class="aca-modal">
+  <div class="aca-drawer">
 
         <!-- ── Header ─────────────────────────────────────────────── -->
         <div class="aca-header">
@@ -123,10 +121,7 @@
             </div>
           </template>
         </div>
-
       </div>
-    </div>
-  </Teleport>
 </template>
 
 <script setup>
@@ -252,59 +247,54 @@ function langStyle(lang) {
   white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; flex-shrink: 0;
 }
 
-/* Overlay — non-blocking panel anchored to the right, below topbar */
-.aca-overlay {
-  position: fixed;
-  top: 52px; right: 12px; bottom: 12px;
-  width: 800px; max-width: calc(100vw - 24px);
-  z-index: 500;
-  pointer-events: none;
-  display: flex; align-items: flex-start; justify-content: flex-end;
-  animation: aca-fade 0.15s ease;
-}
-@keyframes aca-fade { from { opacity: 0 } to { opacity: 1 } }
-
-/* Modal */
-.aca-modal {
-  pointer-events: auto;
-  background: #fff; border-radius: 14px;
-  box-shadow: 0 32px 64px -12px rgba(0,0,0,0.3);
-  width: 100%;
-  height: 100%;
+/* Drawer container */
+.aca-drawer {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 480px; max-width: 90vw;
+  background: #fff;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -4px 0 24px rgba(15,23,42,0.12);
   display: flex; flex-direction: column;
+  z-index: 100;
   overflow: hidden;
-  animation: aca-slide 0.18s ease;
+  animation: aca-slide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes aca-slide { from { transform: translateX(16px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes aca-slide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
 
 /* Header */
 .aca-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #722ed1;
+  color: #fff;
   flex-shrink: 0;
 }
 .aca-header-l { display: flex; align-items: center; gap: 12px; }
 .aca-hdr-ico {
   width: 38px; height: 38px; border-radius: 10px;
-  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  background: rgba(255, 255, 255, 0.15);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .aca-hdr-ico .aca-msi { color: #fff; font-size: 18px; }
-.aca-title { font-size: 15px; font-weight: 700; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; }
-.aca-subtitle { font-size: 12px; color: #64748b; margin: 2px 0 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.aca-title { font-size: 15px; font-weight: 700; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; }
+.aca-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.85); margin: 2px 0 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .aca-model-pill {
   display: inline-block; padding: 1px 7px;
-  background: #f1f5f9; border-radius: 20px;
-  font-size: 10px; font-weight: 600; color: #475569;
+  background: rgba(255, 255, 255, 0.15); border-radius: 20px;
+  font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.95);
 }
 .aca-icon-btn {
   width: 30px; height: 30px; border-radius: 7px; border: none; background: transparent;
-  cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: rgba(255, 255, 255, 0.85); display: flex; align-items: center; justify-content: center;
   transition: all 0.12s;
 }
-.aca-icon-btn:hover { background: #f1f5f9; color: #334155; }
+.aca-icon-btn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 
 /* Body */
 .aca-body {

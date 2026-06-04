@@ -344,6 +344,7 @@ onMounted(async () => {
 
 <style scoped>
 .fe-root {
+  position: relative; /* Anchor for the AI assist drawer */
   display: flex; flex-direction: column;
   height: 100%;
   background: #f8fafc;
