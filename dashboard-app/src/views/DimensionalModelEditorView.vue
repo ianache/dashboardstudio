@@ -231,6 +231,7 @@
           ref="canvasEl"
           class="model-canvas"
           :class="{ 'dragging-field': !!dragField, 'sub-diagram': activeDiagram && !activeDiagram.isMain }"
+          :style="canvasStyle"
           @click="onCanvasClick"
           @mousemove="onNodeDragMove"
           @dragover.prevent="onCanvasDragOver"
@@ -243,8 +244,6 @@
               class="canvas-inner"
               :style="{ width: canvasSize.w + 'px', height: canvasSize.h + 'px', transform: `scale(${zoomLevel})` }"
             >
-              <!-- Snap grid overlay -->
-              <div v-if="snapEnabled" class="canvas-snap-grid" :style="{ backgroundSize: `${SNAP_GRID}px ${SNAP_GRID}px` }" />
 
               <!-- SVG overlay for relationships + guide line -->
               <svg class="canvas-svg" :width="canvasSize.w" :height="canvasSize.h">
@@ -1590,6 +1589,21 @@ const SNAP_GRID = 20
 const zoomLevel = ref(1.0)
 const snapEnabled = ref(false)
 
+const canvasStyle = computed(() => {
+  const styles = {}
+  if (snapEnabled.value) {
+    const size = SNAP_GRID * zoomLevel.value
+    styles.backgroundImage = `
+      linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)
+    `
+    styles.backgroundSize = `${size}px ${size}px`
+    styles.backgroundAttachment = 'local'
+    styles.backgroundPosition = '0 0'
+  }
+  return styles
+})
+
 const zoomPercent = computed(() => Math.round(zoomLevel.value * 100))
 const canvasScalerSize = computed(() => ({
   w: canvasSize.value.w * zoomLevel.value,
@@ -2652,9 +2666,10 @@ function handleAddNodesToDiagram(nodeIds) {
   position: relative;
   overflow: auto;
   min-height: 500px;
+  background-color: #ffffff; /* White background */
 }
 .model-canvas.dragging-field { cursor: crosshair; }
-.model-canvas.sub-diagram { background-color: var(--diagram-bg, #f7f0ff); }
+.model-canvas.sub-diagram { background-color: #ffffff; /* White background for sub-diagrams */ }
 
 /* Scaler: explicit zoomed dimensions to drive scroll area */
 .canvas-scaler {
@@ -2669,17 +2684,6 @@ function handleAddNodesToDiagram(nodeIds) {
   top: 0; left: 0;
   transform-origin: 0 0;
   will-change: transform;
-}
-
-/* Snap grid background */
-.canvas-snap-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .canvas-svg {
