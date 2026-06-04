@@ -40,82 +40,98 @@
       <div class="toolbar-actions">
         <!-- CubeJS / DDL / Import / Export -->
         <input ref="importInput" type="file" accept=".yaml,.yml" style="display:none" @change="handleImport" />
-        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Exportar Diagrama (.png)" @click="handleExportPNG">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-        </button>
-        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Exportar schema CubeJS (.js)" @click="handleExportCubeJS">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
-        </button>
-        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Generar DDL/SQL" @click="handleGenerateDDL">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <ellipse cx="12" cy="5" rx="9" ry="3"/>
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-          </svg>
-        </button>
-        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Importar YAML" @click="importInput.click()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-        </button>
-        <button class="btn btn-secondary btn-sm btn-icon-only" data-tooltip="Exportar YAML" @click="handleExport">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-        </button>
-
-        <button class="btn-ai-assist" @click="aiAssistOpen = true">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
-          </svg>
-          IA Assist
-        </button>
+        <div class="toolbar-btn-group">
+          <button class="btn-icon-only" data-tooltip="Exportar Diagrama (.png)" @click="handleExportPNG">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </button>
+          <div class="toolbar-btn-group-sep"></div>
+          <button class="btn-icon-only" data-tooltip="Exportar schema CubeJS (.js)" @click="handleExportCubeJS">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </button>
+          <div class="toolbar-btn-group-sep"></div>
+          <button class="btn-icon-only" data-tooltip="Generar DDL/SQL" @click="handleGenerateDDL">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+          </button>
+          <div class="toolbar-btn-group-sep"></div>
+          <button class="btn-icon-only" data-tooltip="Importar YAML" @click="importInput.click()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </button>
+          <div class="toolbar-btn-group-sep"></div>
+          <button class="btn-icon-only" data-tooltip="Exportar YAML" @click="handleExport">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+        </div>
 
         <div class="toolbar-sep"></div>
 
-        <button class="btn btn-secondary btn-sm" @click="addNode('fact')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Hecho
-        </button>
-        <button class="btn btn-secondary btn-sm" @click="addNode('dimension')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Dimensión
-        </button>
+        <!-- Group 2: Hecho / Dimensión / Dim Global -->
+        <div class="toolbar-btn-group">
+          <button class="btn-text-icon" data-tooltip="Añadir nueva tabla de Hecho" @click="addNode('fact')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M21 12H3M12 3v18"/>
+              <path d="M6 7h4M6 10h4M7 6v5M9 6v5"/>
+            </svg>
+            <span>Hecho</span>
+          </button>
+          <div class="toolbar-btn-group-sep"></div>
+          <button class="btn-text-icon" data-tooltip="Añadir nueva Dimensión" @click="addNode('dimension')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            <span>Dimensión</span>
+          </button>
+          <template v-if="!model?.isGlobal && modelStore.globalModel">
+            <div class="toolbar-btn-group-sep"></div>
+            <button class="btn-text-icon" data-tooltip="Añadir dimensión del modelo Global" @click="showGlobalDimModal = true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span>Dim. Global</span>
+            </button>
+          </template>
+        </div>
+
         <button
           v-if="activeDiagram && !activeDiagram.isMain"
           class="btn btn-secondary btn-sm"
           @click="showAddNodeModal = true"
         >+ Añadir tabla</button>
 
-        <button
-          v-if="!model?.isGlobal && modelStore.globalModel"
-          class="btn btn-secondary btn-sm"
-          data-tooltip="Añadir dimensión del modelo Global"
-          @click="showGlobalDimModal = true"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          + Dim. Global
-        </button>
+        <div class="toolbar-sep"></div>
+
+        <!-- Group 3: IA Assist -->
+        <div class="toolbar-btn-group">
+          <button class="btn-text-icon btn-ai-assist-group" @click="aiAssistOpen = true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+            </svg>
+            <span>IA Assist</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -393,6 +409,154 @@
             <MIcon icon="center_focus_strong" :size="20" />
           </button>
         </div>
+
+        <!-- Drawer: AI Assist -->
+        <transition name="slide-fade">
+          <div v-if="aiAssistOpen" class="ai-assist-drawer card">
+            <div class="ai-assist-drawer-header">
+              <div class="ai-assist-drawer-title-row">
+                <svg class="ai-assist-drawer-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+                </svg>
+                <span class="ai-assist-drawer-title">IA Assist — Diseñador de Tablas</span>
+                <button class="btn-close-drawer" @click="aiAssistOpen = false" title="Cerrar panel">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              <div v-if="llmStore.isConfigured" class="ai-assist-drawer-model">
+                {{ llmStore.configFor('modelAssist').providerLabel }} · {{ llmStore.configFor('modelAssist').modelLabel }}
+              </div>
+            </div>
+
+            <div class="ai-assist-drawer-content">
+              <!-- No LLM configured -->
+              <div v-if="!llmStore.isConfigured" class="alert alert-error">
+                Sin clave API configurada.
+                <router-link to="/settings" @click="aiAssistOpen = false" style="color:inherit;font-weight:600;margin-left:4px">
+                  Ir a Configuración →
+                </router-link>
+              </div>
+
+              <!-- Context chips -->
+              <div class="ai-context-row">
+                <span class="ai-ctx-label">Modelo:</span>
+                <span class="ai-chip ai-chip-model">{{ model?.name }}</span>
+                <template v-if="model?.nodes?.length">
+                  <span class="ai-ctx-label" style="margin-left:8px">Tablas existentes:</span>
+                  <span v-for="n in model.nodes.slice(0, 6)" :key="n.id"
+                        class="ai-chip" :class="n.type === 'fact' ? 'ai-chip-fact' : 'ai-chip-dim'">
+                    {{ n.name }}
+                  </span>
+                  <span v-if="model.nodes.length > 6" class="ai-chip-more">+{{ model.nodes.length - 6 }}</span>
+                </template>
+              </div>
+
+              <!-- Prompt -->
+              <div class="form-group" style="margin:0">
+                <label class="form-label">¿Qué tablas necesitas diseñar?</label>
+                <textarea
+                  v-model="aiAssistPrompt"
+                  class="form-input"
+                  rows="4"
+                  :disabled="aiAssistLoading"
+                  placeholder="Ej: Necesito una tabla de hechos de Ventas con campos de monto, cantidad y descuento, y dimensiones de Cliente, Producto y Tiempo con sus campos principales."
+                  @keydown.ctrl.enter="runAIAssist"
+                ></textarea>
+                <span class="form-hint">Ctrl+Enter para generar</span>
+              </div>
+
+              <button
+                class="btn btn-primary"
+                style="align-self:flex-start"
+                :disabled="!llmStore.isConfigured || !aiAssistPrompt.trim() || aiAssistLoading"
+                @click="runAIAssist"
+              >
+                <svg v-if="aiAssistLoading" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+                </svg>
+                {{ aiAssistLoading ? 'Generando...' : 'Generar tablas' }}
+              </button>
+
+              <div v-if="aiAssistError" class="alert alert-error">
+                <div style="font-weight:600;margin-bottom:6px">{{ aiAssistError }}</div>
+                <details v-if="aiRawJson" style="font-size:12px;background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;cursor:pointer">
+                  <summary style="outline:none;font-weight:600">Ver respuesta original (Crudo)</summary>
+                  <pre style="margin-top:8px;white-space:pre-wrap;word-wrap:break-word">{{ aiRawJson }}</pre>
+                </details>
+              </div>
+
+              <!-- Result preview -->
+              <div v-if="aiAssistResult" class="ai-result-section">
+                <div class="ai-result-title">
+                  <span>{{ aiAssistResult.length }} tabla(s) generada(s) — selecciona las que quieres añadir</span>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-secondary btn-sm" :class="{ 'btn-primary': aiViewMode === 'visual' }" @click="aiViewMode = 'visual'">Visor Visual</button>
+                    <button class="btn btn-secondary btn-sm" :class="{ 'btn-primary': aiViewMode === 'json' }" @click="aiViewMode = 'json'">JSON</button>
+                  </div>
+                </div>
+
+                <!-- JSON Viewer -->
+                <div v-if="aiViewMode === 'json'" style="margin-top:12px">
+                  <div style="display:flex; justify-content:flex-end; margin-bottom:8px">
+                    <button class="btn btn-secondary btn-sm" @click="downloadAIAssistJSON">
+                      ⬇ Descargar Artifact (.json)
+                    </button>
+                  </div>
+                  <textarea class="form-input json-editor" readonly :value="aiRawJson" rows="12"></textarea>
+                </div>
+
+                <!-- Visual View -->
+                <div v-show="aiViewMode === 'visual'">
+                  <div style="display:flex;gap:6px;margin:12px 0 8px 0">
+                    <button class="btn btn-secondary btn-sm" @click="aiSelectAll(true)">Marcar Todas</button>
+                    <button class="btn btn-secondary btn-sm" @click="aiSelectAll(false)">Ninguna</button>
+                  </div>
+                  <div class="ai-tables-list">
+                    <div
+                      v-for="(table, idx) in aiAssistResult"
+                      :key="idx"
+                      class="ai-table-card"
+                      :class="{ selected: aiSelectedTables.includes(idx), fact: table.type === 'fact', dim: table.type === 'dimension' }"
+                      @click="aiToggleTable(idx)"
+                    >
+                      <div class="ai-table-header">
+                        <input type="checkbox" :checked="aiSelectedTables.includes(idx)" @click.stop="aiToggleTable(idx)" />
+                        <span class="ai-table-badge" :class="table.type">
+                          {{ table.type === 'fact' ? 'HECHO' : 'DIM' }}
+                        </span>
+                        <span class="ai-table-name">{{ table.name }}</span>
+                        <span class="ai-table-count">{{ table.fields.length }} campos</span>
+                      </div>
+                      <div class="ai-table-fields">
+                        <span v-for="f in table.fields" :key="f.name" class="ai-field-chip" :class="{ 'is-key': f.isKey }">
+                          <span v-if="f.isKey">🔑</span>{{ f.name }}
+                          <span class="ai-field-type">{{ f.dataTypeLabel }}</span>
+                        </span>
+                      </div>
+                      <div v-if="table.description" class="ai-table-desc">{{ table.description }}</div>
+                    </div>
+                  </div>
+                </div><!-- /visual view -->
+              </div>
+            </div>
+
+            <div v-if="aiAssistResult" class="ai-assist-drawer-footer">
+              <button class="btn btn-secondary" @click="aiAssistOpen = false">Cancelar</button>
+              <button
+                class="btn btn-primary"
+                :disabled="!aiSelectedTables.length"
+                @click="applyAITables"
+              >
+                Añadir {{ aiSelectedTables.length }} tabla(s) al canvas
+              </button>
+            </div>
+          </div>
+        </transition>
       </div>
 
       <!-- Properties panel -->
@@ -559,10 +723,6 @@
               </button>
             </div>
 
-            <div class="props-divider"></div>
-            <button class="btn btn-sm btn-danger-outline" @click="deleteNodeConfirm">
-              Eliminar tabla
-            </button>
           </div><!-- end v-else editable props-body -->
         </template>
 
@@ -646,151 +806,7 @@
       </div>
     </div>
 
-    <!-- Modal: AI Assist -->
-    <div v-if="aiAssistOpen" class="modal-overlay" @click.self="aiAssistOpen = false">
-      <div class="modal card ai-assist-modal">
-        <div class="modal-header ai-assist-header">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
-          </svg>
-          <span>IA Assist — Diseñador de Tablas</span>
-          <span v-if="llmStore.isConfigured" class="ai-model-label">
-            {{ llmStore.configFor('modelAssist').providerLabel }} · {{ llmStore.configFor('modelAssist').modelLabel }}
-          </span>
-          <button class="btn-icon" style="margin-left:auto" @click="aiAssistOpen = false">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
 
-        <div class="modal-body ai-assist-body">
-          <!-- No LLM configured -->
-          <div v-if="!llmStore.isConfigured" class="alert alert-error">
-            Sin clave API configurada.
-            <router-link to="/settings" @click="aiAssistOpen = false" style="color:inherit;font-weight:600;margin-left:4px">
-              Ir a Configuración →
-            </router-link>
-          </div>
-
-          <!-- Context chips -->
-          <div class="ai-context-row">
-            <span class="ai-ctx-label">Modelo:</span>
-            <span class="ai-chip ai-chip-model">{{ model?.name }}</span>
-            <template v-if="model?.nodes?.length">
-              <span class="ai-ctx-label" style="margin-left:8px">Tablas existentes:</span>
-              <span v-for="n in model.nodes.slice(0, 6)" :key="n.id"
-                    class="ai-chip" :class="n.type === 'fact' ? 'ai-chip-fact' : 'ai-chip-dim'">
-                {{ n.name }}
-              </span>
-              <span v-if="model.nodes.length > 6" class="ai-chip-more">+{{ model.nodes.length - 6 }}</span>
-            </template>
-          </div>
-
-          <!-- Prompt -->
-          <div class="form-group" style="margin:0">
-            <label class="form-label">¿Qué tablas necesitas diseñar?</label>
-            <textarea
-              v-model="aiAssistPrompt"
-              class="form-input"
-              rows="4"
-              :disabled="aiAssistLoading"
-              placeholder="Ej: Necesito una tabla de hechos de Ventas con campos de monto, cantidad y descuento, y dimensiones de Cliente, Producto y Tiempo con sus campos principales."
-              @keydown.ctrl.enter="runAIAssist"
-            ></textarea>
-            <span class="form-hint">Ctrl+Enter para generar</span>
-          </div>
-
-          <button
-            class="btn btn-primary"
-            style="align-self:flex-start"
-            :disabled="!llmStore.isConfigured || !aiAssistPrompt.trim() || aiAssistLoading"
-            @click="runAIAssist"
-          >
-            <svg v-if="aiAssistLoading" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
-            </svg>
-            {{ aiAssistLoading ? 'Generando...' : 'Generar tablas' }}
-          </button>
-
-          <div v-if="aiAssistError" class="alert alert-error">
-            <div style="font-weight:600;margin-bottom:6px">{{ aiAssistError }}</div>
-            <details v-if="aiRawJson" style="font-size:12px;background:rgba(0,0,0,0.05);padding:8px;border-radius:6px;cursor:pointer">
-              <summary style="outline:none;font-weight:600">Ver respuesta original (Crudo)</summary>
-              <pre style="margin-top:8px;white-space:pre-wrap;word-wrap:break-word">{{ aiRawJson }}</pre>
-            </details>
-          </div>
-
-          <!-- Result preview -->
-          <div v-if="aiAssistResult" class="ai-result-section">
-            <div class="ai-result-title">
-              <span>{{ aiAssistResult.length }} tabla(s) generada(s) — selecciona las que quieres añadir</span>
-              <div style="display:flex;gap:6px">
-                <button class="btn btn-secondary btn-sm" :class="{ 'btn-primary': aiViewMode === 'visual' }" @click="aiViewMode = 'visual'">Visor Visual</button>
-                <button class="btn btn-secondary btn-sm" :class="{ 'btn-primary': aiViewMode === 'json' }" @click="aiViewMode = 'json'">JSON</button>
-              </div>
-            </div>
-
-            <!-- JSON Viewer -->
-            <div v-if="aiViewMode === 'json'" style="margin-top:12px">
-              <div style="display:flex; justify-content:flex-end; margin-bottom:8px">
-                <button class="btn btn-secondary btn-sm" @click="downloadAIAssistJSON">
-                  ⬇ Descargar Artifact (.json)
-                </button>
-              </div>
-              <textarea class="form-input json-editor" readonly :value="aiRawJson" rows="12"></textarea>
-            </div>
-
-            <!-- Visual View -->
-            <div v-show="aiViewMode === 'visual'">
-              <div style="display:flex;gap:6px;margin:12px 0 8px 0">
-                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(true)">Marcar Todas</button>
-                <button class="btn btn-secondary btn-sm" @click="aiSelectAll(false)">Ninguna</button>
-              </div>
-              <div class="ai-tables-list">
-              <div
-                v-for="(table, idx) in aiAssistResult"
-                :key="idx"
-                class="ai-table-card"
-                :class="{ selected: aiSelectedTables.includes(idx), fact: table.type === 'fact', dim: table.type === 'dimension' }"
-                @click="aiToggleTable(idx)"
-              >
-                <div class="ai-table-header">
-                  <input type="checkbox" :checked="aiSelectedTables.includes(idx)" @click.stop="aiToggleTable(idx)" />
-                  <span class="ai-table-badge" :class="table.type">
-                    {{ table.type === 'fact' ? 'HECHO' : 'DIM' }}
-                  </span>
-                  <span class="ai-table-name">{{ table.name }}</span>
-                  <span class="ai-table-count">{{ table.fields.length }} campos</span>
-                </div>
-                <div class="ai-table-fields">
-                  <span v-for="f in table.fields" :key="f.name" class="ai-field-chip" :class="{ 'is-key': f.isKey }">
-                    <span v-if="f.isKey">🔑</span>{{ f.name }}
-                    <span class="ai-field-type">{{ f.dataTypeLabel }}</span>
-                  </span>
-                </div>
-                <div v-if="table.description" class="ai-table-desc">{{ table.description }}</div>
-              </div>
-            </div>
-            </div><!-- /visual view -->
-          </div>
-        </div>
-
-        <div v-if="aiAssistResult" class="modal-footer">
-          <button class="btn btn-secondary" @click="aiAssistOpen = false">Cancelar</button>
-          <button
-            class="btn btn-primary"
-            :disabled="!aiSelectedTables.length"
-            @click="applyAITables"
-          >
-            Añadir {{ aiSelectedTables.length }} tabla(s) al canvas
-          </button>
-        </div>
-      </div>
-    </div>
 
     <!-- Modal: Add Global Dimensions -->
     <div v-if="showGlobalDimModal" class="modal-overlay" @click.self="showGlobalDimModal = false">
@@ -836,6 +852,19 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal: Confirm Delete Node -->
+    <ConfirmModal
+      v-if="showDeleteConfirm"
+      question="¿Eliminar tabla?"
+      :detail="`¿Estás seguro de que quieres eliminar la tabla '${selectedNode?.name}' y todas sus relaciones?`"
+      accept-label="Eliminar"
+      accept-icon="delete"
+      accept-variant="danger"
+      warning-icon="warning"
+      @cancel="showDeleteConfirm = false"
+      @accept="performDeleteNode"
+    />
   </div>
 </template>
 
@@ -848,6 +877,7 @@ import { useUIStore } from '@/stores/ui'
 import { useLlmStore } from '@/stores/llm'
 import { callLlm } from '@/composables/useLlmCall'
 import MIcon from '@/components/common/MIcon.vue'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import DiagramTabBar from '@/components/dimensional-model/DiagramTabBar.vue'
 import DiagramPropsPanel from '@/components/dimensional-model/DiagramPropsPanel.vue'
 import AddNodeToDiagramModal from '@/components/dimensional-model/AddNodeToDiagramModal.vue'
@@ -1656,9 +1686,25 @@ const dimsExpanded = ref(true)
 const panelDragNodeId = ref(null)
 
 // ── Lifecycle ────────────────────────────────────────────────
+function onGlobalKeyDown(e) {
+  const activeEl = document.activeElement
+  if (activeEl) {
+    const tagName = activeEl.tagName.toLowerCase()
+    if (tagName === 'input' || tagName === 'textarea' || tagName === 'select' || activeEl.isContentEditable) {
+      return
+    }
+  }
+  if (e.key === 'Delete' || e.key === 'Del') {
+    if (selectedNode.value) {
+      deleteNodeConfirm()
+    }
+  }
+}
+
 onMounted(() => {
   document.addEventListener('mousemove', onGlobalMouseMove)
   document.addEventListener('mouseup', onGlobalMouseUp)
+  window.addEventListener('keydown', onGlobalKeyDown)
   // Place toolbar near bottom-left of canvas column
   nextTick(() => {
     if (canvasColumnEl.value) {
@@ -1673,6 +1719,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onGlobalMouseMove)
   document.removeEventListener('mouseup', onGlobalMouseUp)
   document.removeEventListener('mousemove', onToolbarDragMove)
+  window.removeEventListener('keydown', onGlobalKeyDown)
   if (canvasEl.value) {
     canvasEl.value.removeEventListener('wheel', onCanvasWheel)
   }
@@ -2039,11 +2086,18 @@ function deleteField(fieldId) {
   hasUnsavedChanges.value = true
 }
 
+const showDeleteConfirm = ref(false)
+
 function deleteNodeConfirm() {
   if (!selectedNode.value) return
-  if (!confirm(`¿Eliminar "${selectedNode.value.name}" y todas sus relaciones?`)) return
+  showDeleteConfirm.value = true
+}
+
+function performDeleteNode() {
+  if (!selectedNode.value) return
   modelStore.deleteNode(modelId, selectedNode.value.id)
   selectedNode.value = null
+  showDeleteConfirm.value = false
   hasUnsavedChanges.value = true
 }
 
@@ -2396,6 +2450,81 @@ function handleAddNodesToDiagram(nodeIds) {
 .toolbar-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: center; }
 .btn-icon-only { width: 30px; padding: 0; justify-content: center; }
 .toolbar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+
+.toolbar-btn-group {
+  display: inline-flex;
+  background: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 2px;
+  align-items: center;
+  gap: 1px;
+}
+
+.toolbar-btn-group .btn-icon-only,
+.toolbar-btn-group .btn-text-icon {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--on-surface-variant);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.toolbar-btn-group .btn-icon-only {
+  width: 32px;
+  padding: 0;
+}
+
+.toolbar-btn-group .btn-text-icon {
+  padding: 0 12px;
+  gap: 6px;
+}
+
+.toolbar-btn-group .btn-icon-only:hover,
+.toolbar-btn-group .btn-text-icon:hover {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+
+.toolbar-btn-group .btn-icon-only:active,
+.toolbar-btn-group .btn-text-icon:active {
+  transform: scale(0.95);
+}
+
+.toolbar-btn-group-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--outline-variant);
+  flex-shrink: 0;
+}
+
+.toolbar-btn-group .btn-ai-assist-group {
+  color: #722ed1;
+}
+
+[data-theme="dark"] .toolbar-btn-group .btn-ai-assist-group {
+  color: #b37feb;
+}
+
+.toolbar-btn-group .btn-ai-assist-group:hover {
+  background: color-mix(in srgb, #722ed1 10%, transparent) !important;
+  color: #722ed1 !important;
+}
+
+[data-theme="dark"] .toolbar-btn-group .btn-ai-assist-group:hover {
+  background: color-mix(in srgb, #b37feb 15%, transparent) !important;
+  color: #d3adf7 !important;
+}
 
 /* Editor body */
 .editor-body {
@@ -2892,21 +3021,113 @@ function handleAddNodesToDiagram(nodeIds) {
 .btn-ai-assist:hover,
 .btn-ai-assist.active { background: #722ed1; color: #fff; }
 
-/* ── AI Assist modal ──────────────────────────────────────── */
-.ai-assist-modal { max-width: 680px; width: 96vw; max-height: 88vh; display: flex; flex-direction: column; }
-.ai-assist-header {
-  display: flex; align-items: center; gap: 8px;
-  background: #722ed1; color: #fff; padding: 12px 16px;
-  border-radius: 8px 8px 0 0;
-  font-size: 14px; font-weight: 600;
+/* ── AI Assist side drawer ────────────────────────────────── */
+.ai-assist-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 480px;
+  max-width: 90vw;
+  background: var(--surface-container-lowest);
+  border-left: 1px solid var(--outline-variant);
+  box-shadow: -4px 0 24px rgba(15, 23, 42, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  border-radius: 0;
 }
-.ai-model-label {
-  font-size: 11px; font-weight: 400;
-  background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;
+
+.ai-assist-drawer-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--outline-variant);
+  background: #722ed1;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
 }
-.ai-assist-body {
-  padding: 16px; overflow-y: auto; flex: 1;
-  display: flex; flex-direction: column; gap: 14px;
+
+.ai-assist-drawer-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-assist-drawer-title {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-heading);
+}
+
+.ai-assist-drawer-icon {
+  color: #ffffff;
+}
+
+.ai-assist-drawer-model {
+  font-size: 11px;
+  opacity: 0.85;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  align-self: flex-start;
+  color: #ffffff;
+}
+
+.btn-close-drawer {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: auto;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.btn-close-drawer:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ai-assist-drawer-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-assist-drawer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--outline-variant);
+  background: var(--surface-container-low);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Slide transition */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.25s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(100%);
+  opacity: 0.9;
 }
 
 /* Context chips */

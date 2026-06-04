@@ -20,8 +20,8 @@
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\ai-analyst\\app\\tools\\cube.py": {
-    "mtime": 1780449632.7868898,
-    "hash": "dbb6f0eb5f674b9b3381b09900c070f4"
+    "mtime": 1780456155.0515158,
+    "hash": "0814ea0039dc7d2ea262fdeb74d3e505"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\ai-analyst\\app\\tools\\skills.py": {
     "mtime": 1780260076.596177,
@@ -38,6 +38,10 @@
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\ai-analyst\\scratch\\test_agent.py": {
     "mtime": 1780282056.571654,
     "hash": "3f14551c112aafd504365513a299d1a8"
+  },
+  "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\ai-analyst\\scratch\\test_query.py": {
+    "mtime": 1780456140.2833133,
+    "hash": "b4fe44332492872832ab9d041a5f936d"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\backend\\check_user_exists.py": {
     "mtime": 1778714602.586018,
@@ -692,8 +696,8 @@
     "hash": "4d763d35b43bb8c3eeb3b3c50deaae3e"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\views\\HomeView.vue": {
-    "mtime": 1778826035.5030124,
-    "hash": "cbec36ec16aa1b8747aa9d20415f20d1"
+    "mtime": 1780539166.1240113,
+    "hash": "c45ec190c7c69be8886792aa374fcf39"
   },
   "C:\\Users\\ianache\\Desktop\\DATA\\01-DOCUMENTOS\\02-PROYECTOS\\102-concesionarias\\dashboardstudio\\dashboard-app\\src\\views\\IntegrationsView.vue": {
     "mtime": 1780380089.4715562,

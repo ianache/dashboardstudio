@@ -204,7 +204,10 @@ const gradients = [
   transition: background 0.2s, transform 0.15s;
   font-family: inherit;
 }
-.db-open-btn:hover  { background: var(--primary-dark); }
+.db-open-btn:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
 .db-open-btn:active { transform: scale(0.98); }
 
 .db-share-btn {
