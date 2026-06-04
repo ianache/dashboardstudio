@@ -319,15 +319,16 @@
                     <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                   </svg>
+                  <button
+                    v-if="activeDiagram && !activeDiagram.isMain"
+                    class="node-btn-remove-diagram"
+                    title="Quitar del diagrama"
+                    @click.stop="removeNodeFromActiveDiagram(node)"
+                    @mousedown.stop
+                  >
+                    <MIcon icon="close" :size="12" />
+                  </button>
                 </div>
-                <button
-                  v-if="activeDiagram && !activeDiagram.isMain"
-                  class="node-btn-remove-diagram"
-                  title="Quitar del diagrama"
-                  @click.stop="removeNodeFromActiveDiagram(node)"
-                >
-                  <MIcon icon="close" :size="12" />
-                </button>
                 <div class="node-fields">
                   <div
                     v-for="f in node.fields"
@@ -2830,6 +2831,7 @@ function handleAddNodesToDiagram(nodeIds) {
 .model-node.drop-target { border-color: #52c41a; box-shadow: 0 0 0 3px rgba(82,196,26,0.35); }
 
 .node-header {
+  position: relative;
   display: flex; align-items: center; gap: 6px;
   padding: 8px 10px;
   font-size: 13px; font-weight: 600; color: #fff;
@@ -2837,7 +2839,7 @@ function handleAddNodesToDiagram(nodeIds) {
   transition: padding-right 0.2s ease;
 }
 .node-header.has-remove-btn {
-  padding-right: 36px;
+  padding-right: 38px;
 }
 .node-header.fact { background: var(--primary); }
 .node-header.dimension { background: #52c41a; }
@@ -3297,7 +3299,7 @@ function handleAddNodesToDiagram(nodeIds) {
 /* Sub-diagram node remove button */
 .node-btn-remove-diagram {
   position: absolute;
-  top: 11px;
+  top: 50%;
   right: 10px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -3310,7 +3312,7 @@ function handleAddNodesToDiagram(nodeIds) {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transform: scale(0.9);
+  transform: translateY(-50%) scale(0.9);
   transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
               background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
               border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -3322,13 +3324,13 @@ function handleAddNodesToDiagram(nodeIds) {
   background: #ff4d4f;
   border-color: #ff4d4f;
   color: #fff;
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
   box-shadow: 0 2px 6px rgba(255, 77, 79, 0.4);
 }
 
 .model-node:hover .node-btn-remove-diagram {
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(-50%) scale(1);
 }
 
 /* Sub-diagram empty hint */
