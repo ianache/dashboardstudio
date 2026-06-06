@@ -461,6 +461,37 @@
               <span class="msi">add</span> Añadir variable_insert
             </button>
           </div>
+
+          <!-- Ejemplos de llamada al API -->
+          <div class="fec-var-examples-section">
+            <div class="fec-var-examples-hdr">
+              <span class="msi" style="font-size:18px;color:var(--primary)">code</span>
+              <span class="fec-var-examples-title">Ejemplos de API</span>
+            </div>
+            
+            <p class="fec-var-examples-desc">
+              Llama a este flujo enviando valores para las variables definidas:
+            </p>
+
+            <div class="fec-lang-badges">
+              <span 
+                v-for="lang in ['javascript', 'python', 'curl', 'powershell']" 
+                :key="lang" 
+                class="fec-lang-badge" 
+                :class="{ active: selectedExampleLang === lang }"
+                @click="selectedExampleLang = lang"
+              >
+                {{ lang === 'javascript' ? 'JavaScript' : lang === 'python' ? 'Python' : lang === 'curl' ? 'cURL' : 'PowerShell' }}
+              </span>
+            </div>
+
+            <div class="fec-example-code-container">
+              <pre class="fec-example-code"><code>{{ executionExampleCode }}</code></pre>
+              <button class="fec-copy-code-btn" @click="copyExampleCode" :title="copiedCode ? '¡Copiado!' : 'Copiar al portapapeles'">
+                <span class="msi" :style="{ color: copiedCode ? 'var(--success)' : 'inherit' }">{{ copiedCode ? 'check' : 'content_copy' }}</span>
+              </button>
+            </div>
+          </div>
         </template>
 
         <!-- ── Note properties ── -->
@@ -689,6 +720,10 @@
               <p v-if="def.type === 'textarea' && ['subject', 'body'].includes(key)" class="fec-template-hint">
                 <span class="msi" style="font-size:11px">info</span>
                 Supports {"{{"}variable_insert{"}}"} and {"{%"} for {"%}"} template syntax
+              </p>
+              <p v-if="selectedNode.toolType === 'llm' && ['user_prompt', 'system_prompt'].includes(key)" class="fec-template-hint">
+                <span class="msi" style="font-size:11px">info</span>
+                Usa {"{{"}payload.campo{"}}"} y {"{{"}variables.nombre{"}}"}. Soporta filtros Jinja2 como | tojson
               </p>
             </div>
           </template>
@@ -1198,6 +1233,139 @@ const nodes       = ref([])
 const connections = ref([])
 const notes       = ref([])
 const metadata    = ref({})
+
+// ─── API invocation examples state & logic ──────────────────────────────────
+const selectedExampleLang = ref('javascript')
+const copiedCode = ref(false)
+
+const executionExampleCode = computed(() => {
+  const flowId = props.flowId || 'flow-id'
+  const rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/bff/api'
+  let apiUrl = rawUrl.replace(/\/$/, '')
+  
+  // Consumir el API REST expuesto por el backend directamente, no el BFF
+  if (apiUrl.includes('/bff/api')) {
+    apiUrl = apiUrl.replace('/bff/api', '/api/v1')
+  }
+  if (apiUrl.includes('localhost:3000')) {
+    apiUrl = apiUrl.replace('localhost:3000', 'localhost:8000')
+  }
+  const execUrl = `${apiUrl}/integration-flows/${flowId}/run`
+  
+  const varsObj = {}
+  if (metadata.value.variables) {
+    metadata.value.variables.forEach(v => {
+      if (v.name && v.name.trim() !== '') {
+        let val = v.value
+        if (v.type === 'number') {
+          val = Number(v.value) || 0
+        } else if (v.type === 'boolean') {
+          val = v.value === 'true' || v.value === true
+        } else if (v.type === 'json') {
+          try {
+            val = JSON.parse(v.value)
+          } catch {
+            val = {}
+          }
+        }
+        varsObj[v.name] = val
+      }
+    })
+  }
+
+  if (selectedExampleLang.value === 'javascript') {
+    return `fetch('${execUrl}', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer <TU_TOKEN_JWT>'
+  },
+  body: JSON.stringify(${JSON.stringify(varsObj, null, 2)})
+})
+.then(res => res.json())
+.then(data => console.log(data))
+.catch(err => console.error(err));`
+  } else if (selectedExampleLang.value === 'python') {
+    return `import requests
+
+url = "${execUrl}"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <TU_TOKEN_JWT>"
+}
+payload = ${JSON.stringify(varsObj, null, 4)}
+
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())`
+  } else if (selectedExampleLang.value === 'curl') {
+    return `curl -X POST "${execUrl}" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer <TU_TOKEN_JWT>" \\
+  -d '${JSON.stringify(varsObj, null, 2).replace(/'/g, "'\\''")}'`
+  } else if (selectedExampleLang.value === 'powershell') {
+    let psHash = ''
+    const keys = Object.keys(varsObj)
+    if (keys.length === 0) {
+      psHash = '@{}'
+    } else {
+      const hashLines = keys.map(k => {
+        const val = varsObj[k]
+        let valStr = ''
+        if (typeof val === 'string') {
+          valStr = `"${val.replace(/"/g, '`"')}"`
+        } else if (typeof val === 'boolean') {
+          valStr = val ? '$true' : '$false'
+        } else if (typeof val === 'object') {
+          valStr = `@(${JSON.stringify(val)})`
+        } else {
+          valStr = val
+        }
+        return `    "${k}" = ${valStr}`
+      })
+      psHash = `@{\n${hashLines.join('\n')}\n  }`
+    }
+
+    return `$headers = @{
+  "Content-Type" = "application/json"
+  "Authorization" = "Bearer <TU_TOKEN_JWT>"
+}
+$body = ${psHash} | ConvertTo-Json
+
+$response = Invoke-RestMethod -Uri "${execUrl}" -Method Post -Headers $headers -Body $body
+$response`
+  }
+  return ''
+})
+
+function copyExampleCode() {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(executionExampleCode.value).then(() => {
+      copiedCode.value = true
+      setTimeout(() => {
+        copiedCode.value = false
+      }, 2000)
+    }).catch(err => {
+      console.error('Error al copiar al portapapeles:', err)
+    })
+  } else {
+    const textArea = document.createElement('textarea')
+    textArea.value = executionExampleCode.value
+    textArea.style.position = 'fixed'
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      copiedCode.value = true
+      setTimeout(() => {
+        copiedCode.value = false
+      }, 2000)
+    } catch (err) {
+      console.error('Fallback: Error al copiar', err)
+    }
+    document.body.removeChild(textArea)
+  }
+}
 
 // ─── Dirty tracking ───────────────────────────────────────────────────────────
 let savedSnapshot      = ''
@@ -2790,5 +2958,115 @@ onMounted(() => {
   max-height: 150px;
   overflow-y: auto;
   margin: 0;
+}
+
+/* ── API Execution Examples Styles ──────────────────────────────── */
+.fec-var-examples-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fec-var-examples-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fec-var-examples-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.fec-var-examples-desc {
+  font-size: 11px;
+  color: var(--on-surface-variant);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.fec-lang-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.fec-lang-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.fec-lang-badge:hover {
+  background: var(--surface-container-high);
+  color: var(--primary);
+  border-color: var(--primary-container);
+}
+
+.fec-lang-badge.active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border-color: var(--primary);
+}
+
+.fec-example-code-container {
+  position: relative;
+  border-radius: 8px;
+  background: var(--surface-container-highest);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  max-height: 250px;
+}
+
+.fec-example-code {
+  margin: 0;
+  padding: 12px 36px 12px 12px;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--on-surface);
+}
+
+.fec-example-code code {
+  white-space: pre;
+}
+
+.fec-copy-code-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.fec-copy-code-btn:hover {
+  background: var(--surface-container-low);
+  color: var(--primary);
+  transform: scale(1.05);
+}
+
+.fec-copy-code-btn .msi {
+  font-size: 16px;
 }
 </style>
