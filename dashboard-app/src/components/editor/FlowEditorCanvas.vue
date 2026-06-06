@@ -341,7 +341,7 @@
     </main>
 
     <!-- ── Right Panel: Properties ─────────────────────────────────────────── -->
-    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--resizing': isResizingRight }" :style="{ width: rightCollapsed ? '24px' : (hasWideMode ? Math.max(500, rightWidth) : rightWidth) + 'px' }">
+    <aside v-if="!readOnly || inspectedNodeId" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--resizing': isResizingRight }" :style="{ width: rightCollapsed ? '24px' : (hasWideMode ? Math.max(500, rightWidth) : rightWidth) + 'px' }">
       <div v-if="!rightCollapsed" class="fec-resizer" @mousedown.stop="onResizeMousedown"></div>
       <button class="fec-toggle fec-toggle--right" @click="rightCollapsed = !rightCollapsed" :title="rightCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ rightCollapsed ? 'chevron_left' : 'chevron_right' }}</span>
@@ -359,6 +359,9 @@
           </button>
           <button class="fec-tab" :class="{ active: rightTab === 'history' }" @click="loadHistory">
             <span class="msi" style="font-size:16px">history</span>Historial
+          </button>
+          <button v-if="inspectedNodeId" class="fec-tab" :class="{ active: rightTab === 'inspector' }" @click="rightTab = 'inspector'">
+            <span class="msi" style="font-size:16px">analytics</span>Inspector
           </button>
         </div>
 
@@ -415,13 +418,22 @@
         <!-- ── History ── -->
         <template v-if="!selectedNode && rightTab === 'history'">
           <div class="fec-history" style="height: 100%; overflow: hidden; padding: 16px;">
-            <ExecutionHistoryPanel 
-              :flow-id="flowId" 
+            <ExecutionHistoryPanel
+              :flow-id="flowId"
               :flow-name="metadata.name"
               :hide-graph-button="true"
-              @view-graph="$emit('view-graph', $event)" 
+              @view-graph="$emit('view-graph', $event)"
             />
           </div>
+        </template>
+
+        <!-- Node Inspector -->
+        <template v-if="rightTab === 'inspector' && activeInspectorData">
+          <NodeInspectorPanel
+            :nodeId="inspectedNodeId"
+            :nodeName="inspectedNodeName"
+            :nodeData="activeInspectorData"
+          />
         </template>
 
         <!-- ── Variables ── -->
@@ -2019,12 +2031,25 @@ function onNoteMousedown(e, note) {
   nodeDragStart = { sx: pos.x, sy: pos.y, nx: note.x, ny: note.y }
 }
 function selectNode(node) {
-  if (props.readOnly) return
-  if (!hasDragged) { 
-    selectedNode.value = node
-    selectedNote.value = null
-    selectedConn.value = null
-    rightCollapsed.value = false 
+  if (!hasDragged) {
+    const isReadOnly = props.readOnly
+    const hasExecData = isReadOnly
+      ? !!nodeLogsMap.value[node.id]
+      : !!nodeInspectorData.value[node.id]
+
+    if (hasExecData) {
+      inspectedNodeId.value = node.id
+      selectedNode.value = null
+      selectedNote.value = null
+      selectedConn.value = null
+      rightTab.value = 'inspector'
+      rightCollapsed.value = false
+    } else if (!isReadOnly) {
+      selectedNode.value = node
+      selectedNote.value = null
+      selectedConn.value = null
+      rightCollapsed.value = false
+    }
   }
   hasDragged = false
 }
