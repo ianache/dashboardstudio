@@ -115,12 +115,6 @@
           </template>
         </div>
 
-        <button
-          v-if="activeDiagram && !activeDiagram.isMain"
-          class="btn btn-secondary btn-sm"
-          @click="showAddNodeModal = true"
-        >+ Añadir tabla</button>
-
         <div class="toolbar-sep"></div>
 
         <!-- Group 3: IA Assist -->
