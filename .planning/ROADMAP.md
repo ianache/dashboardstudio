@@ -272,7 +272,18 @@ Plans:
 Plans:
 - [ ] 52-01-PLAN.md — llm_executor.py system_prompt Jinja2 rendering + FlowEditorCanvas.vue LLM field hints
 
+### Phase 53: panel de ejecucion por nodo en integration flows con ctx entrada salida y logs
+
+**Goal:** Agregar un panel de inspeccion por nodo en el Flow Editor que muestre el ctx (entrada, salida) y logs de ejecucion de cada nodo. El panel se activa al hacer clic en un nodo ejecutado, usando datos ya capturados por el backend via WebSocket y BD sin cambios en backend.
+**Requirements**: EXEC-INSPECTOR-01
+**Depends on:** Phase 52
+**Plans:** 2 plans
+
+Plans:
+- [ ] 53-01-PLAN.md — Create NodeInspectorPanel.vue dumb component (3 tabs, JSON display, variables table, export)
+- [ ] 53-02-PLAN.md — Wire inspector into FlowEditorCanvas.vue (node_log capture, selectNode(), fec-right guard, human verify)
+
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-06-05 after Phase 52 plans created*
+*Last updated: 2026-06-06 after Phase 53 plans created*
