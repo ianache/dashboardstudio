@@ -463,6 +463,8 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
                 elif is_ml:
                     warn_suffix = f" (Aviso: {result['warning']})" if result.get('warning') else ""
                     await websocket.send_json({"type": "info", "message": f"[ML] Inferencia completada para '{label}' ({duration_ms}ms){warn_suffix}"})
+                elif is_ods:
+                    await websocket.send_json({"type": "info", "message": f"[ODS] {result.get('rows_written', 0)} registros escritos en '{label}' ({duration_ms}ms)"})
                 else:
                     await websocket.send_json({"type": "info", "message": f"[Fuente] {result['count']} registros cargados desde '{label}' ({duration_ms}ms)"})
         else:
@@ -470,7 +472,7 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
             if websocket:
                 await websocket.send_json({"type": "node_status", "node_id": node["id"], "status": "error"})
                 err_msg = result.get('error', 'Error desconocido')
-                prefix = 'IA' if is_llm else ('ML' if is_ml else 'Fuente')
+                prefix = 'IA' if is_llm else ('ML' if is_ml else ('ODS' if is_ods else 'Fuente'))
                 await websocket.send_json({"type": "error", "message": f"[{prefix} Error] {err_msg}"})
             pre_exec_ok = False
             break
