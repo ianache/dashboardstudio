@@ -19,13 +19,23 @@ async def execute_llm_node(props: Dict[str, Any], ctx: Any) -> Dict[str, Any]:
     if not model or str(model).strip() == "":
         model = "gpt-4o"
     
-    system_prompt = props.get("system_prompt") or "You are a helpful assistant."
+    system_prompt_template = props.get("system_prompt") or "You are a helpful assistant."
     user_prompt_template = props.get("user_prompt") or "{{payload}}"
     temperature = float(props.get("temperature", 0.7))
     max_tokens = int(props.get("max_tokens", 1024))
 
     if not url:
         return {"success": False, "error": "LLM Connection has no URL configured"}
+
+    # 1a. Render System Prompt using Jinja2
+    try:
+        if isinstance(ctx, dict) and "payload" in ctx:
+            context = ctx
+        else:
+            context = {"payload": ctx, "data": ctx, "variables": {}}
+        rendered_system_prompt = jinja2.Template(system_prompt_template).render(context)
+    except Exception as e:
+        return {"success": False, "error": f"Failed to render system prompt: {str(e)}"}
 
     # 1. Render User Prompt using Jinja2
     try:
@@ -51,7 +61,7 @@ async def execute_llm_node(props: Dict[str, Any], ctx: Any) -> Dict[str, Any]:
     llm_payload = {
         "model": model,
         "messages": [
-            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": rendered_system_prompt},
             {"role": "user", "content": rendered_user_prompt}
         ],
         "temperature": temperature,
