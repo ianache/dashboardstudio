@@ -277,7 +277,7 @@ Plans:
 **Goal:** Agregar un panel de inspeccion por nodo en el Flow Editor que muestre el ctx (entrada, salida) y logs de ejecucion de cada nodo. El panel se activa al hacer clic en un nodo ejecutado, usando datos ya capturados por el backend via WebSocket y BD sin cambios en backend.
 **Requirements**: EXEC-INSPECTOR-01
 **Depends on:** Phase 52
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 53-01-PLAN.md — Create NodeInspectorPanel.vue dumb component (3 tabs, JSON display, variables table, export)

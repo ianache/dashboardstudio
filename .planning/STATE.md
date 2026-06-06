@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
+last_updated: "2026-06-06T15:05:13.632Z"
+progress:
+  total_phases: 50
+  completed_phases: 32
+  total_plans: 91
+  completed_plans: 67
+---
+
+---
+gsd_state_version: 1.0
+milestone: v2.0
+milestone_name: BI Analyst
+status: unknown
 last_updated: "2026-06-06T03:25:35.957Z"
 progress:
   total_phases: 49
@@ -60,6 +73,7 @@ progress:
 - Phase 49 added: Diseño Minimalista Profesional @features/FEAT5.md
 - Phase 50 added: Add a new model based on DeepSeek to BI/AI Analyst in dashboard designer / viewer
 - Phase 52 added: Mejorar nodo LLM Completion en Integration Flows — interpolación de variables ctx en User Prompt y System Prompt
+- Phase 53 added: Panel de ejecución por nodo en Integration Flows con ctx entrada/salida y logs
 
 ## Project Reference
 
@@ -102,6 +116,7 @@ Progress: [##########] 100% (Phase 49)
 | Phase 51 P04 | 5 | 1 tasks | 1 files |
 | Phase 51 P05 | 8 | 2 tasks | 2 files |
 | Phase 52-mejorar-nodo-llm-completion P01 | 8 | 2 tasks | 2 files |
+| Phase 53 P01 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -163,6 +178,9 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 51]: _probe_ollama() uses 0.5s timeout and returns (False, False) on any exception — three-state logic: (True,True)=enabled, (True,False)=disabled+pull hint, (False,False)=disabled+start hint
 - [Phase 52-mejorar-nodo-llm-completion]: Two rendering blocks (system_prompt and user_prompt) kept intentionally self-contained — no shared helper extracted per plan spec
 - [Phase 52-mejorar-nodo-llm-completion]: LLM template hint scoped to selectedNode.toolType === 'llm' — does not affect Email or other node types
+- [Phase 53]: NodeInspectorPanel is a pure dumb component — receives nodeId, nodeName, nodeData props, emits nothing, no store access
+- [Phase 53]: Default tab is 'output' (Salida) per CONTEXT.md spec — user sees execution result first
+- [Phase 53]: isTruncated fires at >2000 chars but shows warning banner only — does not clip JSON
 
 ### Blockers/Concerns
 
@@ -170,7 +188,7 @@ Progress: [##########] 100% (Phase 49)
 
 ## Session Continuity
 
-Last session: 2026-06-02
-Stopped at: Completed 51-05-PLAN.md — Ollama local model provider for AI Analyst (llama3.2:3b). Phase 51 COMPLETE (5/5).
+Last session: 2026-06-06
+Stopped at: Completed 53-01-PLAN.md — NodeInspectorPanel.vue dumb component for per-node execution inspector. Phase 53 Plan 01 COMPLETE (1/2).
 Resume file: .planning/STATE.md
 
