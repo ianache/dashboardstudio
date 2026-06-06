@@ -819,6 +819,7 @@ import { useIntegrationsStore } from '@/stores/integrations'
 import { mlModelsApi } from '@/services/api'
 import CodeEditor from './CodeEditor.vue'
 import ExecutionConsole from './ExecutionConsole.vue'
+import NodeInspectorPanel from './NodeInspectorPanel.vue'
 import ExecutionHistoryPanel from '@/components/executions/ExecutionHistoryPanel.vue'
 import { dataSourcesApi, apiRequest } from '@/services/api'
 import { CONN_TYPES, connTypeLabel as _connTypeLabel } from '@/constants/connectionTypes'
@@ -1650,11 +1651,26 @@ const showConsole    = ref(false)
 const execLogs       = ref([])
 const execStatus     = ref('idle')
 const nodeExecStatus = ref({}) // mapping of node_id -> status
+const nodeInspectorData = ref({}) // { [node_id]: { input, output, status, duration, start_time, end_time, logs } }
+const inspectedNodeId   = ref(null)
 let ws               = null
 
 const nodeLogsMap = computed(() => {
   if (!props.executionData?.logs) return {}
   return Object.fromEntries(props.executionData.logs.map(log => [log.node_id, log]))
+})
+
+const activeInspectorData = computed(() => {
+  if (!inspectedNodeId.value) return null
+  const id = inspectedNodeId.value
+  if (nodeInspectorData.value[id]) return nodeInspectorData.value[id]
+  if (nodeLogsMap.value[id]) return nodeLogsMap.value[id]
+  return null
+})
+
+const inspectedNodeName = computed(() => {
+  if (!inspectedNodeId.value) return ''
+  return nodes.value.find(n => n.id === inspectedNodeId.value)?.label || ''
 })
 
 function formatDuration(ms) {
@@ -1706,6 +1722,8 @@ function runFlow() {
   showConsole.value    = true
   execStatus.value     = 'running'
   nodeExecStatus.value = {}
+  nodeInspectorData.value = {}
+  inspectedNodeId.value   = null
   execLogs.value       = [{ type: 'info', message: 'Iniciando conexión...', timestamp: new Date() }]
   
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -1744,6 +1762,21 @@ function runFlow() {
     
     if (data.type === 'node_status') {
       nodeExecStatus.value[data.node_id] = data.status
+    } else if (data.type === 'node_log') {
+      nodeInspectorData.value[data.node_id] = {
+        input:      data.input,
+        output:     data.output,
+        status:     data.status,
+        duration:   data.duration,
+        start_time: data.start_time,
+        end_time:   data.end_time,
+        logs:       []
+      }
+      execLogs.value.push({
+        type: data.status === 'error' ? 'error' : 'info',
+        message: `[${data.node_id}] completado en ${data.duration}ms`,
+        timestamp: new Date()
+      })
     } else if (data.type === 'status') {
       execStatus.value = data.success ? 'success' : 'error'
       execLogs.value.push({ 
