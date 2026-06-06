@@ -1,5 +1,6 @@
 'use strict';
 
+// Force reload to pick up BFF_CUBEJS_URL environment updates
 // Prevent unhandled errors from killing the process.
 // Log them so they remain visible without crashing the BFF.
 process.on('uncaughtException', (err) => {
@@ -46,7 +47,7 @@ app.use(cors({
   origin: config.spaOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-Deepseek-Api-Key', 'X-Groq-Api-Key'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-Deepseek-Api-Key', 'X-Groq-Api-Key', 'X-Gemini-Api-Key', 'X-Ollama-Api-Base'],
 }));
 
 // Trust proxy MUST come before session middleware

@@ -270,9 +270,52 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
     prefetched_outputs = {}
     pre_exec_ok = True
 
+    # Build adjacency list of incoming connections (to -> froms)
+    incoming_map = {}
+    for c in connections:
+        t = c.get("to")
+        s = c.get("from")
+        if t and s:
+            if t not in incoming_map:
+                incoming_map[t] = []
+            incoming_map[t].append(s)
+
+    # Cache to store pre-execution checks and visited set to prevent loops
+    pre_exec_cache = {}
+    visited = set()
+
     # Identify nodes that MUST be pre-executed
     def is_pre_executable(n):
-        return n.get("toolType") in ["llm", "pickle_model", "sql_source", "sql_destination", "ods_pg"] or n.get("category") == "source"
+        node_id = n.get("id")
+        if not node_id:
+            return False
+            
+        if node_id in pre_exec_cache:
+            return pre_exec_cache[node_id]
+            
+        if node_id in visited:
+            pre_exec_cache[node_id] = False
+            return False
+
+        # Base check for tool type or source category
+        is_base = n.get("toolType") in ["llm", "pickle_model", "sql_source", "sql_destination", "ods_pg"] or n.get("category") == "source"
+        if not is_base:
+            pre_exec_cache[node_id] = False
+            return False
+
+        visited.add(node_id)
+        # Check all parent nodes recursively
+        parents = incoming_map.get(node_id, [])
+        for parent_id in parents:
+            parent_node = next((node for node in nodes_copy if node["id"] == parent_id), None)
+            if not parent_node or not is_pre_executable(parent_node):
+                visited.remove(node_id)
+                pre_exec_cache[node_id] = False
+                return False
+                
+        visited.remove(node_id)
+        pre_exec_cache[node_id] = True
+        return True
 
     # Sort nodes topologically (Kahn's algorithm) so that source/LLM nodes
     # that feed into other pre-executable nodes are processed first.
