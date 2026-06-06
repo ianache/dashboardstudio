@@ -82,7 +82,7 @@
           <div class="vh-controls-row">
             <!-- Settings button -->
             <button class="btn btn-secondary btn-icon btn-sm" @click="openPropsDrawer" title="Configuración del dashboard">
-              <MIcon icon="settings" :size="20" />
+              <MIcon icon="settings" :size="20" color="currentColor" />
             </button>
 
             <div class="divider-v"></div>
@@ -95,7 +95,7 @@
                 @click="isDesignMode = true"
                 title="Modo diseño"
               >
-                <MIcon icon="brush" :size="18" />
+                <MIcon icon="brush" :size="18" color="currentColor" />
               </button>
               <button
                 class="mode-btn"
@@ -103,23 +103,21 @@
                 @click="isDesignMode = false"
                 title="Vista previa"
               >
-                <MIcon icon="visibility" :size="18" />
+                <MIcon icon="visibility" :size="18" color="currentColor" />
               </button>
             </div>
 
-            <template v-if="isDesignMode">
-              <button class="btn btn-primary btn-icon btn-sm" @click="addWidget" title="Añadir Widget">
-                <MIcon icon="add" :size="20" />
-              </button>
-              <button
-                class="btn-ai-assist btn-icon btn-sm"
-                :class="{ 'btn-ai-assist--active': aiAnalystStore.isPanelOpen }"
-                @click="aiAnalystStore.togglePanel()"
-                title="AI Analyst"
-              >
-                <MIcon icon="auto_awesome" :size="20" />
-              </button>
-            </template>
+            <button v-if="isDesignMode" class="btn btn-primary btn-icon btn-sm" @click="addWidget" title="Añadir Widget">
+              <MIcon icon="add" :size="20" color="currentColor" />
+            </button>
+            <button
+              class="btn-ai-assist btn-icon btn-sm"
+              :class="{ 'btn-ai-assist--active': aiAnalystStore.isPanelOpen }"
+              @click="aiAnalystStore.togglePanel()"
+              title="AI Analyst"
+            >
+              <MIcon icon="auto_awesome" :size="20" color="currentColor" />
+            </button>
           </div>
         </template>
       </PageHeader>
@@ -1194,40 +1192,103 @@ async function confirmImport() {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 32px; /* Aligns with vh-title height approximate */
+  height: 34px; /* Matches the consistent button height */
 }
 
+/* Force all icon buttons in the toolbar to be square and 34px */
+.vh-controls-row button.btn-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md); /* 8px */
+  transition: var(--transition);
+}
+
+/* Settings button (secondary outline styling) */
+.vh-controls-row button.btn-secondary.btn-icon {
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--on-surface-variant);
+}
+
+.vh-controls-row button.btn-secondary.btn-icon:hover {
+  background: color-mix(in srgb, var(--on-surface-variant) 8%, transparent);
+  border-color: var(--outline-variant);
+  color: var(--on-surface);
+}
+
+/* Add widget button (primary outline styling) */
+.vh-controls-row button.btn-primary.btn-icon {
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+}
+
+.vh-controls-row button.btn-primary.btn-icon:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--primary);
+}
+
+/* AI Assist button styling */
+.vh-controls-row button.btn-ai-assist {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md); /* 8px */
+  background: linear-gradient(135deg, var(--primary), var(--tertiary));
+  color: var(--on-primary);
+  border: none;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 20%, transparent);
+  transition: var(--transition);
+}
+
+.vh-controls-row button.btn-ai-assist:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.vh-controls-row button.btn-ai-assist:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Mode toggle container */
 .mode-toggle {
   display: flex;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md); /* 8px */
   overflow: hidden;
   background: var(--card-bg);
+  height: 34px;
 }
 
+/* Mode toggle buttons */
 .mode-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
-  height: 32px;
+  height: 32px; /* 32px + 2px borders from container = 34px */
   border: none;
   background: transparent;
   cursor: pointer;
   color: var(--on-surface-variant);
-  transition: all 0.2s;
+  transition: var(--transition);
 }
 
-.mode-btn:hover { background: var(--bg); }
-.mode-btn.active { background: var(--primary); color: var(--on-primary); }
+.mode-btn:hover {
+  background: color-mix(in srgb, var(--on-surface-variant) 8%, transparent);
+  color: var(--on-surface);
+}
 
-/* Custom AI Assist Icon Button */
-.btn-ai-assist.btn-icon {
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  justify-content: center;
-  border-radius: 8px;
+.mode-btn.active {
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 

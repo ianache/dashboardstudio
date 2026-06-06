@@ -33,6 +33,26 @@
 
     <!-- Right actions -->
     <div class="top-bar-actions">
+      <!-- Theme toggle -->
+      <div class="theme-toggle">
+        <button
+          class="theme-btn"
+          :class="{ active: uiStore.theme === 'dark' }"
+          @click="uiStore.setTheme('dark')"
+          data-tooltip="Modo oscuro"
+        >
+          <MIcon icon="dark_mode" :size="18" color="currentColor" />
+        </button>
+        <button
+          class="theme-btn"
+          :class="{ active: uiStore.theme === 'light' }"
+          @click="uiStore.setTheme('light')"
+          data-tooltip="Modo claro"
+        >
+          <MIcon icon="light_mode" :size="18" color="currentColor" />
+        </button>
+      </div>
+
       <!-- Alerts -->
       <div class="dropdown-wrapper" @click.stop>
         <button
@@ -218,8 +238,44 @@ function formatTime(iso) {
 .top-bar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex-shrink: 0;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface-container-low);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  height: 36px;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.theme-btn:hover {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+
+.theme-btn.active {
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .action-btn {

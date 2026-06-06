@@ -446,6 +446,13 @@ html, body, #app {
 }
 [data-tooltip]:hover::after { opacity: 1; }
 
+/* Tooltips pointing downwards (for Top Bar elements or elements with explicit class) */
+.top-bar [data-tooltip]::after,
+.tooltip-bottom::after {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
 /* Icon helper */
 .icon { width: 18px; height: 18px; display: inline-block; flex-shrink: 0; }
 

@@ -49,7 +49,10 @@ import {
   AlignLeft,
   AlignRight,
   Search,
-  HelpCircle
+  HelpCircle,
+  CheckCircle,
+  AlertCircle,
+  XCircle
 } from 'lucide-vue-next'
 
 export const iconMap = {
@@ -104,5 +107,8 @@ export const iconMap = {
   'format_align_left': AlignLeft,
   'format_align_right': AlignRight,
   'search': Search,
-  'help': HelpCircle
+  'help': HelpCircle,
+  'check_circle': CheckCircle,
+  'alert_circle': AlertCircle,
+  'x_circle': XCircle
 }

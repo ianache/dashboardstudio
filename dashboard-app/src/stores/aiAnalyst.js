@@ -86,6 +86,8 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
       const llmStore = useLlmStore()
       const deepseekKey = llmStore.keys?.deepseek || ''
       const groqKey = llmStore.keys?.groq || ''
+      const geminiKey = llmStore.keys?.gemini || ''
+      const ollamaBase = llmStore.keys?.ollama || ''
 
       const headers = { 'Content-Type': 'application/json' }
       if (deepseekKey) {
@@ -93,6 +95,12 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
       }
       if (groqKey) {
         headers['X-Groq-Api-Key'] = groqKey
+      }
+      if (geminiKey) {
+        headers['X-Gemini-Api-Key'] = geminiKey
+      }
+      if (ollamaBase) {
+        headers['X-Ollama-Api-Base'] = ollamaBase
       }
       const res = await fetch('/bff/ai/models', { credentials: 'include', headers })
       if (res.ok) {
@@ -158,6 +166,8 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
       const llmStore = useLlmStore()
       const deepseekKey = selectedModel.value.startsWith('deepseek/') ? (llmStore.keys?.deepseek || '') : undefined
       const groqKey = selectedModel.value.startsWith('groq/') ? (llmStore.keys?.groq || '') : undefined
+      const geminiKey = selectedModel.value.startsWith('gemini') ? (llmStore.keys?.gemini || '') : undefined
+      const ollamaBase = selectedModel.value.startsWith('ollama/') ? (llmStore.keys?.ollama || '') : undefined
 
       const response = await fetch('/bff/ai/chat', {
         method: 'POST',
@@ -170,11 +180,17 @@ export const useAiAnalystStore = defineStore('aiAnalyst', () => {
           model: selectedModel.value,
           ...(resolvedFilters.length > 0 ? { filters: resolvedFilters } : {}),
           ...(deepseekKey !== undefined ? { deepseek_api_key: deepseekKey } : {}),
-          ...(groqKey !== undefined ? { groq_api_key: groqKey } : {})
+          ...(groqKey !== undefined ? { groq_api_key: groqKey } : {}),
+          ...(geminiKey !== undefined ? { gemini_api_key: geminiKey } : {}),
+          ...(ollamaBase !== undefined ? { ollama_api_base: ollamaBase } : {})
         })
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          authStore.login()
+          return
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 

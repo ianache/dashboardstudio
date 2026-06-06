@@ -119,38 +119,44 @@
 
     <!-- Bottom section -->
     <div class="side-bottom">
-      <!-- Theme toggle -->
-      <div class="theme-toggle">
-        <button
-          class="theme-btn"
-          :class="{ active: uiStore.theme === 'dark' }"
-          @click="uiStore.setTheme('dark')"
-          title="Modo oscuro"
-        >
-          <MIcon icon="dark_mode" :size="18" />
-        </button>
-        <button
-          class="theme-btn"
-          :class="{ active: uiStore.theme === 'light' }"
-          @click="uiStore.setTheme('light')"
-          title="Modo claro"
-        >
-          <MIcon icon="light_mode" :size="18" />
-        </button>
-      </div>
-
-      <router-link to="/settings" class="nav-item" :class="{ active: $route.name === 'Settings' }">
-        <MIcon icon="settings" :size="20" class="nav-icon" />
-        <span class="nav-label">Configuración</span>
-      </router-link>
-
-      <div class="workspace-info">
-        <div class="workspace-avatar">
-          <MIcon icon="person" :size="18" class="icon-muted" />
+      <div class="platform-status-container">
+        <div class="platform-version-info">
+          <span class="platform-version-label">Versión de la Plataforma</span>
+          <span class="platform-version-val">v1.0.0</span>
         </div>
-        <div class="workspace-text">
-          <p class="workspace-name">{{ authStore.user?.name || 'Usuario' }}</p>
-          <p class="workspace-role">{{ authStore.isDesigner ? 'Diseñador' : 'Visualizador' }}</p>
+        
+        <div class="status-indicator-wrapper">
+          <button 
+            class="status-indicator-btn" 
+            :class="overallStatus" 
+            @click.stop="toggleStatusPopup"
+            data-tooltip="Estado de los servicios"
+          >
+            <MIcon :icon="statusIcon" :size="18" color="currentColor" />
+          </button>
+
+          <!-- Status Popup -->
+          <transition name="fade">
+            <div v-if="showStatusPopup" class="status-popup" @click.stop>
+              <div class="status-popup-header">
+                <span class="status-popup-title">Servicios</span>
+                <button class="status-popup-refresh-btn" @click="checkAllHealth" title="Recargar">
+                  <MIcon icon="sync_alt" :size="12" color="currentColor" />
+                </button>
+              </div>
+              <div class="status-popup-body">
+                <div v-for="(status, service) in services" :key="service" class="service-status-row">
+                  <div class="service-name-group">
+                    <span class="service-dot" :class="status" />
+                    <span class="service-name">{{ service.toUpperCase() }}</span>
+                  </div>
+                  <span class="service-status-label" :class="status">
+                    {{ status === 'green' ? 'OK' : (status === 'amber' ? 'WARN' : 'DOWN') }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </transition>
         </div>
       </div>
     </div>
@@ -158,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
@@ -191,6 +197,70 @@ const availableDashboards = computed(() => {
 
 function toggleSection(name) { openSections.value[name] = !openSections.value[name] }
 function createNewDashboard() { router.push('/designer?new=1') }
+
+// Service Health Monitoring via BFF health report
+const showStatusPopup = ref(false)
+const services = ref({
+  bff: 'green',
+  backend: 'green',
+  ai: 'green',
+  cubejs: 'green'
+})
+
+function toggleStatusPopup() {
+  showStatusPopup.value = !showStatusPopup.value
+}
+
+async function checkAllHealth() {
+  try {
+    const res = await fetch('/bff/health', { credentials: 'include' })
+    if (res.ok) {
+      const data = await res.json()
+      if (data.services) {
+        services.value = data.services
+      }
+    } else {
+      services.value = { bff: 'red', backend: 'red', ai: 'red', cubejs: 'red' }
+    }
+  } catch (err) {
+    services.value = { bff: 'red', backend: 'red', ai: 'red', cubejs: 'red' }
+  }
+}
+
+const overallStatus = computed(() => {
+  const failedCount = Object.values(services.value).filter(status => status === 'red').length
+  const ratio = failedCount / 4
+  if (ratio > 0.8) {
+    return 'red' // More than 80% (4 out of 4) is critical non-operational
+  } else if (failedCount > 0) {
+    return 'amber' // 1, 2, or 3 failed is amber warning
+  } else {
+    return 'green' // All 4 running is green OK
+  }
+})
+
+const statusIcon = computed(() => {
+  const status = overallStatus.value
+  if (status === 'green') return 'check_circle'
+  if (status === 'amber') return 'alert_circle'
+  return 'x_circle'
+})
+
+let healthInterval = null
+onMounted(() => {
+  checkAllHealth()
+  healthInterval = setInterval(checkAllHealth, 30000)
+  window.addEventListener('click', closePopup)
+})
+
+onUnmounted(() => {
+  if (healthInterval) clearInterval(healthInterval)
+  window.removeEventListener('click', closePopup)
+})
+
+function closePopup() {
+  showStatusPopup.value = false
+}
 </script>
 
 <style scoped>
@@ -202,9 +272,9 @@ function createNewDashboard() { router.push('/designer?new=1') }
   border-right: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 1100;
   transition: width 0.25s ease;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--shadow-md);
   font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
 }
@@ -393,74 +463,206 @@ function createNewDashboard() { router.push('/designer?new=1') }
   flex-shrink: 0;
 }
 
-.workspace-info {
+.platform-status-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 16px 16px;
-  overflow: hidden;
-  transition: opacity 0.2s;
+  position: relative;
+  transition: all 0.25s ease;
 }
-.side-menu.collapsed .workspace-info { opacity: 0; }
 
-.workspace-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: var(--surface-container-low);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
+.side-menu.collapsed .platform-status-container {
+  padding: 12px 0;
   justify-content: center;
+}
+
+.platform-version-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  overflow: hidden;
+  transition: opacity 0.2s ease, width 0.2s ease;
+  width: 100%;
+}
+
+.side-menu.collapsed .platform-version-info {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+}
+
+.platform-version-label {
+  font-size: 11px;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.platform-version-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--on-surface);
+  white-space: nowrap;
+}
+
+.status-indicator-wrapper {
+  position: relative;
   flex-shrink: 0;
 }
-.workspace-text { overflow: hidden; }
-.workspace-name {
-  color: var(--on-surface);
-  font-size: 12px; font-weight: 700;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.workspace-role { color: var(--on-surface-variant); font-size: 10px; white-space: nowrap; }
 
-/* Theme toggle */
-.theme-toggle {
-  display: flex;
-  gap: 4px;
-  padding: 8px 12px;
-  justify-content: center;
-}
-
-.collapsed .theme-toggle {
-  flex-direction: column;
-  align-items: center;
-  padding: 4px 0;
-}
-
-.theme-btn {
+.status-indicator-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: 50%;
+  border: 1px solid var(--border);
   background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.status-indicator-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.status-indicator-btn.green {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+}
+.status-indicator-btn.amber {
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 30%, var(--border));
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+}
+.status-indicator-btn.red {
+  color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 30%, var(--border));
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+}
+
+.status-popup {
+  position: absolute;
+  bottom: 0;
+  left: 100%;
+  margin-left: 12px;
+  width: 180px;
+  background: var(--surface-container);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 10px 12px;
+  z-index: 1000;
+  animation: slide-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-in {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.status-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.status-popup-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-popup-refresh-btn {
+  background: transparent;
+  border: none;
   color: var(--on-surface-variant);
   cursor: pointer;
-  transition: all 0.2s;
-  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
 }
 
-.theme-btn:hover {
+.status-popup-refresh-btn:hover {
+  color: var(--on-surface);
   background: var(--surface-container-high);
-  opacity: 1;
 }
 
-.theme-btn.active {
-  background: var(--primary-container);
-  color: var(--on-primary-container);
-  border-color: var(--primary-container);
-  opacity: 1;
+.status-popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
+
+.service-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.service-name-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.service-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.service-dot.green { background-color: var(--success); box-shadow: 0 0 6px var(--success); }
+.service-dot.amber { background-color: var(--warning); box-shadow: 0 0 6px var(--warning); }
+.service-dot.red { background-color: var(--error); box-shadow: 0 0 6px var(--error); }
+
+.service-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.service-status-label {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.service-status-label.green {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+}
+.service-status-label.amber {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+}
+.service-status-label.red {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+
 
 /* Expand animation */
 .expand-enter-active, .expand-leave-active {

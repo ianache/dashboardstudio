@@ -76,6 +76,18 @@ export const PROVIDERS = [
         tier: 'premium'
       }
     ]
+  },
+  {
+    id: 'ollama',
+    label: 'Ollama (Local/Custom)',
+    icon: '🦙',
+    apiKeyLabel: 'Ollama Base URL',
+    apiKeyPlaceholder: 'http://localhost:11434',
+    docsUrl: 'https://ollama.com/',
+    models: [
+      { id: 'llama3.2:3b',   label: 'Llama 3.2 3B',   description: 'Modelo local rápido.',              tier: 'fast' },
+      { id: 'granite4.1:3b', label: 'Granite 4.1 3B', description: 'Modelo IBM compacto y eficiente.', tier: 'fast' }
+    ]
   }
 ]
 
@@ -133,7 +145,8 @@ export const useLlmStore = defineStore('llm', {
       gemini: '',
       moonshot: '',
       groq: '',
-      deepseek: ''
+      deepseek: '',
+      ollama: ''
     },
     // "providerId:modelId" per operation
     models: { ...buildDefaultModels() },
@@ -199,7 +212,7 @@ export const useLlmStore = defineStore('llm', {
       try {
         const configs = await llmConfigApi.getAll()
         // Reset keys first
-        this.keys = { anthropic: '', gemini: '', moonshot: '', groq: '', deepseek: '' }
+        this.keys = { anthropic: '', gemini: '', moonshot: '', groq: '', deepseek: '', ollama: '' }
         // Populate from backend response
         for (const config of configs) {
           if (config.provider in this.keys) {
