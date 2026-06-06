@@ -267,7 +267,7 @@ Plans:
 **Goal:** Habilitar interpolacion Jinja2 en system_prompt del nodo LLM Completion y agregar hints visuales en ambos campos (user_prompt y system_prompt) en el editor de flujos — paridad con el nodo Email.
 **Requirements**: none
 **Depends on:** Phase 51
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 52-01-PLAN.md — llm_executor.py system_prompt Jinja2 rendering + FlowEditorCanvas.vue LLM field hints

@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: BI Analyst
 status: unknown
+last_updated: "2026-06-06T03:25:35.957Z"
+progress:
+  total_phases: 49
+  completed_phases: 32
+  total_plans: 89
+  completed_plans: 66
+---
+
+---
+gsd_state_version: 1.0
+milestone: v2.0
+milestone_name: BI Analyst
+status: unknown
 last_updated: "2026-06-03T02:19:38.371Z"
 progress:
   total_phases: 48
@@ -46,6 +59,7 @@ progress:
 - Phase 48 added: Theme Alignment — fondos y colores de texto menú lateral y páginas según System Design (light/dark)
 - Phase 49 added: Diseño Minimalista Profesional @features/FEAT5.md
 - Phase 50 added: Add a new model based on DeepSeek to BI/AI Analyst in dashboard designer / viewer
+- Phase 52 added: Mejorar nodo LLM Completion en Integration Flows — interpolación de variables ctx en User Prompt y System Prompt
 
 ## Project Reference
 
@@ -87,6 +101,7 @@ Progress: [##########] 100% (Phase 49)
 | Phase 51 P03 | 12 | 2 tasks | 1 files |
 | Phase 51 P04 | 5 | 1 tasks | 1 files |
 | Phase 51 P05 | 8 | 2 tasks | 2 files |
+| Phase 52-mejorar-nodo-llm-completion P01 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -146,6 +161,8 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 51]: FALLBACK_SUMMARY_MODEL constant defined near CONTEXT_SIZE_LIMIT; _summarize_session uses model.startswith('gemini') guard so non-Gemini models (DeepSeek, Groq) fall back to gemini-2.5-flash-lite; chat() passes request.model explicitly
 - [Phase 51]: ollama/ branch uses LiteLlm with api_base='http://localhost:11434' — no api_key, no stream_options; Ollama streaming does not return token usage
 - [Phase 51]: _probe_ollama() uses 0.5s timeout and returns (False, False) on any exception — three-state logic: (True,True)=enabled, (True,False)=disabled+pull hint, (False,False)=disabled+start hint
+- [Phase 52-mejorar-nodo-llm-completion]: Two rendering blocks (system_prompt and user_prompt) kept intentionally self-contained — no shared helper extracted per plan spec
+- [Phase 52-mejorar-nodo-llm-completion]: LLM template hint scoped to selectedNode.toolType === 'llm' — does not affect Email or other node types
 
 ### Blockers/Concerns
 
