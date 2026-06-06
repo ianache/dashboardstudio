@@ -1,8 +1,13 @@
 import asyncio
+import json
 import logging
 import httpx
 import jinja2
 from typing import Dict, Any, Optional
+
+# Shared Jinja2 environment with tojson filter so users can write {{ payload | tojson }}
+_jinja_env = jinja2.Environment()
+_jinja_env.filters['tojson'] = lambda v, **kw: json.dumps(v, ensure_ascii=False, **kw)
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +38,7 @@ async def execute_llm_node(props: Dict[str, Any], ctx: Any) -> Dict[str, Any]:
             context = ctx
         else:
             context = {"payload": ctx, "data": ctx, "variables": {}}
-        rendered_system_prompt = jinja2.Template(system_prompt_template).render(context)
+        rendered_system_prompt = _jinja_env.from_string(system_prompt_template).render(context)
     except Exception as e:
         return {"success": False, "error": f"Failed to render system prompt: {str(e)}"}
 
@@ -45,7 +50,7 @@ async def execute_llm_node(props: Dict[str, Any], ctx: Any) -> Dict[str, Any]:
         else:
             context = {"payload": ctx, "data": ctx, "variables": {}}
             
-        template = jinja2.Template(user_prompt_template)
+        template = _jinja_env.from_string(user_prompt_template)
         rendered_user_prompt = template.render(context)
     except Exception as e:
         return {"success": False, "error": f"Failed to render user prompt: {str(e)}"}

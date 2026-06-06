@@ -274,16 +274,32 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
     def is_pre_executable(n):
         return n.get("toolType") in ["llm", "pickle_model", "sql_source", "sql_destination", "ods_pg"] or n.get("category") == "source"
 
-    # Sort nodes topologically to respect dependencies during pre-execution
-    # (Simple Kahn implementation for pre-execution subset)
-    try:
-        from app.runtime.runner import get_topological_order
-        # Mock FlowNode objects for the runner helper if needed, 
-        # but the helper works with Dict if IDs and connections match.
-        sorted_nodes = get_topological_order(nodes_copy, connections)
-    except Exception as e:
-        logger.warning(f"[SourceExec] Could not sort nodes for pre-execution: {e}")
-        sorted_nodes = nodes_copy
+    # Sort nodes topologically (Kahn's algorithm) so that source/LLM nodes
+    # that feed into other pre-executable nodes are processed first.
+    def _kahn_sort(nodes, conns):
+        ids = [n["id"] for n in nodes]
+        in_deg = {nid: 0 for nid in ids}
+        adj = {nid: [] for nid in ids}
+        for c in conns:
+            s, t = c.get("from"), c.get("to")
+            if s in adj and t in in_deg:
+                adj[s].append(t)
+                in_deg[t] += 1
+        queue = [nid for nid in ids if in_deg[nid] == 0]
+        order = []
+        while queue:
+            u = queue.pop(0)
+            order.append(u)
+            for v in adj[u]:
+                in_deg[v] -= 1
+                if in_deg[v] == 0:
+                    queue.append(v)
+        if len(order) < len(nodes):
+            return nodes  # cycle detected, fall back to original order
+        nm = {n["id"]: n for n in nodes}
+        return [nm[nid] for nid in order]
+
+    sorted_nodes = _kahn_sort(nodes_copy, connections)
 
     for node in sorted_nodes:
         # Only process pre-executable nodes
@@ -348,8 +364,26 @@ async def pre_execute_flow_nodes(flow_data: Dict[str, Any], db, websocket=None) 
         start_utc = datetime.utcnow().isoformat() + "Z"
 
         if is_llm:
-            # Pass ctx-like structure (payload + variables)
-            ctx = {"payload": input_payload, "variables": flow_data.get("variables", {})}
+            # Build variables dict from metadata.variables (list of {name, type, value})
+            raw_vars = flow_data.get("metadata", {}).get("variables", [])
+            if isinstance(raw_vars, list):
+                variables_dict = {}
+                for v in raw_vars:
+                    val = v.get("value")
+                    vtype = v.get("type", "string")
+                    if vtype == "number":
+                        try: val = float(val)
+                        except (TypeError, ValueError): pass
+                    elif vtype == "boolean":
+                        val = str(val).lower() == "true"
+                    elif vtype == "json":
+                        try: val = json.loads(val)
+                        except Exception: pass
+                    if v.get("name"):
+                        variables_dict[v["name"]] = val
+            else:
+                variables_dict = raw_vars if isinstance(raw_vars, dict) else {}
+            ctx = {"payload": input_payload, "variables": variables_dict}
             result = await execute_llm_node(node["props"], ctx)
             if result["success"]: result["rows"] = result["output"]
         elif is_ml:
