@@ -84,10 +84,10 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 
 ## Current Position
 
-Phase: 51 of 51 (AI Analyst Chat Enhancements) — COMPLETE
-Plan: 05 of 05 — COMPLETE
+Phase: 53 of 53 (Panel de ejecucion por nodo en Integration Flows) — COMPLETE
+Plan: 02 of 02 — COMPLETE
 Status: Phase Complete
-Last activity: 2026-06-02 — Completed 51-05 Ollama local model provider (llama3.2:3b) for AI Analyst
+Last activity: 2026-06-06 — Completed 53-02 per-node execution inspector panel wired into FlowEditorCanvas (human verification approved)
 
 Progress: [##########] 100% (Phase 48)
 Progress: [##########] 100% (Phase 49)
@@ -181,6 +181,10 @@ Progress: [##########] 100% (Phase 49)
 - [Phase 53]: NodeInspectorPanel is a pure dumb component — receives nodeId, nodeName, nodeData props, emits nothing, no store access
 - [Phase 53]: Default tab is 'output' (Salida) per CONTEXT.md spec — user sees execution result first
 - [Phase 53]: isTruncated fires at >2000 chars but shows warning banner only — does not clip JSON
+- [Phase 53-02]: nodeInspectorData ref canvas-scoped, cleared on runFlow() — ephemeral live execution data, no store needed
+- [Phase 53-02]: activeInspectorData computed: live nodeInspectorData takes priority over historical nodeLogsMap — freshest data always wins
+- [Phase 53-02]: fec-right guard changed from v-if='!readOnly' to v-if='!readOnly || inspectedNodeId' — minimal touch to enable readOnly inspector
+- [Phase 53-02]: Inspector tab button is v-if='inspectedNodeId' (not v-show) — absent from DOM until executed node is clicked
 
 ### Blockers/Concerns
 
@@ -189,6 +193,6 @@ Progress: [##########] 100% (Phase 49)
 ## Session Continuity
 
 Last session: 2026-06-06
-Stopped at: Completed 53-01-PLAN.md — NodeInspectorPanel.vue dumb component for per-node execution inspector. Phase 53 Plan 01 COMPLETE (1/2).
+Stopped at: Completed 53-02-PLAN.md — FlowEditorCanvas inspector wiring (node_log capture, selectNode() routing, NodeInspectorPanel template binding). Human verification approved. Phase 53 COMPLETE (2/2).
 Resume file: .planning/STATE.md
 
