@@ -48,8 +48,10 @@ class ChatRequest(BaseModel):
     screen_context: dict | None = None
     context: dict | None = None
     model: str = "gemini-2.5-flash-lite"
+    gemini_api_key: str | None = None
     deepseek_api_key: str | None = None
     groq_api_key: str | None = None
+    ollama_api_base: str | None = None
 
 
 async def ensure_session(user_id: str, session_id: str) -> None:
@@ -153,24 +155,27 @@ async def _summarize_session(user_id: str, session_id: str, model: str = FALLBAC
         pass
 
     return summary_text
+_OLLAMA_MODELS = [
+    {"id": "ollama/llama3.2:3b",    "label": "Llama 3.2 3B (Local)",    "tag": "llama3.2:3b",    "pull": "ollama pull llama3.2:3b"},
+    {"id": "ollama/granite4.1:3b",  "label": "Granite 4.1 3B (Local)",  "tag": "granite4.1:3b",  "pull": "ollama pull granite4.1:3b"},
+]
 
 
-async def _probe_ollama() -> tuple[bool, bool]:
+async def _probe_ollama(api_base: str = "http://localhost:11434") -> tuple[bool, set[str]]:
     """
-    Returns (ollama_running, model_available).
+    Returns (ollama_running, set_of_available_tags).
     Uses a 0.5s timeout so /models stays fast.
     """
     try:
         async with httpx.AsyncClient(timeout=0.5) as client:
-            resp = await client.get("http://localhost:11434/api/tags")
+            resp = await client.get(f"{api_base.rstrip('/')}/api/tags")
             if resp.status_code != 200:
-                return False, False
+                return False, set()
             data = resp.json()
-            names = [m.get("name", "") for m in data.get("models", [])]
-            model_available = any("llama3.2:3b" in n for n in names)
-            return True, model_available
+            names = {m.get("name", "") for m in data.get("models", [])}
+            return True, names
     except Exception:
-        return False, False
+        return False, set()
 
 
 @app.get("/health")
@@ -182,11 +187,25 @@ async def health():
 async def get_models(
     x_deepseek_api_key: str | None = Header(default=None),
     x_groq_api_key: str | None = Header(default=None),
+    x_gemini_api_key: str | None = Header(default=None),
+    x_ollama_api_base: str | None = Header(default=None),
 ):
-    models = [
-        {"id": "gemini-2.5-flash-lite", "label": "Gemini Flash",
-         "provider": "google", "enabled": True}
-    ]
+    models = []
+    
+    # Gemini model configuration
+    gemini_enabled = bool(x_gemini_api_key or settings.google_api_key)
+    if gemini_enabled:
+        models.append(
+            {"id": "gemini-2.5-flash-lite", "label": "Gemini Flash",
+             "provider": "google", "enabled": True}
+        )
+    else:
+        models.append(
+            {"id": "gemini-2.5-flash-lite", "label": "Gemini Flash",
+             "provider": "google", "enabled": False,
+             "disabled_reason": "Add API key in Settings"}
+        )
+
     # ── DeepSeek ──────────────────────────────────────────────────────────────
     if x_deepseek_api_key:
         models += [
@@ -204,6 +223,7 @@ async def get_models(
              "provider": "deepseek", "enabled": False,
              "disabled_reason": "Add API key in Settings"},
         ]
+
     # ── Groq ──────────────────────────────────────────────────────────────────
     if x_groq_api_key:
         models += [
@@ -216,25 +236,20 @@ async def get_models(
              "provider": "groq", "enabled": False,
              "disabled_reason": "Add Groq API key in Settings"},
         ]
-    # ── Ollama (local) ────────────────────────────────────────────────────────
-    ollama_running, model_available = await _probe_ollama()
-    if ollama_running and model_available:
-        models += [
-            {"id": "ollama/llama3.2:3b", "label": "Llama 3.2 3B (Local)",
-             "provider": "ollama", "enabled": True},
-        ]
-    elif ollama_running and not model_available:
-        models += [
-            {"id": "ollama/llama3.2:3b", "label": "Llama 3.2 3B (Local)",
-             "provider": "ollama", "enabled": False,
-             "disabled_reason": "Run: ollama pull llama3.2:3b"},
-        ]
-    else:
-        models += [
-            {"id": "ollama/llama3.2:3b", "label": "Llama 3.2 3B (Local)",
-             "provider": "ollama", "enabled": False,
-             "disabled_reason": "Start Ollama to use local models"},
-        ]
+
+    # ── Ollama ────────────────────────────────────────────────────────────────
+    ollama_base = x_ollama_api_base or "http://localhost:11434"
+    ollama_running, available_tags = await _probe_ollama(ollama_base)
+    for om in _OLLAMA_MODELS:
+        if not ollama_running:
+            models.append({"id": om["id"], "label": om["label"], "provider": "ollama",
+                           "enabled": False, "disabled_reason": "Start Ollama to use local models"})
+        elif any(om["tag"] in t for t in available_tags):
+            models.append({"id": om["id"], "label": om["label"], "provider": "ollama", "enabled": True})
+        else:
+            models.append({"id": om["id"], "label": om["label"], "provider": "ollama",
+                           "enabled": False, "disabled_reason": f"Run: {om['pull']}"})
+
     return {"models": models}
 
 
@@ -263,6 +278,10 @@ async def chat(
     # Inject screen context if provided by prepending to the user prompt
     prompt = request.message
     screen_ctx = request.context or request.screen_context
+    
+    # Set dynamic custom mappings for member resolution
+    cube_tool.set_custom_mappings_from_context(screen_ctx)
+
     if screen_ctx:
         # Build a clean, compact representation for the model
         ctx_parts = []
@@ -320,8 +339,14 @@ async def chat(
     if summary_prefix:
         prompt = summary_prefix + prompt
 
-    active_runner = create_runner(request.model, request.deepseek_api_key, request.groq_api_key)
-    run_config = RunConfig(streaming_mode=StreamingMode.SSE)
+    active_runner = create_runner(
+        model_str=request.model,
+        deepseek_api_key=request.deepseek_api_key,
+        groq_api_key=request.groq_api_key,
+        gemini_api_key=request.gemini_api_key,
+        ollama_api_base=request.ollama_api_base
+    )
+    run_config = RunConfig(streaming_mode=StreamingMode.NONE)
     try:
         # Emit context_summarized event BEFORE the agent response if summary was done
         if summary_prefix:

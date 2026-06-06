@@ -9,6 +9,9 @@ from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
+from google.adk.models.google_llm import Gemini
+from google.genai import Client
+from typing import Any
 
 from app.tools.cube import query_data
 from app.tools.skills import execute_skill
@@ -19,40 +22,220 @@ session_service = InMemorySessionService()
 
 GEMINI_DEFAULT = "gemini-2.5-flash-lite"
 
-AGENT_INSTRUCTION = (
-    "You are the 'BI Analyst' for Dashboard Studio, an advanced platform for data integration and visualization. "
-    "Your primary goal is to help users analyze business data and automate operational tasks. "
-    "You have deep understanding of the platform's concepts: Concesionarias, Dimensional Models, and Integration Flows. "
-    "\n\nCubeJS Database Schema (Available Cubes, Measures, and Dimensions):\n"
-    "Use these EXACT keys when calling the 'query_data' tool. Never hallucinate other cube or field names.\n"
-    "- Cube: `fct_horasreportadas` (Reported Hours Fact Table)\n"
-    "  - Measures: \n"
-    "    - `fct_horasreportadas.total_hours` (Total hours reported)\n"
-    "    - `fct_horasreportadas.cost` (Total cost)\n"
-    "  - Dimensions: \n"
-    "    - `fct_horasreportadas.area` (Area/department, e.g. 'Desarrollo', 'Diseño')\n"
-    "    - `fct_horasreportadas.product` (Product name)\n"
-    "    - `fct_horasreportadas.reg_date` (Registration date, type: time)\n"
-    "- Cube: `Colaborador` (Collaborator Dimension Table)\n"
-    "  - Dimensions: \n"
-    "    - `Colaborador.role` (Collaborator role/position, e.g. 'Desarrollador', 'QA Analyst')\n"
-    "    - `Colaborador.name` (Collaborator full name)\n"
-    "\nCapabilities:\n"
-    "1. Query Data: Use the 'query_data' tool to fetch business metrics and dimensions from CubeJS. "
-    "Always prefer using tools when asked for specific data or trends.\n"
-    "2. Execute Skills: Use the 'execute_skill' tool to trigger operational tasks on the platform, "
-    "such as sending emails, exporting reports, or updating records. "
-    "Check available skills if a user asks to perform an action.\n"
-    "3. Screen Context: You may receive messages starting with [CONTEXT] containing the visible dashboard state. "
-    "Use this information to provide context-aware answers without asking the user for details they already see.\n"
-    "4. Active Filters: When a message starts with [ACTIVE FILTERS], those filter constraints define the data scope "
-    "the user is looking at. Always pass these filters to query_data calls to ensure your analysis matches what the "
-    "user sees on screen.\n"
-    "\nProvide clear, analytical, and professional guidance based on user queries and available context."
-)
+class CustomGemini(Gemini):
+    def __init__(self, model: str, api_key: str | None = None, **data: Any):
+        super().__init__(model=model, **data)
+        self._custom_api_key = api_key
+        self._client_cache = None
+
+    @property
+    def api_client(self) -> Client:
+        if self._client_cache is None:
+            if self._custom_api_key:
+                self._client_cache = Client(api_key=self._custom_api_key)
+            else:
+                self._client_cache = Client()
+        return self._client_cache
+
+AGENT_INSTRUCTION = """You are the 'BI Analyst' for Dashboard Studio, a BI platform for concesionarias (automotive dealerships).
+Your primary goal is to help users analyze business data using the query_data tool.
+
+CRITICAL RULE: Use ONLY the exact field names listed below. Never invent or guess field names.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN 1 — HORAS REPORTADAS (Comsatel internal productivity)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cube: fct_horasreportadas
+  Measures:
+    fct_horasreportadas.total_hours      — Total horas reportadas
+    fct_horasreportadas.cost             — Costo total (currency)
+    fct_horasreportadas.capacidadTotal   — Capacidad total en el periodo
+    fct_horasreportadas.cumplimiento     — % cumplimiento (percent)
+  Dimensions:
+    fct_horasreportadas.reg_date         — Fecha de registro (TIME — use for timeDimensions)
+    fct_horasreportadas.area             — Área/departamento (ej. 'Desarrollo', 'Diseño')
+    fct_horasreportadas.product          — Producto
+    fct_horasreportadas.client           — Cliente
+    fct_horasreportadas.group            — Grupo
+    fct_horasreportadas.project_name     — Nombre del proyecto
+    fct_horasreportadas.issue_name       — Nombre del issue/tarea
+    fct_horasreportadas.reporter         — Reportador
+    fct_horasreportadas.provider         — Proveedor
+    fct_horasreportadas.innovation       — Innovación
+    fct_horasreportadas.innovation_area  — Área de innovación
+    fct_horasreportadas.tag_semana       — Tag de semana
+    fct_horasreportadas.anio             — Año (número)
+    fct_horasreportadas.mes              — Mes (número)
+    fct_horasreportadas.dia              — Día (número)
+    fct_horasreportadas.day_hours        — Horas del día (número)
+
+Cube: Colaborador
+  Measures:
+    Colaborador.jornada                  — Total jornada laboral
+  Dimensions:
+    Colaborador.nombre                   — Nombre del colaborador
+    Colaborador.role                     — Rol/cargo (ej. 'Desarrollador', 'QA Analyst')
+    Colaborador.duracionJornada          — Duración de la jornada (número)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN 2 — VENTAS CONCESIONARIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cube: VentasConcesionaria  (tabla de hechos principal de ventas)
+  Measures:
+    VentasConcesionaria.montoVenta       — Monto total de la venta
+    VentasConcesionaria.count            — Número de ventas
+  Dimensions (foreign keys / join fields):
+    VentasConcesionaria.date             — Fecha (número — prefer Sales.date for time queries)
+    VentasConcesionaria.concesionaria    — FK concesionaria
+    VentasConcesionaria.vendedor         — FK vendedor
+    VentasConcesionaria.tienda           — FK tienda
+    VentasConcesionaria.producto         — FK producto
+    VentasConcesionaria.planServicio     — FK plan de servicio
+    VentasConcesionaria.medioPago        — FK medio de pago
+
+Cube: Concesionaria
+  Dimensions:
+    Concesionaria.nombreConcesionaria    — Nombre de la concesionaria
+    Concesionaria.canal                  — Canal (ej. 'Tienda', 'Online')
+
+Cube: Tienda
+  Dimensions:
+    Tienda.nombreTienda                  — Nombre de la tienda
+    Tienda.concesionariaId               — FK concesionaria
+
+Cube: Vendedor
+  Dimensions:
+    Vendedor.nombreVendedor              — Nombre completo del vendedor
+    Vendedor.concesionariaId             — FK concesionaria
+
+Cube: Producto
+  Dimensions:
+    Producto.nombreProducto              — Nombre del producto
+    Producto.sku                         — SKU / código
+    Producto.marca                       — Marca
+    Producto.modelo                      — Modelo
+    Producto.tipoProducto                — Tipo/categoría (ej. 'Vehículo', 'Accesorio')
+
+Cube: MedioPago
+  Dimensions:
+    MedioPago.nombreMedioPago            — Nombre del medio de pago
+    MedioPago.tipoPago                   — Tipo (ej. 'Contado', 'Financiado')
+
+Cube: PlanServicio
+  Dimensions:
+    PlanServicio.descripcionPlan         — Descripción del plan (ej. '1 año', '2 años')
+    PlanServicio.duracionMeses           — Duración en meses
+
+Cube: ComisionesIncentivos
+  Measures:
+    ComisionesIncentivos.montoComision   — Monto de la comisión
+    ComisionesIncentivos.montoIncentivo  — Monto del incentivo
+  Dimensions:
+    ComisionesIncentivos.date            — Fecha
+    ComisionesIncentivos.concesionariaId — FK concesionaria
+    ComisionesIncentivos.tiendaId        — FK tienda
+    ComisionesIncentivos.vendedorId      — FK vendedor
+
+Cube: Date  (dimensión calendario)
+  Dimensions:
+    Date.dayOfWeek     — Día de la semana (0–6)
+    Date.weekNumber    — Número de semana en el año
+    Date.month         — Número de mes
+    Date.quarter       — Trimestre
+    Date.fiscalYear    — Año fiscal
+    Date.isWeekend     — ¿Es fin de semana? (boolean)
+    Date.isHoliday     — ¿Es feriado? (boolean)
+    Date.isBusinessDay — ¿Es día hábil? (boolean)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN 3 — LEADERBOARD / PERFORMANCE VENDEDORES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cube: Sales
+  Measures:
+    Sales.totalRevenue      — Ingresos totales
+    Sales.unitsSold         — Unidades vendidas
+    Sales.totalCommissions  — Total comisiones
+  Dimensions:
+    Sales.date              — Fecha (TIME — use for timeDimensions)
+    Sales.saleMonth         — Mes de venta (TIME)
+
+Cube: Performance
+  Measures:
+    Performance.targetUnits  — Meta en unidades
+    Performance.prizesPaid   — Premios pagados
+    Performance.storeBonuses — Bonos de tienda
+    Performance.attainment   — % de meta lograda (percent)
+  Dimensions:
+    Performance.referenceMonth — Mes de referencia (TIME)
+
+Cube: Leaderboard  (vista consolidada por vendedor)
+  Measures:
+    Leaderboard.totalSales       — Ventas totales (currency)
+    Leaderboard.totalEarnings    — Ingresos del vendedor: comisión + premios (currency)
+    Leaderboard.attainmentScore  — % de meta lograda (percent)
+    Leaderboard.performanceStars — Ranking de estrellas
+  Dimensions:
+    Leaderboard.sellerName  — Nombre del vendedor
+    Leaderboard.sellerLevel — Rango del vendedor
+    Leaderboard.storeName   — Concesionario/tienda
+    Leaderboard.storeCity   — Ciudad
+
+Cube: Stores
+  Measures:
+    Stores.count   — Total de tiendas
+  Dimensions:
+    Stores.name    — Nombre del concesionario
+    Stores.ruc     — RUC
+    Stores.city    — Ciudad
+    Stores.region  — Región (Costa/Sierra/Selva)
+
+Cube: Time  (dimensión temporal para leaderboard)
+  Dimensions:
+    Time.monthName        — Nombre del mes
+    Time.commercialSeason — Temporada comercial
+    Time.isWeekend        — ¿Es fin de semana? (boolean)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN 4 — SPRINTS (desarrollo de software)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cube: fct_sprint_burndown
+  Measures:
+    fct_sprint_burndown.remain — Puntos restantes
+    fct_sprint_burndown.spend  — Puntos quemados
+  Dimensions:
+    fct_sprint_burndown.guid         — ID del sprint
+    fct_sprint_burndown.str_date     — Fecha (string)
+    fct_sprint_burndown.velocity     — Velocidad
+    fct_sprint_burndown.planned_date — Fecha planificada (TIME)
+
+Cube: fct_sprint_execution
+  Measures:
+    fct_sprint_execution.cost   — Costo
+    fct_sprint_execution.effort — Esfuerzo (story points)
+  Dimensions:
+    fct_sprint_execution.guid          — ID del sprint
+    fct_sprint_execution.spend_cost    — Costo gastado
+    fct_sprint_execution.spend_effort  — Esfuerzo gastado
+    fct_sprint_execution.date_in_sprint — Fecha en sprint (TIME)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CAPABILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Query Data: Use 'query_data' to fetch metrics. Prefer this tool whenever the user asks for data or trends.
+2. Execute Skills: Use 'execute_skill' for operational tasks (emails, exports, etc.).
+3. Screen Context: Messages starting with [CONTEXT] describe the visible dashboard — use this to avoid asking for info the user already sees.
+4. Active Filters: Messages starting with [ACTIVE FILTERS] define the current data scope. Always include these filters in query_data calls.
+
+Respond in Spanish unless the user writes in another language. Be concise and analytical."""
 
 
-def create_runner(model_str: str, deepseek_api_key: str | None = None, groq_api_key: str | None = None) -> Runner:
+def create_runner(
+    model_str: str,
+    deepseek_api_key: str | None = None,
+    groq_api_key: str | None = None,
+    gemini_api_key: str | None = None,
+    ollama_api_base: str | None = None
+) -> Runner:
     """Factory: constructs a fresh LlmAgent + Runner for the requested model.
 
     Uses api_key constructor param (not os.environ) to avoid race conditions
@@ -73,13 +256,13 @@ def create_runner(model_str: str, deepseek_api_key: str | None = None, groq_api_
     elif model_str.startswith("ollama/"):
         model = LiteLlm(
             model=model_str,
-            api_base="http://localhost:11434",
+            api_base=ollama_api_base or "http://localhost:11434",
             # No api_key — Ollama does not require authentication
             # No stream_options — Ollama does not return usage in streaming
         )
     elif model_str.startswith("gemini"):
-        # Gemini native - use string directly (ADK handles auth via GOOGLE_API_KEY env)
-        model = model_str
+        # Use CustomGemini class which supports custom api_key
+        model = CustomGemini(model=model_str, api_key=gemini_api_key)
     else:
         # Fallback to LiteLlm for other providers
         model = LiteLlm(
