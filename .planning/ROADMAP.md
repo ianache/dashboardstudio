@@ -262,7 +262,17 @@ Plans:
 - [ ] 51-02-PLAN.md — Per-dashboard sessions: aiAnalyst.js sessions map + backend get-or-create + stable session_id (ANALYST-02)
 - [ ] 51-03-PLAN.md — Context summarization: 200KB size check + _summarize_session() + context_summarized SSE event (ANALYST-03)
 
+### Phase 52: Mejorar nodo LLM Completion en Integration Flows para permitir interpolacion de variables desde ctx en los campos User Prompt y System Prompt similar al comportamiento del nodo Email en sus campos Subject y Body
+
+**Goal:** Habilitar interpolacion Jinja2 en system_prompt del nodo LLM Completion y agregar hints visuales en ambos campos (user_prompt y system_prompt) en el editor de flujos — paridad con el nodo Email.
+**Requirements**: none
+**Depends on:** Phase 51
+**Plans:** 1 plan
+
+Plans:
+- [ ] 52-01-PLAN.md — llm_executor.py system_prompt Jinja2 rendering + FlowEditorCanvas.vue LLM field hints
+
 ---
 
 *For detailed milestone history, see .planning/milestones/*
-*Last updated: 2026-06-02 after Phase 51 plans created*
+*Last updated: 2026-06-05 after Phase 52 plans created*
