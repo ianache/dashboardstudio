@@ -638,20 +638,82 @@
             <!-- Icon picker -->
             <div class="form-group">
               <label class="form-label">Ícono representativo</label>
-              <div class="icon-picker-row">
-                <div class="icon-preview" :class="{ empty: !selectedNode.icon }">
-                  <MIcon v-if="selectedNode.icon" :icon="selectedNode.icon" :size="20" />
-                  <MIcon v-else icon="category" :size="20" style="opacity:0.3" />
+              <div class="icon-picker-container">
+                <div class="icon-picker-row">
+                  <div
+                    class="icon-preview clickable"
+                    :class="{ empty: !selectedNode.icon }"
+                    @click="showIconPickerPopup = !showIconPickerPopup"
+                    title="Abrir selector de íconos"
+                  >
+                    <MIcon v-if="selectedNode.icon" :icon="selectedNode.icon" :size="20" />
+                    <MIcon v-else icon="category" :size="20" style="opacity:0.3" />
+                  </div>
+                  <input
+                    :value="selectedNode.icon"
+                    type="text"
+                    class="form-input"
+                    placeholder="Ej: shopping-cart, package, users…"
+                    @change="modelStore.updateNode(modelId, selectedNode.id, { icon: $event.target.value.trim() }); hasUnsavedChanges = true"
+                  />
+                  <button
+                    type="button"
+                    class="btn-icon-only icon-selector-toggle-btn"
+                    :class="{ active: showIconPickerPopup }"
+                    @click="showIconPickerPopup = !showIconPickerPopup"
+                    title="Seleccionar ícono"
+                  >
+                    <MIcon icon="palette" :size="16" />
+                  </button>
                 </div>
-                <input
-                  :value="selectedNode.icon"
-                  type="text"
-                  class="form-input"
-                  placeholder="Ej: directions_car, analytics…"
-                  @change="modelStore.updateNode(modelId, selectedNode.id, { icon: $event.target.value.trim() }); hasUnsavedChanges = true"
-                />
+
+                <!-- Icon picker popup popover -->
+                <div v-if="showIconPickerPopup" class="icon-picker-popover">
+                  <div class="icon-picker-popover-header">
+                    <input
+                      v-model="iconSearchQuery"
+                      type="text"
+                      class="form-input icon-search-input"
+                      placeholder="Buscar ícono..."
+                    />
+                    <button type="button" class="btn-close-picker" @click="showIconPickerPopup = false" title="Cerrar">
+                      <MIcon icon="close" :size="12" />
+                    </button>
+                  </div>
+                  
+                  <!-- Category tabs -->
+                  <div class="icon-picker-categories">
+                    <span
+                      v-for="cat in ['Todos', 'General', 'Finanzas', 'Clientes', 'Productos', 'Tiempo']"
+                      :key="cat"
+                      class="category-tab"
+                      :class="{ active: selectedIconCategory === cat }"
+                      @click="selectedIconCategory = cat"
+                    >
+                      {{ cat }}
+                    </span>
+                  </div>
+
+                  <!-- Icons Grid -->
+                  <div class="icon-picker-grid">
+                    <div
+                      v-for="icon in filteredIcons"
+                      :key="icon.name"
+                      class="icon-grid-item"
+                      :class="{ selected: selectedNode.icon === icon.name }"
+                      :title="icon.label + ' (' + icon.name + ')'"
+                      @click="modelStore.updateNode(modelId, selectedNode.id, { icon: icon.name }); hasUnsavedChanges = true; showIconPickerPopup = false"
+                    >
+                      <MIcon :icon="icon.name" :size="18" />
+                      <span class="icon-grid-label">{{ icon.label }}</span>
+                    </div>
+                    <div v-if="filteredIcons.length === 0" class="icon-picker-empty">
+                      No se encontraron íconos
+                    </div>
+                  </div>
+                </div>
               </div>
-              <span class="form-hint">Nombre de un Material Symbol (sin espacios)</span>
+              <span class="form-hint">Nombre de un ícono Lucide o Material Design</span>
             </div>
 
             <!-- Description -->
@@ -922,6 +984,97 @@ const modelId = route.params.id
 const model = computed(() => modelStore.getModel(modelId))
 const hasUnsavedChanges = ref(false)
 let savedModelSnapshot = null
+
+// Icon Picker Popover state and data
+const showIconPickerPopup = ref(false)
+const iconSearchQuery = ref('')
+const selectedIconCategory = ref('Todos')
+
+const popularIcons = [
+  // General
+  { name: 'analytics', label: 'Análisis', category: 'General', tags: ['analytics', 'metrics', 'activity', 'chart', 'grafico', 'metricas', 'analisis'] },
+  { name: 'dashboard', label: 'Tablero', category: 'General', tags: ['dashboard', 'tablero', 'layout', 'grid'] },
+  { name: 'database', label: 'Base de datos', category: 'General', tags: ['database', 'db', 'data', 'datos', 'base'] },
+  { name: 'settings', label: 'Ajustes', category: 'General', tags: ['settings', 'config', 'ajustes', 'configuracion'] },
+  { name: 'info', label: 'Información', category: 'General', tags: ['info', 'informacion', 'about'] },
+  { name: 'warning', label: 'Advertencia', category: 'General', tags: ['warning', 'alert', 'error', 'advertencia', 'alerta'] },
+
+  // Ventas & Finanzas
+  { name: 'shopping-cart', label: 'Ventas', category: 'Finanzas', tags: ['sales', 'ventas', 'cart', 'carrito', 'shop', 'compras', 'store'] },
+  { name: 'shopping-bag', label: 'Pedidos', category: 'Finanzas', tags: ['bag', 'bolsa', 'orders', 'pedidos', 'shop', 'compras'] },
+  { name: 'banknote', label: 'Dinero', category: 'Finanzas', tags: ['money', 'dinero', 'cash', 'efectivo', 'finance', 'finanzas', 'sales', 'ventas'] },
+  { name: 'credit-card', label: 'Tarjeta', category: 'Finanzas', tags: ['card', 'tarjeta', 'payment', 'pago', 'finance', 'finanzas'] },
+  { name: 'coins', label: 'Monedas', category: 'Finanzas', tags: ['coins', 'monedas', 'money', 'dinero', 'finance', 'finanzas'] },
+  { name: 'wallet', label: 'Billetera', category: 'Finanzas', tags: ['wallet', 'billetera', 'money', 'dinero', 'finance', 'finanzas'] },
+  { name: 'percent', label: 'Descuento', category: 'Finanzas', tags: ['percent', 'porcentaje', 'discount', 'descuento', 'tax', 'impuesto'] },
+  { name: 'trending-up', label: 'KPI', category: 'Finanzas', tags: ['trend', 'trending', 'up', 'crecimiento', 'tendencia', 'kpi'] },
+
+  // Clientes & Personas
+  { name: 'person', label: 'Cliente', category: 'Clientes', tags: ['user', 'usuario', 'customer', 'cliente', 'person', 'persona'] },
+  { name: 'users', label: 'Clientes', category: 'Clientes', tags: ['users', 'usuarios', 'group', 'grupo', 'customers', 'clientes', 'segmento'] },
+  { name: 'contact', label: 'Contacto', category: 'Clientes', tags: ['contact', 'contacto', 'phone', 'email'] },
+  { name: 'briefcase', label: 'Trabajo', category: 'Clientes', tags: ['work', 'trabajo', 'business', 'negocio', 'briefcase', 'empleado', 'employee'] },
+  { name: 'graduation-cap', label: 'Educación', category: 'Clientes', tags: ['education', 'educacion', 'graduation', 'universidad', 'school'] },
+  { name: 'award', label: 'Premio', category: 'Clientes', tags: ['award', 'premio', 'medal', 'medalla', 'achievement', 'logro'] },
+
+  // Logística & Productos
+  { name: 'widgets', label: 'Caja', category: 'Productos', tags: ['box', 'caja', 'widgets', 'module', 'modulo'] },
+  { name: 'package', label: 'Producto', category: 'Productos', tags: ['package', 'paquete', 'product', 'producto', 'inventory', 'inventario'] },
+  { name: 'truck', label: 'Envío', category: 'Productos', tags: ['truck', 'camion', 'shipping', 'despacho', 'delivery', 'entrega', 'logistics', 'logistica'] },
+  { name: 'warehouse', label: 'Almacén', category: 'Productos', tags: ['warehouse', 'almacen', 'inventory', 'inventario', 'storage', 'deposito'] },
+  { name: 'tag', label: 'Etiqueta', category: 'Productos', tags: ['tag', 'etiqueta', 'price', 'precio', 'category', 'categoria'] },
+  { name: 'archive', label: 'Archivo', category: 'Productos', tags: ['archive', 'archivo', 'history', 'historia'] },
+  { name: 'barcode', label: 'Código', category: 'Productos', tags: ['barcode', 'codigo', 'product', 'producto'] },
+  { name: 'globe', label: 'Región', category: 'Productos', tags: ['globe', 'global', 'world', 'mundo', 'region', 'pais'] },
+
+  // Tiempo & Ubicación
+  { name: 'schedule', label: 'Hora', category: 'Tiempo', tags: ['clock', 'reloj', 'time', 'tiempo', 'hour', 'hora', 'schedule'] },
+  { name: 'calendar', label: 'Fecha', category: 'Tiempo', tags: ['calendar', 'calendario', 'date', 'fecha', 'time', 'tiempo'] },
+  { name: 'map-pin', label: 'Tienda', category: 'Tiempo', tags: ['map', 'pin', 'ubicacion', 'location', 'gps', 'tienda', 'store'] },
+  { name: 'compass', label: 'Dirección', category: 'Tiempo', tags: ['compass', 'brujula', 'direction', 'direccion', 'gps'] }
+]
+
+const filteredIcons = computed(() => {
+  const query = iconSearchQuery.value.trim().toLowerCase()
+  return popularIcons.filter(icon => {
+    // Category filter
+    if (selectedIconCategory.value !== 'Todos' && icon.category !== selectedIconCategory.value) {
+      return false
+    }
+    // Search query filter
+    if (!query) return true
+    return icon.name.toLowerCase().includes(query) || 
+           icon.label.toLowerCase().includes(query) || 
+           icon.tags.some(tag => tag.toLowerCase().includes(query))
+  })
+})
+
+// Close popover on click outside
+const handleOutsideClick = (e) => {
+  const container = document.querySelector('.icon-picker-container')
+  if (container && !container.contains(e.target)) {
+    showIconPickerPopup.value = false
+  }
+}
+
+watch(showIconPickerPopup, (val) => {
+  if (val) {
+    document.addEventListener('click', handleOutsideClick)
+    // Focus search input on open
+    nextTick(() => {
+      const searchInput = document.querySelector('.icon-search-input')
+      if (searchInput) searchInput.focus()
+    })
+  } else {
+    document.removeEventListener('click', handleOutsideClick)
+    iconSearchQuery.value = ''
+    selectedIconCategory.value = 'Todos'
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+})
 
 function updateSnapshot() {
   if (model.value) {
@@ -2935,6 +3088,9 @@ function handleAddNodesToDiagram(nodeIds) {
 .props-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
 
 /* Icon picker */
+.icon-picker-container {
+  position: relative;
+}
 .icon-picker-row {
   display: flex;
   align-items: center;
@@ -2953,6 +3109,157 @@ function handleAddNodesToDiagram(nodeIds) {
   color: var(--primary);
 }
 .icon-preview.empty { color: var(--on-surface-variant); }
+.icon-preview.clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.icon-preview.clickable:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover, #f8fafc);
+}
+.icon-selector-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  transition: all 0.15s;
+}
+.icon-selector-toggle-btn:hover, .icon-selector-toggle-btn.active {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--bg-hover, #f8fafc);
+}
+.icon-picker-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  margin-top: 8px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 290px;
+  overflow: hidden;
+  animation: pickerFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pickerFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.icon-picker-popover-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.icon-search-input {
+  height: 30px;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+.btn-close-picker {
+  background: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+}
+.btn-close-picker:hover {
+  background: var(--bg-hover, #f1f5f9);
+  color: var(--on-surface);
+}
+.icon-picker-categories {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--bg, #f8fafc);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+.icon-picker-categories::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
+}
+.category-tab {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--on-surface-variant);
+  transition: all 0.12s;
+}
+.category-tab:hover {
+  background: var(--border, #e2e8f0);
+}
+.category-tab.active {
+  background: var(--primary);
+  color: var(--on-primary, #ffffff);
+}
+.icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  max-height: 180px;
+  flex: 1;
+}
+.icon-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.icon-grid-item:hover {
+  background: var(--primary-light, #f0fdf4);
+  border-color: var(--primary-border, #bbf7d0);
+  color: var(--primary);
+}
+.icon-grid-item.selected {
+  background: var(--primary-light, #f0fdf4);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.icon-grid-label {
+  font-size: 8px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  color: var(--on-surface-variant);
+}
+.icon-picker-empty {
+  grid-column: span 4;
+  text-align: center;
+  font-size: 11px;
+  color: var(--on-surface-variant);
+  padding: 24px 0;
+}
 .form-hint {
   font-size: 11px;
   color: var(--on-surface-variant);
