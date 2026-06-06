@@ -13,7 +13,15 @@
 <script setup>
 import { computed } from 'vue'
 import { HelpCircle } from 'lucide-vue-next'
+import * as LucideIcons from 'lucide-vue-next'
 import { iconMap } from './IconMap.js'
+
+// Pre-calculate a normalized map of all Lucide icons for fast case-insensitive lookup
+const normalizedLucideMap = {}
+for (const [key, value] of Object.entries(LucideIcons)) {
+  const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+  normalizedLucideMap[normalizedKey] = value
+}
 
 // Avoid double-binding attributes on the root component if it's not needed,
 // but here we want to pass class/style to the lucide component.
@@ -36,8 +44,21 @@ const props = defineProps({
 })
 
 const resolvedIcon = computed(() => {
-  // Try to find the icon in our map, otherwise fallback to HelpCircle
-  return iconMap[props.icon] || HelpCircle
+  if (!props.icon) return HelpCircle
+  
+  // 1. Direct check in the predefined iconMap (legacy Material to Lucide names)
+  if (iconMap[props.icon]) {
+    return iconMap[props.icon]
+  }
+  
+  // 2. Case-insensitive lookup in all Lucide icons
+  const normalizedSearch = props.icon.toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (normalizedLucideMap[normalizedSearch]) {
+    return normalizedLucideMap[normalizedSearch]
+  }
+  
+  // 3. Fallback to HelpCircle
+  return HelpCircle
 })
 
 const strokeWidth = computed(() => {
