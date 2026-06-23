@@ -5,6 +5,13 @@
 
 import nunjucks from "npm:nunjucks";
 
+// Configure Nunjucks environment globally to support Jinja-like JSON serialization
+const nunjucksEnv = nunjucks.configure({ autoescape: false });
+nunjucksEnv.addFilter('tojson', (obj: any) => JSON.stringify(obj));
+nunjucksEnv.addFilter('toJson', (obj: any) => JSON.stringify(obj));
+nunjucksEnv.addFilter('json', (obj: any) => JSON.stringify(obj));
+
+
 interface FlowNode {
   id: string;
   toolType: string;
@@ -34,6 +41,7 @@ interface FlowData {
   test_mode?: boolean;
   payload?: any;
   prefetched_outputs?: Record<string, any>;
+  variables?: any[];
 }
 
 async function readStdin(): Promise<string> {
@@ -289,15 +297,90 @@ async function main() {
         }
         else if (['http_rest', 'rest_api', 'http', 'webhook'].includes(node.toolType)) {
           const nodeContext = { payload: currentPayload, variables };
-          const url = resolveTemplates(node.props.url, nodeContext);
           const method = (node.props.method || "GET").toUpperCase();
-          const headers = resolveTemplates(node.props.headers || {}, nodeContext);
-          const body = (method !== "GET" && method !== "HEAD") ? resolveTemplates(node.props.body, nodeContext) : undefined;
 
-          const response = await fetch(url, {
+          // 1. Resolve and parse query parameters
+          let queryObj: Record<string, string> = {};
+          if (node.props.query) {
+            const resolvedQuery = resolveTemplates(node.props.query, nodeContext);
+            if (typeof resolvedQuery === 'string' && resolvedQuery.trim() !== '') {
+              try {
+                queryObj = JSON.parse(resolvedQuery);
+              } catch (e) {
+                // Fallback: line-by-line parsing for key=value or key:value
+                resolvedQuery.split('\n').forEach(line => {
+                  const parts = line.split('=');
+                  if (parts.length >= 2) {
+                    const k = parts[0].trim();
+                    const v = parts.slice(1).join('=').trim();
+                    if (k) queryObj[k] = v;
+                  } else {
+                    const partsColon = line.split(':');
+                    if (partsColon.length >= 2) {
+                      const k = partsColon[0].trim();
+                      const v = partsColon.slice(1).join(':').trim();
+                      if (k) queryObj[k] = v;
+                    }
+                  }
+                });
+              }
+            } else if (typeof resolvedQuery === 'object' && resolvedQuery !== null) {
+              queryObj = resolvedQuery;
+            }
+          }
+
+          // 2. Resolve URL and append query parameters
+          const resolvedUrl = resolveTemplates(node.props.url || "", nodeContext);
+          let finalUrl = resolvedUrl;
+          if (Object.keys(queryObj).length > 0) {
+            try {
+              const urlObj = new URL(resolvedUrl);
+              for (const [k, v] of Object.entries(queryObj)) {
+                urlObj.searchParams.append(k, String(v));
+              }
+              finalUrl = urlObj.toString();
+            } catch (e) {
+              const separator = resolvedUrl.includes('?') ? '&' : '?';
+              const params = new URLSearchParams();
+              for (const [k, v] of Object.entries(queryObj)) {
+                params.append(k, String(v));
+              }
+              finalUrl = `${resolvedUrl}${separator}${params.toString()}`;
+            }
+          }
+
+          // 3. Resolve and parse headers
+          let headersObj: Record<string, string> = {};
+          if (node.props.headers) {
+            const resolvedHeaders = resolveTemplates(node.props.headers, nodeContext);
+            if (typeof resolvedHeaders === 'string' && resolvedHeaders.trim() !== '') {
+              try {
+                headersObj = JSON.parse(resolvedHeaders);
+              } catch (e) {
+                // Fallback: line-by-line key:value parsing
+                resolvedHeaders.split('\n').forEach(line => {
+                  const parts = line.split(':');
+                  if (parts.length >= 2) {
+                    const k = parts[0].trim();
+                    const v = parts.slice(1).join(':').trim();
+                    if (k) headersObj[k] = v;
+                  }
+                });
+              }
+            } else if (typeof resolvedHeaders === 'object' && resolvedHeaders !== null) {
+              headersObj = resolvedHeaders;
+            }
+          }
+
+          // 4. Resolve body payload
+          const resolvedBody = (method !== "GET" && method !== "HEAD" && node.props.body)
+            ? resolveTemplates(node.props.body, nodeContext)
+            : undefined;
+
+          const response = await fetch(finalUrl, {
             method,
-            headers,
-            body: typeof body === 'object' ? JSON.stringify(body) : body
+            headers: headersObj,
+            body: typeof resolvedBody === 'object' ? JSON.stringify(resolvedBody) : resolvedBody
           });
 
           if (!response.ok) {
@@ -351,6 +434,17 @@ async function main() {
           }
         }
       } catch (err: any) {
+        const endMs = Date.now();
+        console.log(`NODE_LOG_JSON:${JSON.stringify({
+          node_id: node.id,
+          status: 'error',
+          input: (typeof currentPayload === 'object' && currentPayload !== null && JSON.stringify(currentPayload).length < 2000) ? currentPayload : {},
+          output: {},
+          error_message: err.message || String(err),
+          duration: endMs - startMs,
+          start_time: startTime,
+          end_time: new Date(endMs).toISOString()
+        })}`);
         emitStatus(node.id, 'error');
         throw err;
       }

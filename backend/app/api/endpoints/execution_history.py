@@ -76,7 +76,8 @@ async def get_execution_detail(
             "end_time": log.end_time,
             "duration": log.duration,
             "input_data": log.input_data,
-            "output_data": log.output_data
+            "output_data": log.output_data,
+            "error_message": log.error_message
         })
         
     return {

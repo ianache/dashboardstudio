@@ -531,6 +531,7 @@ class NodeExecutionLogResponse(BaseModel):
     duration: Optional[int] = None
     input_data: Optional[Any] = None
     output_data: Optional[Any] = None
+    error_message: Optional[str] = None
     node_title: Optional[str] = None
 
     @field_serializer('start_time')

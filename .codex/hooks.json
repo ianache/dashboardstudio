@@ -1,0 +1,12 @@
+{
+  "SessionStart": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"C:/Users/ianache/AppData/Roaming/fnm/node-versions/v22.15.0/installation/node.exe\" \"C:/Users/ianache/Desktop/DATA/01-DOCUMENTOS/02-PROYECTOS/102-concesionarias/dashboardstudio/.codex/hooks/gsd-check-update.js\""
+        }
+      ]
+    }
+  ]
+}

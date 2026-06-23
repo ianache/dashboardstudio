@@ -337,6 +337,7 @@ class DenoService:
                         "status": status,
                         "input": data.get("input"),
                         "output": data.get("output"),
+                        "error_message": data.get("error_message"),
                         "duration": data.get("duration", 0),
                         "start_time": data.get("start_time"),
                         "end_time": data.get("end_time")

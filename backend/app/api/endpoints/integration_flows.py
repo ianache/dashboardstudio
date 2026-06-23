@@ -143,6 +143,7 @@ async def flow_logs_websocket(websocket: WebSocket, flow_id: str, db: Session = 
                     status=nl.get("status"),
                     input_data=nl.get("input"),
                     output_data=nl.get("output"),
+                    error_message=nl.get("error_message"),
                     duration=nl.get("duration"),
                     start_time=start_dt or datetime.utcnow(),
                     end_time=end_dt
@@ -213,6 +214,7 @@ async def get_execution_logs(
             "status": nl.status,
             "input": nl.input_data,
             "output": nl.output_data,
+            "error_message": nl.error_message,
             "duration": nl.duration,
             "start_time": nl.start_time.isoformat() if nl.start_time else None,
             "end_time": nl.end_time.isoformat() if nl.end_time else None
@@ -330,6 +332,7 @@ async def run_integration_flow(
             status=nl.get("status"),
             input_data=nl.get("input"),
             output_data=nl.get("output"),
+            error_message=nl.get("error_message"),
             duration=nl.get("duration", 0),
             start_time=start_dt or datetime.utcnow(),
             end_time=end_dt

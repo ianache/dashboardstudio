@@ -247,7 +247,8 @@
           <!-- Node status badge -->
           <div v-if="(readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) && (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) !== 'running'" 
                class="fec-node-badge" 
-               :class="`fec-node-badge--${readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]}`">
+               :class="`fec-node-badge--${readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]}`"
+               @click.stop="toggleInspector(node)">
             <span class="msi">{{ (readOnly ? nodeLogsMap[node.id]?.status : nodeExecStatus[node.id]) === 'success' ? 'check_circle' : 'cancel' }}</span>
           </div>
 
@@ -340,8 +341,31 @@
       </div>
     </main>
 
+    <!-- ── Node Inspector Panel (Independent) ───────────────────────────────── -->
+    <aside v-if="inspectedNodeId && activeInspectorData" 
+           class="fec-inspector" 
+           :class="{ 'fec-inspector--resizing': isResizingInspector }" 
+           :style="{ width: inspectorWidth + 'px' }">
+      <div class="fec-resizer" @mousedown.stop="onResizeInspectorMousedown"></div>
+      
+      <div class="fec-inspector-inner">
+        <div class="fec-inspector-header">
+          <span class="msi" style="font-size:20px;color:var(--primary)">analytics</span>
+          <span class="fec-inspector-title">Inspector: {{ inspectedNodeName }}</span>
+          <button class="fec-close-btn" @click="inspectedNodeId = null">
+            <span class="msi" style="font-size:15px">close</span>
+          </button>
+        </div>
+        <NodeInspectorPanel
+          :nodeId="inspectedNodeId"
+          :nodeName="inspectedNodeName"
+          :nodeData="activeInspectorData"
+        />
+      </div>
+    </aside>
+
     <!-- ── Right Panel: Properties ─────────────────────────────────────────── -->
-    <aside v-if="!readOnly || inspectedNodeId" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--resizing': isResizingRight }" :style="{ width: rightCollapsed ? '24px' : (hasWideMode ? Math.max(500, rightWidth) : rightWidth) + 'px' }">
+    <aside v-if="!readOnly" class="fec-right" :class="{ 'fec-right--collapsed': rightCollapsed, 'fec-right--resizing': isResizingRight }" :style="{ width: rightCollapsed ? '24px' : (hasWideMode ? Math.max(500, rightWidth) : rightWidth) + 'px' }">
       <div v-if="!rightCollapsed" class="fec-resizer" @mousedown.stop="onResizeMousedown"></div>
       <button class="fec-toggle fec-toggle--right" @click="rightCollapsed = !rightCollapsed" :title="rightCollapsed ? 'Expandir' : 'Contraer'">
         <span class="msi">{{ rightCollapsed ? 'chevron_left' : 'chevron_right' }}</span>
@@ -359,9 +383,6 @@
           </button>
           <button class="fec-tab" :class="{ active: rightTab === 'history' }" @click="loadHistory">
             <span class="msi" style="font-size:16px">history</span>Historial
-          </button>
-          <button v-if="inspectedNodeId" class="fec-tab" :class="{ active: rightTab === 'inspector' }" @click="rightTab = 'inspector'">
-            <span class="msi" style="font-size:16px">analytics</span>Inspector
           </button>
         </div>
 
@@ -427,14 +448,7 @@
           </div>
         </template>
 
-        <!-- Node Inspector -->
-        <template v-if="rightTab === 'inspector' && activeInspectorData">
-          <NodeInspectorPanel
-            :nodeId="inspectedNodeId"
-            :nodeName="inspectedNodeName"
-            :nodeData="activeInspectorData"
-          />
-        </template>
+
 
         <!-- ── Variables ── -->
         <template v-if="!selectedNode && rightTab === 'variables'">
@@ -1444,7 +1458,7 @@ watch(undoState, (val) => {
   emit('undo-state-change', !!val)
 })
 
-watch([nodes, connections, notes, metadata], () => {
+function onChange() {
   if (initializingFromProp) return
   
   if (!isDeletingNode) {
@@ -1453,13 +1467,20 @@ watch([nodes, connections, notes, metadata], () => {
   
   const dirty = takeSnapshot() !== savedSnapshot
   emit('dirty-change', dirty)
-}, { deep: true })
+}
+
+watch(nodes, onChange, { deep: true })
+watch(connections, onChange, { deep: true })
+watch(notes, onChange, { deep: true })
+watch(metadata, onChange, { deep: true })
 
 // ─── UI state ─────────────────────────────────────────────────────────────────
 const leftCollapsed  = ref(false)
 const rightCollapsed = ref(false)
 const rightWidth     = ref(272)
 const isResizingRight = ref(false)
+const inspectorWidth  = ref(450)
+const isResizingInspector = ref(false)
 const bottomHeight    = ref(240)
 const isResizingBottom = ref(false)
 const isResizingNote   = ref(false)
@@ -1539,6 +1560,19 @@ let isInitializingNodeSelection = false
 function onResizeMousedown(e) {
   isResizingRight.value = true
   document.body.style.userSelect = 'none'
+}
+
+function onResizeInspectorMousedown(e) {
+  isResizingInspector.value = true
+  document.body.style.userSelect = 'none'
+}
+
+function toggleInspector(node) {
+  if (inspectedNodeId.value === node.id) {
+    inspectedNodeId.value = null
+  } else {
+    inspectedNodeId.value = node.id
+  }
 }
 
 function onResizeBottomMousedown(e) {
@@ -1962,6 +1996,12 @@ function onCanvasClick() {
 
 // ─── Global move / up (on root element) ──────────────────────────────────────
 function onGlobalMousemove(e) {
+  if (isResizingInspector.value) {
+    const rightPanelWidth = rightCollapsed.value ? 24 : rightWidth.value
+    const newWidth = window.innerWidth - rightPanelWidth - e.clientX
+    inspectorWidth.value = Math.max(300, Math.min(newWidth, window.innerWidth * 0.6))
+    return
+  }
   if (isResizingRight.value) {
     const newWidth = window.innerWidth - e.clientX
     rightWidth.value = Math.max(272, Math.min(newWidth, window.innerWidth * 0.5))
@@ -2006,6 +2046,7 @@ function onGlobalMousemove(e) {
 function onGlobalMouseup() {
   document.body.style.userSelect = ''
   isResizingRight.value = false
+  isResizingInspector.value = false
   isResizingBottom.value = false
   isResizingNote.value = false
   resizingNote.value = null
@@ -2033,18 +2074,7 @@ function onNoteMousedown(e, note) {
 function selectNode(node) {
   if (!hasDragged) {
     const isReadOnly = props.readOnly
-    const hasExecData = isReadOnly
-      ? !!nodeLogsMap.value[node.id]
-      : !!nodeInspectorData.value[node.id]
-
-    if (hasExecData) {
-      inspectedNodeId.value = node.id
-      selectedNode.value = null
-      selectedNote.value = null
-      selectedConn.value = null
-      rightTab.value = 'inspector'
-      rightCollapsed.value = false
-    } else if (!isReadOnly) {
+    if (!isReadOnly) {
       selectedNode.value = node
       selectedNote.value = null
       selectedConn.value = null
@@ -3126,5 +3156,45 @@ onMounted(() => {
 
 .fec-copy-code-btn .msi {
   font-size: 16px;
+}
+
+/* ── Node Inspector Panel (Independent) ────────────────────────── */
+.fec-inspector {
+  width: 450px;
+  background: #0f172a;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+  transition: width 0.22s ease;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+.fec-inspector--resizing {
+  transition: none !important;
+}
+.fec-inspector-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.fec-inspector-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  color: #e2e8f0;
+}
+.fec-inspector-title {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  flex: 1;
+}
+.fec-node-badge {
+  cursor: pointer;
 }
 </style>

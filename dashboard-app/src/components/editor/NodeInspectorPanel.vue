@@ -96,12 +96,26 @@
           </div>
         </template>
       </div>
+
+      <!-- Panel de Error Colapsable -->
+      <div v-if="nodeData.status === 'error' || nodeData.error_message" class="nip-error-panel" :class="{ collapsed: !isErrorExpanded }">
+        <div class="nip-error-hdr" @click="isErrorExpanded = !isErrorExpanded">
+          <span class="msi nip-error-icon">warning</span>
+          <span class="nip-error-title">Causa de la Falla</span>
+          <span class="msi nip-error-collapse-icon">{{ isErrorExpanded ? 'expand_more' : 'expand_less' }}</span>
+        </div>
+        <div v-show="isErrorExpanded" class="nip-error-body">
+          <pre class="nip-error-pre">{{ nodeData.error_message || 'Fallo de ejecución sin mensaje detallado.' }}</pre>
+        </div>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+
+const isErrorExpanded = ref(true)
 
 const props = defineProps({
   nodeId:   { type: String, required: true },
@@ -182,6 +196,7 @@ function exportData() {
     duration: props.nodeData.duration,
     input: props.nodeData.input,
     output: props.nodeData.output,
+    error_message: props.nodeData.error_message,
     logs: props.nodeData.logs
   }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
@@ -417,5 +432,71 @@ function exportData() {
 
 .nip-log--info .nip-log-msg {
   color: #e2e8f0;
+}
+
+/* Panel de Error Colapsable */
+.nip-error-panel {
+  border-top: 1px solid rgba(239, 68, 68, 0.4);
+  background: #1e1b1b; /* HSL-tailored deep dark red/brown */
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease-in-out;
+}
+
+.nip-error-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+  transition: background 0.2s ease;
+}
+
+.nip-error-hdr:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.nip-error-icon {
+  color: #f87171;
+  font-size: 16px;
+}
+
+.nip-error-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f87171;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.nip-error-collapse-icon {
+  color: #f87171;
+  font-size: 18px;
+  transition: transform 0.2s ease;
+}
+
+.nip-error-panel.collapsed .nip-error-collapse-icon {
+  transform: rotate(180deg);
+}
+
+.nip-error-body {
+  padding: 12px 16px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.nip-error-pre {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #fca5a5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.5;
 }
 </style>

@@ -68,6 +68,7 @@ async def run_integration_flow(flow_id: str):
                     status=log["status"],
                     input_data=log["input"],
                     output_data=log["output"],
+                    error_message=log.get("error_message"),
                     duration=log["duration"],
                     start_time=start_dt or datetime.utcnow(),
                     end_time=end_dt
